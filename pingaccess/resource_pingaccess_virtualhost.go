@@ -48,6 +48,7 @@ func resourcePingAccessVirtualHost() *schema.Resource {
 }
 
 func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) error {
+	log.Println("[INFO] resourcePingAccessVirtualHostCreate")
 	agent_resource_cache_ttl := d.Get("agent_resource_cache_ttl").(int)
 	host := d.Get("host").(string)
 	key_pair_id := d.Get("key_pair_id").(int)
@@ -77,6 +78,7 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) error {
+	log.Println("[INFO] Start - resourcePingAccessVirtualHostRead")
 	svc := virtualhosts.New(m.(*pingaccess.Config))
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -96,10 +98,12 @@ func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) er
 	vh := virtualhosts.VirtualHostView{}
 	json.NewDecoder(b).Decode(&vh)
 
+	log.Println("[INFO] End - resourcePingAccessVirtualHostRead")
 	return resourcePingAccessVirtualHostReadResult(d, &vh)
 }
 
 func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) error {
+	log.Println("[INFO] Start - resourcePingAccessVirtualHostUpdate")
 	agent_resource_cache_ttl := d.Get("agent_resource_cache_ttl").(int)
 	host := d.Get("host").(string)
 	key_pair_id := d.Get("key_pair_id").(int)
@@ -124,10 +128,12 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return fmt.Errorf("Error updating virtualhost: %s", err)
 	}
+	log.Println("[INFO] End - resourcePingAccessVirtualHostUpdate")
 	return nil
 }
 
 func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) error {
+	log.Println("[INFO] Start - resourcePingAccessVirtualHostDelete")
 	svc := virtualhosts.New(m.(*pingaccess.Config))
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -145,10 +151,12 @@ func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
 	}
+	log.Println("[INFO] End - resourcePingAccessVirtualHostDelete")
 	return nil
 }
 
 func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *virtualhosts.VirtualHostView) error {
+	log.Println("[INFO] Start - resourcePingAccessVirtualHostReadResult")
 	if err := d.Set("agent_resource_cache_ttl", input.AgentResourceCacheTTL); err != nil {
 		return err
 	}
@@ -164,5 +172,7 @@ func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *virt
 	if err := d.Set("trusted_certificate_group_id", input.TrustedCertificateGroupId); err != nil {
 		return err
 	}
+
+	log.Println("[INFO] End - resourcePingAccessVirtualHostReadResult")
 	return nil
 }

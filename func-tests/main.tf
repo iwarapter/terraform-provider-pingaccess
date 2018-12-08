@@ -1,5 +1,4 @@
-provider "pingaccess" {
-}
+provider "pingaccess" {}
 
 // resource "pingaccess_rule" "my-server" {
 //   class_name = "com.pingidentity.pa.policy.OAuthAttributeValuePolicyInterceptor"
@@ -23,9 +22,17 @@ provider "pingaccess" {
 // }
 
 // resource "pingaccess_virtualhost" "localhost_3000" {
-//   host = "localhost"
-//   port = 3000
-//   agent_resource_cache_ttl = 800
-//   key_pair_id = 0
+//   host                         = "localhost"
+//   port                         = 3000
+//   agent_resource_cache_ttl     = 900
+//   key_pair_id                  = 0
 //   trusted_certificate_group_id = 0
+// }
+
+// resource "pingaccess_site" "bar" {
+//   name                       = "bar"
+//   targets                    = ["localhost:1234"]
+//   max_connections            = -1
+//   max_web_socket_connections = -1
+//   availability_profile_id    = 1
 // }

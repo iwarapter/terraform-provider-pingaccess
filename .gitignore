@@ -4,3 +4,6 @@ func-tests/crash.log
 func-tests/run.log
 func-tests/terraform.*
 terraform-provider-pingaccess
+.scannerwork/
+.vscode/
+run.log

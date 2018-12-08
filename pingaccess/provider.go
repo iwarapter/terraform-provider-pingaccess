@@ -1,6 +1,8 @@
 package pingaccess
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -21,6 +23,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			// "pingaccess_rule":        resourcePingAccessRule(),
 			"pingaccess_virtualhost": resourcePingAccessVirtualHost(),
+			"pingaccess_site":        resourcePingAccessSite(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -46,4 +49,32 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	return config, nil
+}
+
+// Takes the result of flatmap.Expand for an array of strings
+// and returns a []*string
+func expandStringList(configured []interface{}) []*string {
+	log.Printf("[INFO] expandStringList %d", len(configured))
+	vs := make([]*string, 0, len(configured))
+	for _, v := range configured {
+		val := v.(string)
+		if val != "" {
+			vs = append(vs, &val)
+			log.Printf("[DEBUG] Appending: %s", val)
+		}
+	}
+	return vs
+}
+
+// Takes the result of flatmap.Expand for an array of strings
+// and returns a []*int
+func expandIntList(configured []interface{}) []*int {
+	vs := make([]*int, 0, len(configured))
+	for _, v := range configured {
+		_, ok := v.(*int)
+		if ok {
+			vs = append(vs, v.(*int))
+		}
+	}
+	return vs
 }
