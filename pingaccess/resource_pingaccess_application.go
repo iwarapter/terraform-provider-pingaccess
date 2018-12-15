@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	"github.com/iwarapter/pingaccess-sdk-go/service/applications"
 )
 
@@ -26,6 +25,10 @@ func resourcePingAccessApplication() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"application_type": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"agent_id": &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
@@ -35,6 +38,10 @@ func resourcePingAccessApplication() *schema.Resource {
 				Required: true,
 			},
 			"default_auth_type": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"destination": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -50,7 +57,7 @@ func resourcePingAccessApplication() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeInt,
+					Type: schema.TypeString,
 				},
 			},
 			// AccessValidatorID  int                     `json:"accessValidatorId"`
@@ -77,26 +84,38 @@ func resourcePingAccessApplication() *schema.Resource {
 func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationCreate")
 	access_validator_id := d.Get("access_validator_id").(int)
+	application_type := d.Get("application_type").(string)
 	agent_id := d.Get("agent_id").(int)
 	context_root := d.Get("context_root").(string)
 	default_auth_type := d.Get("default_auth_type").(string)
+	destination := d.Get("destination").(string)
 	name := d.Get("name").(string)
 	site_id := d.Get("site_id").(int)
-	virtual_host_ids := d.Get("virtual_host_ids").([]*int)
+	virtual_host_ids := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
+
+	//TODO fix this dirty dirty hack
+	vh_ids := []*int{}
+	for _, i := range virtual_host_ids {
+		number := *i
+		text, _ := strconv.Atoi(number)
+		vh_ids = append(vh_ids, &text)
+	}
 
 	input := applications.AddApplicationCommandInput{
 		Body: applications.ApplicationView{
 			AccessValidatorId: access_validator_id,
+			ApplicationType:   application_type,
 			AgentId:           agent_id,
 			ContextRoot:       context_root,
 			DefaultAuthType:   default_auth_type,
+			Destination:       destination,
 			Name:              name,
 			SiteId:            site_id,
-			VirtualHostIds:    virtual_host_ids,
+			VirtualHostIds:    vh_ids,
 		},
 	}
 
-	svc := applications.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).appconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	res, err := svc.AddApplicationCommand(&input)
@@ -110,7 +129,7 @@ func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationRead")
-	svc := applications.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).appconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &applications.GetApplicationCommandInput{
@@ -134,6 +153,47 @@ func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) er
 
 func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationUpdate")
+	access_validator_id := d.Get("access_validator_id").(int)
+	application_type := d.Get("application_type").(string)
+	agent_id := d.Get("agent_id").(int)
+	context_root := d.Get("context_root").(string)
+	default_auth_type := d.Get("default_auth_type").(string)
+	destination := d.Get("destination").(string)
+	name := d.Get("name").(string)
+	site_id := d.Get("site_id").(int)
+	virtual_host_ids := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
+
+	//TODO fix this dirty dirty hack
+	vh_ids := []*int{}
+	for _, i := range virtual_host_ids {
+		number := *i
+		text, _ := strconv.Atoi(number)
+		vh_ids = append(vh_ids, &text)
+	}
+
+	input := applications.UpdateApplicationCommandInput{
+		Body: applications.ApplicationView{
+			AccessValidatorId: access_validator_id,
+			ApplicationType:   application_type,
+			AgentId:           agent_id,
+			ContextRoot:       context_root,
+			DefaultAuthType:   default_auth_type,
+			Destination:       destination,
+			Name:              name,
+			SiteId:            site_id,
+			VirtualHostIds:    vh_ids,
+		},
+	}
+	input.Path.Id = d.Id()
+
+	svc := m.(*PAClient).appconn
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	_, err := svc.UpdateApplicationCommand(&input)
+	if err != nil {
+		return fmt.Errorf("Error updating application: %s", err)
+	}
+	log.Println("[DEBUG] End - resourcePingAccessApplicationUpdate")
 	return nil
 }
 

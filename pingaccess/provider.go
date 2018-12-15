@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 //Provider does stuff
@@ -24,6 +23,7 @@ func Provider() terraform.ResourceProvider {
 			// "pingaccess_rule":        resourcePingAccessRule(),
 			"pingaccess_virtualhost": resourcePingAccessVirtualHost(),
 			"pingaccess_site":        resourcePingAccessSite(),
+			"pingaccess_application": resourcePingAccessApplication(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -39,16 +39,14 @@ func init() {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	// config := &Client{
-	// 	Username: d.Get("region").(string),
-	// }
-	config := &pingaccess.Config{
+	//TODO actually read from config
+	config := &Config{
 		Username: "Administrator",
 		Password: "2Access2",
 		BaseURL:  "https://localhost:9000/pa-admin-api/v3",
 	}
 
-	return config, nil
+	return config.Client()
 }
 
 // Takes the result of flatmap.Expand for an array of strings

@@ -7,3 +7,5 @@ terraform-provider-pingaccess
 .scannerwork/
 .vscode/
 run.log
+coverage.out
+report.json

@@ -84,6 +84,12 @@
   version = "v3.5.1"
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
@@ -211,6 +217,12 @@
   revision = "fa9f258a92500514cc8e9c67020487709df92432"
 
 [[projects]]
+  name = "github.com/hashicorp/logutils"
+  packages = ["."]
+  revision = "a335183dfd075f638afcc820c90591ca3c97eba6"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -219,8 +231,12 @@
     "config/module",
     "dag",
     "flatmap",
+    "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
+    "helper/logging",
+    "helper/pathorcontents",
+    "helper/resource",
     "helper/schema",
     "httpclient",
     "moduledeps",
@@ -244,6 +260,17 @@
   name = "github.com/hashicorp/yamux"
   packages = ["."]
   revision = "2f1d1f20f75d5404f53b9edf6b53ed5505508675"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/iwarapter/pingaccess-sdk-go"
+  packages = [
+    "pingaccess",
+    "service/applications",
+    "service/sites",
+    "service/virtualhosts"
+  ]
+  revision = "fdab76de8f90da75d061be1e2e65aca2aa21ba86"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -326,6 +353,12 @@
   ]
   revision = "3ef9b31a6a0613ae832e7ecf208374027c3b2343"
   version = "v1.2.1"
+
+[[projects]]
+  name = "github.com/terraform-providers/terraform-provider-template"
+  packages = ["template"]
+  revision = "d8fb0821ebc320ff3750c982f14eca1e7249660d"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/ulikunitz/xz"
@@ -455,6 +488,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8ce018857307d3ec6f3089ecae7810f57e1fc4ee12f798e9306b69e96c516da4"
+  inputs-digest = "2128068d8be0ed1de17e24ef104609408ff33547314ffe78bcd51ddfbe9326c4"
   solver-name = "gps-cdcl"
   solver-version = 1

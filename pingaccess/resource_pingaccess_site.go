@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	"github.com/iwarapter/pingaccess-sdk-go/service/sites"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -131,7 +130,7 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	}
 
-	svc := sites.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).siteconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	res, err := svc.AddSiteCommand(&input)
@@ -146,7 +145,7 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePingAccessSiteRead(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteRead")
-	svc := sites.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).siteconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &sites.GetSiteCommandInput{
@@ -208,7 +207,7 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	input.Path.Id = d.Id()
 
-	svc := sites.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).siteconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	_, err := svc.UpdateSiteCommand(&input)
@@ -221,7 +220,7 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePingAccessSiteDelete(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteDelete")
-	svc := sites.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).siteconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &sites.DeleteSiteCommandInput{

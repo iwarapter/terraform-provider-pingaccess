@@ -1,7 +1,7 @@
 # Makefile
 
 test:
-	@go test ./... -v -coverprofile=coverage.out && go tool cover -func=coverage.out
+	@go test ./... -v -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
 
 build:
 	@go build  -o terraform-provider-pingaccess .
@@ -30,4 +30,8 @@ sonar:
 		-Dsonar.projectKey=github.com.iwarapter.terraform-provider-pingaccess \
 		-Dsonar.sources=. \
 		-Dsonar.host.url=http://localhost:9001 \
-		-Dsonar.login=28d86a90f2e4ae9563b4501cbc99de7522219c88
+		-Dsonar.login=28d86a90f2e4ae9563b4501cbc99de7522219c88 \
+		-Dsonar.go.coverage.reportPaths=coverage.out \
+		-Dsonar.go.tests.reportPaths=report.json \
+		-Dsonar.exclusions=vendor/*
+		

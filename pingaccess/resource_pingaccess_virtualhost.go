@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	"github.com/iwarapter/pingaccess-sdk-go/service/virtualhosts"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -65,7 +64,7 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 		},
 	}
 
-	svc := virtualhosts.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).vhconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	res, err := svc.AddVirtualHostCommand(&input) //.CreateVirtualHost(rv)
@@ -79,7 +78,7 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostRead")
-	svc := virtualhosts.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).vhconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &virtualhosts.GetVirtualHostCommandInput{
@@ -121,7 +120,7 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 	}
 	input.Path.Id = d.Id()
 
-	svc := virtualhosts.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).vhconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	_, err := svc.UpdateVirtualHostCommand(&input)
@@ -134,7 +133,7 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostDelete")
-	svc := virtualhosts.New(m.(*pingaccess.Config))
+	svc := m.(*PAClient).vhconn
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &virtualhosts.DeleteVirtualHostCommandInput{
