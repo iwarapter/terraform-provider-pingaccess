@@ -21,9 +21,10 @@ func Provider() terraform.ResourceProvider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			// "pingaccess_rule":        resourcePingAccessRule(),
-			"pingaccess_virtualhost": resourcePingAccessVirtualHost(),
-			"pingaccess_site":        resourcePingAccessSite(),
-			"pingaccess_application": resourcePingAccessApplication(),
+			"pingaccess_virtualhost":          resourcePingAccessVirtualHost(),
+			"pingaccess_site":                 resourcePingAccessSite(),
+			"pingaccess_application":          resourcePingAccessApplication(),
+			"pingaccess_application_resource": resourcePingAccessApplicationResource(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

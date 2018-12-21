@@ -199,6 +199,24 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationDelete")
+	svc := m.(*PAClient).appconn
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	input := &applications.DeleteApplicationCommandInput{
+		Path: struct {
+			Id string
+		}{
+			Id: d.Id(),
+		},
+	}
+
+	log.Printf("[INFO] ResourceID: %s", d.Id())
+	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.Path.Id)
+	_, err := svc.DeleteApplicationCommand(input)
+	if err != nil {
+		return fmt.Errorf("Error deleting virtualhost: %s", err)
+	}
+	log.Println("[DEBUG] End - resourcePingAccessSiteDelete")
 	return nil
 }
 

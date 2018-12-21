@@ -33,5 +33,7 @@ sonar:
 		-Dsonar.login=28d86a90f2e4ae9563b4501cbc99de7522219c88 \
 		-Dsonar.go.coverage.reportPaths=coverage.out \
 		-Dsonar.go.tests.reportPaths=report.json \
-		-Dsonar.exclusions=vendor/*
+		-Dsonar.exclusions=vendor/**/* \
+		-Dsonar.tests="." \
+		-Dsonar.test.inclusions="**/*_test.go"
 		

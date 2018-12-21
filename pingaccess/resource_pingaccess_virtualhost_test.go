@@ -21,16 +21,12 @@ func TestAccPingAccessVirtualHost(t *testing.T) {
 				Config: testAccPingAccessVirtualHostConfig("localhost", 3000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessVirtualHostExists("pingaccess_virtualhost.acc_test", 3, &out),
-					// testAccCheckPingAccessVirtualHostAttributes(),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName}, []string{roleName}, []string{groupName}, &out),
 				),
 			},
 			{
 				Config: testAccPingAccessVirtualHostConfig("localhost", 3001),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessVirtualHostExists("pingaccess_virtualhost.acc_test", 6, &out),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
-					// 	[]string{roleName2, roleName3}, []string{groupName2, groupName3}, &out),
 				),
 			},
 		},
