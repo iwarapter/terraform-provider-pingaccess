@@ -2,16 +2,13 @@ package pingaccess
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/service/virtualhosts"
-
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessVirtualHost() *schema.Resource {
@@ -54,8 +51,8 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 	port := d.Get("port").(int)
 	trusted_certificate_group_id := d.Get("trusted_certificate_group_id").(int)
 
-	input := virtualhosts.AddVirtualHostCommandInput{
-		Body: virtualhosts.VirtualHostView{
+	input := pingaccess.AddVirtualHostCommandInput{
+		Body: pingaccess.VirtualHostView{
 			AgentResourceCacheTTL: agent_resource_cache_ttl,
 			Host:      host,
 			KeyPairId: key_pair_id,
@@ -64,24 +61,22 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 		},
 	}
 
-	svc := m.(*PAClient).vhconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Virtualhosts
 
-	res, err := svc.AddVirtualHostCommand(&input) //.CreateVirtualHost(rv)
+	result, _, err := svc.AddVirtualHostCommand(&input) //.CreateVirtualHost(rv)
 	if err != nil {
 		return fmt.Errorf("Error creating virtualhost: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(res.Id))
+	d.SetId(strconv.Itoa(result.Id))
 	return resourcePingAccessVirtualHostReadResult(d, &input.Body)
 }
 
 func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostRead")
-	svc := m.(*PAClient).vhconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Virtualhosts
 
-	input := &virtualhosts.GetVirtualHostCommandInput{
+	input := &pingaccess.GetVirtualHostCommandInput{
 		Path: struct {
 			Id string
 		}{
@@ -91,10 +86,10 @@ func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) er
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] GetVirtualHostCommandInput: %s", input.Path.Id)
-	resp, _ := svc.GetVirtualHostCommand(input)
+	result, _, _ := svc.GetVirtualHostCommand(input)
 	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(resp)
-	vh := virtualhosts.VirtualHostView{}
+	json.NewEncoder(b).Encode(result)
+	vh := pingaccess.VirtualHostView{}
 	json.NewDecoder(b).Decode(&vh)
 
 	log.Println("[INFO] End - resourcePingAccessVirtualHostRead")
@@ -109,8 +104,8 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 	port := d.Get("port").(int)
 	trusted_certificate_group_id := d.Get("trusted_certificate_group_id").(int)
 
-	input := virtualhosts.UpdateVirtualHostCommandInput{
-		Body: virtualhosts.VirtualHostView{
+	input := pingaccess.UpdateVirtualHostCommandInput{
+		Body: pingaccess.VirtualHostView{
 			AgentResourceCacheTTL: agent_resource_cache_ttl,
 			Host:      host,
 			KeyPairId: key_pair_id,
@@ -120,10 +115,9 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 	}
 	input.Path.Id = d.Id()
 
-	svc := m.(*PAClient).vhconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Virtualhosts
 
-	_, err := svc.UpdateVirtualHostCommand(&input)
+	_, _, err := svc.UpdateVirtualHostCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating virtualhost: %s", err)
 	}
@@ -133,10 +127,9 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostDelete")
-	svc := m.(*PAClient).vhconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Virtualhosts
 
-	input := &virtualhosts.DeleteVirtualHostCommandInput{
+	input := &pingaccess.DeleteVirtualHostCommandInput{
 		Path: struct {
 			Id string
 		}{
@@ -146,7 +139,7 @@ func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) 
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] DeleteVirtualHostCommandInput: %s", input.Path.Id)
-	err := svc.DeleteVirtualHostCommand(input)
+	_, err := svc.DeleteVirtualHostCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
 	}
@@ -154,7 +147,7 @@ func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *virtualhosts.VirtualHostView) error {
+func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *pingaccess.VirtualHostView) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostReadResult")
 	if err := d.Set("agent_resource_cache_ttl", input.AgentResourceCacheTTL); err != nil {
 		return err

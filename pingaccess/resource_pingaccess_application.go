@@ -2,15 +2,13 @@ package pingaccess
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/service/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessApplication() *schema.Resource {
@@ -101,8 +99,8 @@ func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) 
 		vh_ids = append(vh_ids, &text)
 	}
 
-	input := applications.AddApplicationCommandInput{
-		Body: applications.ApplicationView{
+	input := pingaccess.AddApplicationCommandInput{
+		Body: pingaccess.ApplicationView{
 			AccessValidatorId: access_validator_id,
 			ApplicationType:   application_type,
 			AgentId:           agent_id,
@@ -115,24 +113,22 @@ func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) 
 		},
 	}
 
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	res, err := svc.AddApplicationCommand(&input)
+	result, _, err := svc.AddApplicationCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error creating application: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(res.Id))
+	d.SetId(strconv.Itoa(result.Id))
 	return resourcePingAccessApplicationReadResult(d, &input.Body)
 }
 
 func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationRead")
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	input := &applications.GetApplicationCommandInput{
+	input := &pingaccess.GetApplicationCommandInput{
 		Path: struct {
 			Id string
 		}{
@@ -142,10 +138,10 @@ func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) er
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] GetApplicationCommandInput: %s", input.Path.Id)
-	resp, _ := svc.GetApplicationCommand(input)
+	result, _, _ := svc.GetApplicationCommand(input)
 	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(resp)
-	vh := applications.ApplicationView{}
+	json.NewEncoder(b).Encode(result)
+	vh := pingaccess.ApplicationView{}
 	json.NewDecoder(b).Decode(&vh)
 
 	return resourcePingAccessApplicationReadResult(d, &vh)
@@ -171,8 +167,8 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 		vh_ids = append(vh_ids, &text)
 	}
 
-	input := applications.UpdateApplicationCommandInput{
-		Body: applications.ApplicationView{
+	input := pingaccess.UpdateApplicationCommandInput{
+		Body: pingaccess.ApplicationView{
 			AccessValidatorId: access_validator_id,
 			ApplicationType:   application_type,
 			AgentId:           agent_id,
@@ -186,10 +182,9 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 	}
 	input.Path.Id = d.Id()
 
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	_, err := svc.UpdateApplicationCommand(&input)
+	_, _, err := svc.UpdateApplicationCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating application: %s", err)
 	}
@@ -199,10 +194,9 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationDelete")
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	input := &applications.DeleteApplicationCommandInput{
+	input := &pingaccess.DeleteApplicationCommandInput{
 		Path: struct {
 			Id string
 		}{
@@ -212,7 +206,7 @@ func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) 
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.Path.Id)
-	_, err := svc.DeleteApplicationCommand(input)
+	_, _, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
 	}
@@ -220,7 +214,7 @@ func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *applications.ApplicationView) error {
+func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pingaccess.ApplicationView) error {
 	log.Printf("[INFO] resourcePingAccessApplicationReadResult")
 	// if err := d.Set("name", rv.Name); err != nil {
 	// 	return err

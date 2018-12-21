@@ -9,9 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/service/sites"
-
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessSite() *schema.Resource {
@@ -110,8 +109,8 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 	use_proxy := d.Get("use_proxy").(bool)
 	use_target_host_header := d.Get("use_target_host_header").(bool)
 
-	input := sites.AddSiteCommandInput{
-		Body: sites.SiteView{
+	input := pingaccess.AddSiteCommandInput{
+		Body: pingaccess.SiteView{
 			AvailabilityProfileId:   availability_profile_id,
 			ExpectedHostname:        expected_hostname,
 			KeepAliveTimeout:        keep_alive_timeout,
@@ -130,25 +129,23 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 		},
 	}
 
-	svc := m.(*PAClient).siteconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Sites
 
-	res, err := svc.AddSiteCommand(&input)
+	result, _, err := svc.AddSiteCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error creating virtualhost: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(res.Id))
+	d.SetId(strconv.Itoa(result.Id))
 	log.Println("[DEBUG] End - resourcePingAccessSiteCreate")
 	return resourcePingAccessSiteReadResult(d, &input.Body)
 }
 
 func resourcePingAccessSiteRead(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteRead")
-	svc := m.(*PAClient).siteconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Sites
 
-	input := &sites.GetSiteCommandInput{
+	input := &pingaccess.GetSiteCommandInput{
 		Path: struct {
 			Id string
 		}{
@@ -158,10 +155,10 @@ func resourcePingAccessSiteRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] GetSiteCommandInput: %s", input.Path.Id)
-	resp, _ := svc.GetSiteCommand(input)
+	result, _, _ := svc.GetSiteCommand(input)
 	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(resp)
-	vh := sites.SiteView{}
+	json.NewEncoder(b).Encode(result)
+	vh := pingaccess.SiteView{}
 	json.NewDecoder(b).Decode(&vh)
 
 	log.Println("[DEBUG] End - resourcePingAccessSiteRead")
@@ -186,8 +183,8 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 	use_proxy := d.Get("use_proxy").(bool)
 	use_target_host_header := d.Get("use_target_host_header").(bool)
 
-	input := sites.UpdateSiteCommandInput{
-		Body: sites.SiteView{
+	input := pingaccess.UpdateSiteCommandInput{
+		Body: pingaccess.SiteView{
 			AvailabilityProfileId:   availability_profile_id,
 			ExpectedHostname:        expected_hostname,
 			KeepAliveTimeout:        keep_alive_timeout,
@@ -207,10 +204,10 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	input.Path.Id = d.Id()
 
-	svc := m.(*PAClient).siteconn
+	svc := m.(*pingaccess.Client).Sites
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	_, err := svc.UpdateSiteCommand(&input)
+	_, _, err := svc.UpdateSiteCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating virtualhost: %s", err)
 	}
@@ -220,10 +217,10 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePingAccessSiteDelete(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteDelete")
-	svc := m.(*PAClient).siteconn
+	svc := m.(*pingaccess.Client).Sites
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	input := &sites.DeleteSiteCommandInput{
+	input := &pingaccess.DeleteSiteCommandInput{
 		Path: struct {
 			Id string
 		}{
@@ -233,7 +230,7 @@ func resourcePingAccessSiteDelete(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] DeleteSiteCommandInput: %s", input.Path.Id)
-	err := svc.DeleteSiteCommand(input)
+	_, err := svc.DeleteSiteCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
 	}
@@ -241,7 +238,7 @@ func resourcePingAccessSiteDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *sites.SiteView) error {
+func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *pingaccess.SiteView) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteReadResult")
 	if err := d.Set("availability_profile_id", input.AvailabilityProfileId); err != nil {
 		return err

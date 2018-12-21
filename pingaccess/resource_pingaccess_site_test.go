@@ -7,11 +7,11 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/service/sites"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessSite(t *testing.T) {
-	var out sites.SiteView
+	var out pingaccess.SiteView
 	var targets = []string{"\"localhost:1234\""}
 	var updatedTargets = []string{"\"localhost:1235\""}
 
@@ -55,7 +55,7 @@ func testAccPingAccessSiteConfig(name string, targets *[]string) string {
 	}`, name, strings.Join(*targets, ","))
 }
 
-func testAccCheckPingAccessSiteExists(n string, c int64, out *sites.SiteView) resource.TestCheckFunc {
+func testAccCheckPingAccessSiteExists(n string, c int64, out *pingaccess.SiteView) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -66,8 +66,8 @@ func testAccCheckPingAccessSiteExists(n string, c int64, out *sites.SiteView) re
 			return fmt.Errorf("No site ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*PAClient).siteconn
-		resp, err := conn.GetSiteCommand(&sites.GetSiteCommandInput{
+		conn := testAccProvider.Meta().(*pingaccess.Client).Sites
+		result, _, err := conn.GetSiteCommand(&pingaccess.GetSiteCommandInput{
 			Path: struct {
 				Id string
 			}{
@@ -78,8 +78,8 @@ func testAccCheckPingAccessSiteExists(n string, c int64, out *sites.SiteView) re
 			return fmt.Errorf("Error: Site (%s) not found", n)
 		}
 
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Site response (%s) didnt match state (%s)", resp.Name, rs.Primary.Attributes["name"])
+		if result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Site response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

@@ -1,10 +1,11 @@
 package pingaccess
 
 import (
+	"crypto/tls"
+	"net/http"
+	"net/url"
+
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"github.com/iwarapter/pingaccess-sdk-go/service/applications"
-	"github.com/iwarapter/pingaccess-sdk-go/service/sites"
-	"github.com/iwarapter/pingaccess-sdk-go/service/virtualhosts"
 )
 
 type Config struct {
@@ -13,25 +14,11 @@ type Config struct {
 	BaseURL  string
 }
 
-type PAClient struct {
-	vhconn   *virtualhosts.Virtualhosts
-	siteconn *sites.Sites
-	appconn  *applications.Applications
-}
-
 // Client configures and returns a fully initialized PAClient
 func (c *Config) Client() (interface{}, error) {
-	var client PAClient
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	url, _ := url.Parse("https://localhost:9000/")
+	client := pingaccess.NewClient("Administrator", "2Access2", url, nil)
 
-	var conf = pingaccess.Config{
-		Username: c.Username,
-		Password: c.Password,
-		BaseURL:  c.BaseURL,
-	}
-
-	client.vhconn = virtualhosts.New(&conf)
-	client.siteconn = sites.New(&conf)
-	client.appconn = applications.New(&conf)
-
-	return &client, nil
+	return client, nil
 }

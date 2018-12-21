@@ -6,11 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/service/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessApplication(t *testing.T) {
-	var out applications.ApplicationView
+	var out pingaccess.ApplicationView
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -72,7 +72,7 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 	}`, name, context)
 }
 
-func testAccCheckPingAccessApplicationExists(n string, c int64, out *applications.ApplicationView) resource.TestCheckFunc {
+func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -86,8 +86,8 @@ func testAccCheckPingAccessApplicationExists(n string, c int64, out *application
 			return fmt.Errorf("No application ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*PAClient).appconn
-		resp, err := conn.GetApplicationCommand(&applications.GetApplicationCommandInput{
+		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
+		result, _, err := conn.GetApplicationCommand(&pingaccess.GetApplicationCommandInput{
 			Path: struct {
 				Id string
 			}{
@@ -98,8 +98,8 @@ func testAccCheckPingAccessApplicationExists(n string, c int64, out *application
 			return fmt.Errorf("Error: Application (%s) not found", n)
 		}
 
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", resp.Name, rs.Primary.Attributes["name"])
+		if result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

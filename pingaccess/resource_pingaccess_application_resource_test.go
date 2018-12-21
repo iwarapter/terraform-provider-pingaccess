@@ -6,11 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/service/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessApplicationResource(t *testing.T) {
-	var out applications.ApplicationView
+	var out pingaccess.ApplicationView
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -70,7 +70,6 @@ func testAccPingAccessApplicationResourceConfig(name string, context string) str
 		site_id							= "${pingaccess_site.app_res_test_site.id}"
 		virtual_host_ids		= ["${pingaccess_virtualhost.app_res_test_virtualhost.id}"]
 	}
-	
 
 resource "pingaccess_application_resource" "app_res_test_resource" {
   name = "woot"
@@ -90,7 +89,7 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
 	`, name, context)
 }
 
-func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *applications.ApplicationView) resource.TestCheckFunc {
+func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -104,8 +103,8 @@ func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *app
 			return fmt.Errorf("No application ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*PAClient).appconn
-		resp, err := conn.GetApplicationCommand(&applications.GetApplicationCommandInput{
+		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
+		result, _, err := conn.GetApplicationCommand(&pingaccess.GetApplicationCommandInput{
 			Path: struct {
 				Id string
 			}{
@@ -116,8 +115,8 @@ func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *app
 			return fmt.Errorf("Error: Application (%s) not found", n)
 		}
 
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", resp.Name, rs.Primary.Attributes["name"])
+		if result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

@@ -6,11 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/service/virtualhosts"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessVirtualHost(t *testing.T) {
-	var out virtualhosts.VirtualHostView
+	var out pingaccess.VirtualHostView
 
 	resource.ParallelTest(t, resource.TestCase{
 		// PreCheck:     func() { testAccPreCheck(t) },
@@ -48,7 +48,7 @@ func testAccPingAccessVirtualHostConfig(host string, port int) string {
 	}`, host, port)
 }
 
-func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *virtualhosts.VirtualHostView) resource.TestCheckFunc {
+func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *pingaccess.VirtualHostView) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -59,8 +59,8 @@ func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *virtualhost
 			return fmt.Errorf("No virtualhost ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*PAClient).vhconn
-		resp, err := conn.GetVirtualHostCommand(&virtualhosts.GetVirtualHostCommandInput{
+		conn := testAccProvider.Meta().(*pingaccess.Client).Virtualhosts
+		result, _, err := conn.GetVirtualHostCommand(&pingaccess.GetVirtualHostCommandInput{
 			Path: struct {
 				Id string
 			}{
@@ -71,8 +71,8 @@ func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *virtualhost
 			return fmt.Errorf("Error: VirtualHost (%s) not found", n)
 		}
 
-		if resp.Host != rs.Primary.Attributes["host"] {
-			return fmt.Errorf("Error: VirtualHost response (%s) didnt match state (%s)", resp.Host, rs.Primary.Attributes["host"])
+		if result.Host != rs.Primary.Attributes["host"] {
+			return fmt.Errorf("Error: VirtualHost response (%s) didnt match state (%s)", result.Host, rs.Primary.Attributes["host"])
 		}
 
 		return nil

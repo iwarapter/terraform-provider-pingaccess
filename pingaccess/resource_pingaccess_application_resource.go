@@ -2,15 +2,13 @@ package pingaccess
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/service/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessApplicationResource() *schema.Resource {
@@ -88,13 +86,13 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 
 	appId, _ := strconv.Atoi(application_id)
 
-	input := applications.AddApplicationResourceCommandInput{
+	input := pingaccess.AddApplicationResourceCommandInput{
 		Path: struct {
 			Id string
 		}{
 			Id: application_id,
 		},
-		Body: applications.ResourceView{
+		Body: pingaccess.ResourceView{
 			Anonymous:               anonymous,
 			ApplicationId:           appId,
 			AuditLevel:              audit_level,
@@ -107,24 +105,22 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 			RootResource: root_resource,
 		},
 	}
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	res, err := svc.AddApplicationResourceCommand(&input)
+	result, _, err := svc.AddApplicationResourceCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error creating application: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(res.Id))
+	d.SetId(strconv.Itoa(result.Id))
 	return resourcePingAccessApplicationResourceReadResult(d, &input.Body)
 }
 
 func resourcePingAccessApplicationResourceRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationResourceRead")
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	input := &applications.GetApplicationResourceCommandInput{
+	input := &pingaccess.GetApplicationResourceCommandInput{
 		Path: struct {
 			ApplicationId string
 			ResourceId    string
@@ -136,10 +132,10 @@ func resourcePingAccessApplicationResourceRead(d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] GetApplicationResourceCommandInput: %s", input.Path.ApplicationId)
-	resp, _ := svc.GetApplicationResourceCommand(input)
+	result, _, _ := svc.GetApplicationResourceCommand(input)
 	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(resp)
-	rs := applications.ResourceView{}
+	json.NewEncoder(b).Encode(result)
+	rs := pingaccess.ResourceView{}
 	json.NewDecoder(b).Decode(&rs)
 
 	return resourcePingAccessApplicationResourceReadResult(d, &rs)
@@ -162,7 +158,7 @@ func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m inter
 	id, _ := strconv.Atoi(d.Id())
 	appId, _ := strconv.Atoi(application_id)
 
-	input := applications.UpdateApplicationResourceCommandInput{
+	input := pingaccess.UpdateApplicationResourceCommandInput{
 		Path: struct {
 			ApplicationId string
 			ResourceId    string
@@ -170,7 +166,7 @@ func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m inter
 			ApplicationId: application_id,
 			ResourceId:    d.Id(),
 		},
-		Body: applications.ResourceView{
+		Body: pingaccess.ResourceView{
 			Anonymous:               anonymous,
 			ApplicationId:           appId,
 			AuditLevel:              audit_level,
@@ -186,10 +182,9 @@ func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m inter
 	}
 	input.Path.ApplicationId = d.Get("application_id").(string)
 
-	svc := m.(*PAClient).appconn
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	svc := m.(*pingaccess.Client).Applications
 
-	_, err := svc.UpdateApplicationResourceCommand(&input)
+	_, _, err := svc.UpdateApplicationResourceCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating application: %s", err)
 	}
@@ -202,7 +197,7 @@ func resourcePingAccessApplicationResourceDelete(d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *applications.ResourceView) error {
+func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *pingaccess.ResourceView) error {
 	log.Printf("[INFO] resourcePingAccessApplicationResourceReadResult")
 	if err := d.Set("anonymous", rv.Anonymous); err != nil {
 		return err
