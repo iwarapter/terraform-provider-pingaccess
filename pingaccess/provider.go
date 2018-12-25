@@ -51,14 +51,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 }
 
 // Takes the result of flatmap.Expand for an array of strings
-// and returns a []*string
-func expandStringList(configured []interface{}) []*string {
+// and returns a []string
+func expandStringList(configured []interface{}) []string {
 	log.Printf("[INFO] expandStringList %d", len(configured))
-	vs := make([]*string, 0, len(configured))
+	vs := make([]string, 0, len(configured))
 	for _, v := range configured {
 		val := v.(string)
 		if val != "" {
-			vs = append(vs, &val)
+			vs = append(vs, val)
 			log.Printf("[DEBUG] Appending: %s", val)
 		}
 	}
@@ -67,12 +67,12 @@ func expandStringList(configured []interface{}) []*string {
 
 // Takes the result of flatmap.Expand for an array of strings
 // and returns a []*int
-func expandIntList(configured []interface{}) []*int {
-	vs := make([]*int, 0, len(configured))
+func expandIntList(configured []interface{}) []int {
+	vs := make([]int, 0, len(configured))
 	for _, v := range configured {
-		_, ok := v.(*int)
+		_, ok := v.(int)
 		if ok {
-			vs = append(vs, v.(*int))
+			vs = append(vs, v.(int))
 		}
 	}
 	return vs

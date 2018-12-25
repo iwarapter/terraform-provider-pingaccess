@@ -61,11 +61,8 @@ func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *pingaccess.
 
 		conn := testAccProvider.Meta().(*pingaccess.Client).Virtualhosts
 		result, _, err := conn.GetVirtualHostCommand(&pingaccess.GetVirtualHostCommandInput{
-			Path: struct {
-				Id string
-			}{
-				Id: rs.Primary.ID,
-			}})
+			Id: rs.Primary.ID,
+		})
 
 		if err != nil {
 			return fmt.Errorf("Error: VirtualHost (%s) not found", n)

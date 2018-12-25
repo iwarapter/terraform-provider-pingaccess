@@ -34,7 +34,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:e10c8977f0725524cc76d1dce85befd4f9c94b985469dfecf63b0123f9615aa4"
+  digest = "1:35564f1cd08e1163bf327e6f595b9e596c4470a77f7f13fe6421236ea99e5966"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -73,8 +73,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "103cb51d5be1d3e4735da3ed250f27df6c73fadf"
-  version = "v1.16.10"
+  revision = "3991042237b45cf58c9d5f34295942d5533c28c6"
+  version = "v1.16.11"
 
 [[projects]]
   branch = "master"
@@ -321,11 +321,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:783f411be41627f895fa49d07a6caa3d490e61c763d579acde687150d4eb4a0e"
+  digest = "1:a01309118eaf79eb1f662adf4783aecac641dab0e2b91f31884f3da7c3722f62"
   name = "github.com/iwarapter/pingaccess-sdk-go"
   packages = ["pingaccess"]
   pruneopts = "UT"
-  revision = "f8b94d93b99208905d7173162a8377dc41d96314"
+  revision = "71d1a5d4e909a0d9d86461152829a148abab43e1"
 
 [[projects]]
   digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
@@ -510,11 +510,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:71f29ade3ca8b29a03a0506acdaddb46060a1f36389ff62b7f873caaeb582b8f"
+  digest = "1:9652da56be8fe4998e79e36be6b9d30fe4fd4aacb73ecf0d9b3a33228189dc7e"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "b00e65af1da0681cde6c8227839a0ca53bbf16bb"
+  revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -545,7 +545,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "a1fde740824669f161e97af4237fb80b8734444d"
+  revision = "bd9b4fb69e2ffd37621a6caa54dcbead29b546f2"
 
 [[projects]]
   digest = "1:03af1505694005143ff6dc5d0e2802c8200ddb618b1d3f7201482f53798b99b4"

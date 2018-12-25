@@ -1,9 +1,7 @@
 package pingaccess
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,73 +17,78 @@ func resourcePingAccessSite() *schema.Resource {
 		Read:   resourcePingAccessSiteRead,
 		Update: resourcePingAccessSiteUpdate,
 		Delete: resourcePingAccessSiteDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
-			"availability_profile_id": &schema.Schema{
+			availabilityProfileID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"expected_hostname": &schema.Schema{
+			expectedHostname: &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"keep_alive_timeout": &schema.Schema{
+			keepAliveTimeout: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"load_balancing_strategy_id": &schema.Schema{
+			loadBalancingStrategyID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"max_connections": &schema.Schema{
+			maxConnections: &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"max_web_socket_connections": &schema.Schema{
+			maxWebSocketConnections: &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			name: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"secure": &schema.Schema{
+			secure: &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"send_pa_cookie": &schema.Schema{
+			sendPaCookie: &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
-			"site_authenticator_ids": &schema.Schema{
+			siteAuthenticatorIDs: &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
 			},
-			"skip_hostname_verification": &schema.Schema{
+			skipHostnameVerification: &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"targets": &schema.Schema{
+			targets: &schema.Schema{
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"trusted_certificate_group_id": &schema.Schema{
+			trustedCertificateGroupID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"use_proxy": &schema.Schema{
+			useProxy: &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"use_target_host_header": &schema.Schema{
+			useTargetHostHeader: &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 		},
 	}
@@ -93,21 +96,21 @@ func resourcePingAccessSite() *schema.Resource {
 
 func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteCreate")
-	availability_profile_id := d.Get("availability_profile_id").(int)
-	expected_hostname := d.Get("expected_hostname").(string)
-	keep_alive_timeout := d.Get("keep_alive_timeout").(int)
-	load_balancing_strategy_id := d.Get("load_balancing_strategy_id").(int)
-	max_connections := d.Get("max_connections").(int)
-	max_web_socket_connections := d.Get("max_web_socket_connections").(int)
-	name := d.Get("name").(string)
-	secure := d.Get("secure").(bool)
-	send_pa_cookie := d.Get("send_pa_cookie").(bool)
-	site_authenticator_ids := expandIntList(d.Get("site_authenticator_ids").(*schema.Set).List())
-	skip_hostname_verification := d.Get("skip_hostname_verification").(bool)
-	targets := expandStringList(d.Get("targets").(*schema.Set).List())
-	trusted_certificate_group_id := d.Get("trusted_certificate_group_id").(int)
-	use_proxy := d.Get("use_proxy").(bool)
-	use_target_host_header := d.Get("use_target_host_header").(bool)
+	availability_profile_id := d.Get(availabilityProfileID).(int)
+	expected_hostname := d.Get(expectedHostname).(string)
+	keep_alive_timeout := d.Get(keepAliveTimeout).(int)
+	load_balancing_strategy_id := d.Get(loadBalancingStrategyID).(int)
+	max_connections := d.Get(maxConnections).(int)
+	max_web_socket_connections := d.Get(maxWebSocketConnections).(int)
+	name := d.Get(name).(string)
+	secure := d.Get(secure).(bool)
+	send_pa_cookie := d.Get(sendPaCookie).(bool)
+	site_authenticator_ids := expandIntList(d.Get(siteAuthenticatorIDs).(*schema.Set).List())
+	skip_hostname_verification := d.Get(skipHostnameVerification).(bool)
+	targets := expandStringList(d.Get(targets).(*schema.Set).List())
+	trusted_certificate_group_id := d.Get(trustedCertificateGroupID).(int)
+	use_proxy := d.Get(useProxy).(bool)
+	use_target_host_header := d.Get(useTargetHostHeader).(bool)
 
 	input := pingaccess.AddSiteCommandInput{
 		Body: pingaccess.SiteView{
@@ -138,7 +141,7 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(strconv.Itoa(result.Id))
 	log.Println("[DEBUG] End - resourcePingAccessSiteCreate")
-	return resourcePingAccessSiteReadResult(d, &input.Body)
+	return resourcePingAccessSiteReadResult(d, result)
 }
 
 func resourcePingAccessSiteRead(d *schema.ResourceData, m interface{}) error {
@@ -146,42 +149,39 @@ func resourcePingAccessSiteRead(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pingaccess.Client).Sites
 
 	input := &pingaccess.GetSiteCommandInput{
-		Path: struct {
-			Id string
-		}{
-			Id: d.Id(),
-		},
+		Id: d.Id(),
 	}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] GetSiteCommandInput: %s", input.Path.Id)
+	log.Printf("[INFO] GetSiteCommandInput: %s", input.Id)
 	result, _, _ := svc.GetSiteCommand(input)
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(result)
-	vh := pingaccess.SiteView{}
-	json.NewDecoder(b).Decode(&vh)
+
+	// b := new(bytes.Buffer)
+	// json.NewEncoder(b).Encode(result)
+	// vh := pingaccess.SiteView{}
+	// json.NewDecoder(b).Decode(&vh)
 
 	log.Println("[DEBUG] End - resourcePingAccessSiteRead")
-	return resourcePingAccessSiteReadResult(d, &vh)
+	return resourcePingAccessSiteReadResult(d, result)
 }
 
 func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteUpdate")
-	availability_profile_id := d.Get("availability_profile_id").(int)
-	expected_hostname := d.Get("expected_hostname").(string)
-	keep_alive_timeout := d.Get("keep_alive_timeout").(int)
-	load_balancing_strategy_id := d.Get("load_balancing_strategy_id").(int)
-	max_connections := d.Get("max_connections").(int)
-	max_web_socket_connections := d.Get("max_web_socket_connections").(int)
-	name := d.Get("name").(string)
-	secure := d.Get("secure").(bool)
-	send_pa_cookie := d.Get("send_pa_cookie").(bool)
-	site_authenticator_ids := expandIntList(d.Get("site_authenticator_ids").(*schema.Set).List())
-	skip_hostname_verification := d.Get("skip_hostname_verification").(bool)
-	targets := expandStringList(d.Get("targets").(*schema.Set).List())
-	trusted_certificate_group_id := d.Get("trusted_certificate_group_id").(int)
-	use_proxy := d.Get("use_proxy").(bool)
-	use_target_host_header := d.Get("use_target_host_header").(bool)
+	availability_profile_id := d.Get(availabilityProfileID).(int)
+	expected_hostname := d.Get(expectedHostname).(string)
+	keep_alive_timeout := d.Get(keepAliveTimeout).(int)
+	load_balancing_strategy_id := d.Get(loadBalancingStrategyID).(int)
+	max_connections := d.Get(maxConnections).(int)
+	max_web_socket_connections := d.Get(maxWebSocketConnections).(int)
+	name := d.Get(name).(string)
+	secure := d.Get(secure).(bool)
+	send_pa_cookie := d.Get(sendPaCookie).(bool)
+	site_authenticator_ids := expandIntList(d.Get(siteAuthenticatorIDs).(*schema.Set).List())
+	skip_hostname_verification := d.Get(skipHostnameVerification).(bool)
+	targets := expandStringList(d.Get(targets).(*schema.Set).List())
+	trusted_certificate_group_id := d.Get(trustedCertificateGroupID).(int)
+	use_proxy := d.Get(useProxy).(bool)
+	use_target_host_header := d.Get(useTargetHostHeader).(bool)
 
 	input := pingaccess.UpdateSiteCommandInput{
 		Body: pingaccess.SiteView{
@@ -202,7 +202,7 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 			UseTargetHostHeader:       use_target_host_header,
 		},
 	}
-	input.Path.Id = d.Id()
+	input.Id = d.Id()
 
 	svc := m.(*pingaccess.Client).Sites
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -221,15 +221,11 @@ func resourcePingAccessSiteDelete(d *schema.ResourceData, m interface{}) error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &pingaccess.DeleteSiteCommandInput{
-		Path: struct {
-			Id string
-		}{
-			Id: d.Id(),
-		},
+		Id: d.Id(),
 	}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] DeleteSiteCommandInput: %s", input.Path.Id)
+	log.Printf("[INFO] DeleteSiteCommandInput: %s", input.Id)
 	_, err := svc.DeleteSiteCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
@@ -240,49 +236,49 @@ func resourcePingAccessSiteDelete(d *schema.ResourceData, m interface{}) error {
 
 func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *pingaccess.SiteView) error {
 	log.Println("[DEBUG] Start - resourcePingAccessSiteReadResult")
-	if err := d.Set("availability_profile_id", input.AvailabilityProfileId); err != nil {
+	if err := d.Set(availabilityProfileID, input.AvailabilityProfileId); err != nil {
 		return err
 	}
-	if err := d.Set("expected_hostname", input.ExpectedHostname); err != nil {
+	if err := d.Set(expectedHostname, input.ExpectedHostname); err != nil {
 		return err
 	}
-	if err := d.Set("keep_alive_timeout", input.KeepAliveTimeout); err != nil {
+	if err := d.Set(keepAliveTimeout, input.KeepAliveTimeout); err != nil {
 		return err
 	}
-	if err := d.Set("load_balancing_strategy_id", input.LoadBalancingStrategyId); err != nil {
+	if err := d.Set(loadBalancingStrategyID, input.LoadBalancingStrategyId); err != nil {
 		return err
 	}
-	if err := d.Set("max_connections", input.MaxConnections); err != nil {
+	if err := d.Set(maxConnections, input.MaxConnections); err != nil {
 		return err
 	}
-	if err := d.Set("max_web_socket_connections", input.MaxWebSocketConnections); err != nil {
+	if err := d.Set(maxWebSocketConnections, input.MaxWebSocketConnections); err != nil {
 		return err
 	}
-	if err := d.Set("name", input.Name); err != nil {
+	if err := d.Set(name, input.Name); err != nil {
 		return err
 	}
-	if err := d.Set("secure", input.Secure); err != nil {
+	if err := d.Set(secure, input.Secure); err != nil {
 		return err
 	}
-	if err := d.Set("send_pa_cookie", input.SendPaCookie); err != nil {
+	if err := d.Set(sendPaCookie, input.SendPaCookie); err != nil {
 		return err
 	}
-	if err := d.Set("site_authenticator_ids", input.SiteAuthenticatorIds); err != nil {
+	if err := d.Set(siteAuthenticatorIDs, input.SiteAuthenticatorIds); err != nil {
 		return err
 	}
-	if err := d.Set("skip_hostname_verification", input.SkipHostnameVerification); err != nil {
+	if err := d.Set(skipHostnameVerification, input.SkipHostnameVerification); err != nil {
 		return err
 	}
-	if err := d.Set("targets", input.Targets); err != nil {
+	if err := d.Set(targets, input.Targets); err != nil {
 		return err
 	}
-	if err := d.Set("trusted_certificate_group_id", input.TrustedCertificateGroupId); err != nil {
+	if err := d.Set(trustedCertificateGroupID, input.TrustedCertificateGroupId); err != nil {
 		return err
 	}
-	if err := d.Set("use_proxy", input.UseProxy); err != nil {
+	if err := d.Set(useProxy, input.UseProxy); err != nil {
 		return err
 	}
-	if err := d.Set("use_target_host_header", input.UseTargetHostHeader); err != nil {
+	if err := d.Set(useTargetHostHeader, input.UseTargetHostHeader); err != nil {
 		return err
 	}
 	log.Println("[DEBUG] End - resourcePingAccessSiteReadResult")

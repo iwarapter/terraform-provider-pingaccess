@@ -12,8 +12,6 @@ import (
 
 func TestAccPingAccessSite(t *testing.T) {
 	var out pingaccess.SiteView
-	var targets = []string{"\"localhost:1234\""}
-	var updatedTargets = []string{"\"localhost:1235\""}
 
 	resource.ParallelTest(t, resource.TestCase{
 		// PreCheck:     func() { testAccPreCheck(t) },
@@ -21,7 +19,7 @@ func TestAccPingAccessSite(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessSiteDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessSiteConfig("bar", &targets),
+				Config: testAccPingAccessSiteConfig("bar", []string{"\"localhost:1234\""}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test", 3, &out),
 					// testAccCheckPingAccessSiteAttributes(),
@@ -29,7 +27,7 @@ func TestAccPingAccessSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPingAccessSiteConfig("bar", &updatedTargets),
+				Config: testAccPingAccessSiteConfig("bar", []string{"\"localhost:1235\""}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test", 6, &out),
 					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
@@ -44,7 +42,7 @@ func testAccCheckPingAccessSiteDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessSiteConfig(name string, targets *[]string) string {
+func testAccPingAccessSiteConfig(name string, targets []string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_site" "acc_test" {
 		name                         = "%s"
@@ -52,7 +50,7 @@ func testAccPingAccessSiteConfig(name string, targets *[]string) string {
 		max_connections              = -1
 		max_web_socket_connections   = -1
 		availability_profile_id      = 1
-	}`, name, strings.Join(*targets, ","))
+	}`, name, strings.Join(targets, ","))
 }
 
 func testAccCheckPingAccessSiteExists(n string, c int64, out *pingaccess.SiteView) resource.TestCheckFunc {
@@ -68,11 +66,8 @@ func testAccCheckPingAccessSiteExists(n string, c int64, out *pingaccess.SiteVie
 
 		conn := testAccProvider.Meta().(*pingaccess.Client).Sites
 		result, _, err := conn.GetSiteCommand(&pingaccess.GetSiteCommandInput{
-			Path: struct {
-				Id string
-			}{
-				Id: rs.Primary.ID,
-			}})
+			Id: rs.Primary.ID,
+		})
 
 		if err != nil {
 			return fmt.Errorf("Error: Site (%s) not found", n)

@@ -105,11 +105,8 @@ func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *pin
 
 		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
 		result, _, err := conn.GetApplicationCommand(&pingaccess.GetApplicationCommandInput{
-			Path: struct {
-				Id string
-			}{
-				Id: rs.Primary.ID,
-			}})
+			Id: rs.Primary.ID,
+		})
 
 		if err != nil {
 			return fmt.Errorf("Error: Application (%s) not found", n)

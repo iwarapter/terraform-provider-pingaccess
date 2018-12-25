@@ -17,25 +17,28 @@ func resourcePingAccessVirtualHost() *schema.Resource {
 		Read:   resourcePingAccessVirtualHostRead,
 		Update: resourcePingAccessVirtualHostUpdate,
 		Delete: resourcePingAccessVirtualHostDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
-			"agent_resource_cache_ttl": &schema.Schema{
+			agentResourceCacheTtl: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"host": &schema.Schema{
+			host: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"key_pair_id": &schema.Schema{
+			keyPairID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"port": &schema.Schema{
+			port: &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"trusted_certificate_group_id": &schema.Schema{
+			trustedCertificateGroupID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -45,18 +48,18 @@ func resourcePingAccessVirtualHost() *schema.Resource {
 
 func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) error {
 	log.Println("[INFO] resourcePingAccessVirtualHostCreate")
-	agent_resource_cache_ttl := d.Get("agent_resource_cache_ttl").(int)
-	host := d.Get("host").(string)
-	key_pair_id := d.Get("key_pair_id").(int)
-	port := d.Get("port").(int)
-	trusted_certificate_group_id := d.Get("trusted_certificate_group_id").(int)
+	agent_resource_cache_ttl := d.Get(agentResourceCacheTtl).(int)
+	host := d.Get(host).(string)
+	key_pair_id := d.Get(keyPairID).(int)
+	port := d.Get(port).(int)
+	trusted_certificate_group_id := d.Get(trustedCertificateGroupID).(int)
 
 	input := pingaccess.AddVirtualHostCommandInput{
 		Body: pingaccess.VirtualHostView{
-			AgentResourceCacheTTL: agent_resource_cache_ttl,
-			Host:      host,
-			KeyPairId: key_pair_id,
-			Port:      port,
+			AgentResourceCacheTTL:     agent_resource_cache_ttl,
+			Host:                      host,
+			KeyPairId:                 key_pair_id,
+			Port:                      port,
 			TrustedCertificateGroupId: trusted_certificate_group_id,
 		},
 	}
@@ -77,15 +80,11 @@ func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) er
 	svc := m.(*pingaccess.Client).Virtualhosts
 
 	input := &pingaccess.GetVirtualHostCommandInput{
-		Path: struct {
-			Id string
-		}{
-			Id: d.Id(),
-		},
+		Id: d.Id(),
 	}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] GetVirtualHostCommandInput: %s", input.Path.Id)
+	log.Printf("[INFO] GetVirtualHostCommandInput: %s", input.Id)
 	result, _, _ := svc.GetVirtualHostCommand(input)
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(result)
@@ -98,22 +97,22 @@ func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) er
 
 func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostUpdate")
-	agent_resource_cache_ttl := d.Get("agent_resource_cache_ttl").(int)
-	host := d.Get("host").(string)
-	key_pair_id := d.Get("key_pair_id").(int)
-	port := d.Get("port").(int)
-	trusted_certificate_group_id := d.Get("trusted_certificate_group_id").(int)
+	agent_resource_cache_ttl := d.Get(agentResourceCacheTtl).(int)
+	host := d.Get(host).(string)
+	key_pair_id := d.Get(keyPairID).(int)
+	port := d.Get(port).(int)
+	trusted_certificate_group_id := d.Get(trustedCertificateGroupID).(int)
 
 	input := pingaccess.UpdateVirtualHostCommandInput{
 		Body: pingaccess.VirtualHostView{
-			AgentResourceCacheTTL: agent_resource_cache_ttl,
-			Host:      host,
-			KeyPairId: key_pair_id,
-			Port:      port,
+			AgentResourceCacheTTL:     agent_resource_cache_ttl,
+			Host:                      host,
+			KeyPairId:                 key_pair_id,
+			Port:                      port,
 			TrustedCertificateGroupId: trusted_certificate_group_id,
 		},
 	}
-	input.Path.Id = d.Id()
+	input.Id = d.Id()
 
 	svc := m.(*pingaccess.Client).Virtualhosts
 
@@ -130,15 +129,11 @@ func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) 
 	svc := m.(*pingaccess.Client).Virtualhosts
 
 	input := &pingaccess.DeleteVirtualHostCommandInput{
-		Path: struct {
-			Id string
-		}{
-			Id: d.Id(),
-		},
+		Id: d.Id(),
 	}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] DeleteVirtualHostCommandInput: %s", input.Path.Id)
+	log.Printf("[INFO] DeleteVirtualHostCommandInput: %s", input.Id)
 	_, err := svc.DeleteVirtualHostCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
@@ -149,19 +144,19 @@ func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) 
 
 func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *pingaccess.VirtualHostView) error {
 	log.Println("[INFO] Start - resourcePingAccessVirtualHostReadResult")
-	if err := d.Set("agent_resource_cache_ttl", input.AgentResourceCacheTTL); err != nil {
+	if err := d.Set(agentResourceCacheTtl, input.AgentResourceCacheTTL); err != nil {
 		return err
 	}
-	if err := d.Set("host", input.Host); err != nil {
+	if err := d.Set(host, input.Host); err != nil {
 		return err
 	}
-	if err := d.Set("key_pair_id", input.KeyPairId); err != nil {
+	if err := d.Set(keyPairID, input.KeyPairId); err != nil {
 		return err
 	}
-	if err := d.Set("port", input.Port); err != nil {
+	if err := d.Set(port, input.Port); err != nil {
 		return err
 	}
-	if err := d.Set("trusted_certificate_group_id", input.TrustedCertificateGroupId); err != nil {
+	if err := d.Set(trustedCertificateGroupID, input.TrustedCertificateGroupId); err != nil {
 		return err
 	}
 

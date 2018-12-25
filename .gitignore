@@ -9,3 +9,4 @@ terraform-provider-pingaccess
 run.log
 coverage.out
 report.json
+pingaccess/terraform.log

@@ -19,39 +19,39 @@ func resourcePingAccessApplication() *schema.Resource {
 		Delete: resourcePingAccessApplicationDelete,
 
 		Schema: map[string]*schema.Schema{
-			"access_validator_id": &schema.Schema{
+			accessValidatorID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"application_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"agent_id": &schema.Schema{
+			agentID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"context_root": &schema.Schema{
+			applicationType: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"default_auth_type": &schema.Schema{
+			contextRoot: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"destination": &schema.Schema{
+			defaultAuthType: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			destination: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"site_id": &schema.Schema{
+			name: &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			siteID: &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"virtual_host_ids": &schema.Schema{
+			virtualHostIDs: &schema.Schema{
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
@@ -82,21 +82,20 @@ func resourcePingAccessApplication() *schema.Resource {
 func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationCreate")
 	access_validator_id := d.Get("access_validator_id").(int)
-	application_type := d.Get("application_type").(string)
-	agent_id := d.Get("agent_id").(int)
-	context_root := d.Get("context_root").(string)
-	default_auth_type := d.Get("default_auth_type").(string)
-	destination := d.Get("destination").(string)
-	name := d.Get("name").(string)
-	site_id := d.Get("site_id").(int)
-	virtual_host_ids := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
+	application_type := d.Get(applicationType).(string)
+	agent_id := d.Get(agentID).(int)
+	context_root := d.Get(contextRoot).(string)
+	default_auth_type := d.Get(defaultAuthType).(string)
+	destination := d.Get(destination).(string)
+	name := d.Get(name).(string)
+	site_id := d.Get(siteID).(int)
+	virtual_host_ids := expandStringList(d.Get(virtualHostIDs).(*schema.Set).List())
 
 	//TODO fix this dirty dirty hack
-	vh_ids := []*int{}
+	vh_ids := []int{}
 	for _, i := range virtual_host_ids {
-		number := *i
-		text, _ := strconv.Atoi(number)
-		vh_ids = append(vh_ids, &text)
+		text, _ := strconv.Atoi(i)
+		vh_ids = append(vh_ids, text)
 	}
 
 	input := pingaccess.AddApplicationCommandInput{
@@ -129,15 +128,11 @@ func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) er
 	svc := m.(*pingaccess.Client).Applications
 
 	input := &pingaccess.GetApplicationCommandInput{
-		Path: struct {
-			Id string
-		}{
-			Id: d.Id(),
-		},
+		Id: d.Id(),
 	}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] GetApplicationCommandInput: %s", input.Path.Id)
+	log.Printf("[INFO] GetApplicationCommandInput: %s", input.Id)
 	result, _, _ := svc.GetApplicationCommand(input)
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(result)
@@ -149,22 +144,21 @@ func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) er
 
 func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationUpdate")
-	access_validator_id := d.Get("access_validator_id").(int)
-	application_type := d.Get("application_type").(string)
-	agent_id := d.Get("agent_id").(int)
-	context_root := d.Get("context_root").(string)
-	default_auth_type := d.Get("default_auth_type").(string)
-	destination := d.Get("destination").(string)
-	name := d.Get("name").(string)
-	site_id := d.Get("site_id").(int)
-	virtual_host_ids := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
+	access_validator_id := d.Get(accessValidatorID).(int)
+	application_type := d.Get(applicationType).(string)
+	agent_id := d.Get(agentID).(int)
+	context_root := d.Get(contextRoot).(string)
+	default_auth_type := d.Get(defaultAuthType).(string)
+	destination := d.Get(destination).(string)
+	name := d.Get(name).(string)
+	site_id := d.Get(siteID).(int)
+	virtual_host_ids := expandStringList(d.Get(virtualHostIDs).(*schema.Set).List())
 
 	//TODO fix this dirty dirty hack
-	vh_ids := []*int{}
+	vh_ids := []int{}
 	for _, i := range virtual_host_ids {
-		number := *i
-		text, _ := strconv.Atoi(number)
-		vh_ids = append(vh_ids, &text)
+		text, _ := strconv.Atoi(i)
+		vh_ids = append(vh_ids, text)
 	}
 
 	input := pingaccess.UpdateApplicationCommandInput{
@@ -180,7 +174,7 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 			VirtualHostIds:    vh_ids,
 		},
 	}
-	input.Path.Id = d.Id()
+	input.Id = d.Id()
 
 	svc := m.(*pingaccess.Client).Applications
 
@@ -197,15 +191,11 @@ func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) 
 	svc := m.(*pingaccess.Client).Applications
 
 	input := &pingaccess.DeleteApplicationCommandInput{
-		Path: struct {
-			Id string
-		}{
-			Id: d.Id(),
-		},
+		Id: d.Id(),
 	}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.Path.Id)
+	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.Id)
 	_, _, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
