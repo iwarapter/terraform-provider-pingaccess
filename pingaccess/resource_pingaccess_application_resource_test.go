@@ -64,7 +64,7 @@ func testAccPingAccessApplicationResourceConfig(name string, context string) str
 		application_type 		= "Web"
 		agent_id						= 0
 		name								= "%s"
-		context_root				= "%s"
+		context_root				= "/bar"
 		default_auth_type		= "Web"
 		destination					= "Site"
 		site_id							= "${pingaccess_site.app_res_test_site.id}"
@@ -77,7 +77,7 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
     "*"
   ]
   path_prefixes = [
-    "/woot"
+    "%s"
   ]
   default_auth_type_override = "Web"
   audit_level = "OFF"
@@ -95,9 +95,6 @@ func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *pin
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
-
-		// b, _ := json.Marshal(rs)
-		// fmt.Printf("%s", b)
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No application ID is set")
