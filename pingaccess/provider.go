@@ -20,7 +20,7 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			// "pingaccess_rule":        resourcePingAccessRule(),
+			"pingaccess_rule":                 resourcePingAccessRule(),
 			"pingaccess_virtualhost":          resourcePingAccessVirtualHost(),
 			"pingaccess_site":                 resourcePingAccessSite(),
 			"pingaccess_application":          resourcePingAccessApplication(),
