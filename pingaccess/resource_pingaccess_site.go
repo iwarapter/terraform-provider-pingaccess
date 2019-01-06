@@ -113,12 +113,12 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 
 	input := pingaccess.AddSiteCommandInput{
 		Body: pingaccess.SiteView{
-			AvailabilityProfileId:   Int(availability_profile_id),
-			ExpectedHostname:        String(expected_hostname),
-			KeepAliveTimeout:        Int(keep_alive_timeout),
-			LoadBalancingStrategyId: Int(load_balancing_strategy_id),
-			MaxConnections:          Int(max_connections),
-			MaxWebSocketConnections: Int(max_web_socket_connections),
+			AvailabilityProfileId:     Int(availability_profile_id),
+			ExpectedHostname:          String(expected_hostname),
+			KeepAliveTimeout:          Int(keep_alive_timeout),
+			LoadBalancingStrategyId:   Int(load_balancing_strategy_id),
+			MaxConnections:            Int(max_connections),
+			MaxWebSocketConnections:   Int(max_web_socket_connections),
 			Name:                      String(name),
 			Secure:                    Bool(secure),
 			SendPaCookie:              Bool(send_pa_cookie),
@@ -179,12 +179,12 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 
 	input := pingaccess.UpdateSiteCommandInput{
 		Body: pingaccess.SiteView{
-			AvailabilityProfileId:   Int(availability_profile_id),
-			ExpectedHostname:        String(expected_hostname),
-			KeepAliveTimeout:        Int(keep_alive_timeout),
-			LoadBalancingStrategyId: Int(load_balancing_strategy_id),
-			MaxConnections:          Int(max_connections),
-			MaxWebSocketConnections: Int(max_web_socket_connections),
+			AvailabilityProfileId:     Int(availability_profile_id),
+			ExpectedHostname:          String(expected_hostname),
+			KeepAliveTimeout:          Int(keep_alive_timeout),
+			LoadBalancingStrategyId:   Int(load_balancing_strategy_id),
+			MaxConnections:            Int(max_connections),
+			MaxWebSocketConnections:   Int(max_web_socket_connections),
 			Name:                      String(name),
 			Secure:                    Bool(secure),
 			SendPaCookie:              Bool(send_pa_cookie),

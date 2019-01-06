@@ -55,10 +55,10 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 
 	input := pingaccess.AddVirtualHostCommandInput{
 		Body: pingaccess.VirtualHostView{
-			AgentResourceCacheTTL: Int(agent_resource_cache_ttl),
-			Host:      String(host),
-			KeyPairId: Int(key_pair_id),
-			Port:      Int(port),
+			AgentResourceCacheTTL:     Int(agent_resource_cache_ttl),
+			Host:                      String(host),
+			KeyPairId:                 Int(key_pair_id),
+			Port:                      Int(port),
 			TrustedCertificateGroupId: Int(trusted_certificate_group_id),
 		},
 	}
@@ -104,10 +104,10 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 
 	input := pingaccess.UpdateVirtualHostCommandInput{
 		Body: pingaccess.VirtualHostView{
-			AgentResourceCacheTTL: Int(agent_resource_cache_ttl),
-			Host:      String(host),
-			KeyPairId: Int(key_pair_id),
-			Port:      Int(port),
+			AgentResourceCacheTTL:     Int(agent_resource_cache_ttl),
+			Host:                      String(host),
+			KeyPairId:                 Int(key_pair_id),
+			Port:                      Int(port),
 			TrustedCertificateGroupId: Int(trusted_certificate_group_id),
 		},
 	}

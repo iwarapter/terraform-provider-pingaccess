@@ -212,30 +212,31 @@ func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	if _, ok := d.GetOk(policy); ok {
-		// policies := d.Get("policy").(*schema.Set).List()
+		policySet := d.Get(policy).([]interface{})
 
-		// expandPolicy(d.Get("policy").([]interface{}))
-		// c := policies
-		// for _, p := range policies {
-		// 	c := p.(map[string]interface{})
-		// 	webPolicies := c["web"].(map[string]interface{})
-		// 	var webPolicyItems []*pingaccess.PolicyItem
-		// 	for _, v := range webPolicies {
-		// 		vp := v.(map[string]interface{})
-		// 		pol := &pingaccess.PolicyItem{
-		// 			Type: String(vp["type"].(string)),
-		// 			Id:   json.Number(vp["id"].(string)),
-		// 		}
-		// 		webPolicyItems = append(webPolicyItems, pol)
-		// 	}
-		// 	input.Body.Policy["Web"] = &webPolicyItems
-		// 	// apiPolicies := c["api"].([]*pingaccess.PolicyItem)
-		// 	// var apiPolicyItems []*pingaccess.PolicyItem
-		// 	// for _, v := range apiPolicies {
-		// 	// 	apiPolicyItems = append(apiPolicyItems, v)
-		// 	// }
-		// 	// input.Body.Policy["API"] = &apiPolicyItems
-		// }
+		webPolicies := make([]*pingaccess.PolicyItem, 0)
+		apiPolicies := make([]*pingaccess.PolicyItem, 0)
+
+		policy := policySet[0].(map[string]interface{})
+		for _, pV := range policy["web"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			webPolicies = append(webPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		for _, pV := range policy["api"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			apiPolicies = append(apiPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		policies := map[string]*[]*pingaccess.PolicyItem{
+			"Web": &webPolicies,
+			"API": &apiPolicies,
+		}
+		input.Body.Policy = policies
 	}
 
 	svc := m.(*pingaccess.Client).Applications
@@ -319,6 +320,34 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 		},
 	}
 	input.Id = d.Id()
+
+	if _, ok := d.GetOk(policy); ok {
+		policySet := d.Get(policy).([]interface{})
+
+		webPolicies := make([]*pingaccess.PolicyItem, 0)
+		apiPolicies := make([]*pingaccess.PolicyItem, 0)
+
+		policy := policySet[0].(map[string]interface{})
+		for _, pV := range policy["web"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			webPolicies = append(webPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		for _, pV := range policy["api"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			apiPolicies = append(apiPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		policies := map[string]*[]*pingaccess.PolicyItem{
+			"Web": &webPolicies,
+			"API": &apiPolicies,
+		}
+		input.Body.Policy = policies
+	}
 
 	svc := m.(*pingaccess.Client).Applications
 
