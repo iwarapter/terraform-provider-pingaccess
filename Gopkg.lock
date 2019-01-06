@@ -34,7 +34,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:35564f1cd08e1163bf327e6f595b9e596c4470a77f7f13fe6421236ea99e5966"
+  digest = "1:661ab5b74fa30a8f6b53d53740fd0302b0f237c22c28b185e15e991c83032fa1"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -73,8 +73,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "3991042237b45cf58c9d5f34295942d5533c28c6"
-  version = "v1.16.11"
+  revision = "d75ca9c91e5bcf0c3adb9672a786ac65e8073a6e"
+  version = "v1.16.13"
 
 [[projects]]
   branch = "master"
@@ -241,7 +241,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:872ef52e6a786933b2b882239bf613793f8cd61386915691ac14b5dde9afd887"
+  digest = "1:42be61fec3bab3da25daeff5ed0315477fd7d6c21dab5b23f911f9e59ece5926"
   name = "github.com/hashicorp/hcl2"
   packages = [
     "gohcl",
@@ -253,7 +253,7 @@
     "hclwrite",
   ]
   pruneopts = "UT"
-  revision = "6631d7cd0a68d20ba7d0aa559f883c86158fffd9"
+  revision = "819a65acc453ba35681e287fa31f5f0bb084ddb9"
 
 [[projects]]
   branch = "master"
@@ -321,11 +321,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a01309118eaf79eb1f662adf4783aecac641dab0e2b91f31884f3da7c3722f62"
+  digest = "1:dbecd3d25d4daa4ee643468bf22ef8d15c3762291773b6c6ae665d72004ca0f7"
   name = "github.com/iwarapter/pingaccess-sdk-go"
   packages = ["pingaccess"]
   pruneopts = "UT"
-  revision = "71d1a5d4e909a0d9d86461152829a148abab43e1"
+  revision = "9133ff537ed829a4c7544b18a2a96272782815be"
 
 [[projects]]
   digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
@@ -470,7 +470,7 @@
     "cty/set",
   ]
   pruneopts = "UT"
-  revision = "4fe1e489ee06ac211df6f290ed1cfdd1e14c2ac6"
+  revision = "67e3da15e4309389854d5b28eaaede43da5ca9ad"
 
 [[projects]]
   branch = "master"
@@ -488,7 +488,7 @@
     "openpgp/s2k",
   ]
   pruneopts = "UT"
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
+  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
 
 [[projects]]
   branch = "master"
@@ -510,11 +510,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9652da56be8fe4998e79e36be6b9d30fe4fd4aacb73ecf0d9b3a33228189dc7e"
+  digest = "1:5004e851e5eccde563d17871cd9d11c82e2faa578b1a0de81dc74867ad3845a4"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
+  revision = "82a175fd1598e8a172e58ebdf5ed262bb29129e5"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"

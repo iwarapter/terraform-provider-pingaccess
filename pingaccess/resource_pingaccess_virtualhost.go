@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -56,11 +55,11 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 
 	input := pingaccess.AddVirtualHostCommandInput{
 		Body: pingaccess.VirtualHostView{
-			AgentResourceCacheTTL:     agent_resource_cache_ttl,
-			Host:                      host,
-			KeyPairId:                 key_pair_id,
-			Port:                      port,
-			TrustedCertificateGroupId: trusted_certificate_group_id,
+			AgentResourceCacheTTL: Int(agent_resource_cache_ttl),
+			Host:      String(host),
+			KeyPairId: Int(key_pair_id),
+			Port:      Int(port),
+			TrustedCertificateGroupId: Int(trusted_certificate_group_id),
 		},
 	}
 
@@ -71,7 +70,7 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error creating virtualhost: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(result.Id))
+	d.SetId(result.Id.String())
 	return resourcePingAccessVirtualHostReadResult(d, &input.Body)
 }
 
@@ -105,11 +104,11 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 
 	input := pingaccess.UpdateVirtualHostCommandInput{
 		Body: pingaccess.VirtualHostView{
-			AgentResourceCacheTTL:     agent_resource_cache_ttl,
-			Host:                      host,
-			KeyPairId:                 key_pair_id,
-			Port:                      port,
-			TrustedCertificateGroupId: trusted_certificate_group_id,
+			AgentResourceCacheTTL: Int(agent_resource_cache_ttl),
+			Host:      String(host),
+			KeyPairId: Int(key_pair_id),
+			Port:      Int(port),
+			TrustedCertificateGroupId: Int(trusted_certificate_group_id),
 		},
 	}
 	input.Id = d.Id()

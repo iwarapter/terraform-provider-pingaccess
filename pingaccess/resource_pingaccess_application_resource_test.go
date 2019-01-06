@@ -1,7 +1,10 @@
 package pingaccess
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -20,17 +23,15 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 			{
 				Config: testAccPingAccessApplicationResourceConfig("bart", "/bar"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationResourceExists("pingaccess_application.app_res_test", 3, &out),
-					// testAccCheckPingAccessApplicationResourceAttributes(),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName}, []string{roleName}, []string{groupName}, &out),
+					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource", 3, &out),
+					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bar"),
 				),
 			},
 			{
 				Config: testAccPingAccessApplicationResourceConfig("bart", "/bart"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationResourceExists("pingaccess_application.app_res_test", 6, &out),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
-					// 	[]string{roleName2, roleName3}, []string{groupName2, groupName3}, &out),
+					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource", 6, &out),
+					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bart"),
 				),
 			},
 		},
@@ -57,7 +58,7 @@ func testAccPingAccessApplicationResourceConfig(name string, context string) str
 		agent_resource_cache_ttl     = 900
 		key_pair_id                  = 0
 		trusted_certificate_group_id = 0
- }
+ 	}
 
 	resource "pingaccess_application" "app_res_test" {
 		access_validator_id = 0
@@ -76,17 +77,28 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
   methods = [
     "*"
   ]
+
+  path_patterns {
+    pattern = "/as/token.oauth2"
+    type    = "WILDCARD"
+	}
+	
+	path_patterns {
+    pattern = "%s"
+    type    = "WILDCARD"
+  }
+
   path_prefixes = [
-    "%s"
+		"/as/token.oauth2",
+		"%s"
   ]
-  default_auth_type_override = "Web"
   audit_level = "OFF"
   anonymous = false
   enabled = true
   root_resource = false
   application_id = "${pingaccess_application.app_res_test.id}"
 }
-	`, name, context)
+	`, name, context, context)
 }
 
 func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {
@@ -96,21 +108,54 @@ func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *pin
 			return fmt.Errorf("Not found: %s", n)
 		}
 
+		b, _ := json.Marshal(rs)
+		log.Printf("[INFO] RS: %s", b)
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
-			return fmt.Errorf("No application ID is set")
+			return fmt.Errorf("No application resource ID is set")
 		}
 
 		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
-		result, _, err := conn.GetApplicationCommand(&pingaccess.GetApplicationCommandInput{
-			Id: rs.Primary.ID,
+		result, _, err := conn.GetApplicationResourceCommand(&pingaccess.GetApplicationResourceCommandInput{
+			ApplicationId: rs.Primary.Attributes["application_id"],
+			ResourceId:    rs.Primary.ID,
 		})
 
 		if err != nil {
 			return fmt.Errorf("Error: Application (%s) not found", n)
 		}
 
-		if result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
+		if *result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Application Resource response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckPingAccessApplicationResourceAttributes(n, name, context string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
+		result, _, err := conn.GetApplicationResourceCommand(&pingaccess.GetApplicationResourceCommandInput{
+			ApplicationId: rs.Primary.Attributes["application_id"],
+			ResourceId:    rs.Primary.ID,
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error: Application (%s) not found", n)
+		}
+
+		if *result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Application Resource response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+		}
+
+		if strconv.Itoa(len(*result.Methods)) != rs.Primary.Attributes["methods.#"] {
+			return fmt.Errorf("Error: Application Resource response (%s) didnt match state (%s)", strconv.Itoa(len(*result.Methods)), rs.Primary.Attributes["methods.#"])
 		}
 
 		return nil

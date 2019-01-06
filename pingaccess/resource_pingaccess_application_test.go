@@ -95,8 +95,8 @@ func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.
 			return fmt.Errorf("Error: Application (%s) not found", n)
 		}
 
-		if result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
+		if *result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Application response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

@@ -73,8 +73,8 @@ func testAccCheckPingAccessSiteExists(n string, c int64, out *pingaccess.SiteVie
 			return fmt.Errorf("Error: Site (%s) not found", n)
 		}
 
-		if result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Site response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
+		if *result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Site response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

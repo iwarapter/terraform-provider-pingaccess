@@ -61,7 +61,9 @@ func testAccPingAccessRuleConfig(name, configUpdate string) string {
 			"errorResponseCode": %s,
 			"errorResponseStatusMsg": "Forbidden",
 			"errorResponseTemplateFile": "policy.error.page.template.html",
-			"errorResponseContentType": "text/html;charset=UTF-8"
+			"errorResponseContentType": "text/html;charset=UTF-8",
+			"rejectionHandler": null,
+			"rejectionHandlingEnabled": false
 		}
 		EOF
 	}`, name, name, configUpdate)
@@ -87,8 +89,8 @@ func testAccCheckPingAccessRuleExists(n string, c int64, out *pingaccess.RuleVie
 			return fmt.Errorf("Error: Rule (%s) not found", n)
 		}
 
-		if result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Rule response (%s) didnt match state (%s)", result.Name, rs.Primary.Attributes["name"])
+		if *result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: Rule response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

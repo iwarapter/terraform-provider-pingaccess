@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"reflect"
-	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -59,9 +58,9 @@ func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
 
 	input := pingaccess.AddRuleCommandInput{
 		Body: pingaccess.RuleView{
-			Name:                  name,
-			ClassName:             className,
-			SupportedDestinations: supDests,
+			Name:                  String(name),
+			ClassName:             String(className),
+			SupportedDestinations: &supDests,
 			Configuration:         dat,
 		},
 	}
@@ -73,7 +72,7 @@ func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error creating rule: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(result.Id))
+	d.SetId(result.Id.String())
 	return resourcePingAccessRuleReadResult(d, result)
 }
 
@@ -107,9 +106,9 @@ func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
 
 	input := pingaccess.UpdateRuleCommandInput{
 		Body: pingaccess.RuleView{
-			Name:                  name,
-			ClassName:             className,
-			SupportedDestinations: supDests,
+			Name:                  String(name),
+			ClassName:             String(className),
+			SupportedDestinations: &supDests,
 			Configuration:         dat,
 		},
 		Id: d.Id(),
@@ -122,7 +121,7 @@ func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error creating rule: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(result.Id))
+	d.SetId(result.Id.String())
 	log.Println("[DEBUG] End - resourcePingAccessRuleUpdate")
 	return resourcePingAccessRuleReadResult(d, result)
 }

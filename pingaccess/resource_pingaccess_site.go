@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -114,21 +113,21 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 
 	input := pingaccess.AddSiteCommandInput{
 		Body: pingaccess.SiteView{
-			AvailabilityProfileId:   availability_profile_id,
-			ExpectedHostname:        expected_hostname,
-			KeepAliveTimeout:        keep_alive_timeout,
-			LoadBalancingStrategyId: load_balancing_strategy_id,
-			MaxConnections:          max_connections,
-			MaxWebSocketConnections: max_web_socket_connections,
-			Name:                      name,
-			Secure:                    secure,
-			SendPaCookie:              send_pa_cookie,
-			SiteAuthenticatorIds:      site_authenticator_ids,
-			SkipHostnameVerification:  skip_hostname_verification,
-			Targets:                   targets,
-			TrustedCertificateGroupId: trusted_certificate_group_id,
-			UseProxy:                  use_proxy,
-			UseTargetHostHeader:       use_target_host_header,
+			AvailabilityProfileId:   Int(availability_profile_id),
+			ExpectedHostname:        String(expected_hostname),
+			KeepAliveTimeout:        Int(keep_alive_timeout),
+			LoadBalancingStrategyId: Int(load_balancing_strategy_id),
+			MaxConnections:          Int(max_connections),
+			MaxWebSocketConnections: Int(max_web_socket_connections),
+			Name:                      String(name),
+			Secure:                    Bool(secure),
+			SendPaCookie:              Bool(send_pa_cookie),
+			SiteAuthenticatorIds:      &site_authenticator_ids,
+			SkipHostnameVerification:  Bool(skip_hostname_verification),
+			Targets:                   &targets,
+			TrustedCertificateGroupId: Int(trusted_certificate_group_id),
+			UseProxy:                  Bool(use_proxy),
+			UseTargetHostHeader:       Bool(use_target_host_header),
 		},
 	}
 
@@ -139,7 +138,7 @@ func resourcePingAccessSiteCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error creating virtualhost: %s", err)
 	}
 
-	d.SetId(strconv.Itoa(result.Id))
+	d.SetId(result.Id.String())
 	log.Println("[DEBUG] End - resourcePingAccessSiteCreate")
 	return resourcePingAccessSiteReadResult(d, result)
 }
@@ -155,11 +154,6 @@ func resourcePingAccessSiteRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	log.Printf("[INFO] GetSiteCommandInput: %s", input.Id)
 	result, _, _ := svc.GetSiteCommand(input)
-
-	// b := new(bytes.Buffer)
-	// json.NewEncoder(b).Encode(result)
-	// vh := pingaccess.SiteView{}
-	// json.NewDecoder(b).Decode(&vh)
 
 	log.Println("[DEBUG] End - resourcePingAccessSiteRead")
 	return resourcePingAccessSiteReadResult(d, result)
@@ -185,21 +179,21 @@ func resourcePingAccessSiteUpdate(d *schema.ResourceData, m interface{}) error {
 
 	input := pingaccess.UpdateSiteCommandInput{
 		Body: pingaccess.SiteView{
-			AvailabilityProfileId:   availability_profile_id,
-			ExpectedHostname:        expected_hostname,
-			KeepAliveTimeout:        keep_alive_timeout,
-			LoadBalancingStrategyId: load_balancing_strategy_id,
-			MaxConnections:          max_connections,
-			MaxWebSocketConnections: max_web_socket_connections,
-			Name:                      name,
-			Secure:                    secure,
-			SendPaCookie:              send_pa_cookie,
-			SiteAuthenticatorIds:      site_authenticator_ids,
-			SkipHostnameVerification:  skip_hostname_verification,
-			Targets:                   targets,
-			TrustedCertificateGroupId: trusted_certificate_group_id,
-			UseProxy:                  use_proxy,
-			UseTargetHostHeader:       use_target_host_header,
+			AvailabilityProfileId:   Int(availability_profile_id),
+			ExpectedHostname:        String(expected_hostname),
+			KeepAliveTimeout:        Int(keep_alive_timeout),
+			LoadBalancingStrategyId: Int(load_balancing_strategy_id),
+			MaxConnections:          Int(max_connections),
+			MaxWebSocketConnections: Int(max_web_socket_connections),
+			Name:                      String(name),
+			Secure:                    Bool(secure),
+			SendPaCookie:              Bool(send_pa_cookie),
+			SiteAuthenticatorIds:      &site_authenticator_ids,
+			SkipHostnameVerification:  Bool(skip_hostname_verification),
+			Targets:                   &targets,
+			TrustedCertificateGroupId: Int(trusted_certificate_group_id),
+			UseProxy:                  Bool(use_proxy),
+			UseTargetHostHeader:       Bool(use_target_host_header),
 		},
 	}
 	input.Id = d.Id()

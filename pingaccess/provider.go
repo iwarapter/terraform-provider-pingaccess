@@ -12,11 +12,33 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"region": {
+			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
-				Description: descriptions["region"],
+				Default:     "Administrator",
+				Description: descriptions["username"],
+				DefaultFunc: schema.EnvDefaultFunc("PINGACCESS_USERNAME", nil),
+			},
+			"password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "2Access2",
+				Description: descriptions["password"],
+				DefaultFunc: schema.EnvDefaultFunc("PINGACCESS_PASSWORD", nil),
+			},
+			"context": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "/pa-admin-api/v3",
+				Description: descriptions["context"],
+				DefaultFunc: schema.EnvDefaultFunc("PINGACCESS_CONTEXT", nil),
+			},
+			"base_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "https://localhost:9000",
+				Description: descriptions["base_url"],
+				DefaultFunc: schema.EnvDefaultFunc("PINGACCESS_BASEURL", nil),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -34,17 +56,19 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
-		"region": "The region where AWS operations will take place. Examples\n" +
-			"are us-east-1, us-west-2, etc.",
+		"username": "The username for pingaccess API.",
+		"password": "The password for pingaccess API.",
+		"base_url": "The base url of the pingaccess API.",
+		"context":  "The context path of the pingaccess API.",
 	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	//TODO actually read from config
 	config := &Config{
-		Username: "Administrator",
-		Password: "2Access2",
-		BaseURL:  "https://localhost:9000/pa-admin-api/v3",
+		Username: d.Get("username").(string),
+		Password: d.Get("password").(string),
+		BaseURL:  d.Get("base_url").(string),
+		Context:  d.Get("context").(string),
 	}
 
 	return config.Client()
@@ -52,13 +76,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 // Takes the result of flatmap.Expand for an array of strings
 // and returns a []string
-func expandStringList(configured []interface{}) []string {
+func expandStringList(configured []interface{}) []*string {
 	log.Printf("[INFO] expandStringList %d", len(configured))
-	vs := make([]string, 0, len(configured))
+	vs := make([]*string, 0, len(configured))
 	for _, v := range configured {
 		val := v.(string)
 		if val != "" {
-			vs = append(vs, val)
+			vs = append(vs, &val)
 			log.Printf("[DEBUG] Appending: %s", val)
 		}
 	}
@@ -67,13 +91,57 @@ func expandStringList(configured []interface{}) []string {
 
 // Takes the result of flatmap.Expand for an array of strings
 // and returns a []*int
-func expandIntList(configured []interface{}) []int {
-	vs := make([]int, 0, len(configured))
+func expandIntList(configured []interface{}) []*int {
+	vs := make([]*int, 0, len(configured))
 	for _, v := range configured {
 		_, ok := v.(int)
 		if ok {
-			vs = append(vs, v.(int))
+			val := v.(int)
+			vs = append(vs, &val)
 		}
 	}
 	return vs
+}
+
+// Bool is a helper routine that allocates a new bool value
+// to store v and returns a pointer to it.
+func Bool(v bool) *bool { return &v }
+
+// Int is a helper routine that allocates a new int value
+// to store v and returns a pointer to it.
+func Int(v int) *int { return &v }
+
+// Int64 is a helper routine that allocates a new int64 value
+// to store v and returns a pointer to it.
+func Int64(v int64) *int64 { return &v }
+
+// String is a helper routine that allocates a new string value
+// to store v and returns a pointer to it.
+func String(v string) *string { return &v }
+
+func setResourceDataString(d *schema.ResourceData, name string, data *string) error {
+	if data != nil {
+		if err := d.Set(name, *data); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func setResourceDataInt(d *schema.ResourceData, name string, data *int) error {
+	if data != nil {
+		if err := d.Set(name, *data); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func setResourceDataBool(d *schema.ResourceData, name string, data *bool) error {
+	if data != nil {
+		if err := d.Set(name, *data); err != nil {
+			return err
+		}
+	}
+	return nil
 }
