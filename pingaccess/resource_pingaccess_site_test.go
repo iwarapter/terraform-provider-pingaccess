@@ -1,7 +1,11 @@
 package pingaccess
 
 import (
+	"crypto/tls"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -9,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
+
+func init() {
+	resource.AddTestSweepers("pingaccess_sites", &resource.Sweeper{
+		Name:         "pingaccess_sites",
+		F:            testSweepSites,
+		Dependencies: []string{"pingaccess_application", "pingaccess_application_resource"},
+	})
+}
+
+func testSweepSites(r string) error {
+	url, _ := url.Parse("https://localhost:9000")
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Sites
+	result, _, _ := conn.GetSitesCommand(&pingaccess.GetSitesCommandInput{Filter: "acc_test_"})
+	for _, v := range result.Items {
+		log.Printf("Sweeper: Deleting %s", *v.Name)
+		conn.DeleteSiteCommand(&pingaccess.DeleteSiteCommandInput{Id: v.Id.String()})
+	}
+	return nil
+}
 
 func TestAccPingAccessSite(t *testing.T) {
 	var out pingaccess.SiteView
@@ -19,7 +43,7 @@ func TestAccPingAccessSite(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessSiteDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessSiteConfig("bar", []string{"\"localhost:1234\""}),
+				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"\"localhost:1234\""}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test", 3, &out),
 					// testAccCheckPingAccessSiteAttributes(),
@@ -27,7 +51,7 @@ func TestAccPingAccessSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPingAccessSiteConfig("bar", []string{"\"localhost:1235\""}),
+				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"\"localhost:1235\""}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test", 6, &out),
 					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},

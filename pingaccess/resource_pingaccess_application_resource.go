@@ -1,7 +1,6 @@
 package pingaccess
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -79,8 +78,45 @@ func resourcePingAccessApplicationResource() *schema.Resource {
 				},
 			},
 			policy: &schema.Schema{
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"id": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
+						"api": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"id": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			rootResource: &schema.Schema{
 				Type:     schema.TypeBool,
@@ -91,7 +127,8 @@ func resourcePingAccessApplicationResource() *schema.Resource {
 }
 
 func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] resourcePingAccessApplicationResourceCreate")
+	log.Printf("[INFO] resourcePingAccessApplicationResourceCreate")
+	svc := m.(*pingaccess.Client).Applications
 	anonymous := d.Get(anonymous).(bool)
 	application_id := d.Get(applicationID).(string)
 	audit_level := d.Get(auditLevel).(string)
@@ -106,6 +143,28 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 
 	appId, _ := strconv.Atoi(application_id)
 
+	// log.Printf("[INFO] RootResourceCheck: %s %b", name, root_resource)
+	if root_resource {
+		//Root Resources are created automatically, if one exists we will import it instead of failing to create.
+		input := pingaccess.GetApplicationResourcesCommandInput{
+			Id:   application_id,
+			Name: "Root Resource",
+		}
+		result, _, err := svc.GetApplicationResourcesCommand(&input)
+		b, _ := json.Marshal(result)
+		log.Printf("[INFO] RootResourceCheck: %s", b)
+		if err != nil {
+			return fmt.Errorf("Error creating application resource: %s", err)
+		}
+		// d.SetId(result.Id.String())
+		rv := result.Items[0]
+		d.SetId(rv.Id.String())
+		d.Set("application_id", strconv.Itoa(*result.Items[0].ApplicationId))
+		// log.Printf("[INFO] RootResourceCheck: set application ID: %d and resource ID: %d", rv.Id.String(), *result.Items[0].ApplicationId)
+		return resourcePingAccessApplicationResourceReadResult(d, result.Items[0])
+	}
+
+	log.Printf("[INFO] Not Root Resource, creating normally")
 	input := pingaccess.AddApplicationResourceCommandInput{
 		Id: application_id,
 		Body: pingaccess.ResourceView{
@@ -119,7 +178,6 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 			RootResource:  Bool(root_resource),
 		},
 	}
-	svc := m.(*pingaccess.Client).Applications
 
 	if default_auth_type_override, ok := d.GetOk(defaultAuthTypeOverride); ok {
 		input.Body.DefaultAuthTypeOverride = String(default_auth_type_override.(string))
@@ -138,6 +196,34 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 			input.Body.PathPatterns = append(input.Body.PathPatterns, p)
 		}
 	}
+
+	if _, ok := d.GetOk(policy); ok {
+		policySet := d.Get(policy).([]interface{})
+
+		webPolicies := make([]*pingaccess.PolicyItem, 0)
+		apiPolicies := make([]*pingaccess.PolicyItem, 0)
+
+		policy := policySet[0].(map[string]interface{})
+		for _, pV := range policy["web"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			webPolicies = append(webPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		for _, pV := range policy["api"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			apiPolicies = append(apiPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		policies := map[string]*[]*pingaccess.PolicyItem{
+			"Web": &webPolicies,
+			"API": &apiPolicies,
+		}
+		input.Body.Policy = policies
+	}
 	// default_auth_type_override := d.GetOk(defaultAuthTypeOverride)
 
 	// default_auth_type_override := d.Get(defaultAuthTypeOverride).(string)
@@ -149,11 +235,11 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessApplicationResourceReadResult(d, &input.Body)
+	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
 func resourcePingAccessApplicationResourceRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] resourcePingAccessApplicationResourceRead")
+	log.Printf("[INFO] resourcePingAccessApplicationResourceRead")
 	svc := m.(*pingaccess.Client).Applications
 
 	input := &pingaccess.GetApplicationResourceCommandInput{
@@ -161,19 +247,21 @@ func resourcePingAccessApplicationResourceRead(d *schema.ResourceData, m interfa
 		ResourceId:    d.Id(),
 	}
 
-	log.Printf("[DEBUG] ResourceID: %s", d.Id())
-	log.Printf("[DEBUG] GetApplicationResourceCommandInput: %s", input.ApplicationId)
+	log.Printf("[INFO] ResourceID: %s", d.Id())
+	log.Printf("[INFO] GetApplicationResourceCommandInput: %s", input.ApplicationId)
 	result, _, _ := svc.GetApplicationResourceCommand(input)
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(result)
-	rs := pingaccess.ResourceView{}
-	json.NewDecoder(b).Decode(&rs)
+	b, _ := json.Marshal(result)
+	log.Printf("[INFO] read rv: %s", b)
+	// b := new(bytes.Buffer)
+	// json.NewEncoder(b).Encode(result)
+	// rs := pingaccess.ResourceView{}
+	// json.NewDecoder(b).Decode(&rs)
 
-	return resourcePingAccessApplicationResourceReadResult(d, &rs)
+	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
 func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] resourcePingAccessApplicationResourceUpdate")
+	log.Printf("[INFO] resourcePingAccessApplicationResourceUpdate")
 	anonymous := d.Get(anonymous).(bool)
 	application_id := d.Get(applicationID).(string)
 	audit_level := d.Get(auditLevel).(string)
@@ -224,17 +312,46 @@ func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m inter
 			input.Body.PathPatterns = append(input.Body.PathPatterns, p)
 		}
 	}
+
+	if _, ok := d.GetOk(policy); ok {
+		policySet := d.Get(policy).([]interface{})
+
+		webPolicies := make([]*pingaccess.PolicyItem, 0)
+		apiPolicies := make([]*pingaccess.PolicyItem, 0)
+
+		policy := policySet[0].(map[string]interface{})
+		for _, pV := range policy["web"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			webPolicies = append(webPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		for _, pV := range policy["api"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			apiPolicies = append(apiPolicies, &pingaccess.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		policies := map[string]*[]*pingaccess.PolicyItem{
+			"Web": &webPolicies,
+			"API": &apiPolicies,
+		}
+		input.Body.Policy = policies
+	}
+
 	_, resp, err := svc.UpdateApplicationResourceCommand(&input)
 	log.Printf("[DEBUG-README] UpdateApplicationResourceCommand-Response: %d", resp.StatusCode)
 	if err != nil {
 		return fmt.Errorf("Error updating application: %s", err)
 	}
-	log.Println("[DEBUG] End - resourcePingAccessApplicationResourceUpdate")
+	log.Println("[INFO] End - resourcePingAccessApplicationResourceUpdate")
 	return resourcePingAccessApplicationResourceRead(d, m)
 }
 
 func resourcePingAccessApplicationResourceDelete(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] resourcePingAccessApplicationResourceDelete")
+	log.Printf("[INFO] resourcePingAccessApplicationResourceDelete")
 	svc := m.(*pingaccess.Client).Applications
 
 	input := &pingaccess.DeleteApplicationResourceCommandInput{
@@ -242,13 +359,13 @@ func resourcePingAccessApplicationResourceDelete(d *schema.ResourceData, m inter
 		ApplicationId: d.Get(applicationID).(string),
 	}
 
-	log.Printf("[DEBUG] ResourceID: %s", d.Id())
-	log.Printf("[DEBUG] DeleteApplicationCommandInput: %s", input.ResourceId)
+	log.Printf("[INFO] ResourceID: %s", d.Id())
+	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.ResourceId)
 	_, err := svc.DeleteApplicationResourceCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error deleting application resource: %s", err)
 	}
-	log.Println("[DEBUG] End - resourcePingAccessApplicationResourceDelete")
+	log.Println("[INFO] End - resourcePingAccessApplicationResourceDelete")
 	return nil
 }
 
@@ -265,28 +382,39 @@ func resourcePingAccessApplicationResourceImport(d *schema.ResourceData, m inter
 }
 
 func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *pingaccess.ResourceView) error {
-	log.Printf("[DEBUG] resourcePingAccessApplicationResourceReadResult")
+	log.Printf("[INFO] BEGIN - resourcePingAccessApplicationResourceReadResult")
+	b, _ := json.Marshal(*rv)
+	log.Printf("[INFO] rv: %s", b)
 	setResourceDataBool(d, anonymous, rv.Anonymous)
 	// if err := d.Set(anonymous, *rv.Anonymous); err != nil {
 	// 	return err
 	// }
 	// anonymous := d.Get("anonymous").(bool)
-	if err := d.Set(applicationID, strconv.Itoa(*rv.ApplicationId)); err != nil {
-		return err
+	// setResourceDataString(d, applicationId, *rv.ApplicationId)
+	if rv.ApplicationId != nil {
+		if err := d.Set(applicationID, strconv.Itoa(*rv.ApplicationId)); err != nil {
+			return err
+		}
 	}
+	// return nil
+	// if err := d.Set(applicationID, *rv.ApplicationId); err != nil {
+	// 	return err
+	// }
 	// application_id := d.Get("application_id").(string)
-	if err := d.Set(auditLevel, *rv.AuditLevel); err != nil {
-		return err
-	}
+	setResourceDataString(d, auditLevel, rv.AuditLevel)
+	// if err := d.Set(auditLevel, *rv.AuditLevel); err != nil {
+	// 	return err
+	// }
 	// audit_level := d.Get("audit_level").(string)
 	setResourceDataString(d, defaultAuthTypeOverride, rv.DefaultAuthTypeOverride)
 	// if err := d.Set(defaultAuthTypeOverride, *rv.DefaultAuthTypeOverride); err != nil {
 	// 	return err
 	// }
 	// default_auth_type_override := d.Get("default_auth_type_override").(string)
-	if err := d.Set(enabled, *rv.Enabled); err != nil {
-		return err
-	}
+	setResourceDataBool(d, enabled, rv.Enabled)
+	// if err := d.Set(enabled, *rv.Enabled); err != nil {
+	// 	return err
+	// }
 	// enabled := d.Get("enabled").(bool)
 	// methods := d.Get("methods").([]*string)
 	if err := d.Set(methods, *rv.Methods); err != nil {
@@ -309,5 +437,6 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	if err := d.Set(rootResource, *rv.RootResource); err != nil {
 		return err
 	}
+	log.Printf("[INFO] END - resourcePingAccessApplicationResourceReadResult")
 	return nil
 }

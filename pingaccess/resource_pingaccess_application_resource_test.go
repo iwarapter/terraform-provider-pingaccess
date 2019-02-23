@@ -1,9 +1,12 @@
 package pingaccess
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
 	"strconv"
 	"testing"
 
@@ -11,6 +14,24 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
+
+func init() {
+	resource.AddTestSweepers("pingaccess_application_resource", &resource.Sweeper{
+		Name: "pingaccess_application_resource",
+		F:    testSweepApplicationResources,
+	})
+}
+
+func testSweepApplicationResources(r string) error {
+	url, _ := url.Parse("https://localhost:9000")
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Applications
+	result, _, _ := conn.GetResourcesCommand(&pingaccess.GetResourcesCommandInput{Filter: "acc_test_"})
+	for _, v := range result.Items {
+		conn.DeleteApplicationResourceCommand(&pingaccess.DeleteApplicationResourceCommandInput{ApplicationId: strconv.Itoa(*v.ApplicationId), ResourceId: v.Id.String()})
+	}
+	return nil
+}
 
 func TestAccPingAccessApplicationResource(t *testing.T) {
 	var out pingaccess.ApplicationView
@@ -21,14 +42,14 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessApplicationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessApplicationResourceConfig("bart", "/bar"),
+				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bar"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource", 3, &out),
 					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bar"),
 				),
 			},
 			{
-				Config: testAccPingAccessApplicationResourceConfig("bart", "/bart"),
+				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bart"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource", 6, &out),
 					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bart"),
@@ -45,7 +66,7 @@ func testAccCheckPingAccessApplicationResourceDestroy(s *terraform.State) error 
 func testAccPingAccessApplicationResourceConfig(name string, context string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_site" "app_res_test_site" {
-		name                         = "app_res_test_site"
+		name                         = "acc_test_app_res_test_site"
 		targets                      = ["localhost:4321"]
 		max_connections              = -1
 		max_web_socket_connections   = -1
@@ -53,7 +74,7 @@ func testAccPingAccessApplicationResourceConfig(name string, context string) str
 	}
 
 	resource "pingaccess_virtualhost" "app_res_test_virtualhost" {
-		host                         = "localhost"
+		host                         = "acc-test-localhost"
 		port                         = 4000
 		agent_resource_cache_ttl     = 900
 		key_pair_id                  = 0
@@ -73,7 +94,7 @@ func testAccPingAccessApplicationResourceConfig(name string, context string) str
 	}
 
 resource "pingaccess_application_resource" "app_res_test_resource" {
-  name = "woot"
+  name = "acc_test_woot"
   methods = [
     "*"
   ]

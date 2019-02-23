@@ -3,6 +3,7 @@ package pingaccess
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"testing"
@@ -14,8 +15,9 @@ import (
 
 func init() {
 	resource.AddTestSweepers("pingaccess_virtualhosts", &resource.Sweeper{
-		Name: "pingaccess_virtualhosts",
-		F:    testSweepVirtualhosts,
+		Name:         "pingaccess_virtualhosts",
+		F:            testSweepVirtualhosts,
+		Dependencies: []string{"pingaccess_application", "pingaccess_application_resource"},
 	})
 }
 
@@ -23,8 +25,9 @@ func testSweepVirtualhosts(r string) error {
 	url, _ := url.Parse("https://localhost:9000")
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Virtualhosts
-	result, _, _ := conn.GetVirtualHostsCommand(&pingaccess.GetVirtualHostsCommandInput{})
+	result, _, _ := conn.GetVirtualHostsCommand(&pingaccess.GetVirtualHostsCommandInput{Filter: "acc-test-"})
 	for _, v := range result.Items {
+		log.Printf("Sweeper: Deleting %s", *v.Host)
 		conn.DeleteVirtualHostCommand(&pingaccess.DeleteVirtualHostCommandInput{Id: v.Id.String()})
 	}
 	return nil
