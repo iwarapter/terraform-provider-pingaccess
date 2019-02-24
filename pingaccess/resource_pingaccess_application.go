@@ -1,14 +1,13 @@
 package pingaccess
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessApplication() *schema.Resource {
@@ -126,100 +125,10 @@ func resourcePingAccessApplication() *schema.Resource {
 }
 
 func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessApplicationCreate")
-	access_validator_id := d.Get("access_validator_id").(int)
-	application_type := d.Get("application_type").(string)
-	agent_id := d.Get(agentID).(int)
-	case_sensitive_path := d.Get("case_sensitive_path").(bool)
-	context_root := d.Get(contextRoot).(string)
-	default_auth_type := d.Get(defaultAuthType).(string)
-	description := d.Get(description).(string)
-	destination := d.Get(destination).(string)
-	enabled := d.Get(enabled).(bool)
-	// identity_mapping_ids := magic
-	name := d.Get(name).(string)
-	// policy := magic
-	realm := d.Get(realm).(string)
-	require_https := d.Get(requireHTTPS).(bool)
-	site_id := d.Get(siteID).(string)
-	virtual_host_ids := expandStringList(d.Get(virtualHostIDs).(*schema.Set).List())
-	web_session_id := d.Get(webSessionId).(int)
-
-	//TODO fix this dirty dirty hack
-	vh_ids := []*int{}
-	for _, i := range virtual_host_ids {
-		text, _ := strconv.Atoi(*i)
-		vh_ids = append(vh_ids, &text)
+	svc := m.(*pa.Client).Applications
+	input := &pa.AddApplicationCommandInput{
+		Body: *resourcePingAccessApplicationReadData(d),
 	}
-
-	siteID, _ := strconv.Atoi(site_id)
-
-	input := &pingaccess.AddApplicationCommandInput{
-		Body: pingaccess.ApplicationView{
-			AccessValidatorId: Int(access_validator_id),
-			ApplicationType:   String(application_type),
-			AgentId:           Int(agent_id),
-			CaseSensitivePath: Bool(case_sensitive_path),
-			ContextRoot:       String(context_root),
-			DefaultAuthType:   String(default_auth_type),
-			Description:       String(description),
-			Destination:       String(destination),
-			Enabled:           Bool(enabled),
-			Name:              String(name),
-			Realm:             String(realm),
-			RequireHTTPS:      Bool(require_https),
-			SiteId:            Int(siteID),
-			VirtualHostIds:    &vh_ids,
-			WebSessionId:      Int(web_session_id),
-		},
-	}
-
-	if _, ok := d.GetOk("identity_mapping_ids"); ok {
-		input.Body.IdentityMappingIds = make(map[string]*int)
-		idMapping := d.Get("identity_mapping_ids").([]interface{})[0].(map[string]interface{})
-		if idMapping["web"] != nil {
-			id, _ := strconv.Atoi(idMapping["web"].(string))
-			input.Body.IdentityMappingIds["Web"] = Int(id)
-		}
-		if idMapping["api"] != nil {
-			id, _ := strconv.Atoi(idMapping["api"].(string))
-			input.Body.IdentityMappingIds["API"] = Int(id)
-		}
-	}
-
-	if _, ok := d.GetOk(policy); ok {
-		policySet := d.Get(policy).([]interface{})
-
-		webPolicies := make([]*pingaccess.PolicyItem, 0)
-		apiPolicies := make([]*pingaccess.PolicyItem, 0)
-
-		policy := policySet[0].(map[string]interface{})
-		for _, pV := range policy["web"].(*schema.Set).List() {
-			p := pV.(map[string]interface{})
-			webPolicies = append(webPolicies, &pingaccess.PolicyItem{
-				Id:   json.Number(p["id"].(string)),
-				Type: String(p["type"].(string)),
-			})
-		}
-		for _, pV := range policy["api"].(*schema.Set).List() {
-			p := pV.(map[string]interface{})
-			apiPolicies = append(apiPolicies, &pingaccess.PolicyItem{
-				Id:   json.Number(p["id"].(string)),
-				Type: String(p["type"].(string)),
-			})
-		}
-		policies := map[string]*[]*pingaccess.PolicyItem{
-			"Web": &webPolicies,
-			"API": &apiPolicies,
-		}
-		input.Body.Policy = policies
-	}
-
-	svc := m.(*pingaccess.Client).Applications
-
-	b, _ := json.Marshal(input.Body)
-	log.Printf("[INFO] Creating Application: %s", b)
-
 	result, _, err := svc.AddApplicationCommand(input)
 	if err != nil {
 		return fmt.Errorf("Error creating application: %s", err)
@@ -230,132 +139,32 @@ func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessApplicationRead")
-	svc := m.(*pingaccess.Client).Applications
-
-	input := &pingaccess.GetApplicationCommandInput{
+	svc := m.(*pa.Client).Applications
+	input := &pa.GetApplicationCommandInput{
 		Id: d.Id(),
 	}
-
-	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] GetApplicationCommandInput: %s", input.Id)
 	result, _, _ := svc.GetApplicationCommand(input)
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(result)
-	vh := pingaccess.ApplicationView{}
-	json.NewDecoder(b).Decode(&vh)
-
-	return resourcePingAccessApplicationReadResult(d, &vh)
+	return resourcePingAccessApplicationReadResult(d, result)
 }
 
 func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessApplicationUpdate")
-	access_validator_id := d.Get("access_validator_id").(int)
-	application_type := d.Get("application_type").(string)
-	agent_id := d.Get(agentID).(int)
-	case_sensitive_path := d.Get("case_sensitive_path").(bool)
-	context_root := d.Get(contextRoot).(string)
-	default_auth_type := d.Get(defaultAuthType).(string)
-	description := d.Get(description).(string)
-	destination := d.Get(destination).(string)
-	enabled := d.Get(enabled).(bool)
-	// identity_mapping_ids := magic
-	name := d.Get(name).(string)
-	// policy := magic
-	realm := d.Get(realm).(string)
-	require_https := d.Get(requireHTTPS).(bool)
-	site_id := d.Get(siteID).(string)
-	virtual_host_ids := expandStringList(d.Get(virtualHostIDs).(*schema.Set).List())
-	web_session_id := d.Get(webSessionId).(int)
-
-	//TODO fix this dirty dirty hack
-	vh_ids := []*int{}
-	for _, i := range virtual_host_ids {
-		text, _ := strconv.Atoi(*i)
-		vh_ids = append(vh_ids, &text)
+	svc := m.(*pa.Client).Applications
+	input := pa.UpdateApplicationCommandInput{
+		Body: *resourcePingAccessApplicationReadData(d),
+		Id:   d.Id(),
 	}
-
-	siteID, _ := strconv.Atoi(site_id)
-
-	input := pingaccess.UpdateApplicationCommandInput{
-		Body: pingaccess.ApplicationView{
-			AccessValidatorId: Int(access_validator_id),
-			ApplicationType:   String(application_type),
-			AgentId:           Int(agent_id),
-			CaseSensitivePath: Bool(case_sensitive_path),
-			ContextRoot:       String(context_root),
-			DefaultAuthType:   String(default_auth_type),
-			Description:       String(description),
-			Destination:       String(destination),
-			Enabled:           Bool(enabled),
-			//IdentityMappingIds: magic
-			Name: String(name),
-			//Policy: magic
-			Realm:          String(realm),
-			RequireHTTPS:   Bool(require_https),
-			SiteId:         Int(siteID),
-			VirtualHostIds: &vh_ids,
-			WebSessionId:   Int(web_session_id),
-		},
-	}
-	input.Id = d.Id()
-
-	if _, ok := d.GetOk(identityMappingIds); ok {
-		input.Body.IdentityMappingIds = make(map[string]*int)
-		idMapping := d.Get(identityMappingIds).([]interface{})[0].(map[string]interface{})
-		if idMapping["web"] != nil {
-			id, _ := strconv.Atoi(idMapping["web"].(string))
-			input.Body.IdentityMappingIds["Web"] = Int(id)
-		}
-		if idMapping["api"] != nil {
-			id, _ := strconv.Atoi(idMapping["api"].(string))
-			input.Body.IdentityMappingIds["API"] = Int(id)
-		}
-	}
-
-	if _, ok := d.GetOk(policy); ok {
-		policySet := d.Get(policy).([]interface{})
-
-		webPolicies := make([]*pingaccess.PolicyItem, 0)
-		apiPolicies := make([]*pingaccess.PolicyItem, 0)
-
-		policy := policySet[0].(map[string]interface{})
-		for _, pV := range policy["web"].(*schema.Set).List() {
-			p := pV.(map[string]interface{})
-			webPolicies = append(webPolicies, &pingaccess.PolicyItem{
-				Id:   json.Number(p["id"].(string)),
-				Type: String(p["type"].(string)),
-			})
-		}
-		for _, pV := range policy["api"].(*schema.Set).List() {
-			p := pV.(map[string]interface{})
-			apiPolicies = append(apiPolicies, &pingaccess.PolicyItem{
-				Id:   json.Number(p["id"].(string)),
-				Type: String(p["type"].(string)),
-			})
-		}
-		policies := map[string]*[]*pingaccess.PolicyItem{
-			"Web": &webPolicies,
-			"API": &apiPolicies,
-		}
-		input.Body.Policy = policies
-	}
-
-	svc := m.(*pingaccess.Client).Applications
-
 	_, _, err := svc.UpdateApplicationCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating application: %s", err)
 	}
-	log.Println("[DEBUG] End - resourcePingAccessApplicationUpdate")
 	return nil
 }
 
 func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessApplicationDelete")
-	svc := m.(*pingaccess.Client).Applications
+	svc := m.(*pa.Client).Applications
 
-	input := &pingaccess.DeleteApplicationCommandInput{
+	input := &pa.DeleteApplicationCommandInput{
 		Id: d.Id(),
 	}
 
@@ -369,7 +178,7 @@ func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pingaccess.ApplicationView) (err error) {
+func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.ApplicationView) (err error) {
 	setResourceDataInt(d, "access_validator_id", rv.AccessValidatorId)
 	setResourceDataInt(d, "agent_id", rv.AgentId)
 	setResourceDataString(d, "application_type", rv.ApplicationType)
@@ -380,4 +189,96 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pingacc
 		}
 	}
 	return nil
+}
+
+func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.ApplicationView {
+	siteID, _ := strconv.Atoi(d.Get("site_id").(string))
+	virtualHostIds := expandStringList(d.Get(virtualHostIDs).(*schema.Set).List())
+	vhIds := []*int{}
+	for _, i := range virtualHostIds {
+		text, _ := strconv.Atoi(*i)
+		vhIds = append(vhIds, &text)
+	}
+
+	application := &pa.ApplicationView{
+		AgentId:         Int(d.Get("agent_id").(int)),
+		Name:            String(d.Get("name").(string)),
+		ApplicationType: String(d.Get("application_type").(string)),
+		ContextRoot:     String(d.Get("context_root").(string)),
+		DefaultAuthType: String(d.Get("default_auth_type").(string)),
+		Destination:     String(d.Get("destination").(string)),
+		SiteId:          Int(siteID),
+		VirtualHostIds:  &vhIds,
+	}
+
+	if _, ok := d.GetOk("access_validator_id"); ok {
+		application.AccessValidatorId = Int(d.Get("access_validator_id").(int))
+	}
+
+	if _, ok := d.GetOk("case_sensitive_path"); ok {
+		application.CaseSensitivePath = Bool(d.Get("case_sensitive_path").(bool))
+	}
+
+	if _, ok := d.GetOk("description"); ok {
+		application.Description = String(d.Get("description").(string))
+	}
+
+	if _, ok := d.GetOk("enabled"); ok {
+		application.Enabled = Bool(d.Get("enabled").(bool))
+	}
+
+	if _, ok := d.GetOk("realm"); ok {
+		application.Realm = String(d.Get("realm").(string))
+	}
+
+	if _, ok := d.GetOk("require_https"); ok {
+		application.RequireHTTPS = Bool(d.Get("require_https").(bool))
+	}
+
+	if _, ok := d.GetOk("web_session_id"); ok {
+		application.WebSessionId = Int(d.Get("web_session_id").(int))
+	}
+
+	if _, ok := d.GetOk("identity_mapping_ids"); ok {
+		application.IdentityMappingIds = make(map[string]*int)
+		idMapping := d.Get("identity_mapping_ids").([]interface{})[0].(map[string]interface{})
+		if idMapping["web"] != nil {
+			id, _ := strconv.Atoi(idMapping["web"].(string))
+			application.IdentityMappingIds["Web"] = Int(id)
+		}
+		if idMapping["api"] != nil {
+			id, _ := strconv.Atoi(idMapping["api"].(string))
+			application.IdentityMappingIds["API"] = Int(id)
+		}
+	}
+
+	if _, ok := d.GetOk(policy); ok {
+		policySet := d.Get(policy).([]interface{})
+
+		webPolicies := make([]*pa.PolicyItem, 0)
+		apiPolicies := make([]*pa.PolicyItem, 0)
+
+		policy := policySet[0].(map[string]interface{})
+		for _, pV := range policy["web"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			webPolicies = append(webPolicies, &pa.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		for _, pV := range policy["api"].(*schema.Set).List() {
+			p := pV.(map[string]interface{})
+			apiPolicies = append(apiPolicies, &pa.PolicyItem{
+				Id:   json.Number(p["id"].(string)),
+				Type: String(p["type"].(string)),
+			})
+		}
+		policies := map[string]*[]*pa.PolicyItem{
+			"Web": &webPolicies,
+			"API": &apiPolicies,
+		}
+		application.Policy = policies
+	}
+
+	return application
 }
