@@ -1,8 +1,6 @@
 package pingaccess
 
 import (
-	"log"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -49,6 +47,7 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_site":                 resourcePingAccessSite(),
 			"pingaccess_application":          resourcePingAccessApplication(),
 			"pingaccess_application_resource": resourcePingAccessApplicationResource(),
+			"pingaccess_websession":           resourcePingAccessWebSession(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -74,35 +73,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	return config.Client()
-}
-
-// Takes the result of flatmap.Expand for an array of strings
-// and returns a []string
-func expandStringList(configured []interface{}) []*string {
-	log.Printf("[INFO] expandStringList %d", len(configured))
-	vs := make([]*string, 0, len(configured))
-	for _, v := range configured {
-		val := v.(string)
-		if val != "" {
-			vs = append(vs, &val)
-			log.Printf("[DEBUG] Appending: %s", val)
-		}
-	}
-	return vs
-}
-
-// Takes the result of flatmap.Expand for an array of strings
-// and returns a []*int
-func expandIntList(configured []interface{}) []*int {
-	vs := make([]*int, 0, len(configured))
-	for _, v := range configured {
-		_, ok := v.(int)
-		if ok {
-			val := v.(int)
-			vs = append(vs, &val)
-		}
-	}
-	return vs
 }
 
 // Bool is a helper routine that allocates a new bool value
