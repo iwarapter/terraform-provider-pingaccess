@@ -1,9 +1,15 @@
 package pingaccess
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
+	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func applicationPolicySchema() *schema.Schema {
@@ -39,6 +45,101 @@ func applicationPolicyItemSchema() *schema.Schema {
 	}
 }
 
+func oAuthClientCredentials() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Required: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"client_id": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"client_secret": hiddenField(),
+			},
+		},
+	}
+}
+
+func hiddenField() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"encrypted_value": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"value": {
+					Type:      schema.TypeString,
+					Optional:  true,
+					Sensitive: true,
+				},
+			},
+		},
+	}
+}
+
+func expandHiddenFieldView(in []interface{}) *pa.HiddenFieldView {
+	hf := &pa.HiddenFieldView{}
+	for _, raw := range in {
+		if raw == nil {
+			return hf
+		}
+		l := raw.(map[string]interface{})
+		if val, ok := l["value"]; ok {
+			hf.Value = String(val.(string))
+		}
+		// if val, ok := l["encrypted_value"]; ok {
+		// 	hf.EncryptedValue = String(val.(string))
+		// }
+	}
+	return hf
+}
+
+func flattenHiddenFieldView(in *pa.HiddenFieldView) []map[string]interface{} {
+	m := make([]map[string]interface{}, 0, 1)
+	s := make(map[string]interface{})
+	if in.Value != nil {
+		s["value"] = *in.Value //TODO this is bad don't do this.
+	}
+	// if in.EncryptedValue != nil {
+	// s["encrypted_value"] = *in.EncryptedValue
+	// }
+	m = append(m, s)
+	return m
+}
+
+func expandOAuthClientCredentialsView(in []interface{}) *pa.OAuthClientCredentialsView {
+	hf := &pa.OAuthClientCredentialsView{}
+	for _, raw := range in {
+		l := raw.(map[string]interface{})
+		if val, ok := l["client_id"]; ok {
+			hf.ClientId = String(val.(string))
+		}
+		if val, ok := l["client_secret"]; ok {
+			hf.ClientSecret = expandHiddenFieldView(val.([]interface{}))
+		}
+	}
+	return hf
+}
+
+func flattenOAuthClientCredentialsView(in *pa.OAuthClientCredentialsView) []map[string]interface{} {
+	m := make([]map[string]interface{}, 0, 1)
+	s := make(map[string]interface{})
+	if in.ClientId != nil {
+		s["client_id"] = *in.ClientId
+	}
+	if in.ClientSecret != nil {
+		s["client_secret"] = flattenHiddenFieldView(in.ClientSecret)
+	}
+	m = append(m, s)
+	return m
+}
+
 func flattenIdentityMappingIds(in map[string]*int) []interface{} {
 	// NOTE: the top level structure to set is a map
 	m := make(map[string]interface{})
@@ -48,8 +149,117 @@ func flattenIdentityMappingIds(in map[string]*int) []interface{} {
 	if in["API"] != nil {
 		m["api"] = strconv.Itoa(*in["API"])
 	}
-	if m["api"] == "0" && m["web"] == "0" {
-		return []interface{}{}
-	}
+	log.Printf("FLATTENER: %v, %v", *in["API"], *in["Web"])
+	// if m["api"] == "0" && m["web"] == "0" {
+	// 	return []interface{}{}
+	// }
 	return []interface{}{m}
+}
+
+func expandPolicyItem(in []interface{}) *pa.PolicyItem {
+	policy := &pa.PolicyItem{}
+	for _, raw := range in {
+		l := raw.(map[string]interface{})
+		if val, ok := l["id"]; ok {
+			policy.Id = json.Number(val.(string))
+		}
+		if val, ok := l["type"]; ok {
+			policy.Type = String(val.(string))
+		}
+	}
+	return policy
+}
+
+func flattenPolicyItem(in []*pa.PolicyItem) *schema.Set {
+	// m := make([]map[string]interface{}, 0, len(in))
+	m := []interface{}{}
+	for _, v := range in {
+		s := make(map[string]interface{})
+		s["id"] = v.Id.String()
+		s["type"] = *v.Type
+		m = append(m, s)
+	}
+	return schema.NewSet(policyItemHash, m)
+}
+
+func policyItemHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	buf.WriteString(m["id"].(string))
+	if d, ok := m["type"]; ok && d.(string) != "" {
+		buf.WriteString(fmt.Sprintf("%s-", d.(string)))
+	}
+	return hashcode.String(buf.String())
+}
+
+func stringHash(v interface{}) int {
+	var buf bytes.Buffer
+	buf.WriteString(v.(string))
+	return hashcode.String(buf.String())
+}
+
+func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
+	ca := map[string]*[]*pa.PolicyItem{}
+
+	webPolicies := make([]*pa.PolicyItem, 0)
+	apiPolicies := make([]*pa.PolicyItem, 0)
+
+	for _, raw := range in {
+		l := raw.(map[string]interface{})
+		if val, ok := l["web"]; ok && len(val.(*schema.Set).List()) > 0 {
+			webPolicies = append(webPolicies, expandPolicyItem(val.(*schema.Set).List()))
+		}
+		if val, ok := l["api"]; ok && len(val.(*schema.Set).List()) > 0 {
+			apiPolicies = append(apiPolicies, expandPolicyItem(val.(*schema.Set).List()))
+		}
+	}
+
+	ca["Web"] = &webPolicies
+	ca["API"] = &apiPolicies
+
+	return ca
+}
+
+func flattenPolicy(in map[string]*[]*pa.PolicyItem) []interface{} {
+	// m := make([]map[string]interface{}, 0, 1)
+	m := []interface{}{}
+	s := make(map[string]interface{})
+	if val, ok := in["Web"]; ok && len(*in["Web"]) > 0 {
+		s["web"] = flattenPolicyItem(*val)
+	}
+	if val, ok := in["API"]; ok && len(*in["API"]) > 0 {
+		s["api"] = flattenPolicyItem(*val)
+	}
+	m = append(m, s)
+	return m
+	// return //[]interface{}{s}
+}
+
+// Takes the result of flatmap.Expand for an array of strings
+// and returns a []string
+func expandStringList(configured []interface{}) []*string {
+	// log.Printf("[INFO] expandStringList %d", len(configured))
+	vs := make([]*string, 0, len(configured))
+	for _, v := range configured {
+		val := v.(string)
+		if val != "" {
+			vs = append(vs, &val)
+			// log.Printf("[DEBUG] Appending: %s", val)
+		}
+	}
+	return vs
+}
+
+// Takes the result of flatmap.Expand for an array of strings
+// and returns a []*int
+func expandIntList(configured []interface{}) []*int {
+	vs := make([]*int, 0, len(configured))
+	for _, v := range configured {
+		_, ok := v.(int)
+		if ok {
+			val := v.(int)
+			vs = append(vs, &val)
+		}
+	}
+	return vs
 }

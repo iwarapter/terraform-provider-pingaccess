@@ -34,7 +34,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:bce2d8f08ec72abb69b8ddd15a27761edc809f07aee7f73214de2e4cbf47e7d1"
+  digest = "1:d2829f46be792e69fb09197b515c69abdf89839388735ba271596032c48b85f4"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -73,8 +73,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "e8b22c9937cae1fee9bc364a88f3752cc4d1ac2f"
-  version = "v1.17.4"
+  revision = "754d07f5dfb0a42be29df8da4a5428a321377cb3"
+  version = "v1.17.11"
 
 [[projects]]
   branch = "master"
@@ -117,7 +117,7 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
+  digest = "1:239c4c7fd2159585454003d9be7207167970194216193a8a210b8d29576f19c9"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -127,8 +127,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
+  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
@@ -171,12 +171,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:2fea68d1a506e91f177579597a6a4d13d460d288e9f7948ce9d717fe77eaedcc"
+  digest = "1:f6ecb0dc7d965d75815729fd300cc0cd17004fb2d6172a7f37192494936942e5"
   name = "github.com/hashicorp/go-hclog"
   packages = ["."]
   pruneopts = "UT"
-  revision = "90f2fbc4844c54471c74c1395e1d06ce0582ec59"
-  version = "v0.7.0"
+  revision = "6907afbebd2eef854f0be9194eb79b0ba75d7b29"
+  version = "v0.8.0"
 
 [[projects]]
   digest = "1:f668349b83f7d779567c880550534addeca7ebadfdcf44b0b9c39be61864b4b7"
@@ -241,7 +241,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e49fa10f39f91347553eec4fbd94c6395d5a2c1a532d0586acbdf8d21f06c7bf"
+  digest = "1:5db33827118b76923a73f19976d02756ac8d17b00b8791cc7f5291f389dcf47e"
   name = "github.com/hashicorp/hcl2"
   packages = [
     "gohcl",
@@ -253,7 +253,7 @@
     "hclwrite",
   ]
   pruneopts = "UT"
-  revision = "fb2bc46cdbe36e247dac0c7dc185b34eaeb54c21"
+  revision = "fdf8e232b64f68d5335fa1be449b0160dadacdb5"
 
 [[projects]]
   branch = "master"
@@ -343,12 +343,12 @@
   version = "v0.0.9"
 
 [[projects]]
-  digest = "1:b5cf82c3199c040b82e2bb3fbcbcf6771c2759f9c6b839621b0714c822167581"
+  digest = "1:3bb9c8451d199650bfd303e0068d86f135952fead374ad87c09a9b8a2cc4bd7c"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a6dda38a851a575e6799957cdd53ffe0b3fdd90f"
-  version = "v0.0.5"
+  revision = "369ecd8cea9851e459abb67eb171853e3986591e"
+  version = "v0.0.6"
 
 [[projects]]
   digest = "1:dac0667a3fcdd4102a5da07abeddc89eb2f125b1e91af1ea9544c80eaff19c9a"
@@ -488,11 +488,11 @@
     "openpgp/s2k",
   ]
   pruneopts = "UT"
-  revision = "ffb98f73852f696ea2bb21a617a5c4b3e067a439"
+  revision = "8dd112bcdc25174059e45e07517d9fc663123347"
 
 [[projects]]
   branch = "master"
-  digest = "1:b00cb23f34b0ee30295405da90c7ecbca91930854cff854c9ef9c1e8bfb198e2"
+  digest = "1:4117fe121d7c421cf0a77278cb988b5574f5f834b3da779970b85a7e34f12b4b"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -506,15 +506,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898"
+  revision = "16b79f2e4e95ea23b2bf9903c9809ff7b013ce85"
 
 [[projects]]
   branch = "master"
-  digest = "1:d0e9a312c4610a508569ab25e54d34600b1a96d19b1866ece104ffdf1c1b9d2c"
+  digest = "1:7705456281a2327caef2d26e5881361effba03476bd9d09c60f3e4958d6c981c"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "cd391775e71e684db52b63df9affd58269495083"
+  revision = "30e92a19ae4a77dde818b8c3d41d51e4850cba12"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -545,10 +545,10 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "082222b4a5c572e33e82ee9162d1352c7cf38682"
+  revision = "c21a8b77f9f040598af1c8c5c0870568f1959df3"
 
 [[projects]]
-  digest = "1:a887a56d0ff92cf05b4bb6004b46fc6e64d3fb6aca4eaeb1466bdce183ba5004"
+  digest = "1:5b600bdd0f5f37f1cfb03d98b512414d8900263efb7e1c0f22297d4f118fb9ab"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -586,13 +586,16 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
-  version = "v1.18.0"
+  revision = "2fdaae294f38ed9a121193c51ec99fecd3b13eb7"
+  version = "v1.19.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/google/go-cmp/cmp",
+    "github.com/hashicorp/terraform/flatmap",
+    "github.com/hashicorp/terraform/helper/hashcode",
     "github.com/hashicorp/terraform/helper/resource",
     "github.com/hashicorp/terraform/helper/schema",
     "github.com/hashicorp/terraform/plugin",
