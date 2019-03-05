@@ -1,7 +1,6 @@
 package pingaccess
 
 import (
-	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -84,15 +83,8 @@ func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
 		Id: d.Id(),
 	}
 
-	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] GetApplicationCommandInput: %s", input.Id)
 	result, _, _ := svc.GetRuleCommand(input)
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(result)
-	rv := pingaccess.RuleView{}
-	json.NewDecoder(b).Decode(&rv)
-
-	return resourcePingAccessRuleReadResult(d, &rv)
+	return resourcePingAccessRuleReadResult(d, result)
 }
 
 func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {

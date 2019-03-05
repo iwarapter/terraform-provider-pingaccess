@@ -1,13 +1,35 @@
 package pingaccess
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
+
+func init() {
+	resource.AddTestSweepers("pingaccess_rule", &resource.Sweeper{
+		Name:         "pingaccess_rule",
+		F:            testSweepRules,
+		Dependencies: []string{"pingaccess_ruleset"},
+	})
+}
+
+func testSweepRules(r string) error {
+	url, _ := url.Parse("https://localhost:9000")
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Rules
+	result, _, _ := conn.GetRulesCommand(&pingaccess.GetRulesCommandInput{Filter: "acc_test_"})
+	for _, v := range result.Items {
+		conn.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: v.Id.String()})
+	}
+	return nil
+}
 
 func TestAccPingAccessRule(t *testing.T) {
 	var out pingaccess.RuleView
