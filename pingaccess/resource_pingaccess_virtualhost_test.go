@@ -8,9 +8,12 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func init() {
@@ -97,5 +100,48 @@ func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *pingaccess.
 		}
 
 		return nil
+	}
+}
+
+func Test_resourcePingAccessVirtualhostReadData(t *testing.T) {
+	cases := []struct {
+		VirtualHost pa.VirtualHostView
+	}{
+		{
+			VirtualHost: pa.VirtualHostView{
+				Host: String("localhost"),
+				Port: Int(9999),
+			},
+		},
+		{
+			VirtualHost: pa.VirtualHostView{
+				Host:                      String("localhost"),
+				Port:                      Int(9999),
+				AgentResourceCacheTTL:     Int(0),
+				KeyPairId:                 Int(0),
+				TrustedCertificateGroupId: Int(0),
+			},
+		},
+		{
+			VirtualHost: pa.VirtualHostView{
+				Host:                      String("localhost"),
+				Port:                      Int(9999),
+				AgentResourceCacheTTL:     Int(30),
+				KeyPairId:                 Int(30),
+				TrustedCertificateGroupId: Int(30),
+			},
+		},
+	}
+	for i, tc := range cases {
+		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
+
+			resourceSchema := resourcePingAccessVirtualHostSchema()
+			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
+			resourcePingAccessVirtualHostReadResult(resourceLocalData, &tc.VirtualHost)
+
+			if got := *resourcePingAccessVirtualHostReadData(resourceLocalData); !cmp.Equal(got, tc.VirtualHost) {
+				t.Errorf("resourcePingAccessVirtualHostReadData() = %v", cmp.Diff(got, tc.VirtualHost))
+			}
+		})
 	}
 }
