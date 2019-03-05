@@ -65,45 +65,61 @@ resource "pingaccess_application" "acc_test" {
   destination         = "Site"
   site_id             = "${pingaccess_site.acc_test_site.id}"
   virtual_host_ids    = ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
+
+  identity_mapping_ids {
+    web = 0
+    api = 0
+  }
   // identity_mapping_ids {
   //   web = "65"
   // }
   // web_session_id = 12
 }
 
-resource "pingaccess_ruleset" "ruleset_one" {
-		name             = "demo-ruleset"
-		success_criteria = "SuccessIfAnyOneSucceeds"
-		element_type     = "Rule"
-		policy = [
-			"${pingaccess_rule.ruleset_rule_one.id}"
-		]
-	}
+// resource "pingaccess_ruleset" "ruleset_one" {
+// 		name             = "demo-ruleset"
+// 		success_criteria = "SuccessIfAnyOneSucceeds"
+// 		element_type     = "Rule"
+// 		policy = [
+// 			"${pingaccess_rule.ruleset_rule_one.id}"
+// 		]
+// 	}
 
-	resource "pingaccess_rule" "ruleset_rule_one" {
-		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "demo-ruleset-rule"
-		supported_destinations = [
-			"Site",
-			"Agent"
-		]
-		configuration = <<EOF
-		{
-			"cidrNotation": "127.0.0.1/32",
-			"negate": false,
-			"overrideIpSource": false,
-			"headers": [],
-			"headerValueLocation": "LAST",
-			"fallbackToLastHopIp": true,
-			"errorResponseCode": 403,
-			"errorResponseStatusMsg": "Forbidden",
-			"errorResponseTemplateFile": "policy.error.page.template.html",
-			"errorResponseContentType": "text/html;charset=UTF-8",
-			"rejectionHandler": null,
-			"rejectionHandlingEnabled": false
-		}
-		EOF
-	}
+// resource "pingaccess_rule" "ruleset_rule_one" {
+// 	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+// 	name = "demo-ruleset-rule"
+// 	supported_destinations = [
+// 		"Site",
+// 		"Agent"
+// 	]
+// 	configuration = <<EOF
+// 	{
+// 		"cidrNotation": "127.0.0.1/32",
+// 		"negate": false,
+// 		"overrideIpSource": false,
+// 		"headers": [],
+// 		"headerValueLocation": "LAST",
+// 		"fallbackToLastHopIp": true,
+// 		"errorResponseCode": 403,
+// 		"errorResponseStatusMsg": "Forbidden",
+// 		"errorResponseTemplateFile": "policy.error.page.template.html",
+// 		"errorResponseContentType": "text/html;charset=UTF-8",
+// 		"rejectionHandler": null,
+// 		"rejectionHandlingEnabled": false
+// 	}
+// 	EOF
+// }
+
+// resource "pingaccess_websession" "demo_session" {
+// 	name = "demo-session"
+// 	audience = "woot"
+// 	client_credentials {
+// 		client_id = "user",
+//     client_secret {
+// 			value = "atat"
+// 		}
+// 	}
+// }
 
 // resource "pingaccess_application_resource" "woot" {
 //   name = "woot"
@@ -123,4 +139,11 @@ resource "pingaccess_ruleset" "ruleset_one" {
 //   // },
 //   root_resource = false
 //   application_id = "${pingaccess_application.acc_test.id}"
+
+// 	// policy {
+// 	// 	web {
+// 	// 		id = "${pingaccess_rule.ruleset_rule_one.id}"
+// 	// 		type = "Rule"
+// 	// 	}
+// 	// }
 // }

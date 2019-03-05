@@ -11,19 +11,6 @@ import (
 )
 
 func resourcePingAccessApplication() *schema.Resource {
-	// PolicyItem := &schema.Resource{
-	// 	Schema: map[string]*schema.Schema{
-	// 		"type": {
-	// 			Type:     schema.TypeString,
-	// 			Optional: true,
-	// 		},
-	// 		"id": {
-	// 			Type:     schema.TypeString,
-	// 			Optional: true,
-	// 		},
-	// 	},
-	// }
-
 	return &schema.Resource{
 		Create: resourcePingAccessApplicationCreate,
 		Read:   resourcePingAccessApplicationRead,
@@ -73,21 +60,27 @@ func resourcePingAccessApplication() *schema.Resource {
 			"identity_mapping_ids": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
-				// Computed: true,
 				MaxItems: 1,
 				MinItems: 1,
-				// DefaultFunc: defaultIdentityMappingIds(),
+				// DefaultFunc: func() (interface{}, error) {
+				// 	m := make(map[string]interface{})
+				// 	m["api"] = "0"
+				// 	m["web"] = "0"
+				// 	return []interface{}{m}, nil
+				// },
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "0",
+							// DefaultFunc: func() (interface{}, error) { return "0", nil },
 						},
 						"api": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "0",
+							// DefaultFunc: func() (interface{}, error) { return "0", nil },
 						},
 					},
 				},
@@ -143,7 +136,10 @@ func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) er
 	input := &pa.GetApplicationCommandInput{
 		Id: d.Id(),
 	}
-	result, _, _ := svc.GetApplicationCommand(input)
+	result, _, err := svc.GetApplicationCommand(input)
+	if err != nil {
+		return fmt.Errorf("Error reading application: %s", err)
+	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
 
@@ -153,11 +149,11 @@ func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) 
 		Body: *resourcePingAccessApplicationReadData(d),
 		Id:   d.Id(),
 	}
-	_, _, err := svc.UpdateApplicationCommand(&input)
+	result, _, err := svc.UpdateApplicationCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating application: %s", err)
 	}
-	return nil
+	return resourcePingAccessApplicationReadResult(d, result)
 }
 
 func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) error {
@@ -187,6 +183,8 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 		if err = d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
 			return err
 		}
+		log.Printf("FLATTENER 2: %v", flattenIdentityMappingIds(rv.IdentityMappingIds))
+		log.Printf("FLATTENER 3: %v", d.Get("identity_mapping_ids"))
 	}
 	return nil
 }
@@ -239,9 +237,12 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		application.WebSessionId = Int(d.Get("web_session_id").(int))
 	}
 
-	if _, ok := d.GetOk("identity_mapping_ids"); ok {
+	v, r := d.GetOkExists("identity_mapping_ids")
+	log.Printf("EXPANDER: %v , %v", v, r)
+	if val, ok := d.GetOkExists("identity_mapping_ids"); ok {
 		application.IdentityMappingIds = make(map[string]*int)
-		idMapping := d.Get("identity_mapping_ids").([]interface{})[0].(map[string]interface{})
+		idMapping := val.([]interface{})[0].(map[string]interface{})
+		log.Printf("EXPANDER 2: %v", idMapping)
 		if idMapping["web"] != nil {
 			id, _ := strconv.Atoi(idMapping["web"].(string))
 			application.IdentityMappingIds["Web"] = Int(id)
@@ -250,6 +251,10 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 			id, _ := strconv.Atoi(idMapping["api"].(string))
 			application.IdentityMappingIds["API"] = Int(id)
 		}
+	} else {
+		application.IdentityMappingIds = make(map[string]*int)
+		application.IdentityMappingIds["API"] = Int(0)
+		application.IdentityMappingIds["Web"] = Int(0)
 	}
 
 	if _, ok := d.GetOk(policy); ok {

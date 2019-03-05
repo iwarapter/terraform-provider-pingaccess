@@ -87,6 +87,11 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 		destination					= "Site"
 		site_id							= "${pingaccess_site.acc_test_site.id}"
 		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
+
+		identity_mapping_ids {
+			web = 0
+			api = 0
+		}
 	}`, name, context)
 }
 
