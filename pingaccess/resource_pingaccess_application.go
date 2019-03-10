@@ -36,6 +36,7 @@ func resourcePingAccessApplication() *schema.Resource {
 			"case_sensitive_path": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 			contextRoot: &schema.Schema{
 				Type:     schema.TypeString,
@@ -93,6 +94,13 @@ func resourcePingAccessApplication() *schema.Resource {
 			realm: &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"resource_order": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			requireHTTPS: &schema.Schema{
 				Type:     schema.TypeBool,
@@ -178,13 +186,48 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 	setResourceDataInt(d, "access_validator_id", rv.AccessValidatorId)
 	setResourceDataInt(d, "agent_id", rv.AgentId)
 	setResourceDataString(d, "application_type", rv.ApplicationType)
+	setResourceDataBool(d, "case_sensitive_path", rv.CaseSensitivePath)
+	setResourceDataString(d, "context_root", rv.ContextRoot)
+	setResourceDataString(d, "default_auth_type", rv.DefaultAuthType)
+	setResourceDataString(d, "description", rv.Description)
+	setResourceDataString(d, "destination", rv.Destination)
+	setResourceDataBool(d, "enabled", rv.Enabled)
+	setResourceDataString(d, "name", rv.Name)
+	setResourceDataString(d, "realm", rv.Realm)
+	setResourceDataBool(d, "require_https", rv.RequireHTTPS)
+	siteID := strconv.Itoa(*rv.SiteId)
+	setResourceDataString(d, "site_id", &siteID)
+	setResourceDataInt(d, "web_session_id", rv.WebSessionId)
+
+	if rv.VirtualHostIds != nil {
+		vhs := []string{}
+		for _, vh := range *rv.VirtualHostIds {
+			vhs = append(vhs, strconv.Itoa(*vh))
+		}
+		if err := d.Set("virtual_host_ids", vhs); err != nil {
+			return err
+		}
+	}
+
+	if rv.ResourceOrder != nil {
+		resIds := []string{}
+		for _, vh := range *rv.ResourceOrder {
+			resIds = append(resIds, strconv.Itoa(*vh))
+		}
+		if err := d.Set("resource_order", resIds); err != nil {
+			return err
+		}
+	}
 
 	if rv.IdentityMappingIds != nil {
 		if err = d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
 			return err
 		}
-		log.Printf("FLATTENER 2: %v", flattenIdentityMappingIds(rv.IdentityMappingIds))
-		log.Printf("FLATTENER 3: %v", d.Get("identity_mapping_ids"))
+	}
+	if rv.Policy != nil && (len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0) {
+		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -209,31 +252,41 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		VirtualHostIds:  &vhIds,
 	}
 
-	if _, ok := d.GetOk("access_validator_id"); ok {
+	if _, ok := d.GetOkExists("access_validator_id"); ok {
 		application.AccessValidatorId = Int(d.Get("access_validator_id").(int))
 	}
 
-	if _, ok := d.GetOk("case_sensitive_path"); ok {
+	if _, ok := d.GetOkExists("case_sensitive_path"); ok {
 		application.CaseSensitivePath = Bool(d.Get("case_sensitive_path").(bool))
 	}
 
-	if _, ok := d.GetOk("description"); ok {
+	if _, ok := d.GetOkExists("description"); ok {
 		application.Description = String(d.Get("description").(string))
 	}
 
-	if _, ok := d.GetOk("enabled"); ok {
+	if _, ok := d.GetOkExists("enabled"); ok {
 		application.Enabled = Bool(d.Get("enabled").(bool))
 	}
 
-	if _, ok := d.GetOk("realm"); ok {
+	if _, ok := d.GetOkExists("realm"); ok {
 		application.Realm = String(d.Get("realm").(string))
 	}
 
-	if _, ok := d.GetOk("require_https"); ok {
+	if _, ok := d.GetOkExists("resource_order"); ok {
+		resOrder := expandStringList(d.Get("resource_order").(*schema.Set).List())
+		resIds := []*int{}
+		for _, i := range resOrder {
+			text, _ := strconv.Atoi(*i)
+			resIds = append(resIds, &text)
+		}
+		application.ResourceOrder = &resIds
+	}
+
+	if _, ok := d.GetOkExists("require_https"); ok {
 		application.RequireHTTPS = Bool(d.Get("require_https").(bool))
 	}
 
-	if _, ok := d.GetOk("web_session_id"); ok {
+	if _, ok := d.GetOkExists("web_session_id"); ok {
 		application.WebSessionId = Int(d.Get("web_session_id").(int))
 	}
 

@@ -37,7 +37,7 @@ sonar:
 		-Dsonar.projectKey=github.com.iwarapter.terraform-provider-pingaccess \
 		-Dsonar.sources=. \
 		-Dsonar.host.url=http://localhost:9001 \
-		-Dsonar.login=4d6e58712a7163d2ee1f901632726b8da3d463ba \
+		-Dsonar.login=f06f9298d2cbb23fc445bdd66cc45cfd7fcd9376 \
 		-Dsonar.go.coverage.reportPaths=coverage.out \
 		-Dsonar.go.tests.reportPaths=report.json \
 		-Dsonar.exclusions=vendor/**/* \

@@ -40,7 +40,7 @@ func TestAccPingAccessVirtualHost(t *testing.T) {
 	var out pingaccess.VirtualHostView
 
 	resource.ParallelTest(t, resource.TestCase{
-		// PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessVirtualHostDestroy,
 		Steps: []resource.TestStep{

@@ -17,6 +17,9 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 		Read:   resourcePingAccessIdentityMappingRead,
 		Update: resourcePingAccessIdentityMappingUpdate,
 		Delete: resourcePingAccessIdentityMappingDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			className: &schema.Schema{
@@ -64,17 +67,14 @@ func resourcePingAccessIdentityMappingCreate(d *schema.ResourceData, m interface
 }
 
 func resourcePingAccessIdentityMappingRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessIdentityMappingRead")
 	svc := m.(*pingaccess.Client).IdentityMappings
-
 	input := &pingaccess.GetIdentityMappingCommandInput{
 		Id: d.Id(),
 	}
-
-	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] GetApplicationCommandInput: %s", input.Id)
-	result, _, _ := svc.GetIdentityMappingCommand(input)
-
+	result, _, err := svc.GetIdentityMappingCommand(input)
+	if err != nil {
+		return fmt.Errorf("Error reading IdentityMapping: %s", err)
+	}
 	return resourcePingAccessIdentityMappingReadResult(d, result)
 }
 

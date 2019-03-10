@@ -35,7 +35,7 @@ func TestAccPingAccessRule(t *testing.T) {
 	var out pingaccess.RuleView
 
 	resource.ParallelTest(t, resource.TestCase{
-		// PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessRuleDestroy,
 		Steps: []resource.TestStep{

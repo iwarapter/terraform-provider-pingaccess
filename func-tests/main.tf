@@ -76,39 +76,39 @@ resource "pingaccess_application" "acc_test" {
   // web_session_id = 12
 }
 
-// resource "pingaccess_ruleset" "ruleset_one" {
-// 		name             = "demo-ruleset"
-// 		success_criteria = "SuccessIfAnyOneSucceeds"
-// 		element_type     = "Rule"
-// 		policy = [
-// 			"${pingaccess_rule.ruleset_rule_one.id}"
-// 		]
-// 	}
+resource "pingaccess_ruleset" "ruleset_one" {
+		name             = "demo-ruleset"
+		success_criteria = "SuccessIfAnyOneSucceeds"
+		element_type     = "Rule"
+		policy = [
+			"${pingaccess_rule.ruleset_rule_one.id}"
+		]
+	}
 
-// resource "pingaccess_rule" "ruleset_rule_one" {
-// 	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-// 	name = "demo-ruleset-rule"
-// 	supported_destinations = [
-// 		"Site",
-// 		"Agent"
-// 	]
-// 	configuration = <<EOF
-// 	{
-// 		"cidrNotation": "127.0.0.1/32",
-// 		"negate": false,
-// 		"overrideIpSource": false,
-// 		"headers": [],
-// 		"headerValueLocation": "LAST",
-// 		"fallbackToLastHopIp": true,
-// 		"errorResponseCode": 403,
-// 		"errorResponseStatusMsg": "Forbidden",
-// 		"errorResponseTemplateFile": "policy.error.page.template.html",
-// 		"errorResponseContentType": "text/html;charset=UTF-8",
-// 		"rejectionHandler": null,
-// 		"rejectionHandlingEnabled": false
-// 	}
-// 	EOF
-// }
+resource "pingaccess_rule" "ruleset_rule_one" {
+	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+	name = "demo-ruleset-rule"
+	supported_destinations = [
+		"Site",
+		"Agent"
+	]
+	configuration = <<EOF
+	{
+		"cidrNotation": "127.0.0.1/32",
+		"negate": false,
+		"overrideIpSource": false,
+		"headers": [],
+		"headerValueLocation": "LAST",
+		"fallbackToLastHopIp": true,
+		"errorResponseCode": 403,
+		"errorResponseStatusMsg": "Forbidden",
+		"errorResponseTemplateFile": "policy.error.page.template.html",
+		"errorResponseContentType": "text/html;charset=UTF-8",
+		"rejectionHandler": null,
+		"rejectionHandlingEnabled": false
+	}
+	EOF
+}
 
 // resource "pingaccess_websession" "demo_session" {
 // 	name = "demo-session"
@@ -121,29 +121,29 @@ resource "pingaccess_application" "acc_test" {
 // 	}
 // }
 
-// resource "pingaccess_application_resource" "woot" {
-//   name = "woot"
-//   methods = [
-//     "*"
-//   ]
-//   path_prefixes = [
-//     "/woot"
-//   ]
-//   default_auth_type_override = "Web"
-//   audit_level = "OFF"
-//   anonymous = false
-//   enabled = true
-//   // policy {
-//   //   "Web": [],
-//   //   "API": []
-//   // },
-//   root_resource = false
-//   application_id = "${pingaccess_application.acc_test.id}"
+resource "pingaccess_application_resource" "woot" {
+  name = "Root Resource"
+  methods = [
+    "*"
+  ]
+  path_prefixes = [
+    "/*"
+  ]
+  default_auth_type_override = "Web"
+  audit_level = "OFF"
+  anonymous = false
+  enabled = true
+  // policy {
+  //   "Web": [],
+  //   "API": []
+  // },
+  root_resource = true
+  application_id = "${pingaccess_application.acc_test.id}"
 
-// 	// policy {
-// 	// 	web {
-// 	// 		id = "${pingaccess_rule.ruleset_rule_one.id}"
-// 	// 		type = "Rule"
-// 	// 	}
-// 	// }
-// }
+	policy {
+		web {
+			id = "${pingaccess_rule.ruleset_rule_one.id}"
+			type = "Rule"
+		}
+	}
+}

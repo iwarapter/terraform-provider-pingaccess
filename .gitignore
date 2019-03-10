@@ -10,3 +10,4 @@ run.log
 coverage.out
 report.json
 pingaccess/terraform.log
+pingaccess.lic

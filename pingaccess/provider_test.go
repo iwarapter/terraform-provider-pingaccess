@@ -1,7 +1,12 @@
 package pingaccess
 
 import (
+	"crypto/tls"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -9,8 +14,58 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/ory/dockertest"
 	"github.com/terraform-providers/terraform-provider-template/template"
 )
+
+func TestMain(m *testing.M) {
+	_, acceptanceTesting := os.LookupEnv("TF_ACC")
+	if acceptanceTesting {
+		pool, err := dockertest.NewPool("")
+		if err != nil {
+			log.Fatalf("Could not connect to docker: %s", err)
+		}
+
+		dir, _ := os.Getwd()
+		options := &dockertest.RunOptions{
+			Repository: "pingidentity/pingaccess",
+			Tag:        "latest",
+			Mounts:     []string{dir + "/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic"},
+		}
+
+		// pulls an image, creates a container based on it and runs it
+		resource, err := pool.RunWithOptions(options)
+		if err != nil {
+			log.Fatalf("Could not start resource: %s", err)
+		}
+
+		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+		if err := pool.Retry(func() error {
+			var err error
+			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			url, _ := url.Parse(fmt.Sprintf("https://localhost:%s", resource.GetPort("9000/tcp")))
+			client := pa.NewClient("Administrator", "2Access", url, "/pa-admin-api/v3", nil)
+
+			_, _, err = client.Applications.GetApplicationsCommand(&pa.GetApplicationsCommandInput{})
+			return err
+		}); err != nil {
+			log.Fatalf("Could not connect to docker: %s", err)
+		}
+
+		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", resource.GetPort("9000/tcp")))
+		code := m.Run()
+
+		// You can't defer this because os.Exit doesn't care for defer
+		if err := pool.Purge(resource); err != nil {
+			log.Fatalf("Could not purge resource: %s", err)
+		}
+
+		os.Exit(code)
+	} else {
+		m.Run()
+	}
+}
 
 var testAccProviders map[string]terraform.ResourceProvider
 var testAccProvider *schema.Provider
@@ -33,13 +88,6 @@ func init() {
 			},
 		}
 	}
-	// testAccProvidersWithTLS = map[string]terraform.ResourceProvider{
-	// 	"tls": tls.Provider(),
-	// }
-
-	// for k, v := range testAccProviders {
-	// 	testAccProvidersWithTLS[k] = v
-	// }
 }
 
 func testAccPreCheck(t *testing.T) {

@@ -16,6 +16,9 @@ func resourcePingAccessRuleSet() *schema.Resource {
 		Read:   resourcePingAccessRuleSetRead,
 		Update: resourcePingAccessRuleSetUpdate,
 		Delete: resourcePingAccessRuleSetDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"element_type": &schema.Schema{
@@ -86,9 +89,12 @@ func resourcePingAccessRuleSetCreate(d *schema.ResourceData, m interface{}) erro
 func resourcePingAccessRuleSetRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] resourcePingAccessRuleSetRead")
 	svc := m.(*pingaccess.Client).Rulesets
-	result, _, _ := svc.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
+	result, _, err := svc.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
 		Id: d.Id(),
 	})
+	if err != nil {
+		return fmt.Errorf("Error reading RuleSet: %s", err)
+	}
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
 
@@ -150,14 +156,15 @@ func resourcePingAccessRuleSetReadResult(d *schema.ResourceData, rv *pingaccess.
 	if err := d.Set("element_type", rv.ElementType); err != nil {
 		return err
 	}
-	//TODO FIX
-	// pol_ids := []*string{}
-	// for _, i := range *rv.Policy {
-	// 	text := strconv.Itoa(*i)
-	// 	pol_ids = append(pol_ids, &text)
-	// }
-	// if err := d.Set("policy", pol_ids); err != nil {
-	// 	return err
-	// }
+
+	if rv.Policy != nil {
+		pol_ids := []string{}
+		for _, p := range *rv.Policy {
+			pol_ids = append(pol_ids, strconv.Itoa(*p))
+		}
+		if err := d.Set("policy", pol_ids); err != nil {
+			return err
+		}
+	}
 	return nil
 }

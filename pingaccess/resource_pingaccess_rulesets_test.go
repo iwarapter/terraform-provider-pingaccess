@@ -32,7 +32,7 @@ func testSweepRuleSets(r string) error {
 
 func TestAccPingAccessRuleSet(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
-		// PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessRuleDestroy,
 		Steps: []resource.TestStep{

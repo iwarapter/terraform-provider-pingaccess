@@ -15,8 +15,9 @@ import (
 
 func init() {
 	resource.AddTestSweepers("pingaccess_application", &resource.Sweeper{
-		Name: "pingaccess_application",
-		F:    testSweepApplication,
+		Name:         "pingaccess_application",
+		F:            testSweepApplication,
+		Dependencies: []string{"pingaccess_application_resource"},
 	})
 }
 

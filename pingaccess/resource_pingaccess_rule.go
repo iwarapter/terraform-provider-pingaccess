@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/tidwall/sjson"
 )
 
 func resourcePingAccessRule() *schema.Resource {
@@ -26,6 +27,9 @@ func resourcePingAccessRule() *schema.Resource {
 		Read:   resourcePingAccessRuleRead,
 		Update: resourcePingAccessRuleUpdate,
 		Delete: resourcePingAccessRuleDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			className: &schema.Schema{
@@ -42,6 +46,7 @@ func resourcePingAccessRule() *schema.Resource {
 				Required:         true,
 				DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
 			},
+			"ignrored_configuration_fields": setOfString,
 		},
 	}
 }
@@ -83,7 +88,11 @@ func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
 		Id: d.Id(),
 	}
 
-	result, _, _ := svc.GetRuleCommand(input)
+	result, _, err := svc.GetRuleCommand(input)
+	if err != nil {
+		return fmt.Errorf("Error reading rule: %s", err)
+	}
+
 	return resourcePingAccessRuleReadResult(d, result)
 }
 
@@ -150,10 +159,15 @@ func resourcePingAccessRuleReadResult(d *schema.ResourceData, rv *pingaccess.Rul
 }
 
 func suppressEquivalentConfigurationDiffs(k, old, new string, d *schema.ResourceData) bool {
+	if _, ok := d.GetOkExists("ignrored_configuration_fields"); ok {
+		for _, f := range expandStringList(d.Get("ignrored_configuration_fields").(*schema.Set).List()) {
+			old, _ = sjson.Delete(old, *f)
+			new, _ = sjson.Delete(new, *f)
+		}
+	}
 	var o1 interface{}
 	var o2 interface{}
 	_ = json.Unmarshal([]byte(old), &o1)
 	_ = json.Unmarshal([]byte(new), &o2)
-
 	return reflect.DeepEqual(o1, o2)
 }

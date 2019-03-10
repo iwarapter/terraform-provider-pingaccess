@@ -12,7 +12,7 @@ import (
 
 func TestAccPingAccessIdentityMapping(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
-		// PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessIdentityMappingDestroy,
 		Steps: []resource.TestStep{

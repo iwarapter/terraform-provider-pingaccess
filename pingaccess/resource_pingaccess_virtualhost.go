@@ -82,7 +82,7 @@ func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) 
 
 	result, _, err := svc.UpdateVirtualHostCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating virtualhost: %s", err)
+		return fmt.Errorf("Error updating virtualhost: %s", err.Error())
 	}
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }

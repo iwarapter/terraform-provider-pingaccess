@@ -124,7 +124,14 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
   anonymous = false
   enabled = true
   root_resource = false
-  application_id = "${pingaccess_application.app_res_test.id}"
+	application_id = "${pingaccess_application.app_res_test.id}"
+	
+	policy {
+		web {
+			type = "Rule"
+			id = "${pingaccess_rule.acc_test_resource_rule.id}"
+		}
+	}
 }
 
 resource "pingaccess_application_resource" "app_res_test_root_resource" {
@@ -142,6 +149,31 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
   enabled = true
   root_resource = true
   application_id = "${pingaccess_application.app_res_test.id}"
+}
+
+resource "pingaccess_rule" "acc_test_resource_rule" {
+	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+	name = "acc_test_resource_rule"
+	supported_destinations = [
+		"Site",
+		"Agent"
+	]
+	configuration = <<EOF
+	{
+		"cidrNotation": "127.0.0.1/32",
+		"negate": false,
+		"overrideIpSource": false,
+		"headers": [],
+		"headerValueLocation": "LAST",
+		"fallbackToLastHopIp": true,
+		"errorResponseCode": 403,
+		"errorResponseStatusMsg": "Forbidden",
+		"errorResponseTemplateFile": "policy.error.page.template.html",
+		"errorResponseContentType": "text/html;charset=UTF-8",
+		"rejectionHandler": null,
+		"rejectionHandlingEnabled": false
+	}
+	EOF
 }
 	`, name, context, context)
 }

@@ -42,7 +42,7 @@ func TestAccPingAccessSite(t *testing.T) {
 	var out pingaccess.SiteView
 
 	resource.ParallelTest(t, resource.TestCase{
-		// PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessSiteDestroy,
 		Steps: []resource.TestStep{

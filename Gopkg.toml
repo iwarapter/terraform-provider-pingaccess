@@ -36,3 +36,11 @@
 [[constraint]]
   name = "github.com/terraform-providers/terraform-provider-template"
   version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/tidwall/sjson"
+  version = "1.0.4"
+
+[[constraint]]
+  name = "github.com/ory/dockertest"
+  version = "3.3.4"
