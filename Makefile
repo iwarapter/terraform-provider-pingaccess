@@ -1,7 +1,7 @@
 # Makefile
 
 sweep:
-	@F_ACC=1 go test ./... -v -sweep=true
+	@TF_ACC=1 go test ./... -v -sweep=true
 
 test:
 	@rm -f pingaccess/terraform.log
@@ -24,7 +24,7 @@ func-plan:
 	@cd func-tests && terraform plan
 
 func-apply:
-	@cd func-tests && terraform apply -auto-approve
+	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log cd func-tests && terraform apply -auto-approve
 
 func-destroy:
 	@cd func-tests && terraform destroy -auto-approve

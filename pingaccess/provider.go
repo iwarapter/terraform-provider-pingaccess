@@ -44,6 +44,8 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_application":          resourcePingAccessApplication(),
 			"pingaccess_application_resource": resourcePingAccessApplicationResource(),
 			"pingaccess_websession":           resourcePingAccessWebSession(),
+			"pingaccess_site_authenticator":   resourcePingAccessSiteAuthenticator(),
+			"pingaccess_third_party_service":  resourcePingAccessThirdPartyService(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

@@ -12,6 +12,16 @@ import (
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
+func setOfString() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
 func applicationPolicySchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -23,6 +33,9 @@ func applicationPolicySchema() *schema.Schema {
 				"api": applicationPolicyItemSchema(),
 			},
 		},
+		// DefaultFunc: func() (interface{}, error) {
+		// 	return []map[string][]interface{}{}, nil
+		// },
 	}
 }
 
@@ -156,9 +169,10 @@ func flattenIdentityMappingIds(in map[string]*int) []interface{} {
 	return []interface{}{m}
 }
 
-func expandPolicyItem(in []interface{}) *pa.PolicyItem {
-	policy := &pa.PolicyItem{}
+func expandPolicyItem(in []interface{}) []*pa.PolicyItem {
+	policies := []*pa.PolicyItem{}
 	for _, raw := range in {
+		policy := &pa.PolicyItem{}
 		l := raw.(map[string]interface{})
 		if val, ok := l["id"]; ok {
 			policy.Id = json.Number(val.(string))
@@ -166,8 +180,9 @@ func expandPolicyItem(in []interface{}) *pa.PolicyItem {
 		if val, ok := l["type"]; ok {
 			policy.Type = String(val.(string))
 		}
+		policies = append(policies, policy)
 	}
-	return policy
+	return policies
 }
 
 func flattenPolicyItem(in []*pa.PolicyItem) *schema.Set {
@@ -207,10 +222,10 @@ func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
 	for _, raw := range in {
 		l := raw.(map[string]interface{})
 		if val, ok := l["web"]; ok && len(val.(*schema.Set).List()) > 0 {
-			webPolicies = append(webPolicies, expandPolicyItem(val.(*schema.Set).List()))
+			webPolicies = expandPolicyItem(val.(*schema.Set).List())
 		}
 		if val, ok := l["api"]; ok && len(val.(*schema.Set).List()) > 0 {
-			apiPolicies = append(apiPolicies, expandPolicyItem(val.(*schema.Set).List()))
+			apiPolicies = expandPolicyItem(val.(*schema.Set).List())
 		}
 	}
 
@@ -224,10 +239,10 @@ func flattenPolicy(in map[string]*[]*pa.PolicyItem) []interface{} {
 	// m := make([]map[string]interface{}, 0, 1)
 	m := []interface{}{}
 	s := make(map[string]interface{})
-	if val, ok := in["Web"]; ok && len(*in["Web"]) > 0 {
+	if val, ok := in["Web"]; ok { // && len(*in["Web"]) > 0 {
 		s["web"] = flattenPolicyItem(*val)
 	}
-	if val, ok := in["API"]; ok && len(*in["API"]) > 0 {
+	if val, ok := in["API"]; ok { //&& len(*in["API"]) > 0 {
 		s["api"] = flattenPolicyItem(*val)
 	}
 	m = append(m, s)

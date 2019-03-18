@@ -89,10 +89,44 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 		site_id							= "${pingaccess_site.acc_test_site.id}"
 		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
 
+		// identity_mapping_ids {
+		// 	web = 0
+		// 	api = 0
+		// }
+	}
+
+	resource "pingaccess_application" "acc_test_two" {
+		access_validator_id = 1
+		application_type 		= "API"
+		agent_id						= 0
+		name								= "api-demo"
+		context_root				= "/"
+		default_auth_type		= "API"
+		destination					= "Site"
+		site_id							= "${pingaccess_site.acc_test_site.id}"
+		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
+
 		identity_mapping_ids {
-			web = 0
-			api = 0
+			api = "${pingaccess_identity_mapping.idm_foo.id}"
 		}
+	}
+	
+	resource "pingaccess_identity_mapping" "idm_foo" {
+		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
+		name       = "Foo"
+	
+		configuration = <<EOF
+		{
+			"attributeHeaderMappings": [
+				{
+					"subject": true,
+					"attributeName": "FOO",
+					"headerName": "FOO"
+				}
+			],
+			"headerClientCertificateMappings": []
+		}
+		EOF
 	}`, name, context)
 }
 

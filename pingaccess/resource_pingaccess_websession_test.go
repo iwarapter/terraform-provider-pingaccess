@@ -41,13 +41,13 @@ func TestAccPingAccessWebSession(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessWebSessionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessWebSessionConfig("woot"),
+				Config: testAccPingAccessWebSessionConfig("woot", "password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session", 3, &out),
 				),
 			},
 			{
-				Config: testAccPingAccessWebSessionConfig("foo"),
+				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session", 6, &out),
 				),
@@ -60,7 +60,7 @@ func testAccCheckPingAccessWebSessionDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessWebSessionConfig(audience string) string {
+func testAccPingAccessWebSessionConfig(audience, password string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_websession" "demo_session" {
 		name = "acc-test-demo-session"
@@ -68,7 +68,7 @@ func testAccPingAccessWebSessionConfig(audience string) string {
 		client_credentials {
 			client_id = "websession",
 			client_secret {
-				value = "password"
+				value = "%s"
 			}
 		}
 		scopes = [
@@ -77,7 +77,7 @@ func testAccPingAccessWebSessionConfig(audience string) string {
 			"email",
 			"phone"
 		]
-	}`, name)
+	}`, name, password)
 }
 
 func testAccCheckPingAccessWebSessionExists(n string, c int64, out *pa.WebSessionView) resource.TestCheckFunc {

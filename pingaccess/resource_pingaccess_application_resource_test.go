@@ -131,6 +131,11 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
 			type = "Rule"
 			id = "${pingaccess_rule.acc_test_resource_rule.id}"
 		}
+
+		web {
+			type = "Rule"
+			id = "${pingaccess_rule.acc_test_resource_rule_two.id}"
+		}
 	}
 }
 
@@ -154,6 +159,31 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
 resource "pingaccess_rule" "acc_test_resource_rule" {
 	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
 	name = "acc_test_resource_rule"
+	supported_destinations = [
+		"Site",
+		"Agent"
+	]
+	configuration = <<EOF
+	{
+		"cidrNotation": "127.0.0.1/32",
+		"negate": false,
+		"overrideIpSource": false,
+		"headers": [],
+		"headerValueLocation": "LAST",
+		"fallbackToLastHopIp": true,
+		"errorResponseCode": 403,
+		"errorResponseStatusMsg": "Forbidden",
+		"errorResponseTemplateFile": "policy.error.page.template.html",
+		"errorResponseContentType": "text/html;charset=UTF-8",
+		"rejectionHandler": null,
+		"rejectionHandlingEnabled": false
+	}
+	EOF
+}
+
+resource "pingaccess_rule" "acc_test_resource_rule_two" {
+	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+	name = "acc_test_resource_rule_two"
 	supported_destinations = [
 		"Site",
 		"Agent"
@@ -235,6 +265,10 @@ func testAccCheckPingAccessApplicationResourceAttributes(n, name, context string
 			return fmt.Errorf("Error: Application Resource response (%s) didnt match state (%s)", strconv.Itoa(len(*result.Methods)), rs.Primary.Attributes["methods.#"])
 		}
 
+		if len(*result.Policy["Web"]) != 2 {
+			return fmt.Errorf("Expected 2 web policies, got: %v", *result.Policy["Web"])
+		}
+
 		return nil
 	}
 }
@@ -265,11 +299,22 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 							Id:   json.Number("1"),
 							Type: String("Rule"),
 						},
+						&pa.PolicyItem{
+							Id:   json.Number("2"),
+							Type: String("RuleSet"),
+						},
 					},
 					"API": &[]*pa.PolicyItem{},
 				},
 				RootResource: Bool(false),
 				Unprotected:  Bool(false),
+			},
+		},
+		{
+			Resource: pa.ResourceView{
+				ApplicationId: Int(0),
+				Methods:       &[]*string{String("GET")},
+				Name:          String("false"),
 			},
 		},
 	}

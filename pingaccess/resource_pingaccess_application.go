@@ -95,13 +95,6 @@ func resourcePingAccessApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"resource_order": &schema.Schema{
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			requireHTTPS: &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -118,7 +111,7 @@ func resourcePingAccessApplication() *schema.Resource {
 				},
 			},
 			webSessionId: &schema.Schema{
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 		},
@@ -197,7 +190,6 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 	setResourceDataBool(d, "require_https", rv.RequireHTTPS)
 	siteID := strconv.Itoa(*rv.SiteId)
 	setResourceDataString(d, "site_id", &siteID)
-	setResourceDataInt(d, "web_session_id", rv.WebSessionId)
 
 	if rv.VirtualHostIds != nil {
 		vhs := []string{}
@@ -209,17 +201,9 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 		}
 	}
 
-	if rv.ResourceOrder != nil {
-		resIds := []string{}
-		for _, vh := range *rv.ResourceOrder {
-			resIds = append(resIds, strconv.Itoa(*vh))
-		}
-		if err := d.Set("resource_order", resIds); err != nil {
-			return err
-		}
-	}
+	setResourceDataInt(d, "web_session_id", rv.WebSessionId)
 
-	if rv.IdentityMappingIds != nil {
+	if rv.IdentityMappingIds != nil && (*rv.IdentityMappingIds["Web"] != 0 || *rv.IdentityMappingIds["API"] != 0) {
 		if err = d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
 			return err
 		}
@@ -272,16 +256,6 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		application.Realm = String(d.Get("realm").(string))
 	}
 
-	if _, ok := d.GetOkExists("resource_order"); ok {
-		resOrder := expandStringList(d.Get("resource_order").(*schema.Set).List())
-		resIds := []*int{}
-		for _, i := range resOrder {
-			text, _ := strconv.Atoi(*i)
-			resIds = append(resIds, &text)
-		}
-		application.ResourceOrder = &resIds
-	}
-
 	if _, ok := d.GetOkExists("require_https"); ok {
 		application.RequireHTTPS = Bool(d.Get("require_https").(bool))
 	}
@@ -290,12 +264,9 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		application.WebSessionId = Int(d.Get("web_session_id").(int))
 	}
 
-	v, r := d.GetOkExists("identity_mapping_ids")
-	log.Printf("EXPANDER: %v , %v", v, r)
 	if val, ok := d.GetOkExists("identity_mapping_ids"); ok {
 		application.IdentityMappingIds = make(map[string]*int)
 		idMapping := val.([]interface{})[0].(map[string]interface{})
-		log.Printf("EXPANDER 2: %v", idMapping)
 		if idMapping["web"] != nil {
 			id, _ := strconv.Atoi(idMapping["web"].(string))
 			application.IdentityMappingIds["Web"] = Int(id)
@@ -304,10 +275,6 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 			id, _ := strconv.Atoi(idMapping["api"].(string))
 			application.IdentityMappingIds["API"] = Int(id)
 		}
-	} else {
-		application.IdentityMappingIds = make(map[string]*int)
-		application.IdentityMappingIds["API"] = Int(0)
-		application.IdentityMappingIds["Web"] = Int(0)
 	}
 
 	if _, ok := d.GetOk(policy); ok {

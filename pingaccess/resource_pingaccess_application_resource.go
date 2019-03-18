@@ -2,6 +2,7 @@ package pingaccess
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -110,7 +111,7 @@ func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m inter
 		rv := result.Items[0]
 		d.SetId(rv.Id.String())
 		d.Set("application_id", strconv.Itoa(*rv.ApplicationId))
-		return resourcePingAccessApplicationResourceReadResult(d, rv)
+		return resourcePingAccessApplicationResourceUpdate(d, m)
 	}
 
 	input := pingaccess.AddApplicationResourceCommandInput{
@@ -228,8 +229,10 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	}
 	// name := d.Get("name").(string)
 	// path_prefixes := d.Get("path_prefixes").([]*string)
-	if err := d.Set(pathPrefixes, *rv.PathPrefixes); err != nil {
-		return err
+	if rv.PathPrefixes != nil {
+		if err := d.Set(pathPrefixes, *rv.PathPrefixes); err != nil {
+			return err
+		}
 	}
 
 	// if err := d.Set("path_patterns", *rv.PathPrefixes); err != nil {
@@ -243,7 +246,8 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	setResourceDataBool(d, "root_resource", rv.RootResource)
 	setResourceDataBool(d, "unprotected", rv.Unprotected)
 
-	if rv.Policy != nil && (len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0) {
+	if rv.Policy != nil && (len(*rv.Policy["Web"]) != 0 || len(*rv.Policy["API"]) != 0) {
+		log.Printf("Policies ReadResult: %v, %v", rv.Policy["Web"], rv.Policy["API"])
 		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
 			return err
 		}

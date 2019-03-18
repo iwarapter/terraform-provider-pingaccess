@@ -101,8 +101,8 @@ func Test_expandPolicyItem(t *testing.T) {
 	expanded := flatmap.Expand(testPolicyItem(), "policy.0.api").([]interface{})
 	expandPolicyItem := expandPolicyItem(expanded)
 
-	equals(t, "1334", expandPolicyItem.Id.String())
-	equals(t, "Rule", *(*expandPolicyItem).Type)
+	equals(t, "1334", expandPolicyItem[0].Id.String())
+	equals(t, "Rule", *(*expandPolicyItem[0]).Type)
 }
 
 func testPolicy() []interface{} {

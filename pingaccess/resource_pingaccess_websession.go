@@ -220,6 +220,7 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.We
 		}
 	}
 	if input.ClientCredentials != nil {
+		//TODO we should look at encrypting the value
 		pw, ok := d.GetOkExists("client_credentials.0.client_secret.0.value")
 		creds := flattenOAuthClientCredentialsView(input.ClientCredentials)
 		if ok {

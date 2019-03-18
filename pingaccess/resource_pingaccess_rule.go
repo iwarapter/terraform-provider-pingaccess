@@ -1,11 +1,9 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"reflect"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -14,14 +12,6 @@ import (
 )
 
 func resourcePingAccessRule() *schema.Resource {
-	setOfString := &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-
 	return &schema.Resource{
 		Create: resourcePingAccessRuleCreate,
 		Read:   resourcePingAccessRuleRead,
@@ -40,13 +30,13 @@ func resourcePingAccessRule() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			supportedDestinations: setOfString,
+			supportedDestinations: setOfString(),
 			configuration: &schema.Schema{
 				Type:             schema.TypeString,
 				Required:         true,
 				DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
 			},
-			"ignrored_configuration_fields": setOfString,
+			"ignrored_configuration_fields": setOfString(),
 		},
 	}
 }
@@ -97,7 +87,6 @@ func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessRuleUpdate")
 	name := d.Get(name).(string)
 	className := d.Get(className).(string)
 	supDests := expandStringList(d.Get(supportedDestinations).(*schema.Set).List())
@@ -123,21 +112,15 @@ func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(result.Id.String())
-	log.Println("[DEBUG] End - resourcePingAccessRuleUpdate")
 	return resourcePingAccessRuleReadResult(d, result)
 }
 
 func resourcePingAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
-	log.Println("[DEBUG] Start - resourcePingAccessRuleDelete")
 	svc := m.(*pingaccess.Client).Rules
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-	log.Printf("[INFO] ResourceID: %s", d.Id())
 	_, err := svc.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: d.Id()})
 	if err != nil {
 		return fmt.Errorf("Error deleting virtualhost: %s", err)
 	}
-	log.Println("[DEBUG] End - resourcePingAccessRuleDelete")
 	return nil
 }
 
