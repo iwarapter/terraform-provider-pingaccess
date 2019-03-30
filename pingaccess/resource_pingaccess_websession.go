@@ -131,17 +131,6 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 	}
 }
 
-func scopesDefaultFunc() schema.SchemaDefaultFunc {
-	return func() (interface{}, error) {
-
-		// d := schema.NewSet(stringHash, []interface{}{"profile", "email", "address", "phone"})
-		// log.Printf("%v", d)
-		// log.Printf("%v", d.List())
-		// return d.List(), nil
-		return []interface{}{"profile", "email", "address", "phone"}, nil
-	}
-}
-
 func resourcePingAccessWebSessionCreate(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pa.Client).WebSessions
 	input := pa.AddWebSessionCommandInput{
@@ -162,7 +151,10 @@ func resourcePingAccessWebSessionRead(d *schema.ResourceData, m interface{}) err
 	input := &pa.GetWebSessionCommandInput{
 		Id: d.Id(),
 	}
-	result, _, _ := svc.GetWebSessionCommand(input)
+	result, _, err := svc.GetWebSessionCommand(input)
+	if err != nil {
+		return fmt.Errorf("Error reading websession: %s", err)
+	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
