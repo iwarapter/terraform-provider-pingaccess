@@ -36,6 +36,7 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			"pingaccess_certificate":               resourcePingAccessCertificate(),
 			"pingaccess_identity_mapping":          resourcePingAccessIdentityMapping(),
 			"pingaccess_rule":                      resourcePingAccessRule(),
 			"pingaccess_ruleset":                   resourcePingAccessRuleSet(),
@@ -47,6 +48,9 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_site_authenticator":        resourcePingAccessSiteAuthenticator(),
 			"pingaccess_third_party_service":       resourcePingAccessThirdPartyService(),
 			"pingaccess_trusted_certificate_group": resourcePingAccessTrustedCertificateGroups(),
+			"pingaccess_pingfederate_runtime":      resourcePingAccessPingFederateRuntime(),
+			"pingaccess_pingfederate_oauth":        resourcePingAccessPingFederateOAuth(),
+			"pingaccess_oauth_server":              resourcePingAccessOAuthServer(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

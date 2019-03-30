@@ -144,6 +144,7 @@ resource "pingaccess_websession" "demo_session" {
 			value = "atat"
 		}
 	}
+  request_profile = false
 }
 
 resource "pingaccess_application_resource" "woot" {

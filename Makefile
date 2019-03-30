@@ -8,8 +8,23 @@ test:
 	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test ./... -v -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
 
 build:
-	@go build  -o terraform-provider-pingaccess .
+	@go build -o terraform-provider-pingaccess .
 
+release:
+	@rm -rf build/*
+	GOOS=darwin GOARCH=amd64 go build -o build/darwin_amd64/terraform-provider-pingaccess . && zip build/terraform-provider-pingaccess_darwin_amd64.zip build/darwin_amd64/terraform-provider-pingaccess
+	# GOOS=freebsd GOARCH=386 go build -o build/freebsd_386/terraform-provider-pingaccess .
+	# GOOS=freebsd GOARCH=amd64 go build -o build/freebsd_amd64/terraform-provider-pingaccess .
+	# GOOS=freebsd GOARCH=arm go build -o build/freebsd_arm/terraform-provider-pingaccess .
+	# GOOS=linux GOARCH=386 go build -o build/linux_386/terraform-provider-pingaccess .
+	GOOS=linux GOARCH=amd64 go build -o build/linux_amd64/terraform-provider-pingaccess . && zip build/terraform-provider-pingaccess_linux_amd64.zip build/linux_amd64/terraform-provider-pingaccess
+	# GOOS=linux GOARCH=arm go build -o build/linux_arm/terraform-provider-pingaccess .
+	# GOOS=openbsd GOARCH=386 go build -o build/openbsd_386/terraform-provider-pingaccess .
+	# GOOS=openbsd GOARCH=amd64 go build -o build/openbsd_amd64/terraform-provider-pingaccess .
+	# GOOS=solaris GOARCH=amd64 go build -o build/solaris_amd64/terraform-provider-pingaccess .
+	# GOOS=windows GOARCH=386 go build -o build/windows_386/terraform-provider-pingaccess .
+	GOOS=windows GOARCH=amd64 go build -o build/windows_amd64/terraform-provider-pingaccess . && zip build/terraform-provider-pingaccess_windows_amd64.zip build/windows_amd64/terraform-provider-pingaccess
+	
 deploy-local:
 	@mkdir -p ~/.terraform.d/plugins
 	@cp terraform-provider-pingaccess ~/.terraform.d/plugins/
@@ -37,10 +52,11 @@ sonar:
 		-Dsonar.projectKey=github.com.iwarapter.terraform-provider-pingaccess \
 		-Dsonar.sources=. \
 		-Dsonar.host.url=http://localhost:9001 \
-		-Dsonar.login=f06f9298d2cbb23fc445bdd66cc45cfd7fcd9376 \
+		-Dsonar.login=53187e3a93d8ac509d2f0d708b2aa3c23912583d \
 		-Dsonar.go.coverage.reportPaths=coverage.out \
 		-Dsonar.go.tests.reportPaths=report.json \
 		-Dsonar.exclusions=vendor/**/* \
 		-Dsonar.tests="." \
 		-Dsonar.test.inclusions="**/*_test.go"
 		
+.PHONY: test build deploy-local
