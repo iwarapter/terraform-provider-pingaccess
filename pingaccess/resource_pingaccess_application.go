@@ -110,9 +110,10 @@ func resourcePingAccessApplication() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			webSessionId: &schema.Schema{
+			"web_session_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "0",
 			},
 		},
 	}
@@ -201,7 +202,9 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 		}
 	}
 
-	setResourceDataInt(d, "web_session_id", rv.WebSessionId)
+	if rv.WebSessionId != nil {
+		d.Set("web_session_id", strconv.Itoa(*rv.WebSessionId))
+	}
 
 	if rv.IdentityMappingIds != nil && (*rv.IdentityMappingIds["Web"] != 0 || *rv.IdentityMappingIds["API"] != 0) {
 		if err = d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
@@ -261,7 +264,8 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 	}
 
 	if _, ok := d.GetOkExists("web_session_id"); ok {
-		application.WebSessionId = Int(d.Get("web_session_id").(int))
+		webID, _ := strconv.Atoi(d.Get("web_session_id").(string))
+		application.WebSessionId = Int(webID)
 	}
 
 	if val, ok := d.GetOkExists("identity_mapping_ids"); ok {

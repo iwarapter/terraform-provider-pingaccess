@@ -88,11 +88,19 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 		destination					= "Site"
 		site_id							= "${pingaccess_site.acc_test_site.id}"
 		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
+		web_session_id 			= "${pingaccess_websession.my_session.id}"
 
 		// identity_mapping_ids {
 		// 	web = 0
 		// 	api = 0
 		// }
+
+		policy {
+			web {
+				type = "Rule"
+				id = "${pingaccess_rule.acc_test_app_rule.id}"
+			}
+		}
 	}
 
 	resource "pingaccess_application" "acc_test_two" {
@@ -127,7 +135,60 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 			"headerClientCertificateMappings": []
 		}
 		EOF
-	}`, name, context)
+	}
+	
+	resource "pingaccess_rule" "acc_test_app_rule" {
+		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+		name = "acc_test_app_rule"
+		supported_destinations = [
+			"Site",
+			"Agent"
+		]
+		configuration = <<EOF
+		{
+			"cidrNotation": "127.0.0.1/32",
+			"negate": false,
+			"overrideIpSource": false,
+			"headers": [],
+			"headerValueLocation": "LAST",
+			"fallbackToLastHopIp": true,
+			"errorResponseCode": 403,
+			"errorResponseStatusMsg": "Forbidden",
+			"errorResponseTemplateFile": "policy.error.page.template.html",
+			"errorResponseContentType": "text/html;charset=UTF-8",
+			"rejectionHandler": null,
+			"rejectionHandlingEnabled": false
+		}
+		EOF
+	}
+
+	resource "pingaccess_pingfederate_oauth" "app_demo_pfo" {
+		client_id = "my_client"
+		subject_attribute_name = "sany"
+	}
+
+	resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
+		host = "localhost"
+		port = 9031
+	}
+
+	resource "pingaccess_websession" "my_session" {
+		name = "my-test-session"
+		audience = "all"
+		client_credentials {
+			client_id = "websession",
+			client_secret {
+				value = "secret"
+			}
+		}
+		scopes = [
+			"profile",
+			"address",
+			"email",
+			"phone"
+		]
+	}
+	`, name, context)
 }
 
 func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {

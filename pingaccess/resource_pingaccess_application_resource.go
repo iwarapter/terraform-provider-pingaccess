@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -247,7 +246,6 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	setResourceDataBool(d, "unprotected", rv.Unprotected)
 
 	if rv.Policy != nil && (len(*rv.Policy["Web"]) != 0 || len(*rv.Policy["API"]) != 0) {
-		log.Printf("Policies ReadResult: %v, %v", rv.Policy["Web"], rv.Policy["API"])
 		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
 			return err
 		}
