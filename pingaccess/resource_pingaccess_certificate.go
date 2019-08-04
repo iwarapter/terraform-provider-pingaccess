@@ -27,6 +27,47 @@ func resourcePingAccessCertificate() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"expires": &schema.Schema{
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"issuer_dn": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"md5sum": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"serial_number": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sha1sum": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"signature_algorithm": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"status": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			// "subject_alternative_names": setOfString(),
+			"subject_cn": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"subject_dn": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"valid_from": &schema.Schema{
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -95,5 +136,37 @@ func resourcePingAccessCertificateReadResult(d *schema.ResourceData, rv *pa.Trus
 	if err := d.Set("alias", rv.Alias); err != nil {
 		return err
 	}
+	if err := d.Set("expires", rv.Expires); err != nil {
+		return err
+	}
+	if err := d.Set("issuer_dn", rv.IssuerDn); err != nil {
+		return err
+	}
+	if err := d.Set("md5sum", rv.Md5sum); err != nil {
+		return err
+	}
+	if err := d.Set("serial_number", rv.SerialNumber); err != nil {
+		return err
+	}
+	if err := d.Set("sha1sum", rv.Sha1sum); err != nil {
+		return err
+	}
+	if err := d.Set("signature_algorithm", rv.SignatureAlgorithm); err != nil {
+		return err
+	}
+	if err := d.Set("status", rv.Status); err != nil {
+		return err
+	}
+	if err := d.Set("subject_dn", rv.SubjectDn); err != nil {
+		return err
+	}
+	if err := d.Set("valid_from", rv.ValidFrom); err != nil {
+		return err
+	}
+	// "subject_alternative_names": setOfString(),
+	// "subject_cn": &schema.Schema{
+	// 	Type:     schema.TypeString,
+	// 	Computed: true,
+	// },
 	return nil
 }

@@ -67,3 +67,11 @@ func validateWebStorageType(value interface{}, field string) (warns []string, er
 	}
 	return
 }
+
+func validateListLocationValue(value interface{}, field string) (warns []string, errs []error) {
+	v := value.(string)
+	if v != "FIRST" && v != "LAST" {
+		errs = append(errs, fmt.Errorf("%q must be either 'FIRST' or 'LAST' not %s", field, v))
+	}
+	return
+}

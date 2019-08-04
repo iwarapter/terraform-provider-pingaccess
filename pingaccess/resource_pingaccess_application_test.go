@@ -41,13 +41,13 @@ func TestAccPingAccessApplication(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessApplicationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bar"),
+				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bar", "API"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test", 3, &out),
 				),
 			},
 			{
-				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bart"),
+				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bart", "Web"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test", 6, &out),
 				),
@@ -60,7 +60,7 @@ func testAccCheckPingAccessApplicationDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessApplicationConfig(name string, context string) string {
+func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_site" "acc_test_site" {
 		name                         = "acc_test_site"
@@ -104,19 +104,14 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 	}
 
 	resource "pingaccess_application" "acc_test_two" {
-		access_validator_id = 1
-		application_type 		= "API"
+		application_type 		= "%s"
 		agent_id						= 0
 		name								= "api-demo"
 		context_root				= "/"
-		default_auth_type		= "API"
+		default_auth_type		= "%s"
 		destination					= "Site"
 		site_id							= "${pingaccess_site.acc_test_site.id}"
 		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
-
-		identity_mapping_ids {
-			api = "${pingaccess_identity_mapping.idm_foo.id}"
-		}
 	}
 	
 	resource "pingaccess_identity_mapping" "idm_foo" {
@@ -188,7 +183,7 @@ func testAccPingAccessApplicationConfig(name string, context string) string {
 			"phone"
 		]
 	}
-	`, name, context)
+	`, name, context, appType, appType)
 }
 
 func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {

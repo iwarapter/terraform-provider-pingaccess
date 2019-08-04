@@ -439,3 +439,55 @@ func Test_validateWebStorageType(t *testing.T) {
 		})
 	}
 }
+
+func Test_validateListLocationValue(t *testing.T) {
+	type args struct {
+		value interface{}
+		field string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantWarns []string
+		wantErrs  []error
+	}{
+		{
+			name: "FIRST passes",
+			args: args{
+				value: "FIRST",
+				field: "list_value_location",
+			},
+			wantWarns: nil,
+			wantErrs:  nil,
+		},
+		{
+			name: "LAST passes",
+			args: args{
+				value: "LAST",
+				field: "list_value_location",
+			},
+			wantWarns: nil,
+			wantErrs:  nil,
+		},
+		{
+			name: "junk does not pass",
+			args: args{
+				value: "other",
+				field: "list_value_location",
+			},
+			wantWarns: nil,
+			wantErrs:  []error{fmt.Errorf("%q must be either 'FIRST' or 'LAST' not %s", "list_value_location", "other")},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotWarns, gotErrs := validateListLocationValue(tt.args.value, tt.args.field)
+			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
+				t.Errorf("validateListLocationValue() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+			}
+			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
+				t.Errorf("validateListLocationValue() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			}
+		})
+	}
+}

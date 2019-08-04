@@ -1,0 +1,24 @@
+site_name: Terraform PingAccess Provider
+nav:
+    - PingAccess Provider: index.md
+    - Data Sources:
+      - pingaccess_certificate: data_sources/pingaccess_certificate.md
+    - Supported Resources:
+      - pingaccess_application: resources/pingaccess_application.md
+      - pingaccess_application_resource: resources/pingaccess_application_resource.md
+      - pingaccess_certificate: resources/pingaccess_certificate.md
+      - pingaccess_identity_mapping: resources/pingaccess_identity_mapping.md
+      - pingaccess_oauth_server: resources/pingaccess_oauth_server.md
+      - pingaccess_rule: resources/pingaccess_rule.md
+      - pingaccess_ruleset: resources/pingaccess_ruleset.md
+      - pingaccess_site: resources/pingaccess_site.md
+      - pingaccess_site_authenticator: resources/pingaccess_site_authenticator.md
+      - pingaccess_third_party_service: resources/pingaccess_third_party_service.md
+      - pingaccess_trusted_certificate_group: resources/pingaccess_trusted_certificate_group.md
+      - pingaccess_virtualhost: resources/pingaccess_virtualhost.md
+      - pingaccess_websession: resources/pingaccess_websession.md
+theme: readthedocs
+markdown_extensions:
+    - admonition
+    - markdown_include.include:
+        base_path: docs

@@ -22,6 +22,16 @@ func setOfString() *schema.Schema {
 	}
 }
 
+func requiredListOfString() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Required: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
 func applicationPolicySchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,

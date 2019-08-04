@@ -11,3 +11,4 @@ coverage.out
 report.json
 pingaccess/terraform.log
 pingaccess.lic
+site/

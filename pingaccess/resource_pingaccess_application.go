@@ -32,6 +32,7 @@ func resourcePingAccessApplication() *schema.Resource {
 			"application_type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"case_sensitive_path": &schema.Schema{
 				Type:     schema.TypeBool,

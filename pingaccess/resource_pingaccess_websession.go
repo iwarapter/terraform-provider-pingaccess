@@ -88,9 +88,10 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 			ValidateFunc: validateRequestPreservationType,
 		},
 		"request_profile": &schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:       schema.TypeBool,
+			Optional:   true,
+			Default:    true,
+			Deprecated: "DEPRECATED - to be removed in a future release; please use 'scopes' instead",
 		},
 		"scopes": &schema.Schema{
 			Type:     schema.TypeSet,

@@ -42,11 +42,13 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 		},
 		maxConnections: &schema.Schema{
 			Type:     schema.TypeInt,
-			Required: true,
+			Optional: true,
+			Default:  -1,
 		},
 		maxWebSocketConnections: &schema.Schema{
 			Type:     schema.TypeInt,
-			Required: true,
+			Optional: true,
+			Default:  -1,
 		},
 		name: &schema.Schema{
 			Type:     schema.TypeString,

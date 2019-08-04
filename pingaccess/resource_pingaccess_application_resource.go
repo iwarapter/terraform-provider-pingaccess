@@ -75,8 +75,9 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 			},
 		},
 		pathPrefixes: &schema.Schema{
-			Type:     schema.TypeSet,
-			Required: true,
+			Type:       schema.TypeSet,
+			Required:   true,
+			Deprecated: "DEPRECATED - to be removed in a future release; please use 'path_patterns' instead",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
