@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>pingaccess_site_authenticator - Terraform PingAccess Provider</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "pingaccess_site_authenticator";
+    var mkdocs_page_input_path = "resources/pingaccess_site_authenticator.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Terraform PingAccess Provider</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">PingAccess Provider</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Data Sources</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../data_sources/pingaccess_certificate/">pingaccess_certificate</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Supported Resources</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application/">pingaccess_application</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application_resource/">pingaccess_application_resource</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_certificate/">pingaccess_certificate</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_identity_mapping/">pingaccess_identity_mapping</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_oauth_server/">pingaccess_oauth_server</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_rule/">pingaccess_rule</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_ruleset/">pingaccess_ruleset</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_site/">pingaccess_site</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="./">pingaccess_site_authenticator</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#example-usage">Example Usage</a></li>
+    
+
+    <li class="toctree-l3"><a href="#argument-attributes">Argument Attributes</a></li>
+    
+
+    <li class="toctree-l3"><a href="#attributes-reference">Attributes Reference</a></li>
+    
+
+    <li class="toctree-l3"><a href="#import">Import</a></li>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_third_party_service/">pingaccess_third_party_service</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_trusted_certificate_group/">pingaccess_trusted_certificate_group</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_virtualhost/">pingaccess_virtualhost</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_websession/">pingaccess_websession</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Terraform PingAccess Provider</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Supported Resources &raquo;</li>
+        
+      
+    
+    <li>pingaccess_site_authenticator</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>Provides a site authenticator.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This resource will store any credentials in the backend state file, please ensure you use an appropriate backend with the relevent encryption/access controls etc for this.</p>
+</div>
+<h2 id="example-usage">Example Usage</h2>
+<pre><code class="terraform">resource &quot;pingaccess_site_authenticator&quot; &quot;demo_site_authenticator&quot; {
+  name       = &quot;demo-site-authenticator&quot;
+  class_name = &quot;com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator&quot;
+
+  configuration = &lt;&lt;EOF
+    {
+      &quot;username&quot;: &quot;cheese&quot;,
+      &quot;password&quot;: {
+        &quot;value&quot;: &quot;top_5ecr37&quot;
+      }
+    }
+    EOF
+
+  hidden_fields = [&quot;password&quot;]
+}
+</code></pre>
+
+<h2 id="argument-attributes">Argument Attributes</h2>
+<p>The following arguments are supported:</p>
+<ul>
+<li>
+<p><a href="#class_name"><code>class_name</code></a> - (Required) The site authenticator's class name.</p>
+</li>
+<li>
+<p><a href="#configuration"><code>configuration</code></a> - (Required) The site authenticator's configuration data.</p>
+</li>
+<li>
+<p><a href="#name"><code>name</code></a> - (Required) The site authenticator's name.</p>
+</li>
+<li>
+<p><a href="#hidden_fields"><code>hidden_fields</code></a> - (Optional) This is a configuration field, to help manage credentials within the resource. As the PingAccess API doesn't return the password used and the encryptedValue field changes on every call we need to store the password field and mask it so we can correctly identify when it has changed (according to the resource not the actual API).</p>
+</li>
+</ul>
+<h2 id="attributes-reference">Attributes Reference</h2>
+<p>In addition to all arguments above, the following attributes are exported:</p>
+<ul>
+<li><a href="#id"><code>id</code></a> - The sites authenticator's ID.</li>
+</ul>
+<h2 id="import">Import</h2>
+<p>PingAccess site authenticator can be imported using the id, e.g.</p>
+<pre><code>$ terraform import pingaccess_site_authenticator.demo_site_authenticator 123
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../pingaccess_third_party_service/" class="btn btn-neutral float-right" title="pingaccess_third_party_service">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../pingaccess_site/" class="btn btn-neutral" title="pingaccess_site"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../pingaccess_site/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../pingaccess_third_party_service/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+
+</body>
+</html>

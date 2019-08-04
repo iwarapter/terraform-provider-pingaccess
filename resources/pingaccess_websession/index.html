@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>pingaccess_websession - Terraform PingAccess Provider</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "pingaccess_websession";
+    var mkdocs_page_input_path = "resources/pingaccess_websession.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Terraform PingAccess Provider</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">PingAccess Provider</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Data Sources</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../data_sources/pingaccess_certificate/">pingaccess_certificate</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Supported Resources</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application/">pingaccess_application</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application_resource/">pingaccess_application_resource</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_certificate/">pingaccess_certificate</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_identity_mapping/">pingaccess_identity_mapping</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_oauth_server/">pingaccess_oauth_server</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_rule/">pingaccess_rule</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_ruleset/">pingaccess_ruleset</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_site/">pingaccess_site</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_site_authenticator/">pingaccess_site_authenticator</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_third_party_service/">pingaccess_third_party_service</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_trusted_certificate_group/">pingaccess_trusted_certificate_group</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_virtualhost/">pingaccess_virtualhost</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="./">pingaccess_websession</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#example-usage">Example Usage</a></li>
+    
+
+    <li class="toctree-l3"><a href="#argument-attributes">Argument Attributes</a></li>
+    
+
+    <li class="toctree-l3"><a href="#attributes-reference">Attributes Reference</a></li>
+    
+
+    <li class="toctree-l3"><a href="#import">Import</a></li>
+    
+
+    </ul>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Terraform PingAccess Provider</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Supported Resources &raquo;</li>
+        
+      
+    
+    <li>pingaccess_websession</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>Provides a web session.</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre><code class="terraform">resource &quot;pingaccess_websession&quot; &quot;demo_session&quot; {
+  name     = &quot;demo-session&quot;
+  audience = &quot;example&quot;
+
+  client_credentials {
+    client_id = &quot;websession&quot;
+
+    client_secret {
+      value = &quot;changeme&quot;
+    }
+  }
+
+  scopes = [
+    &quot;profile&quot;,
+    &quot;address&quot;,
+    &quot;email&quot;,
+    &quot;phone&quot;,
+  ]
+}
+</code></pre>
+
+<h2 id="argument-attributes">Argument Attributes</h2>
+<p>The following arguments are supported:</p>
+<ul>
+<li>
+<p><a href="#audience"><code>audience</code></a> -  Enter a unique identifier between 1 and 32 characters that defines who the PA Token is applicable to.</p>
+</li>
+<li>
+<p><a href="#cache_user_attributes"><code>cache_user_attributes</code></a> -  Specify if PingAccess should cache user attribute information for use in policy decisions. When disabled, this data is encoded and stored in the session cookie.</p>
+</li>
+<li>
+<p><a href="#client_credentials"><code>client_credentials</code></a> - Specify the client credentials.</p>
+</li>
+<li>
+<p><a href="#cookie_domain"><code>cookie_domain</code></a> -  The domain where the cookie is stored--for example, corp.yourcompany.com.</p>
+</li>
+<li>
+<p><a href="#cookie_type"><code>cookie_type</code></a> - ['Encrypted' or 'Signed']:  Specify an Encrypted JWT or a Signed JWT web session cookie.</p>
+</li>
+<li>
+<p><a href="#enable_refresh_user"><code>enable_refresh_user</code></a> -  Specify if you want to have PingAccess periodically refresh user data from PingFederate for use in policy decisions.</p>
+</li>
+<li>
+<p><a href="#http_only_cookie"><code>http_only_cookie</code></a> -  Enable the HttpOnly flag on cookies that contain the PA Token.</p>
+</li>
+<li>
+<p><a href="#idle_timeout_in_minutes"><code>idle_timeout_in_minutes</code></a> -  The length of time you want the PingAccess Token to remain active when no activity is detected.</p>
+</li>
+<li>
+<p><a href="#name"><code>name</code></a> -  The name of the web session.</p>
+</li>
+<li>
+<p><a href="#oidc_login_type"><code>oidc_login_type</code></a> - ['Code' or 'POST' or 'x_post']:  The web session token type.</p>
+</li>
+<li>
+<p><a href="#pfsession_state_cache_in_seconds"><code>pfsession_state_cache_in_seconds</code></a> -  Specify the number of seconds to cache PingFederate Session State information.</p>
+</li>
+<li>
+<p><a href="#refresh_user_info_claims_interval"><code>refresh_user_info_claims_interval</code></a> -  Specify the maximum number of seconds to cache user attribute information when the Refresh User is enabled.</p>
+</li>
+<li>
+<p><a href="#request_preservation_type"><code>request_preservation_type</code></a> - ['None' or 'POST' or 'All']:  Specify the types of request data to be preserved if the user is redirected to an authentication page when submitting information to a protected resource.</p>
+</li>
+<li>
+<p><a href="#request_profile"><code>request_profile</code></a> - Specifies whether the default scopes ('profile', 'email', 'address', and 'phone') should be specified in the access request. (DEPRECATED - to be removed in a future release; please use 'scopes' instead)</p>
+</li>
+<li>
+<p><a href="#scopes"><code>scopes</code></a> - The list of scopes to be specified in the access request. If not specified, the default scopes ('profile', 'email', 'address', and 'phone') will be used.</p>
+</li>
+<li>
+<p><a href="#secure_cookie"><code>secure_cookie</code></a> -  Specify whether the PingAccess Cookie must be sent using only HTTPS connections.</p>
+</li>
+<li>
+<p><a href="#send_requested_url_to_provider"><code>send_requested_url_to_provider</code></a> -  Specify if you want to send the requested URL as part of the authentication request to the OpenID Connect Provider.</p>
+</li>
+<li>
+<p><a href="#session_timeout_in_minutes"><code>session_timeout_in_minutes</code></a> -  The length of time you want the PA Token to remain active. Once the PA Token expires, an authenticated user must re-authenticate.</p>
+</li>
+<li>
+<p><a href="#validate_session_is_alive"><code>validate_session_is_alive</code></a> -  Specify if PingAccess should validate sessions with the configured PingFederate instance during request processing.</p>
+</li>
+<li>
+<p><a href="#web_storage_type"><code>web_storage_type</code></a> - ['SessionStorage' or 'LocalStorage']:  Specify the type of web storage to use for request preservation data. Default is SessionStorage.</p>
+</li>
+</ul>
+<h2 id="attributes-reference">Attributes Reference</h2>
+<p>In addition to all arguments above, the following attributes are exported:</p>
+<ul>
+<li><a href="#id"><code>id</code></a> - The web session's ID.</li>
+</ul>
+<h2 id="import">Import</h2>
+<p>PingAccess web session can be imported using the id, e.g.</p>
+<pre><code class="bash">$ terraform import pingaccess_websession.demo_websession 123
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../pingaccess_virtualhost/" class="btn btn-neutral" title="pingaccess_virtualhost"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../pingaccess_virtualhost/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+
+</body>
+</html>

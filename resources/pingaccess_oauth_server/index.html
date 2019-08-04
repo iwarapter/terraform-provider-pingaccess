@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>pingaccess_oauth_server - Terraform PingAccess Provider</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "pingaccess_oauth_server";
+    var mkdocs_page_input_path = "resources/pingaccess_oauth_server.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Terraform PingAccess Provider</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">PingAccess Provider</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Data Sources</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../data_sources/pingaccess_certificate/">pingaccess_certificate</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Supported Resources</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application/">pingaccess_application</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application_resource/">pingaccess_application_resource</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_certificate/">pingaccess_certificate</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_identity_mapping/">pingaccess_identity_mapping</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="./">pingaccess_oauth_server</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#example-usage">Example Usage</a></li>
+    
+
+    <li class="toctree-l3"><a href="#argument-attributes">Argument Attributes</a></li>
+    
+
+    <li class="toctree-l3"><a href="#attributes-reference">Attributes Reference</a></li>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_rule/">pingaccess_rule</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_ruleset/">pingaccess_ruleset</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_site/">pingaccess_site</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_site_authenticator/">pingaccess_site_authenticator</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_third_party_service/">pingaccess_third_party_service</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_trusted_certificate_group/">pingaccess_trusted_certificate_group</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_virtualhost/">pingaccess_virtualhost</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_websession/">pingaccess_websession</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Terraform PingAccess Provider</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Supported Resources &raquo;</li>
+        
+      
+    
+    <li>pingaccess_oauth_server</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>Provides an Authorization Server configuration.</p>
+<h3 id="example-usage">Example Usage</h3>
+<pre><code class="terraform">resource &quot;pingaccess_oauth_server&quot; &quot;demo_oauth_server&quot; {
+  targets                      = [&quot;localhost:9031&quot;]
+  subject_attribute_name       = &quot;san&quot;
+  trusted_certificate_group_id = 1
+  introspection_endpoint       = &quot;https://localhost:443/introspection&quot;
+
+  client_credentials {
+    client_id = &quot;oauth&quot;
+
+    client_secret {
+      value = &quot;top_secret&quot;
+    }
+  }
+
+  secure = true
+}
+</code></pre>
+
+<h3 id="argument-attributes">Argument Attributes</h3>
+<p>The following arguments are supported:</p>
+<ul>
+<li>
+<p><a href="#audit_level"><code>audit_level</code></a> - Enable to record requests to third-party OAuth 2.0 Authorization Server to the audit store.</p>
+</li>
+<li>
+<p><a href="#cache_tokens"><code>cache_tokens</code></a> - Enable to retain token details for subsequent requests.</p>
+</li>
+<li>
+<p><a href="#client_credentials"><code>client_credentials</code></a> - Specify the client credentials.</p>
+</li>
+<li>
+<p><a href="#description"><code>description</code></a> - The description of the third-party OAuth 2.0 Authorization Server.</p>
+</li>
+<li>
+<p><a href="#introspection_endpoint"><code>introspection_endpoint</code></a> - The third-party OAuth 2.0 Authorization Server's token introspection endpoint.</p>
+</li>
+<li>
+<p><a href="#secure"><code>secure</code></a> - Enable if third-party OAuth 2.0 Authorization Server is expecting HTTPS connections.</p>
+</li>
+<li>
+<p><a href="#send_audience"><code>send_audience</code></a> - Enable to send the URI the user requested as the 'aud' OAuth parameter for PingAccess to the OAuth 2.0 Authorization server.</p>
+</li>
+<li>
+<p><a href="#subject_attribute_name"><code>subject_attribute_name</code></a> - The attribute you want to use from the OAuth access token as the subject for auditing purposes.</p>
+</li>
+<li>
+<p><a href="#targets"><code>targets</code></a> - One or more server hostname:port pairs used to access third-party OAuth 2.0 Authorization Server.</p>
+</li>
+<li>
+<p><a href="#token_time_to_live_seconds"><code>token_time_to_live_seconds</code></a> - Defines the number of seconds to cache the access token. -1 means no limit. This value should be less than the PingFederate Token Lifetime.</p>
+</li>
+<li>
+<p><a href="#trusted_certificate_group_id"><code>trusted_certificate_group_id</code></a> - The group of certificates to use when authenticating to third-party OAuth 2.0 Authorization Server.</p>
+</li>
+<li>
+<p><a href="#use_proxy"><code>use_proxy</code></a> - True if a proxy should be used for HTTP or HTTPS requests.</p>
+</li>
+</ul>
+<h3 id="attributes-reference">Attributes Reference</h3>
+<p>No additional attributes are provided.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../pingaccess_rule/" class="btn btn-neutral float-right" title="pingaccess_rule">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../pingaccess_identity_mapping/" class="btn btn-neutral" title="pingaccess_identity_mapping"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../pingaccess_identity_mapping/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../pingaccess_rule/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+
+</body>
+</html>
