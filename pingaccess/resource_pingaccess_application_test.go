@@ -35,7 +35,7 @@ func testSweepApplication(r string) error {
 func TestAccPingAccessApplication(t *testing.T) {
 	var out pingaccess.ApplicationView
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessApplicationDestroy,
@@ -168,10 +168,11 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_websession" "my_session" {
+		depends_on = [pingaccess_pingfederate_runtime.app_demo_pfr, pingaccess_pingfederate_oauth.app_demo_pfo]
 		name = "my-test-session"
 		audience = "all"
 		client_credentials {
-			client_id = "websession",
+			client_id = "websession"
 			client_secret {
 				value = "secret"
 			}

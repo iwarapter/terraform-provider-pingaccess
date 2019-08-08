@@ -63,13 +63,7 @@ func resourcePingAccessApplication() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
-				MinItems: 1,
-				// DefaultFunc: func() (interface{}, error) {
-				// 	m := make(map[string]interface{})
-				// 	m["api"] = "0"
-				// 	m["web"] = "0"
-				// 	return []interface{}{m}, nil
-				// },
+				MinItems: 0,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -270,15 +264,17 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 	}
 
 	if val, ok := d.GetOkExists("identity_mapping_ids"); ok {
-		application.IdentityMappingIds = make(map[string]*int)
-		idMapping := val.([]interface{})[0].(map[string]interface{})
-		if idMapping["web"] != nil {
-			id, _ := strconv.Atoi(idMapping["web"].(string))
-			application.IdentityMappingIds["Web"] = Int(id)
-		}
-		if idMapping["api"] != nil {
-			id, _ := strconv.Atoi(idMapping["api"].(string))
-			application.IdentityMappingIds["API"] = Int(id)
+		if len(val.([]interface{})) > 0 {
+			application.IdentityMappingIds = make(map[string]*int)
+			idMapping := val.([]interface{})[0].(map[string]interface{})
+			if idMapping["web"] != nil {
+				id, _ := strconv.Atoi(idMapping["web"].(string))
+				application.IdentityMappingIds["Web"] = Int(id)
+			}
+			if idMapping["api"] != nil {
+				id, _ := strconv.Atoi(idMapping["api"].(string))
+				application.IdentityMappingIds["API"] = Int(id)
+			}
 		}
 	}
 

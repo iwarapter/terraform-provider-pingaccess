@@ -66,7 +66,7 @@ func testAccPingAccessWebSessionConfig(audience, password string) string {
 		name = "acc-test-demo-session"
 		audience = "%s"
 		client_credentials {
-			client_id = "websession",
+			client_id = "websession"
 			client_secret {
 				value = "%s"
 			}
