@@ -14,8 +14,9 @@ go:
 addons:
   sonarcloud:
     organization: "iwarapter-github"
+
 script:
   - go mod vendor
   - go mod verify
   - make test-and-report
-  - make sonar
+  - sonar-scanner
