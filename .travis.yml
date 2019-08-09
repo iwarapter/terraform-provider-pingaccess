@@ -1,0 +1,22 @@
+dist: trusty
+
+git:
+  depth: false
+
+services:
+  - docker
+
+language: go
+
+go:
+- 1.12.x
+
+addons:
+  sonarcloud:
+    organization: "iwarapter-github"
+
+script:
+  - go mod vendor
+  - go mod verify
+  - make test-and-report
+  - sonar-scanner
