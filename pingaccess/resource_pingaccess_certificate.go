@@ -17,57 +17,61 @@ func resourcePingAccessCertificate() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"alias": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"file_data": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"expires": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"issuer_dn": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"md5sum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"serial_number": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"sha1sum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"signature_algorithm": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"status": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			// "subject_alternative_names": setOfString(),
-			"subject_cn": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"subject_dn": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"valid_from": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
+		Schema: resourcePingAccessCertificateSchema(),
+	}
+}
+
+func resourcePingAccessCertificateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"alias": &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+		},
+		"file_data": &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"expires": &schema.Schema{
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"issuer_dn": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"md5sum": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"serial_number": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"sha1sum": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"signature_algorithm": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"status": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		// "subject_alternative_names": setOfString(),
+		"subject_cn": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"subject_dn": &schema.Schema{
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"valid_from": &schema.Schema{
+			Type:     schema.TypeInt,
+			Computed: true,
 		},
 	}
 }

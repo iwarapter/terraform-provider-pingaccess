@@ -8,55 +8,12 @@ import (
 )
 
 func dataSourcePingAccessCertificate() *schema.Resource {
+	sch := resourcePingAccessCertificateSchema()
+	//The normal certificate schema has a file data passed to it, this isnt required for the data resource
+	delete(sch, "file_data")
 	return &schema.Resource{
-		Read: dataSourcePingAccessCertificateRead,
-		Schema: map[string]*schema.Schema{
-			"alias": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"expires": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"issuer_dn": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"md5sum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"serial_number": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"sha1sum": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"signature_algorithm": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"status": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			// "subject_alternative_names": setOfString(),
-			"subject_cn": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"subject_dn": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"valid_from": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-		},
+		Read:   dataSourcePingAccessCertificateRead,
+		Schema: sch,
 	}
 }
 
