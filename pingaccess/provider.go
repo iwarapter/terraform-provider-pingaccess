@@ -39,6 +39,7 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_certificate": dataSourcePingAccessCertificate(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			"pingaccess_access_token_validator":          resourcePingAccessAccessTokenValidator(),
 			"pingaccess_certificate":                     resourcePingAccessCertificate(),
 			"pingaccess_identity_mapping":                resourcePingAccessIdentityMapping(),
 			"pingaccess_rule":                            resourcePingAccessRule(),

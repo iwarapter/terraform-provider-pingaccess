@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/go-plugin v1.0.1-0.20190610192547-a1bc61569a26 // indirect
 	github.com/hashicorp/hcl2 v0.0.0-20190725010614-0c3fe388e450 // indirect
 	github.com/hashicorp/terraform v0.12.0
-	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190808202129-cdcdd18aa216
+	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190811210817-f1c631653a4d
 	github.com/ory/dockertest v3.3.4+incompatible
 	github.com/terraform-providers/terraform-provider-template v1.0.0
 	github.com/tidwall/gjson v1.3.2

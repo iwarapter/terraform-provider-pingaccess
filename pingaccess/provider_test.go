@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 
 		// pulls an image, creates a container based on it and runs it
 		resource, err := pool.RunWithOptions(options)
-		resource.Expire(60)
+		resource.Expire(90)
 		if err != nil {
 			log.Fatalf("Could not start resource: %s", err)
 		}

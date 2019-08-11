@@ -215,8 +215,8 @@ github.com/hashicorp/vault v0.10.4/go.mod h1:KfSyffbKxoVyspOdlaGVjIuwLobi07qD1bA
 github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb h1:b5rjCoWHc7eqmAS4/qyk21ZsHyb6Mxv/jykxvNTkU4M=
 github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190808202129-cdcdd18aa216 h1:5Dlqt31csjIT9jdgHAdpmYIh6Lng4aeaRTdRluYe7yk=
-github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190808202129-cdcdd18aa216/go.mod h1:5FnKTPlitpx5z7Q/itbtKkgCEOBXXqhGOJqmryBZrZk=
+github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190811210817-f1c631653a4d h1:ZfBrgMOVaNxu9P/xSH0QfCplY90+yrB2J3JDjvlV5NY=
+github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190811210817-f1c631653a4d/go.mod h1:5FnKTPlitpx5z7Q/itbtKkgCEOBXXqhGOJqmryBZrZk=
 github.com/jellevandenhooff/dkim v0.0.0-20150330215556-f50fe3d243e1/go.mod h1:E0B/fFc00Y+Rasa88328GlI/XbtyysCtTHZS8h7IrBU=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
