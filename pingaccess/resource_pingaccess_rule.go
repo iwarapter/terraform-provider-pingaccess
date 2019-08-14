@@ -119,7 +119,7 @@ func resourcePingAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pingaccess.Client).Rules
 	_, err := svc.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting virtualhost: %s", err)
+		return fmt.Errorf("Error deleting rule: %s", err)
 	}
 	return nil
 }

@@ -1,9 +1,7 @@
 package pingaccess
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -69,8 +67,6 @@ func resourcePingAccessRuleSetCreate(d *schema.ResourceData, m interface{}) erro
 			SuccessCriteria: String(successCriteria),
 		},
 	}
-	b, _ := json.Marshal(input.Body)
-	log.Printf("[INFO] RuleSet body: %s", b)
 
 	svc := m.(*pingaccess.Client).Rulesets
 
@@ -79,15 +75,11 @@ func resourcePingAccessRuleSetCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Error creating RuleSet: %s", err)
 	}
 
-	b, _ = json.Marshal(result)
-	log.Printf("[INFO] RuleSetResponse body: %s", b)
-
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
 
 func resourcePingAccessRuleSetRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessRuleSetRead")
 	svc := m.(*pingaccess.Client).Rulesets
 	result, _, err := svc.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
 		Id: d.Id(),
@@ -133,16 +125,12 @@ func resourcePingAccessRuleSetUpdate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourcePingAccessRuleSetDelete(d *schema.ResourceData, m interface{}) error {
-	// log.Println("[DEBUG] Start - resourcePingAccessRuleSetDelete")
 	svc := m.(*pingaccess.Client).Rulesets
-	// http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	// log.Printf("[INFO] ResourceID: %s", d.Id())
 	_, err := svc.DeleteRuleSetCommand(&pingaccess.DeleteRuleSetCommandInput{Id: d.Id()})
 	if err != nil {
 		return fmt.Errorf("Error deleting RuleSet: %s", err)
 	}
-	// log.Println("[DEBUG] End - resourcePingAccessRuleSetDelete")
 	return nil
 }
 
