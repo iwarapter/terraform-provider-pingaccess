@@ -288,3 +288,33 @@ func expandIntList(configured []interface{}) []*int {
 	}
 	return vs
 }
+
+func flattenChainCertificates(in []*pa.ChainCertificateView) *schema.Set {
+	m := []interface{}{}
+	for _, v := range in {
+		s := make(map[string]interface{})
+		s["alias"] = *v.Alias
+		s["expires"] = v.Expires
+		s["issuer_dn"] = *v.IssuerDn
+		s["md5sum"] = *v.Md5sum
+		s["serial_number"] = *v.SerialNumber
+		s["sha1sum"] = *v.Sha1sum
+		s["signature_algorithm"] = *v.SignatureAlgorithm
+		s["status"] = *v.Status
+		s["subject_cn"] = *v.SubjectCn
+		s["subject_dn"] = *v.SubjectDn
+		s["valid_from"] = v.ValidFrom
+		m = append(m, s)
+	}
+	return schema.NewSet(configFieldHash, m)
+}
+
+func configFieldHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	buf.WriteString(m["alias"].(string))
+	if d, ok := m["md5sum"]; ok && d.(string) != "" {
+		buf.WriteString(fmt.Sprintf("%s-", d.(string)))
+	}
+	return hashcode.String(buf.String())
+}

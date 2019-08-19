@@ -12,3 +12,4 @@ report.json
 pingaccess/terraform.log
 pingaccess.lic
 site/
+pingaccess/test_cases/ca/*
