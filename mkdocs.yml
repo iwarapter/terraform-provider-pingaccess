@@ -3,6 +3,7 @@ nav:
     - PingAccess Provider: index.md
     - Data Sources:
       - pingaccess_certificate: data_sources/pingaccess_certificate.md
+      - pingaccess_trusted_certificate_group: data_sources/pingaccess_trusted_certificate_group.md
     - Supported Resources:
       - pingaccess_access_token_validator: resources/pingaccess_access_token_validator.md
       - pingaccess_application: resources/pingaccess_application.md

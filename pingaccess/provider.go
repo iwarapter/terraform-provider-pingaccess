@@ -37,12 +37,14 @@ func Provider() terraform.ResourceProvider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"pingaccess_certificate":               dataSourcePingAccessCertificate(),
+			"pingaccess_keypair":                   dataSourcePingAccessKeyPair(),
 			"pingaccess_trusted_certificate_group": dataSourcePingAccessTrustedCertificateGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"pingaccess_access_token_validator":          resourcePingAccessAccessTokenValidator(),
 			"pingaccess_certificate":                     resourcePingAccessCertificate(),
 			"pingaccess_identity_mapping":                resourcePingAccessIdentityMapping(),
+			"pingaccess_keypair":                         resourcePingAccessKeyPair(),
 			"pingaccess_rule":                            resourcePingAccessRule(),
 			"pingaccess_ruleset":                         resourcePingAccessRuleSet(),
 			"pingaccess_virtualhost":                     resourcePingAccessVirtualHost(),
