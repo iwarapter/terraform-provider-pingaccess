@@ -27,6 +27,7 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("Could not connect to docker: %s", err)
 		}
+
 		options := &dockertest.RunOptions{
 			Repository: "pingidentity/pingaccess",
 			Tag:        "5.2.2-edge",
