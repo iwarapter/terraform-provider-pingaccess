@@ -183,7 +183,7 @@ func Test_validateAudience(t *testing.T) {
 			wantErrs:  nil,
 		},
 		{
-			name: "Empty value failes",
+			name: "Empty value fails",
 			args: args{
 				value: "",
 				field: "audience",
@@ -192,7 +192,7 @@ func Test_validateAudience(t *testing.T) {
 			wantErrs:  []error{fmt.Errorf("%q must be between 1 and 32 characters not %s", "audience", "0")},
 		},
 		{
-			name: "Very long value failes",
+			name: "Very long value fails",
 			args: args{
 				value: "12345678901234567890123456789012",
 				field: "audience",
@@ -487,6 +487,58 @@ func Test_validateListLocationValue(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
 				t.Errorf("validateListLocationValue() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			}
+		})
+	}
+}
+
+func Test_validateClassNameValue(t *testing.T) {
+	type args struct {
+		value interface{}
+		field string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantWarns []string
+		wantErrs  []error
+	}{
+		{
+			name: "CookieBasedClassName passes",
+			args: args{
+				value: cookieBasedClassName,
+				field: "className",
+			},
+			wantWarns: nil,
+			wantErrs:  nil,
+		},
+		{
+			name: "HeaderBasedClassName passes",
+			args: args{
+				value: headerBasedClassName,
+				field: "className",
+			},
+			wantWarns: nil,
+			wantErrs:  nil,
+		},
+		{
+			name: "junk does not pass",
+			args: args{
+				value: "other",
+				field: "className",
+			},
+			wantWarns: nil,
+			wantErrs:  []error{fmt.Errorf("%[1]q must be either %[2]s or %[3]s not %[4]s", "className", cookieBasedClassName, headerBasedClassName, "other")},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotWarns, gotErrs := validateClassNameValue(tt.args.value, tt.args.field)
+			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
+				t.Errorf("validateClassNameValue() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+			}
+			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
+				t.Errorf("validateClassNameValue() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
 			}
 		})
 	}

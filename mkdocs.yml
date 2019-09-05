@@ -10,6 +10,7 @@ nav:
       - pingaccess_application_resource: resources/pingaccess_application_resource.md
       - pingaccess_certificate: resources/pingaccess_certificate.md
       - pingaccess_identity_mapping: resources/pingaccess_identity_mapping.md
+      - pingaccess_load_balancing_strategy: resources/pingaccess_load_balancing_strategy.md
       - pingaccess_oauth_server: resources/pingaccess_oauth_server.md
       - pingaccess_rule: resources/pingaccess_rule.md
       - pingaccess_ruleset: resources/pingaccess_ruleset.md
