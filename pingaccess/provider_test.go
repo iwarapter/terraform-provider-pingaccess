@@ -27,12 +27,9 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("Could not connect to docker: %s", err)
 		}
-		dir, _ := os.Getwd()
-
 		options := &dockertest.RunOptions{
 			Repository: "pingidentity/pingaccess",
 			Tag:        "5.2.2-edge",
-			Mounts:     []string{dir + "/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic"},
 		}
 
 		// pulls an image, creates a container based on it and runs it
