@@ -16,7 +16,7 @@ addons:
     organization: "iwarapter-github"
 
 script:
-  - go mod vendor
-  - go mod verify
-  - make test-and-report
-  - sonar-scanner
+  - go mod vendor || travis_terminate 1;
+  - go mod verify || travis_terminate 1;
+  - make test-and-report || travis_terminate 1;
+  - sonar-scanner || travis_terminate 1;

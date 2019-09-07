@@ -76,8 +76,8 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		},
 		pathPrefixes: &schema.Schema{
 			Type:       schema.TypeSet,
-			Required:   true,
-			Deprecated: "DEPRECATED - to be removed in a future release; please use 'path_patterns' instead",
+			Optional:   true,
+			Deprecated: "To be removed in a future release; please use 'path_patterns' instead",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -309,6 +309,7 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.R
 
 	if val, ok := d.GetOkExists("policy"); ok {
 		resource.Policy = expandPolicy(val.([]interface{}))
+
 	}
 
 	return resource
