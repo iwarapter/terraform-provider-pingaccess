@@ -149,6 +149,8 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
 		"/*"
   ]
 
+	policy {}
+
   audit_level = "ON"
   anonymous = false
   enabled = true

@@ -1,4 +1,6 @@
 # Makefile
+VERSION ?= local
+NAME=terraform-provider-pingaccess_v${VERSION}
 
 sweep:
 	@TF_ACC=1 go test ./... -v -sweep=true
@@ -8,33 +10,33 @@ pa-init:
 
 test:
 	@rm -f pingaccess/terraform.log
-	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test ./... -v
+	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v
 
 test-and-report:
 	@rm -f pingaccess/terraform.log coverage.out report.json
-	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test ./... -v -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
+	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
 
 build:
-	@go build -o terraform-provider-pingaccess .
+	@go build -mod=vendor -o ${NAME} -gcflags "all=-trimpath=$GOPATH" .
 
 release:
 	@rm -rf build/*
-	GOOS=darwin GOARCH=amd64 go build -o build/darwin_amd64/terraform-provider-pingaccess . && zip -j build/darwin_amd64.zip build/darwin_amd64/terraform-provider-pingaccess
-	# GOOS=freebsd GOARCH=386 go build -o build/freebsd_386/terraform-provider-pingaccess .
-	# GOOS=freebsd GOARCH=amd64 go build -o build/freebsd_amd64/terraform-provider-pingaccess .
-	# GOOS=freebsd GOARCH=arm go build -o build/freebsd_arm/terraform-provider-pingaccess .
-	# GOOS=linux GOARCH=386 go build -o build/linux_386/terraform-provider-pingaccess .
-	GOOS=linux GOARCH=amd64 go build -o build/linux_amd64/terraform-provider-pingaccess . && zip -j build/linux_amd64.zip build/linux_amd64/terraform-provider-pingaccess
-	# GOOS=linux GOARCH=arm go build -o build/linux_arm/terraform-provider-pingaccess .
-	# GOOS=openbsd GOARCH=386 go build -o build/openbsd_386/terraform-provider-pingaccess .
-	# GOOS=openbsd GOARCH=amd64 go build -o build/openbsd_amd64/terraform-provider-pingaccess .
-	# GOOS=solaris GOARCH=amd64 go build -o build/solaris_amd64/terraform-provider-pingaccess .
-	# GOOS=windows GOARCH=386 go build -o build/windows_386/terraform-provider-pingaccess .
-	GOOS=windows GOARCH=amd64 go build -o build/windows_amd64/terraform-provider-pingaccess . && zip -j build/windows_amd64.zip build/windows_amd64/terraform-provider-pingaccess
+	GOOS=darwin GOARCH=amd64 go build -o -mod=vendor build/darwin_amd64/${NAME} -gcflags "all=-trimpath=$GOPATH" . && zip -j build/darwin_amd64.zip build/darwin_amd64/${NAME}
+	# GOOS=freebsd GOARCH=386 go build -o -mod=vendor build/freebsd_386/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=freebsd GOARCH=amd64 go build -o -mod=vendor build/freebsd_amd64/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=freebsd GOARCH=arm go build -o -mod=vendor build/freebsd_arm/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=linux GOARCH=386 go build -o -mod=vendor build/linux_386/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	GOOS=linux GOARCH=amd64 go build -o -mod=vendor build/linux_amd64/${NAME} -gcflags "all=-trimpath=$GOPATH" . && zip -j build/linux_amd64.zip build/linux_amd64/${NAME}
+	# GOOS=linux GOARCH=arm go build -o -mod=vendor build/linux_arm/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=openbsd GOARCH=386 go build -o -mod=vendor build/openbsd_386/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=openbsd GOARCH=amd64 go build -o -mod=vendor build/openbsd_amd64/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=solaris GOARCH=amd64 go build -o -mod=vendor build/solaris_amd64/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	# GOOS=windows GOARCH=386 go build -o -mod=vendor build/windows_386/${NAME} -gcflags "all=-trimpath=$GOPATH" .
+	GOOS=windows GOARCH=amd64 go build -o -mod=vendor build/windows_amd64/${NAME} -gcflags "all=-trimpath=$GOPATH" . && zip -j build/windows_amd64.zip build/windows_amd64/${NAME}
 	
 deploy-local:
 	@mkdir -p ~/.terraform.d/plugins
-	@cp terraform-provider-pingaccess ~/.terraform.d/plugins/
+	@cp ${NAME} ~/.terraform.d/plugins/
 
 func-init:
 	@rm -rf func-tests/.terraform
