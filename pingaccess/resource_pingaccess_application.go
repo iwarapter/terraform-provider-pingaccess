@@ -1,7 +1,6 @@
 package pingaccess
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -278,32 +277,8 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		}
 	}
 
-	if _, ok := d.GetOk(policy); ok {
-		policySet := d.Get(policy).([]interface{})
-
-		webPolicies := make([]*pa.PolicyItem, 0)
-		apiPolicies := make([]*pa.PolicyItem, 0)
-
-		policy := policySet[0].(map[string]interface{})
-		for _, pV := range policy["web"].(*schema.Set).List() {
-			p := pV.(map[string]interface{})
-			webPolicies = append(webPolicies, &pa.PolicyItem{
-				Id:   json.Number(p["id"].(string)),
-				Type: String(p["type"].(string)),
-			})
-		}
-		for _, pV := range policy["api"].(*schema.Set).List() {
-			p := pV.(map[string]interface{})
-			apiPolicies = append(apiPolicies, &pa.PolicyItem{
-				Id:   json.Number(p["id"].(string)),
-				Type: String(p["type"].(string)),
-			})
-		}
-		policies := map[string]*[]*pa.PolicyItem{
-			"Web": &webPolicies,
-			"API": &apiPolicies,
-		}
-		application.Policy = policies
+	if val, ok := d.GetOkExists("policy"); ok {
+		application.Policy = expandPolicy(val.([]interface{}))
 	}
 
 	return application

@@ -16,17 +16,17 @@ func TestAccPingAccessCertificate(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessCertificateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessCertificateConfig("bar", "1"),
+				Config: testAccPingAccessCertificateConfig("bar"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessCertificateExists("pingaccess_certificate.acc_test_idm_bar"),
-					testAccCheckPingAccessCertificateAttributes("pingaccess_certificate.acc_test_idm_bar"),
+					testAccCheckPingAccessCertificateExists("pingaccess_certificate.test"),
+					testAccCheckPingAccessCertificateAttributes("pingaccess_certificate.test"),
 				),
 			},
 			{
-				Config: testAccPingAccessCertificateConfig("bar", "2"),
+				Config: testAccPingAccessCertificateConfig("foo"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessCertificateExists("pingaccess_certificate.acc_test_idm_bar"),
-					testAccCheckPingAccessCertificateAttributes("pingaccess_certificate.acc_test_idm_bar"),
+					testAccCheckPingAccessCertificateExists("pingaccess_certificate.test"),
+					testAccCheckPingAccessCertificateAttributes("pingaccess_certificate.test"),
 				),
 			},
 		},
@@ -37,12 +37,19 @@ func testAccCheckPingAccessCertificateDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessCertificateConfig(name, configUpdate string) string {
+func testAccPingAccessCertificateConfig(name string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_certificate" "acc_test_idm_%s" {
+	resource "pingaccess_trusted_certificate_group" "test" {
+		name = "test_tcg"
+		cert_ids = [
+			pingaccess_certificate.test.id
+		]
+	}
+
+	resource "pingaccess_certificate" "test" {
 		alias = "%s"
-		file_data = "${base64encode(file("test_cases/amazon_root_ca%s.pem"))}"
-	}`, name, name, configUpdate)
+		file_data = "${base64encode(file("test_cases/amazon_root_ca1.pem"))}"
+	}`, name)
 }
 
 func testAccCheckPingAccessCertificateExists(n string) resource.TestCheckFunc {

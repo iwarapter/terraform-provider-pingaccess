@@ -28,9 +28,24 @@ func TestMain(m *testing.M) {
 			log.Fatalf("Could not connect to docker: %s", err)
 		}
 
-		options := &dockertest.RunOptions{
-			Repository: "pingidentity/pingaccess",
-			Tag:        "5.2.2-edge",
+		devOpsUser, devOpsUserExists := os.LookupEnv("PING_IDENTITY_DEVOPS_USER")
+		devOpsKey, devOpsKeyExists := os.LookupEnv("PING_IDENTITY_DEVOPS_KEY")
+
+		var options *dockertest.RunOptions
+
+		if devOpsUserExists && devOpsKeyExists {
+			options = &dockertest.RunOptions{
+				Repository: "pingidentity/pingaccess",
+				Env:        []string{fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
+				Tag:        "5.2.2-edge",
+			}
+		} else {
+			dir, _ := os.Getwd()
+			options = &dockertest.RunOptions{
+				Repository: "pingidentity/pingaccess",
+				Mounts:     []string{dir + "/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic"},
+				Tag:        "5.2.2-edge",
+			}
 		}
 
 		// pulls an image, creates a container based on it and runs it
