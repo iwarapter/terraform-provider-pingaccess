@@ -2,6 +2,8 @@ module github.com/iwarapter/terraform-provider-pingaccess
 
 go 1.12
 
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
+
 require (
 	github.com/GeertJohan/go.rice v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.4.13 // indirect

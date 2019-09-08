@@ -1,4 +1,4 @@
-## 0.0.2-BETA (Unreleased)
+## 0.2.0 (Unreleased)
 
 NOTES:
 
@@ -13,6 +13,14 @@ FEATURES:
 * **New Resource:** `pingaccess_access_token_validator`
 * **New Resource:** `pingaccess_keypair` ([#4](https://github.com/iwarapter/terraform-provider-pingaccess/issues/4))
  
+BUG FIXES:
+
+* resource/pingaccess_application: Fixing issue with an empty `policy` block ([#7](https://github.com/iwarapter/terraform-provider-pingaccess/issues/7))
+* resource/pingaccess_application_resource: Fixing issue with an empty `policy` block ([#7](https://github.com/iwarapter/terraform-provider-pingaccess/issues/7))
+* resource/pingaccess_application_resource: path_prefixes is deprecated but required  ([#8](https://github.com/iwarapter/terraform-provider-pingaccess/issues/8))
+* resource/pingaccess_certificate: Certificate `alias` change forces new resource ([#6](https://github.com/iwarapter/terraform-provider-pingaccess/issues/6))
+
+
 ## 0.0.1-BETA (August 4, 2019)
 
 NOTES:

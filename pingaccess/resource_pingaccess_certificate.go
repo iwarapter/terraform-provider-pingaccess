@@ -26,7 +26,6 @@ func resourcePingAccessCertificateSchema() map[string]*schema.Schema {
 		"alias": &schema.Schema{
 			Type:     schema.TypeString,
 			Required: true,
-			ForceNew: true,
 		},
 		"file_data": &schema.Schema{
 			Type:     schema.TypeString,
