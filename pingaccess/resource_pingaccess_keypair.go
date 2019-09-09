@@ -34,7 +34,6 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 		"alias": &schema.Schema{
 			Type:     schema.TypeString,
 			Required: true,
-			ForceNew: true,
 		},
 		"chain_certificates": &schema.Schema{
 			Type:     schema.TypeSet,

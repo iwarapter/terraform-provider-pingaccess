@@ -228,14 +228,15 @@ func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
 
 	webPolicies := make([]*pa.PolicyItem, 0)
 	apiPolicies := make([]*pa.PolicyItem, 0)
-
 	for _, raw := range in {
-		l := raw.(map[string]interface{})
-		if val, ok := l["web"]; ok && len(val.(*schema.Set).List()) > 0 {
-			webPolicies = expandPolicyItem(val.(*schema.Set).List())
-		}
-		if val, ok := l["api"]; ok && len(val.(*schema.Set).List()) > 0 {
-			apiPolicies = expandPolicyItem(val.(*schema.Set).List())
+		if raw != nil {
+			l := raw.(map[string]interface{})
+			if val, ok := l["web"]; ok && len(val.(*schema.Set).List()) > 0 {
+				webPolicies = expandPolicyItem(val.(*schema.Set).List())
+			}
+			if val, ok := l["api"]; ok && len(val.(*schema.Set).List()) > 0 {
+				apiPolicies = expandPolicyItem(val.(*schema.Set).List())
+			}
 		}
 	}
 
