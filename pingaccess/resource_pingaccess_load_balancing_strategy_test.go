@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform/helper/schema"
 	"log"
 	"net/http"
 	"net/url"
@@ -22,6 +24,9 @@ var headerConfig = map[string]interface{}{
 	"fallbackToFirstAvailableHost": true,
 	"headerName":                   "COOKIE-D",
 }
+
+const cookieBasedClassName = "com.pingidentity.pa.ha.lb.roundrobin.CookieBasedRoundRobinPlugin"
+const headerBasedClassName = "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"
 
 func init() {
 	resource.AddTestSweepers("pingaccess_loadbalancingstrategies", &resource.Sweeper{
@@ -106,5 +111,38 @@ func testAccCheckPingAccessLoadBalancingStrategyExists(n string, c int64, out *p
 			return fmt.Errorf("Error: Load Balancing Strategy response (%s) didnt match state (%s)", *result.ClassName, rs.Primary.Attributes["class_name"])
 		}
 		return nil
+	}
+}
+
+func Test_resourcePingAccessLoadBalancingStrategyData(t *testing.T) {
+	cases := []struct {
+		LoadBalancingStrategy pingaccess.LoadBalancingStrategyView
+	}{
+		{
+			LoadBalancingStrategy: pingaccess.LoadBalancingStrategyView{
+				ClassName:     String(cookieBasedClassName),
+				Name:          String("Round robin"),
+				Configuration: rrConfig,
+			},
+		},
+		{
+			LoadBalancingStrategy: pingaccess.LoadBalancingStrategyView{
+				ClassName:     String(headerBasedClassName),
+				Name:          String("X-Auth header"),
+				Configuration: headerConfig,
+			},
+		},
+	}
+	for i, tc := range cases {
+		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
+
+			resourceSchema := resourcePingAccessLoadBalancingStrategySchema()
+			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
+			resourcePingAccessLoadBalancingStrategyReadResult(resourceLocalData, &tc.LoadBalancingStrategy)
+
+			if got := *resourcePingAccessLoadBalancingStrategyReadData(resourceLocalData); !cmp.Equal(got, tc.LoadBalancingStrategy) {
+				t.Errorf("resourcePingAccessVirtualHostReadData() = %v", cmp.Diff(got, tc.LoadBalancingStrategy))
+			}
+		})
 	}
 }

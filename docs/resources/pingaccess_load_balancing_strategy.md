@@ -16,7 +16,7 @@ resource "pingaccess_load_balancing_strategy" "demo_strategy" {
 
 The following arguments are supported:
 
-- [`className`](#className) - (Required) The class name of the load balancing strategy.
+- [`class_name`](#class_name) - (Required) The class name of the load balancing strategy.
 - [`configuration`](#configuration) - (Required) The load balancing strategy's configuration data.
 - [`name`](#name) - (Required) The name of the load balancing strategy.
 

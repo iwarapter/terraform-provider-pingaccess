@@ -25,9 +25,8 @@ func resourcePingAccessLoadBalancingStrategy() *schema.Resource {
 func resourcePingAccessLoadBalancingStrategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		className: &schema.Schema{
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validateClassNameValue,
+			Type:     schema.TypeString,
+			Required: true,
 		},
 		configuration: &schema.Schema{
 			Type:             schema.TypeString,
@@ -43,18 +42,8 @@ func resourcePingAccessLoadBalancingStrategySchema() map[string]*schema.Schema {
 
 func resourcePingAccessLoadBalancingStrategyCreate(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pingaccess.Client).HighAvailability
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
 	input := pingaccess.AddLoadBalancingStrategyCommandInput{
-		Body: pingaccess.LoadBalancingStrategyView{
-			Name:          String(name),
-			ClassName:     String(className),
-			Configuration: dat,
-		},
+		Body: *resourcePingAccessLoadBalancingStrategyReadData(d),
 	}
 	result, _, err := svc.AddLoadBalancingStrategyCommand(&input)
 	if err != nil {
@@ -78,19 +67,9 @@ func resourcePingAccessLoadBalancingStrategyRead(d *schema.ResourceData, m inter
 
 func resourcePingAccessLoadBalancingStrategyUpdate(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pingaccess.Client).HighAvailability
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
 	input := pingaccess.UpdateLoadBalancingStrategyCommandInput{
-		Body: pingaccess.LoadBalancingStrategyView{
-			Name:          String(name),
-			ClassName:     String(className),
-			Configuration: dat,
-		},
-		Id: d.Id(),
+		Body: *resourcePingAccessLoadBalancingStrategyReadData(d),
+		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateLoadBalancingStrategyCommand(&input)
@@ -115,11 +94,22 @@ func resourcePingAccessLoadBalancingStrategyDelete(d *schema.ResourceData, m int
 
 func resourcePingAccessLoadBalancingStrategyReadResult(d *schema.ResourceData, input *pingaccess.LoadBalancingStrategyView) error {
 	setResourceDataString(d, "class_name", input.ClassName)
-	//d.Set("configuration", input.Configuration)
 	b, _ := json.Marshal(input.Configuration)
 	if err := d.Set("configuration", string(b)); err != nil {
 		return err
 	}
 	setResourceDataString(d, "name", input.Name)
 	return nil
+}
+
+func resourcePingAccessLoadBalancingStrategyReadData(d *schema.ResourceData) *pingaccess.LoadBalancingStrategyView {
+	config := d.Get(configuration).(string)
+	var dat map[string]interface{}
+	_ = json.Unmarshal([]byte(config), &dat)
+	lbs := &pingaccess.LoadBalancingStrategyView{
+		Name:          String(d.Get(name).(string)),
+		ClassName:     String(d.Get(className).(string)),
+		Configuration: dat,
+	}
+	return lbs
 }

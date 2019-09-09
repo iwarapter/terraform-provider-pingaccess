@@ -4,9 +4,6 @@ import (
 	"fmt"
 )
 
-const cookieBasedClassName = "com.pingidentity.pa.ha.lb.roundrobin.CookieBasedRoundRobinPlugin"
-const headerBasedClassName = "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"
-
 func validateWebOrAPI(value interface{}, field string) (warns []string, errs []error) {
 	v := value.(string)
 	if v != "Web" && v != "API" {
@@ -75,14 +72,6 @@ func validateListLocationValue(value interface{}, field string) (warns []string,
 	v := value.(string)
 	if v != "FIRST" && v != "LAST" {
 		errs = append(errs, fmt.Errorf("%q must be either 'FIRST' or 'LAST' not %s", field, v))
-	}
-	return
-}
-
-func validateClassNameValue(value interface{}, field string) (warns []string, errs []error) {
-	v := value.(string)
-	if v != cookieBasedClassName && v != headerBasedClassName {
-		errs = append(errs, fmt.Errorf("%[1]q must be either %[2]s or %[3]s not %[4]s", field, cookieBasedClassName, headerBasedClassName, v))
 	}
 	return
 }
