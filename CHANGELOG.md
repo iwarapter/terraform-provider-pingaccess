@@ -1,4 +1,4 @@
-## 0.2.0 (Unreleased)
+## 0.2.0 (October 12, 2019)
 
 NOTES:
 
@@ -12,7 +12,7 @@ FEATURES:
 * **New DataSource:** `pingaccess_keypair` ([#4](https://github.com/iwarapter/terraform-provider-pingaccess/issues/4))
 * **New Resource:** `pingaccess_access_token_validator`
 * **New Resource:** `pingaccess_keypair` ([#4](https://github.com/iwarapter/terraform-provider-pingaccess/issues/4))
-* * **New Resource:** `pingaccess_auth_token_management` ([#11](https://github.com/iwarapter/terraform-provider-pingaccess/issues/11))
+* **New Resource:** `pingaccess_auth_token_management` ([#11](https://github.com/iwarapter/terraform-provider-pingaccess/issues/11))
  
 BUG FIXES:
 
