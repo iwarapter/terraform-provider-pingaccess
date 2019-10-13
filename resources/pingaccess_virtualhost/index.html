@@ -61,6 +61,10 @@
                     
     <a class="" href="../../data_sources/pingaccess_certificate/">pingaccess_certificate</a>
                 </li>
+                <li class="">
+                    
+    <a class="" href="../../data_sources/pingaccess_trusted_certificate_group/">pingaccess_trusted_certificate_group</a>
+                </li>
     </ul>
 	    </li>
           
@@ -68,6 +72,14 @@
 		
     <span class="caption-text">Supported Resources</span>
     <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../pingaccess_access_token_validator/">pingaccess_access_token_validator</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_auth_token_management/">pingaccess_auth_token_management</a>
+                </li>
                 <li class="">
                     
     <a class="" href="../pingaccess_application/">pingaccess_application</a>
@@ -186,11 +198,11 @@
 <p>The following arguments are supported:</p>
 <ul>
 <li><a href="#access_validator_id"><code>access_validator_id</code></a> - Non-zero if the application is protected by an Authorization Server. Only applies to applications of type API.</li>
-<li><a href="#pingaccess_virtualhost_host"><code>pingaccess_virtualhost_host</code></a> - (Required) The host name for the Virtual Host.</li>
-<li><a href="#pingaccess_virtualhost_port"><code>pingaccess_virtualhost_port</code></a> - (Required) The integer port number for the Virtual Host.</li>
-<li><a href="#pingaccess_virtualhost_agent_resource_cache_ttl"><code>pingaccess_virtualhost_agent_resource_cache_ttl</code></a> - (Optional) Indicates the number of seconds the Agent can cache resources for this application.</li>
-<li><a href="#pingaccess_virtualhost_key_pair_id"><code>pingaccess_virtualhost_key_pair_id</code></a> - (Optional) Key pair assigned to Virtual Host used by SNI, If no key pair is assigned to a virtual host, ENGINE HTTPS Listener key pair will be used.</li>
-<li><a href="#pingaccess_virtualhost_trusted_certificate_group_id"><code>pingaccess_virtualhost_trusted_certificate_group_id</code></a> - (Optional) Trusted Certificate Group assigned to Virtual Host for client certificate authentication.</li>
+<li><a href="#host"><code>host</code></a> - (Required) The host name for the Virtual Host.</li>
+<li><a href="#port"><code>port</code></a> - (Required) The integer port number for the Virtual Host.</li>
+<li><a href="#agent_resource_cache_ttl"><code>agent_resource_cache_ttl</code></a> - (Optional) Indicates the number of seconds the Agent can cache resources for this application.</li>
+<li><a href="#key_pair_id"><code>key_pair_id</code></a> - (Optional) Key pair assigned to Virtual Host used by SNI, If no key pair is assigned to a virtual host, ENGINE HTTPS Listener key pair will be used.</li>
+<li><a href="#trusted_certificate_group_id"><code>trusted_certificate_group_id</code></a> - (Optional) Trusted Certificate Group assigned to Virtual Host for client certificate authentication.</li>
 </ul>
 <h2 id="attributes-reference">Attributes Reference</h2>
 <p>In addition to all arguments above, the following attributes are exported:</p>

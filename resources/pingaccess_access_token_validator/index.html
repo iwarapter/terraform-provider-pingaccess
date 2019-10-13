@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>pingaccess_certificate - Terraform PingAccess Provider</title>
+  <title>pingaccess_access_token_validator - Terraform PingAccess Provider</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
@@ -17,8 +17,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "pingaccess_certificate";
-    var mkdocs_page_input_path = "resources/pingaccess_certificate.md";
+    var mkdocs_page_name = "pingaccess_access_token_validator";
+    var mkdocs_page_input_path = "resources/pingaccess_access_token_validator.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -72,25 +72,9 @@
 		
     <span class="caption-text">Supported Resources</span>
     <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../pingaccess_access_token_validator/">pingaccess_access_token_validator</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../pingaccess_auth_token_management/">pingaccess_auth_token_management</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../pingaccess_application/">pingaccess_application</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../pingaccess_application_resource/">pingaccess_application_resource</a>
-                </li>
                 <li class=" current">
                     
-    <a class="current" href="./">pingaccess_certificate</a>
+    <a class="current" href="./">pingaccess_access_token_validator</a>
     <ul class="subnav">
             
     <li class="toctree-l3"><a href="#example-usage">Example Usage</a></li>
@@ -106,6 +90,22 @@
     
 
     </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_auth_token_management/">pingaccess_auth_token_management</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application/">pingaccess_application</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_application_resource/">pingaccess_application_resource</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../pingaccess_certificate/">pingaccess_certificate</a>
                 </li>
                 <li class="">
                     
@@ -176,7 +176,7 @@
         
       
     
-    <li>pingaccess_certificate</li>
+    <li>pingaccess_access_token_validator</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -186,61 +186,45 @@
           <div role="main">
             <div class="section">
               
-                <p>Provides a ceritficate.</p>
-<h3 id="example-usage">Example Usage</h3>
-<pre><code class="terraform">resource &quot;pingaccess_certificate&quot; &quot;demo_certificate&quot; {
-  alias     = &quot;demo&quot;
-  file_data = &quot;${base64encode(file(&quot;test_cases/amazon_root_ca1.pem&quot;))}&quot;
+                <p>Provides a access token validator.</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre><code class="terraform">resource &quot;pingaccess_access_token_validator&quot; &quot;demo_access_token_validator&quot; {
+  class_name = &quot;com.pingidentity.pa.accesstokenvalidators.JwksEndpoint&quot;
+  name       = &quot;demo&quot;
+
+  configuration = &lt;&lt;EOF
+    {
+        &quot;description&quot;: null,
+        &quot;path&quot;: &quot;/bar&quot;,
+        &quot;subjectAttributeName&quot;: &quot;demo&quot;,
+        &quot;issuer&quot;: null,
+        &quot;audience&quot;: null
+    }
+    EOF
 }
 </code></pre>
 
-<h3 id="argument-attributes">Argument Attributes</h3>
+<h2 id="argument-attributes">Argument Attributes</h2>
 <p>The following arguments are supported:</p>
 <ul>
 <li>
-<p><a href="#alias"><code>alias</code></a> - (required) The alias for the certificate.</p>
+<p><a href="#class_name"><code>class_name</code></a> - (Required) The access token validator's class name.</p>
 </li>
 <li>
-<p><a href="#file_data"><code>file_data</code></a> - (required) The base64-encoded data of the certificate.</p>
+<p><a href="#configuration"><code>configuration</code></a> - (Required) The access token validator's configuration data.</p>
+</li>
+<li>
+<p><a href="#name"><code>name</code></a> - (Required) The access token validator's name.</p>
 </li>
 </ul>
-<h3 id="attributes-reference">Attributes Reference</h3>
+<h2 id="attributes-reference">Attributes Reference</h2>
 <p>In addition to all arguments above, the following attributes are exported:</p>
 <ul>
-<li>
-<p><a href="#id"><code>id</code></a> - The certificates's ID.</p>
-</li>
-<li>
-<p><a href="#expires"><code>expires</code></a> - The date at which the certificate expires as the number of milliseconds since January 1, 1970, 00:00:00 GMT.</p>
-</li>
-<li>
-<p><a href="#issuer_dn"><code>issuer_dn</code></a> - The issuer DN for the certificate.</p>
-</li>
-<li>
-<p><a href="#md5sum"><code>md5sum</code></a> - The MD5 sum for the certificate.</p>
-</li>
-<li>
-<p><a href="#serial_number"><code>serial_number</code></a> - The serial number for the certificate.</p>
-</li>
-<li>
-<p><a href="#sha1sum"><code>sha1sum</code></a> - The SHA1 sum for the certificate.</p>
-</li>
-<li>
-<p><a href="#signature_algorithm"><code>signature_algorithm</code></a> -  The algorithm used to sign the certificate.</p>
-</li>
-<li>
-<p><a href="#subject_cn"><code>subject_cn</code></a> - The subject CN for the certificate.</p>
-</li>
-<li>
-<p><a href="#subject_dn"><code>subject_dn</code></a> - The subject DN for the certificate.</p>
-</li>
-<li>
-<p><a href="#valid_from"><code>valid_from</code></a> - The date at which the certificate is valid from as the number of milliseconds since January 1, 1970, 00:00:00 GMT.</p>
-</li>
+<li><a href="#id"><code>id</code></a> - The access token validator's ID.</li>
 </ul>
-<h3 id="import">Import</h3>
-<p>PingAccess Certificates can be imported using the id, e.g.</p>
-<pre><code class="bash">$ terraform import pingaccess_certificate.demo_certificate 123
+<h2 id="import">Import</h2>
+<p>PingAccess access token validator can be imported using the id, e.g.</p>
+<pre><code>$ terraform import pingaccess_access_token_validator.demo_access_token_validator 123
 </code></pre>
               
             </div>
@@ -249,10 +233,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../pingaccess_identity_mapping/" class="btn btn-neutral float-right" title="pingaccess_identity_mapping">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../pingaccess_auth_token_management/" class="btn btn-neutral float-right" title="pingaccess_auth_token_management">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../pingaccess_application_resource/" class="btn btn-neutral" title="pingaccess_application_resource"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../data_sources/pingaccess_trusted_certificate_group/" class="btn btn-neutral" title="pingaccess_trusted_certificate_group"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -278,10 +262,10 @@
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../pingaccess_application_resource/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../../data_sources/pingaccess_trusted_certificate_group/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../pingaccess_identity_mapping/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../pingaccess_auth_token_management/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
