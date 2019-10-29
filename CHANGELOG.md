@@ -1,3 +1,10 @@
+## 0.3.0 (Unreleased)
+
+BUG FIXES:
+
+* resource/pingaccess_application: Fixed issued with `policy`ignoring rule order ([#17](https://github.com/iwarapter/terraform-provider-pingaccess/issues/17))
+* resource/pingaccess_application_resource: Fixed issued with `policy`ignoring rule order ([#17](https://github.com/iwarapter/terraform-provider-pingaccess/issues/17))
+
 ## 0.2.0 (October 12, 2019)
 
 NOTES:

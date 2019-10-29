@@ -36,7 +36,25 @@ func testSweepApplicationResources(r string) error {
 }
 
 func TestAccPingAccessApplicationResource(t *testing.T) {
-	var out pa.ApplicationView
+	policy1 := `web {
+		type = "Rule"
+		id = "${pingaccess_rule.acc_test_resource_rule.id}"
+	}
+
+	web {
+		type = "Rule"
+		id = "${pingaccess_rule.acc_test_resource_rule_two.id}"
+	}
+	`
+
+	policy2 := `web {
+		type = "Rule"
+		id = "${pingaccess_rule.acc_test_resource_rule_two.id}"
+	}
+	web {
+		type = "Rule"
+		id = "${pingaccess_rule.acc_test_resource_rule.id}"
+	}`
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -44,16 +62,16 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessApplicationResourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bar"),
+				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bar", policy1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource", 3, &out),
+					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource"),
 					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bar"),
 				),
 			},
 			{
-				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bart"),
+				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bart", policy2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource", 6, &out),
+					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource"),
 					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bart"),
 				),
 			},
@@ -65,7 +83,7 @@ func testAccCheckPingAccessApplicationResourceDestroy(s *terraform.State) error 
 	return nil
 }
 
-func testAccPingAccessApplicationResourceConfig(name string, context string) string {
+func testAccPingAccessApplicationResourceConfig(name string, context string, policy string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_site" "app_res_test_site" {
 		name                         = "acc_test_app_res_test_site"
@@ -127,15 +145,7 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
 	application_id = "${pingaccess_application.app_res_test.id}"
 	
 	policy {
-		web {
-			type = "Rule"
-			id = "${pingaccess_rule.acc_test_resource_rule.id}"
-		}
-
-		web {
-			type = "Rule"
-			id = "${pingaccess_rule.acc_test_resource_rule_two.id}"
-		}
+		%s
 	}
 }
 
@@ -207,10 +217,10 @@ resource "pingaccess_rule" "acc_test_resource_rule_two" {
 	}
 	EOF
 }
-	`, name, context, context)
+	`, name, context, context, policy)
 }
 
-func testAccCheckPingAccessApplicationResourceExists(n string, c int64, out *pa.ApplicationView) resource.TestCheckFunc {
+func testAccCheckPingAccessApplicationResourceExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

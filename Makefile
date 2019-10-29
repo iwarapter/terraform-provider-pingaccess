@@ -1,16 +1,17 @@
 # Makefile
-VERSION ?= local
+VERSION ?= 0.0.0
 NAME=terraform-provider-pingaccess_v${VERSION}
 
-sweep:
-	@TF_ACC=1 go test ./... -v -sweep=true
-
 pa-init:
-	@docker run --rm -d --name pingaccess --publish 9000:9000 pingidentity/pingaccess:5.2.2-edge
+	@docker run --rm -d --hostname pingaccess --name pingaccess -v  `pwd`/pingaccess/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic --publish 9000:9000 pingidentity/pingaccess:5.2.2-edge
 
 test:
 	@rm -f pingaccess/terraform.log
 	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v
+
+unit-test:
+	@go test -mod=vendor ./... -v
+
 
 test-and-report:
 	@rm -f pingaccess/terraform.log coverage.out report.json
@@ -53,17 +54,4 @@ func-apply:
 func-destroy:
 	@cd func-tests && terraform destroy -auto-approve
 
-func-cli-gen:
-	@cd ../pingaccess-sdk-go-gen-cli/ && make generate
-
-sonar:
-	@sonar-scanner \
-		-Dsonar.projectKey=github.com.iwarapter.terraform-provider-pingaccess \
-		-Dsonar.sources=. \
-		-Dsonar.go.coverage.reportPaths=coverage.out \
-		-Dsonar.go.tests.reportPaths=report.json \
-		-Dsonar.exclusions=vendor/**/* \
-		-Dsonar.tests="." \
-		-Dsonar.test.inclusions="**/*_test.go"
-		
 .PHONY: test build deploy-local

@@ -1,36 +1,17 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
-	"net/url"
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
-
-func init() {
-	resource.AddTestSweepers("pingaccess_application", &resource.Sweeper{
-		Name:         "pingaccess_application",
-		F:            testSweepApplication,
-		Dependencies: []string{"pingaccess_application_resource"},
-	})
-}
-
-func testSweepApplication(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Applications
-	result, _, _ := conn.GetApplicationsCommand(&pingaccess.GetApplicationsCommandInput{Filter: "acc_test_"})
-	for _, v := range result.Items {
-		conn.DeleteApplicationCommand(&pingaccess.DeleteApplicationCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
 
 func TestAccPingAccessApplication(t *testing.T) {
 	var out pingaccess.ApplicationView
@@ -233,6 +214,51 @@ func Test_flattenIdentityMappingIds(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := flattenIdentityMappingIds(tt.args.in); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("flattenIdentityMappingIds() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_resourcePingAccessApplicationReadData(t *testing.T) {
+	cases := []struct {
+		Application pa.ApplicationView
+	}{
+		{
+			Application: pa.ApplicationView{
+				Name:              String("engine1"),
+				ApplicationType:   String("API"),
+				AgentId:           Int(0),
+				CaseSensitivePath: Bool(true),
+				ContextRoot:       String("/"),
+				DefaultAuthType:   String("API"),
+				SiteId:            Int(0),
+				VirtualHostIds:    &[]*int{Int(1)},
+				Policy: map[string]*[]*pa.PolicyItem{
+					"API": &[]*pa.PolicyItem{
+						&pa.PolicyItem{
+							Id:   "1",
+							Type: String("Rule"),
+						},
+						&pa.PolicyItem{
+							Id:   "2",
+							Type: String("Rule"),
+						},
+					},
+					"Web": &[]*pa.PolicyItem{},
+				},
+				WebSessionId: Int(0),
+			},
+		},
+	}
+	for i, tc := range cases {
+		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
+
+			resourceSchema := resourcePingAccessApplicationSchema()
+			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
+			resourcePingAccessApplicationReadResult(resourceLocalData, &tc.Application)
+
+			if got := *resourcePingAccessApplicationReadData(resourceLocalData); !cmp.Equal(got, tc.Application) {
+				t.Errorf("resourcePingAccessApplicationReadData() = %v", cmp.Diff(got, tc.Application))
 			}
 		})
 	}

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform/flatmap"
-	"github.com/hashicorp/terraform/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -90,11 +89,11 @@ func Test_weCanFlattenPolicy(t *testing.T) {
 		},
 	}
 
-	output := schema.NewSet(policyItemHash, []interface{}{map[string]interface{}{"id": "1334", "type": "Rule"}})
+	output := []interface{}{map[string]interface{}{"id": "1334", "type": "Rule"}}
 
 	flattened := flattenPolicyItem(initialPolicyItem)
 
-	assert(t, output.Equal(flattened), "")
+	equals(t, output, flattened)
 }
 
 func Test_expandPolicyItem(t *testing.T) {
@@ -106,7 +105,7 @@ func Test_expandPolicyItem(t *testing.T) {
 }
 
 func testPolicy() []interface{} {
-	return []interface{}{map[string]interface{}{"api": schema.NewSet(policyItemHash, []interface{}{map[string]interface{}{"id": "1334", "type": "Rule"}})}}
+	return []interface{}{map[string]interface{}{"api": []interface{}{map[string]interface{}{"id": "1334", "type": "Rule"}}}}
 }
 
 func Test_expandPolicy(t *testing.T) {

@@ -51,7 +51,7 @@ func applicationPolicySchema() *schema.Schema {
 
 func applicationPolicyItemSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -195,8 +195,7 @@ func expandPolicyItem(in []interface{}) []*pa.PolicyItem {
 	return policies
 }
 
-func flattenPolicyItem(in []*pa.PolicyItem) *schema.Set {
-	// m := make([]map[string]interface{}, 0, len(in))
+func flattenPolicyItem(in []*pa.PolicyItem) []interface{} {
 	m := []interface{}{}
 	for _, v := range in {
 		s := make(map[string]interface{})
@@ -204,7 +203,7 @@ func flattenPolicyItem(in []*pa.PolicyItem) *schema.Set {
 		s["type"] = *v.Type
 		m = append(m, s)
 	}
-	return schema.NewSet(policyItemHash, m)
+	return m
 }
 
 func policyItemHash(v interface{}) int {
@@ -231,11 +230,11 @@ func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
 	for _, raw := range in {
 		if raw != nil {
 			l := raw.(map[string]interface{})
-			if val, ok := l["web"]; ok && len(val.(*schema.Set).List()) > 0 {
-				webPolicies = expandPolicyItem(val.(*schema.Set).List())
+			if val, ok := l["web"]; ok && len(val.([]interface{})) > 0 {
+				webPolicies = expandPolicyItem(val.([]interface{}))
 			}
-			if val, ok := l["api"]; ok && len(val.(*schema.Set).List()) > 0 {
-				apiPolicies = expandPolicyItem(val.(*schema.Set).List())
+			if val, ok := l["api"]; ok && len(val.([]interface{})) > 0 {
+				apiPolicies = expandPolicyItem(val.([]interface{}))
 			}
 		}
 	}
