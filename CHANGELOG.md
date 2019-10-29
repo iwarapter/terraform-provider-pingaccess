@@ -1,5 +1,9 @@
 ## 0.3.0 (Unreleased)
 
+FEATURES:
+
+* **New Resource:** `pingaccess_authn_req_lists` ([#16](https://github.com/iwarapter/terraform-provider-pingaccess/issues/16))
+
 BUG FIXES:
 
 * resource/pingaccess_application: Fixed issued with `policy`ignoring rule order ([#17](https://github.com/iwarapter/terraform-provider-pingaccess/issues/17))
