@@ -3,6 +3,7 @@
 FEATURES:
 
 * **New Resource:** `pingaccess_authn_req_lists` ([#16](https://github.com/iwarapter/terraform-provider-pingaccess/issues/16))
+* **New Resource:** `pingaccess_https_listener` ([#15](https://github.com/iwarapter/terraform-provider-pingaccess/issues/15))
 
 BUG FIXES:
 

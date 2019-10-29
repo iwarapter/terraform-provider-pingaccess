@@ -45,6 +45,7 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_auth_token_management":           resourcePingAccessAuthTokenManagement(),
 			"pingaccess_authn_req_list":                  resourcePingAccessAuthnReqList(),
 			"pingaccess_certificate":                     resourcePingAccessCertificate(),
+			"pingaccess_https_listener":                  resourcePingAccessHTTPSListener(),
 			"pingaccess_identity_mapping":                resourcePingAccessIdentityMapping(),
 			"pingaccess_keypair":                         resourcePingAccessKeyPair(),
 			"pingaccess_rule":                            resourcePingAccessRule(),
