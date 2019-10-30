@@ -1,3 +1,16 @@
+## 0.3.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `pingaccess_authn_req_lists` ([#16](https://github.com/iwarapter/terraform-provider-pingaccess/issues/16))
+* **New Resource:** `pingaccess_https_listener` ([#15](https://github.com/iwarapter/terraform-provider-pingaccess/issues/15))
+* **New Resource:** `pingaccess_engine_listener` ([#14](https://github.com/iwarapter/terraform-provider-pingaccess/issues/14))
+
+BUG FIXES:
+
+* resource/pingaccess_application: Fixed issued with `policy`ignoring rule order ([#17](https://github.com/iwarapter/terraform-provider-pingaccess/issues/17))
+* resource/pingaccess_application_resource: Fixed issued with `policy`ignoring rule order ([#17](https://github.com/iwarapter/terraform-provider-pingaccess/issues/17))
+
 ## 0.2.0 (October 12, 2019)
 
 NOTES:

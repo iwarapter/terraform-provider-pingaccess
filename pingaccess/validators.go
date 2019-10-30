@@ -75,3 +75,11 @@ func validateListLocationValue(value interface{}, field string) (warns []string,
 	}
 	return
 }
+
+func validateHTTPListenerName(value interface{}, field string) (warns []string, errs []error) {
+	v := value.(string)
+	if v != "ADMIN" && v != "AGENT" && v != "ENGINE" {
+		errs = append(errs, fmt.Errorf("%q must be either 'ADMIN', 'AGENT' or 'ENGINE' not %s", field, v))
+	}
+	return
+}

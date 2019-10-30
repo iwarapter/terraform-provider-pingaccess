@@ -19,96 +19,100 @@ func resourcePingAccessApplication() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"access_validator_id": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-			"agent_id": &schema.Schema{
-				Type:     schema.TypeInt,
-				Required: true,
-			},
-			"application_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"case_sensitive_path": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			contextRoot: &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			defaultAuthType: &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			description: &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			destination: &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			enabled: &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"identity_mapping_ids": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				MinItems: 0,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"web": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "0",
-							// DefaultFunc: func() (interface{}, error) { return "0", nil },
-						},
-						"api": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "0",
-							// DefaultFunc: func() (interface{}, error) { return "0", nil },
-						},
+		Schema: resourcePingAccessApplicationSchema(),
+	}
+}
+
+func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"access_validator_id": &schema.Schema{
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"agent_id": &schema.Schema{
+			Type:     schema.TypeInt,
+			Required: true,
+		},
+		"application_type": &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+		},
+		"case_sensitive_path": &schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		contextRoot: &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		defaultAuthType: &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		description: &schema.Schema{
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		destination: &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		enabled: &schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"identity_mapping_ids": &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			MinItems: 0,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "0",
+						// DefaultFunc: func() (interface{}, error) { return "0", nil },
+					},
+					"api": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "0",
+						// DefaultFunc: func() (interface{}, error) { return "0", nil },
 					},
 				},
 			},
-			name: &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+		},
+		name: &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"policy": applicationPolicySchema(),
+		realm: &schema.Schema{
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		requireHTTPS: &schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		siteID: &schema.Schema{
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		virtualHostIDs: &schema.Schema{
+			Type:     schema.TypeSet,
+			Required: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
 			},
-			"policy": applicationPolicySchema(),
-			realm: &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			requireHTTPS: &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			siteID: &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			virtualHostIDs: &schema.Schema{
-				Type:     schema.TypeSet,
-				Required: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"web_session_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "0",
-			},
+		},
+		"web_session_id": &schema.Schema{
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "0",
 		},
 	}
 }
@@ -228,7 +232,6 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		ApplicationType: String(d.Get("application_type").(string)),
 		ContextRoot:     String(d.Get("context_root").(string)),
 		DefaultAuthType: String(d.Get("default_auth_type").(string)),
-		Destination:     String(d.Get("destination").(string)),
 		SiteId:          Int(siteID),
 		VirtualHostIds:  &vhIds,
 	}
@@ -243,6 +246,10 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 
 	if _, ok := d.GetOkExists("description"); ok {
 		application.Description = String(d.Get("description").(string))
+	}
+
+	if v, ok := d.GetOkExists("destination"); ok {
+		application.Destination = String(v.(string))
 	}
 
 	if _, ok := d.GetOkExists("enabled"); ok {

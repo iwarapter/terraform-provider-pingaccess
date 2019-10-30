@@ -7,9 +7,12 @@ nav:
     - Supported Resources:
       - pingaccess_access_token_validator: resources/pingaccess_access_token_validator.md
       - pingaccess_auth_token_management: resources/pingaccess_auth_token_management.md
+      - pingaccess_authn_req_list: resources/pingaccess_authn_req_list.md
       - pingaccess_application: resources/pingaccess_application.md
       - pingaccess_application_resource: resources/pingaccess_application_resource.md
       - pingaccess_certificate: resources/pingaccess_certificate.md
+      - pingaccess_engine_listener: resources/pingaccess_engine_listener.md
+      - pingaccess_https_listener: resources/pingaccess_https_listener.md
       - pingaccess_identity_mapping: resources/pingaccess_identity_mapping.md
       - pingaccess_oauth_server: resources/pingaccess_oauth_server.md
       - pingaccess_rule: resources/pingaccess_rule.md
