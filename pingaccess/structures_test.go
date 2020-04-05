@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/hashicorp/terraform/flatmap"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
-func testHiddenFieldView() map[string]string {
-	return map[string]string{
-		"client_secret.#":                 "1",
-		"client_secret.0.encrypted_value": "atat",
-		"client_secret.0.value":           "atat",
+func testHiddenFieldView() map[string]interface{} {
+	return map[string]interface{}{
+		"encrypted_value": "atat",
+		"value":           "atat",
 	}
 }
 
@@ -30,20 +28,23 @@ func Test_weCanFlattenHiddenFieldView(t *testing.T) {
 }
 
 func Test_expandHiddenFieldView(t *testing.T) {
-	expanded := flatmap.Expand(testHiddenFieldView(), "client_secret").([]interface{})
+	//expanded := flatmap.Expand(testHiddenFieldView(), "client_secret").([]interface{})
+	expanded := []interface{}{testHiddenFieldView()}
 	expandHiddenFieldView := expandHiddenFieldView(expanded)
 
 	equals(t, "atat", *(*expandHiddenFieldView).Value)
 	// equals(t, "atat", *(*expandHiddenFieldView).EncryptedValue)
 }
 
-func testOAuthClientCredentials() map[string]string {
-	return map[string]string{
-		"client_credentials.#":                                 "1",
-		"client_credentials.0.client_id":                       "atat",
-		"client_credentials.0.client_secret.#":                 "1",
-		"client_credentials.0.client_secret.0.encrypted_value": "atat",
-		"client_credentials.0.client_secret.0.value":           "atat",
+func testOAuthClientCredentials() map[string]interface{} {
+	return map[string]interface{}{
+		"client_id": "atat",
+		"client_secret": []interface{}{
+			map[string]interface{}{
+				"encrypted_value": "atat",
+				"value":           "atat",
+			},
+		},
 	}
 }
 
@@ -64,20 +65,18 @@ func Test_weCanFlattenOAuthClientCredentials(t *testing.T) {
 }
 
 func Test_expandOAuthClientCredentials(t *testing.T) {
-	expanded := flatmap.Expand(testOAuthClientCredentials(), "client_credentials").([]interface{})
+	//expanded := flatmap.Expand(testOAuthClientCredentials(), "client_credentials").([]interface{})
+	expanded := []interface{}{testOAuthClientCredentials()}
 	expandOAuthClientCredentialsView := expandOAuthClientCredentialsView(expanded)
 
 	equals(t, "atat", *(*expandOAuthClientCredentialsView).ClientId)
 	equals(t, "atat", *(*expandOAuthClientCredentialsView).ClientSecret.Value)
 }
 
-func testPolicyItem() map[string]string {
-	return map[string]string{
-		"policy.#":                     "1",
-		"policy.0.api.#":               "1",
-		"policy.0.api.4232758680.id":   "1334",
-		"policy.0.api.4232758680.type": "Rule",
-		"policy.0.web.#":               "0",
+func testPolicyItem() map[string]interface{} {
+	return map[string]interface{}{
+		"id":   "1334",
+		"type": "Rule",
 	}
 }
 
@@ -97,7 +96,8 @@ func Test_weCanFlattenPolicy(t *testing.T) {
 }
 
 func Test_expandPolicyItem(t *testing.T) {
-	expanded := flatmap.Expand(testPolicyItem(), "policy.0.api").([]interface{})
+	//expanded := flatmap.Expand(testPolicyItem(), "policy.0.api").([]interface{})
+	expanded := []interface{}{testPolicyItem()}
 	expandPolicyItem := expandPolicyItem(expanded)
 
 	equals(t, "1334", expandPolicyItem[0].Id.String())

@@ -3,7 +3,7 @@ VERSION ?= 0.0.0
 NAME=terraform-provider-pingaccess_v${VERSION}
 
 pa-init:
-	@docker run --rm -d --hostname pingaccess --name pingaccess -v  `pwd`/pingaccess/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic --publish 9000:9000 pingidentity/pingaccess:5.2.2-edge
+	@docker run --rm -d --hostname pingaccess --name pingaccess -e PING_IDENTITY_DEVOPS_KEY=$(PING_IDENTITY_DEVOPS_KEY) -e PING_IDENTITY_DEVOPS_USER=$(PING_IDENTITY_DEVOPS_USER) --publish 9000:9000 pingidentity/pingaccess:5.2.2-edge
 
 test:
 	@rm -f pingaccess/terraform.log

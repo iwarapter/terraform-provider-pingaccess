@@ -3,10 +3,10 @@ package pingaccess
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	"github.com/tidwall/sjson"
 )
@@ -22,27 +22,29 @@ func resourcePingAccessRule() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			className: &schema.Schema{
+			className: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			name: &schema.Schema{
+			name: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			supportedDestinations: setOfString(),
-			configuration: &schema.Schema{
+			"configuration": {
 				Type:             schema.TypeString,
 				Required:         true,
 				DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
 			},
 			"ignrored_configuration_fields": setOfString(),
 		},
+		CustomizeDiff: customdiff.ComputedIf("configuration", func(diff *schema.ResourceDiff, meta interface{}) bool {
+			return diff.HasChange("configuration")
+		}),
 	}
 }
 
 func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessRuleCreate")
 	name := d.Get(name).(string)
 	className := d.Get(className).(string)
 	supDests := expandStringList(d.Get(supportedDestinations).(*schema.Set).List())
@@ -71,7 +73,6 @@ func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessRuleRead")
 	svc := m.(*pingaccess.Client).Rules
 
 	input := &pingaccess.GetRuleCommandInput{

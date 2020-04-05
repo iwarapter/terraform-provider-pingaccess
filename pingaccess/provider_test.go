@@ -13,11 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	"github.com/ory/dockertest"
-	"github.com/terraform-providers/terraform-provider-template/template"
 )
 
 func TestMain(m *testing.M) {
@@ -93,7 +92,7 @@ var testAccTemplateProvider *schema.Provider
 
 func init() {
 	testAccProvider = Provider().(*schema.Provider)
-	testAccTemplateProvider = template.Provider().(*schema.Provider)
+	//testAccTemplateProvider = template.Provider().(*schema.Provider)
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"pingaccess": testAccProvider,
 		"template":   testAccTemplateProvider,
@@ -110,7 +109,7 @@ func init() {
 }
 
 func testAccPreCheck(t *testing.T) {
-	err := testAccProvider.Configure(terraform.NewResourceConfig(nil))
+	err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
 	if err != nil {
 		t.Fatal(err)
 	}

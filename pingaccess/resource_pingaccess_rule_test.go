@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -46,15 +47,17 @@ func TestAccPingAccessRule(t *testing.T) {
 					// testAccCheckPingAccessRuleAttributes(),
 					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName}, []string{roleName}, []string{groupName}, &out),
 				),
+				ExpectError: regexp.MustCompile(`Provider produced inconsistent final plan`),
 			},
-			{
-				Config: testAccPingAccessRuleConfig("bar", "403"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 6, &out),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
-					// 	[]string{roleName2, roleName3}, []string{groupName2, groupName3}, &out),
-				),
-			},
+			//{
+			//	Config: testAccPingAccessRuleConfig("bar", "403"),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 6, &out),
+			//		// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
+			//		// 	[]string{roleName2, roleName3}, []string{groupName2, groupName3}, &out),
+			//	),
+			//	ExpectError: regexp.MustCompile("Error: Provider produced inconsistent final plan"),
+			//},
 		},
 	})
 }
@@ -74,7 +77,7 @@ func testAccPingAccessRuleConfig(name, configUpdate string) string {
 		]
 		configuration = <<EOF
 		{
-			"cidrNotation": "127.0.0.1/32",
+			"cidrNotation": "127.0.0.${pingaccess_virtualhost.unknown_value.id}/32",
 			"negate": false,
 			"overrideIpSource": false,
 			"headers": [],
@@ -88,6 +91,14 @@ func testAccPingAccessRuleConfig(name, configUpdate string) string {
 			"rejectionHandlingEnabled": false
 		}
 		EOF
+	}
+
+	resource "pingaccess_virtualhost" "unknown_value" {
+	   host                         = "rule-config-dynamic-config"
+	   port                         = 1111
+	   agent_resource_cache_ttl     = 900
+	   key_pair_id                  = 0
+	   trusted_certificate_group_id = 0
 	}`, name, name, configUpdate)
 }
 

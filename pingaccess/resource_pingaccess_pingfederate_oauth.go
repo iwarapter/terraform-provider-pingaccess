@@ -5,7 +5,7 @@ import (
 
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourcePingAccessPingFederateOAuth() *schema.Resource {
