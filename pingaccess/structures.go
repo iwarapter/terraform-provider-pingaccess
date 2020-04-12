@@ -321,6 +321,29 @@ func configFieldHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
+// Searches a given set of RuleDescriptors for a matching className, when found it will check all fields types for
+// a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by
+// current API and set the value back to the original defined. For COMPOSITE fields we then iterate recursively on its
+// fields.
+//
+// TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
+func maskConfigFromRuleDescriptors(desc *pa.RuleDescriptorsView, input *string, originalConfig string, config string) string {
+	for _, value := range desc.Items {
+		if *value.ClassName == *input {
+			config = maskConfigFromRuleDescriptor(value, String(""), originalConfig, config)
+		}
+	}
+	return config
+}
+
+func maskConfigFromRuleDescriptor(desc *pa.RuleDescriptorView, input *string, originalConfig string, config string) string {
+	for _, c := range desc.ConfigurationFields {
+		config = maskConfigFromConfigurationField(c, input, originalConfig, config)
+	}
+	return config
+}
+
+
 // Searches a given set of descriptors for a matching className, when found it will check all fields types for
 // a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by
 // current API and set the value back to the original defined. For COMPOSITE fields we then iterate recursively on its

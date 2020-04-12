@@ -22,21 +22,20 @@ func resourcePingAccessRule() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			className: {
+			"class_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			name: {
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			supportedDestinations: setOfString(),
+			"supported_destinations": setOfString(),
 			"configuration": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
+				DiffSuppressFunc: suppressEquivalentJsonDiffs,
 			},
-			"ignrored_configuration_fields": setOfString(),
 		},
 		CustomizeDiff: customdiff.ComputedIf("configuration", func(diff *schema.ResourceDiff, meta interface{}) bool {
 			return diff.HasChange("configuration")
@@ -45,23 +44,10 @@ func resourcePingAccessRule() *schema.Resource {
 }
 
 func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	supDests := expandStringList(d.Get(supportedDestinations).(*schema.Set).List())
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
-	input := pingaccess.AddRuleCommandInput{
-		Body: pingaccess.RuleView{
-			Name:                  String(name),
-			ClassName:             String(className),
-			SupportedDestinations: &supDests,
-			Configuration:         dat,
-		},
-	}
-
 	svc := m.(*pingaccess.Client).Rules
+	input := pingaccess.AddRuleCommandInput{
+		Body: *resourcePingAccessRuleReadData(d),
+	}
 
 	result, _, err := svc.AddRuleCommand(&input)
 	if err != nil {
@@ -69,12 +55,11 @@ func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessRuleReadResult(d, result)
+	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
 func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pingaccess.Client).Rules
-
 	input := &pingaccess.GetRuleCommandInput{
 		Id: d.Id(),
 	}
@@ -84,36 +69,23 @@ func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error reading rule: %s", err)
 	}
 
-	return resourcePingAccessRuleReadResult(d, result)
+	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
 func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	supDests := expandStringList(d.Get(supportedDestinations).(*schema.Set).List())
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
+	svc := m.(*pingaccess.Client).Rules
 	input := pingaccess.UpdateRuleCommandInput{
-		Body: pingaccess.RuleView{
-			Name:                  String(name),
-			ClassName:             String(className),
-			SupportedDestinations: &supDests,
-			Configuration:         dat,
-		},
+		Body: *resourcePingAccessRuleReadData(d),
 		Id: d.Id(),
 	}
 
-	svc := m.(*pingaccess.Client).Rules
-
 	result, _, err := svc.UpdateRuleCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating rule: %s", err)
+		return fmt.Errorf("Error updating rule: %s", err)
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessRuleReadResult(d, result)
+	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
 func resourcePingAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
@@ -125,21 +97,41 @@ func resourcePingAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourcePingAccessRuleReadResult(d *schema.ResourceData, rv *pingaccess.RuleView) error {
-	if err := d.Set("name", rv.Name); err != nil {
+func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *pingaccess.RuleView, svc *pingaccess.RulesService) error {
+	setResourceDataString(d, "name", input.Name)
+	setResourceDataString(d, "class_name", input.ClassName)
+	if err := d.Set("supported_destinations", input.SupportedDestinations); err != nil {
 		return err
 	}
-	if err := d.Set("class_name", rv.ClassName); err != nil {
-		return err
-	}
-	if err := d.Set("supported_destinations", rv.SupportedDestinations); err != nil {
-		return err
-	}
-	b, _ := json.Marshal(rv.Configuration)
-	if err := d.Set("configuration", string(b)); err != nil {
+	b, _ := json.Marshal(input.Configuration)
+	config := string(b)
+
+	originalConfig := d.Get("configuration").(string)
+
+	//Search the Rules descriptors for CONCEALED fields, and update the original value back as we cannot use the
+	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
+	//has changed and needs updating
+	desc, _, _ := svc.GetRuleDescriptorsCommand()
+	config = maskConfigFromRuleDescriptors(desc, input.ClassName, originalConfig, config)
+
+	if err := d.Set("configuration", config); err != nil {
 		return err
 	}
 	return nil
+}
+
+func resourcePingAccessRuleReadData(d *schema.ResourceData) *pingaccess.RuleView {
+	config := d.Get("configuration").(string)
+	var dat map[string]interface{}
+	_ = json.Unmarshal([]byte(config), &dat)
+	supDests := expandStringList(d.Get("supported_destinations").(*schema.Set).List())
+	rule := &pingaccess.RuleView{
+		Name:          String(d.Get("name").(string)),
+		ClassName:     String(d.Get("class_name").(string)),
+		Configuration: dat,
+		SupportedDestinations: &supDests,
+	}
+	return rule
 }
 
 func suppressEquivalentConfigurationDiffs(k, old, new string, d *schema.ResourceData) bool {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -44,20 +43,14 @@ func TestAccPingAccessRule(t *testing.T) {
 				Config: testAccPingAccessRuleConfig("bar", "404"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 3, &out),
-					// testAccCheckPingAccessRuleAttributes(),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName}, []string{roleName}, []string{groupName}, &out),
 				),
-				ExpectError: regexp.MustCompile(`Provider produced inconsistent final plan`),
 			},
-			//{
-			//	Config: testAccPingAccessRuleConfig("bar", "403"),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 6, &out),
-			//		// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
-			//		// 	[]string{roleName2, roleName3}, []string{groupName2, groupName3}, &out),
-			//	),
-			//	ExpectError: regexp.MustCompile("Error: Provider produced inconsistent final plan"),
-			//},
+			{
+				Config: testAccPingAccessRuleConfig("bar", "403"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 6, &out),
+				),
+			},
 		},
 	})
 }

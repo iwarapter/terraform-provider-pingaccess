@@ -24,38 +24,27 @@ func resourcePingAccessAccessTokenValidator() *schema.Resource {
 
 func resourcePingAccessAccessTokenValidatorSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"class_name": &schema.Schema{
+		"class_name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"configuration": &schema.Schema{
+		"configuration": {
 			Type:             schema.TypeString,
 			Required:         true,
-			DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
+			DiffSuppressFunc: suppressEquivalentJsonDiffs,
 		},
 	}
 }
 
 func resourcePingAccessAccessTokenValidatorCreate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
-	input := pingaccess.AddAccessTokenValidatorCommandInput{
-		Body: pingaccess.AccessTokenValidatorView{
-			Name:          String(name),
-			ClassName:     String(className),
-			Configuration: dat,
-		},
-	}
-
 	svc := m.(*pingaccess.Client).AccessTokenValidators
+	input := pingaccess.AddAccessTokenValidatorCommandInput{
+		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
+	}
 
 	result, _, err := svc.AddAccessTokenValidatorCommand(&input)
 	if err != nil {
@@ -63,7 +52,7 @@ func resourcePingAccessAccessTokenValidatorCreate(d *schema.ResourceData, m inte
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessAccessTokenValidatorReadResult(d, result)
+	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
 func resourcePingAccessAccessTokenValidatorRead(d *schema.ResourceData, m interface{}) error {
@@ -78,26 +67,15 @@ func resourcePingAccessAccessTokenValidatorRead(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error reading AccessTokenValidator: %s", err)
 	}
 
-	return resourcePingAccessAccessTokenValidatorReadResult(d, result)
+	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
 func resourcePingAccessAccessTokenValidatorUpdate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
+	svc := m.(*pingaccess.Client).AccessTokenValidators
 	input := pingaccess.UpdateAccessTokenValidatorCommandInput{
-		Body: pingaccess.AccessTokenValidatorView{
-			Name:          String(name),
-			ClassName:     String(className),
-			Configuration: dat,
-		},
+		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
 		Id: d.Id(),
 	}
-
-	svc := m.(*pingaccess.Client).AccessTokenValidators
 
 	result, _, err := svc.UpdateAccessTokenValidatorCommand(&input)
 	if err != nil {
@@ -105,7 +83,7 @@ func resourcePingAccessAccessTokenValidatorUpdate(d *schema.ResourceData, m inte
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessAccessTokenValidatorReadResult(d, result)
+	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
 func resourcePingAccessAccessTokenValidatorDelete(d *schema.ResourceData, m interface{}) error {
@@ -117,16 +95,34 @@ func resourcePingAccessAccessTokenValidatorDelete(d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, rv *pingaccess.AccessTokenValidatorView) error {
-	if err := d.Set("name", rv.Name); err != nil {
-		return err
-	}
-	if err := d.Set("class_name", rv.ClassName); err != nil {
-		return err
-	}
-	b, _ := json.Marshal(rv.Configuration)
-	if err := d.Set("configuration", string(b)); err != nil {
+func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, input *pingaccess.AccessTokenValidatorView, svc *pingaccess.AccessTokenValidatorsService) error {
+	setResourceDataString(d, "name", input.Name)
+	setResourceDataString(d, "class_name", input.ClassName)
+	b, _ := json.Marshal(input.Configuration)
+	config := string(b)
+
+	originalConfig := d.Get("configuration").(string)
+
+	//Search the Access Token Validators descriptors for CONCEALED fields, and update the original value back as we cannot use the
+	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
+	//has changed and needs updating
+	desc, _, _ := svc.GetAccessTokenValidatorDescriptorsCommand()
+	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
+
+	if err := d.Set("configuration", config); err != nil {
 		return err
 	}
 	return nil
+}
+
+func resourcePingAccessAccessTokenValidatorReadData(d *schema.ResourceData) *pingaccess.AccessTokenValidatorView {
+	config := d.Get("configuration").(string)
+	var dat map[string]interface{}
+	_ = json.Unmarshal([]byte(config), &dat)
+	atv := &pingaccess.AccessTokenValidatorView{
+		Name:          String(d.Get("name").(string)),
+		ClassName:     String(d.Get("class_name").(string)),
+		Configuration: dat,
+	}
+	return atv
 }

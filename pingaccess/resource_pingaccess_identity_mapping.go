@@ -22,39 +22,28 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			className: &schema.Schema{
+			"class_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			name: &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			configuration: &schema.Schema{
+			"configuration": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
+				DiffSuppressFunc: suppressEquivalentJsonDiffs,
 			},
 		},
 	}
 }
 
 func resourcePingAccessIdentityMappingCreate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
-	input := pingaccess.AddIdentityMappingCommandInput{
-		Body: pingaccess.IdentityMappingView{
-			Name:          String(name),
-			ClassName:     String(className),
-			Configuration: dat,
-		},
-	}
-
 	svc := m.(*pingaccess.Client).IdentityMappings
+	input := pingaccess.AddIdentityMappingCommandInput{
+		Body: *resourcePingAccessIdentityMappingReadData(d),
+	}
 
 	result, _, err := svc.AddIdentityMappingCommand(&input)
 	if err != nil {
@@ -62,7 +51,7 @@ func resourcePingAccessIdentityMappingCreate(d *schema.ResourceData, m interface
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessIdentityMappingReadResult(d, result)
+	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
 func resourcePingAccessIdentityMappingRead(d *schema.ResourceData, m interface{}) error {
@@ -74,26 +63,15 @@ func resourcePingAccessIdentityMappingRead(d *schema.ResourceData, m interface{}
 	if err != nil {
 		return fmt.Errorf("Error reading IdentityMapping: %s", err)
 	}
-	return resourcePingAccessIdentityMappingReadResult(d, result)
+	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
 func resourcePingAccessIdentityMappingUpdate(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(name).(string)
-	className := d.Get(className).(string)
-	config := d.Get(configuration).(string)
-	var dat map[string]interface{}
-	_ = json.Unmarshal([]byte(config), &dat)
-
+	svc := m.(*pingaccess.Client).IdentityMappings
 	input := pingaccess.UpdateIdentityMappingCommandInput{
-		Body: pingaccess.IdentityMappingView{
-			Name:          String(name),
-			ClassName:     String(className),
-			Configuration: dat,
-		},
+		Body: *resourcePingAccessIdentityMappingReadData(d),
 		Id: d.Id(),
 	}
-
-	svc := m.(*pingaccess.Client).IdentityMappings
 
 	result, _, err := svc.UpdateIdentityMappingCommand(&input)
 	if err != nil {
@@ -101,7 +79,7 @@ func resourcePingAccessIdentityMappingUpdate(d *schema.ResourceData, m interface
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessIdentityMappingReadResult(d, result)
+	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
 func resourcePingAccessIdentityMappingDelete(d *schema.ResourceData, m interface{}) error {
@@ -116,16 +94,35 @@ func resourcePingAccessIdentityMappingDelete(d *schema.ResourceData, m interface
 	return nil
 }
 
-func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, rv *pingaccess.IdentityMappingView) error {
-	if err := d.Set("name", rv.Name); err != nil {
-		return err
-	}
-	if err := d.Set("class_name", rv.ClassName); err != nil {
-		return err
-	}
-	b, _ := json.Marshal(rv.Configuration)
-	if err := d.Set("configuration", string(b)); err != nil {
+func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *pingaccess.IdentityMappingView, svc *pingaccess.IdentityMappingsService) error {
+	setResourceDataString(d, "name", input.Name)
+	setResourceDataString(d, "class_name", input.ClassName)
+
+	b, _ := json.Marshal(input.Configuration)
+	config := string(b)
+
+	originalConfig := d.Get("configuration").(string)
+
+	//Search the Identity Mappings descriptors for CONCEALED fields, and update the original value back as we cannot use the
+	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
+	//has changed and needs updating
+	desc, _, _ := svc.GetIdentityMappingDescriptorsCommand()
+	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
+
+	if err := d.Set("configuration", config); err != nil {
 		return err
 	}
 	return nil
+}
+
+func resourcePingAccessIdentityMappingReadData(d *schema.ResourceData) *pingaccess.IdentityMappingView {
+	config := d.Get("configuration").(string)
+	var dat map[string]interface{}
+	_ = json.Unmarshal([]byte(config), &dat)
+	idMapping := &pingaccess.IdentityMappingView{
+		Name:          String(d.Get("name").(string)),
+		ClassName:     String(d.Get("class_name").(string)),
+		Configuration: dat,
+	}
+	return idMapping
 }
