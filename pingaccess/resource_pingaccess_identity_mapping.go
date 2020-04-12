@@ -40,7 +40,6 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 }
 
 func resourcePingAccessIdentityMappingCreate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessIdentityMappingCreate")
 	name := d.Get(name).(string)
 	className := d.Get(className).(string)
 	config := d.Get(configuration).(string)
@@ -79,7 +78,6 @@ func resourcePingAccessIdentityMappingRead(d *schema.ResourceData, m interface{}
 }
 
 func resourcePingAccessIdentityMappingUpdate(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessIdentityMappingUpdate")
 	name := d.Get(name).(string)
 	className := d.Get(className).(string)
 	config := d.Get(configuration).(string)
@@ -103,21 +101,18 @@ func resourcePingAccessIdentityMappingUpdate(d *schema.ResourceData, m interface
 	}
 
 	d.SetId(result.Id.String())
-	log.Println("[DEBUG] End - resourcePingAccessIdentityMappingUpdate")
 	return resourcePingAccessIdentityMappingReadResult(d, result)
 }
 
 func resourcePingAccessIdentityMappingDelete(d *schema.ResourceData, m interface{}) error {
-	log.Println("[DEBUG] Start - resourcePingAccessIdentityMappingDelete")
 	svc := m.(*pingaccess.Client).IdentityMappings
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	_, err := svc.DeleteIdentityMappingCommand(&pingaccess.DeleteIdentityMappingCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting virtualhost: %s", err)
+		return fmt.Errorf("Error deleting IdentityMapping: %s", err)
 	}
-	log.Println("[DEBUG] End - resourcePingAccessIdentityMappingDelete")
 	return nil
 }
 

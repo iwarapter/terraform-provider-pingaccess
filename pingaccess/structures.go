@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"log"
 	"strconv"
 
@@ -317,4 +319,48 @@ func configFieldHash(v interface{}) int {
 		buf.WriteString(fmt.Sprintf("%s-", d.(string)))
 	}
 	return hashcode.String(buf.String())
+}
+
+// Searches a given set of descriptors for a matching className, when found it will check all fields types for
+// a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by
+// current API and set the value back to the original defined. For COMPOSITE fields we then iterate recursively on its
+// fields.
+//
+// TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
+func maskConfigFromDescriptors(desc *pa.DescriptorsView, input *string, originalConfig string, config string) string {
+	for _, value := range desc.Items {
+		if *value.ClassName == *input {
+			config = maskConfigFromDescriptor(value, String(""), originalConfig, config)
+		}
+	}
+	return config
+}
+
+func maskConfigFromDescriptor(desc *pa.DescriptorView, input *string, originalConfig string, config string) string {
+	for _, c := range desc.ConfigurationFields {
+		config = maskConfigFromConfigurationField(c, input, originalConfig, config)
+	}
+	return config
+}
+
+func maskConfigFromConfigurationField(field *pa.ConfigurationField, input *string, originalConfig string, config string) string {
+	if *field.Type == "CONCEALED" {
+		path := fmt.Sprintf("%s.value", *field.Name)
+		v := gjson.Get(originalConfig, path)
+		if v.Exists() {
+			config, _ = sjson.Set(config, path, v.String())
+		} else if v = gjson.Get(originalConfig, *field.Name); v.Exists() {
+			config, _ = sjson.Set(config, *field.Name, v.String())
+		}
+		config, _ = sjson.Delete(config, fmt.Sprintf("%s.encryptedValue", *field.Name))
+	} else if *field.Type == "COMPOSITE" {
+		for _, value := range field.Fields {
+			newInput := String(fmt.Sprintf("%s.%s", *input, *value.Name))
+			if *input == "" {
+				newInput = value.Name
+			}
+			config = maskConfigFromConfigurationField(value, newInput, originalConfig, config)
+		}
+	}
+	return config
 }

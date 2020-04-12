@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
@@ -71,5 +72,8 @@ func (c *Config) Client() (interface{}, error) {
 	url, _ := url.Parse(c.BaseURL)
 	client := pingaccess.NewClient(c.Username, c.Password, url, c.Context, nil)
 
+	if os.Getenv("TF_LOG") == "DEBUG" || os.Getenv("TF_LOG") == "TRACE" {
+		client.LogDebug(true)
+	}
 	return client, nil
 }

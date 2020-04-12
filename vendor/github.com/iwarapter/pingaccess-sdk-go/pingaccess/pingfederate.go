@@ -8,7 +8,7 @@ import (
 
 type PingfederateService service
 
-//DeletePingFederateCommand - Resets the PingFederate configuration to default values
+//DeletePingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Resets the PingFederate configuration to default values
 //RequestType: DELETE
 //Input:
 func (s *PingfederateService) DeletePingFederateCommand() (resp *http.Response, err error) {
@@ -27,7 +27,7 @@ func (s *PingfederateService) DeletePingFederateCommand() (resp *http.Response, 
 
 }
 
-//GetPingFederateCommand - Get the PingFederate configuration
+//GetPingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Get the PingFederate configuration
 //RequestType: GET
 //Input:
 func (s *PingfederateService) GetPingFederateCommand() (result *PingFederateRuntimeView, resp *http.Response, err error) {
@@ -46,7 +46,7 @@ func (s *PingfederateService) GetPingFederateCommand() (result *PingFederateRunt
 
 }
 
-//UpdatePingFederateCommand - Update the PingFederate configuration
+//UpdatePingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Update the PingFederate configuration
 //RequestType: PUT
 //Input: input *UpdatePingFederateCommandInput
 func (s *PingfederateService) UpdatePingFederateCommand(input *UpdatePingFederateCommandInput) (result *PingFederateRuntimeView, resp *http.Response, err error) {
@@ -189,4 +189,103 @@ func (s *PingfederateService) UpdatePingFederateAdminCommand(input *UpdatePingFe
 
 type UpdatePingFederateAdminCommandInput struct {
 	Body PingFederateAdminView
+}
+
+//GetLegacyPingFederateMetadataCommand - [Attention: The endpoint "/pingfederate" is deprecated. This metadata corresponds to that configuration."/pingfederate/runtime" and "/pingfederate/runtime/metadata" should be used instead.] Get the PingFederate metadata
+//RequestType: GET
+//Input:
+func (s *PingfederateService) GetLegacyPingFederateMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error) {
+	path := "/pingfederate/metadata"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("GET", rel, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err = s.client.do(req, &result)
+	if err != nil {
+		return result, resp, err
+	}
+	return result, resp, nil
+
+}
+
+//DeletePingFederateRuntimeCommand - Resets the PingFederate configuration
+//RequestType: DELETE
+//Input:
+func (s *PingfederateService) DeletePingFederateRuntimeCommand() (resp *http.Response, err error) {
+	path := "/pingfederate/runtime"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("DELETE", rel, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err = s.client.do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
+
+}
+
+//GetPingFederateRuntimeCommand - Get the PingFederate configuration
+//RequestType: GET
+//Input:
+func (s *PingfederateService) GetPingFederateRuntimeCommand() (result *PingFederateMetadataRuntimeView, resp *http.Response, err error) {
+	path := "/pingfederate/runtime"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("GET", rel, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err = s.client.do(req, &result)
+	if err != nil {
+		return result, resp, err
+	}
+	return result, resp, nil
+
+}
+
+//UpdatePingFederateRuntimeCommand - Update the PingFederate configuration
+//RequestType: PUT
+//Input: input *UpdatePingFederateRuntimeCommandInput
+func (s *PingfederateService) UpdatePingFederateRuntimeCommand(input *UpdatePingFederateRuntimeCommandInput) (result *PingFederateMetadataRuntimeView, resp *http.Response, err error) {
+	path := "/pingfederate/runtime"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("PUT", rel, input.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err = s.client.do(req, &result)
+	if err != nil {
+		return result, resp, err
+	}
+	return result, resp, nil
+
+}
+
+type UpdatePingFederateRuntimeCommandInput struct {
+	Body PingFederateMetadataRuntimeView
+}
+
+//GetPingFederateMetadataCommand - Get the PingFederate Runtime metadata
+//RequestType: GET
+//Input:
+func (s *PingfederateService) GetPingFederateMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error) {
+	path := "/pingfederate/runtime/metadata"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("GET", rel, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err = s.client.do(req, &result)
+	if err != nil {
+		return result, resp, err
+	}
+	return result, resp, nil
+
 }

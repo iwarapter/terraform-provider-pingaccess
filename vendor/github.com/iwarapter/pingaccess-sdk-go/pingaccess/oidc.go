@@ -114,7 +114,7 @@ type GetOIDCProviderPluginDescriptorCommandInput struct {
 	PluginType string
 }
 
-//GetOIDCProviderMetadataCommand - Get the OpenID Connect Provider configuration
+//GetOIDCProviderMetadataCommand - Get the OpenID Connect Provider's metadata
 //RequestType: GET
 //Input:
 func (s *OidcService) GetOIDCProviderMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error) {

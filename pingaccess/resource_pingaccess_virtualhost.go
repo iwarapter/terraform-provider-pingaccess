@@ -23,23 +23,23 @@ func resourcePingAccessVirtualHost() *schema.Resource {
 
 func resourcePingAccessVirtualHostSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		agentResourceCacheTtl: &schema.Schema{
+		"agent_resource_cache_ttl": {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
-		host: &schema.Schema{
+		"host": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		keyPairID: &schema.Schema{
+		"key_pair_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
-		port: &schema.Schema{
+		"port": {
 			Type:     schema.TypeInt,
 			Required: true,
 		},
-		trustedCertificateGroupID: &schema.Schema{
+		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
@@ -54,7 +54,7 @@ func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) 
 
 	result, _, err := svc.AddVirtualHostCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating virtualhost: %s", err)
+		return fmt.Errorf("Error creating virtualhost: %s", err.Error())
 	}
 
 	d.SetId(result.Id.String())
@@ -68,7 +68,7 @@ func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) er
 	}
 	result, _, err := svc.GetVirtualHostCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading virtualhost: %s", err)
+		return fmt.Errorf("Error reading virtualhost: %s", err.Error())
 	}
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
@@ -95,7 +95,7 @@ func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) 
 
 	_, err := svc.DeleteVirtualHostCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting virtualhost: %s", err)
+		return fmt.Errorf("Error deleting virtualhost: %s", err.Error())
 	}
 	return nil
 }

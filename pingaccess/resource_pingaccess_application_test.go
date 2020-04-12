@@ -68,6 +68,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 		default_auth_type		= "Web"
 		destination					= "Site"
 		site_id							= "${pingaccess_site.acc_test_site.id}"
+		spa_support_enabled = false
 		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
 		web_session_id 			= "${pingaccess_websession.my_session.id}"
 
@@ -232,19 +233,20 @@ func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 				ContextRoot:       String("/"),
 				DefaultAuthType:   String("API"),
 				SiteId:            Int(0),
+				SpaSupportEnabled: Bool(true),
 				VirtualHostIds:    &[]*int{Int(1)},
 				Policy: map[string]*[]*pa.PolicyItem{
-					"API": &[]*pa.PolicyItem{
-						&pa.PolicyItem{
+					"API": {
+						{
 							Id:   "1",
 							Type: String("Rule"),
 						},
-						&pa.PolicyItem{
+						{
 							Id:   "2",
 							Type: String("Rule"),
 						},
 					},
-					"Web": &[]*pa.PolicyItem{},
+					"Web": {},
 				},
 				WebSessionId: Int(0),
 			},

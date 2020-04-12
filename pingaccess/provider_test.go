@@ -34,21 +34,22 @@ func TestMain(m *testing.M) {
 
 		if devOpsUserExists && devOpsKeyExists {
 			options = &dockertest.RunOptions{
-				Repository: "pingidentity/pingaccess",
-				Env:        []string{fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
-				Tag:        "5.2.2-edge",
+				Name: "terraform-provider-pingaccess-test",
+				Env:  []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
+				//Tag:        tag,
 			}
 		} else {
 			dir, _ := os.Getwd()
 			options = &dockertest.RunOptions{
-				Repository: "pingidentity/pingaccess",
-				Mounts:     []string{dir + "/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic"},
-				Tag:        "5.2.2-edge",
+				Name:   "terraform-provider-pingaccess-test",
+				Env:    []string{"PING_IDENTITY_ACCEPT_EULA=YES"},
+				Mounts: []string{dir + "/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic"},
+				//Tag:        tag,
 			}
 		}
 
 		// pulls an image, creates a container based on it and runs it
-		resource, err := pool.RunWithOptions(options)
+		resource, err := pool.BuildAndRunWithOptions("../Dockerfile", options)
 		resource.Expire(90)
 		if err != nil {
 			log.Fatalf("Could not start resource: %s", err)
@@ -60,7 +61,7 @@ func TestMain(m *testing.M) {
 			var err error
 			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 			url, _ := url.Parse(fmt.Sprintf("https://localhost:%s", resource.GetPort("9000/tcp")))
-			client := pa.NewClient("Administrator", "2Access", url, "/pa-admin-api/v3", nil)
+			client := pa.NewClient("administrator", "2FederateM0re", url, "/pa-admin-api/v3", nil)
 
 			log.Println("Attempting to connect to PingAccess admin API....")
 			_, _, err = client.Version.VersionCommand()
@@ -70,6 +71,7 @@ func TestMain(m *testing.M) {
 		}
 
 		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", resource.GetPort("9000/tcp")))
+		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
 		log.Println("Connected to PingAccess admin API....")
 		code := m.Run()
 		log.Println("Tests complete shutting down container")

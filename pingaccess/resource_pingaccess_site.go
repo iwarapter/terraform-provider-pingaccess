@@ -86,7 +86,7 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
-		useProxy: &schema.Schema{
+		"use_proxy": &schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 		},

@@ -31,6 +31,12 @@ func (s *ApplicationsService) GetApplicationsCommand(input *GetApplicationsComma
 	if input.VirtualHostId != "" {
 		q.Set("virtualHostId", input.VirtualHostId)
 	}
+	if input.RuleId != "" {
+		q.Set("ruleId", input.RuleId)
+	}
+	if input.RulesetId != "" {
+		q.Set("rulesetId", input.RulesetId)
+	}
 	if input.Filter != "" {
 		q.Set("filter", input.Filter)
 	}
@@ -63,6 +69,8 @@ type GetApplicationsCommandInput struct {
 	NumberPerPage string
 	AgentId       string
 	VirtualHostId string
+	RuleId        string
+	RulesetId     string
 	Filter        string
 	Name          string
 	SortKey       string
@@ -166,6 +174,12 @@ func (s *ApplicationsService) GetResourcesCommand(input *GetResourcesCommandInpu
 	if input.NumberPerPage != "" {
 		q.Set("numberPerPage", input.NumberPerPage)
 	}
+	if input.RuleId != "" {
+		q.Set("ruleId", input.RuleId)
+	}
+	if input.RulesetId != "" {
+		q.Set("rulesetId", input.RulesetId)
+	}
 	if input.Name != "" {
 		q.Set("name", input.Name)
 	}
@@ -195,6 +209,8 @@ func (s *ApplicationsService) GetResourcesCommand(input *GetResourcesCommandInpu
 type GetResourcesCommandInput struct {
 	Page          string
 	NumberPerPage string
+	RuleId        string
+	RulesetId     string
 	Name          string
 	Filter        string
 	SortKey       string

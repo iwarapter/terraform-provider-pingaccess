@@ -8,6 +8,67 @@ import (
 
 type HttpConfigService service
 
+//DeleteHttpMonitoringCommand - Resets the HTTP monitoring auditLevel to default value
+//RequestType: DELETE
+//Input:
+func (s *HttpConfigService) DeleteHttpMonitoringCommand() (resp *http.Response, err error) {
+	path := "/httpConfig/monitoring"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("DELETE", rel, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err = s.client.do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
+
+}
+
+//GetHttpMonitoringCommand - Get the HTTP monitoring auditLevel
+//RequestType: GET
+//Input:
+func (s *HttpConfigService) GetHttpMonitoringCommand() (result *HttpMonitoringView, resp *http.Response, err error) {
+	path := "/httpConfig/monitoring"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("GET", rel, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err = s.client.do(req, &result)
+	if err != nil {
+		return result, resp, err
+	}
+	return result, resp, nil
+
+}
+
+//UpdateHttpMonitoringCommand - Update the HTTP monitoring auditLevel
+//RequestType: PUT
+//Input: input *UpdateHttpMonitoringCommandInput
+func (s *HttpConfigService) UpdateHttpMonitoringCommand(input *UpdateHttpMonitoringCommandInput) (result *HttpMonitoringView, resp *http.Response, err error) {
+	path := "/httpConfig/monitoring"
+	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
+	req, err := s.client.newRequest("PUT", rel, input.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err = s.client.do(req, &result)
+	if err != nil {
+		return result, resp, err
+	}
+	return result, resp, nil
+
+}
+
+type UpdateHttpMonitoringCommandInput struct {
+	Body HttpMonitoringView
+}
+
 //DeleteHostSourceCommand - Resets the HTTP request Host Source type to default values
 //RequestType: DELETE
 //Input:

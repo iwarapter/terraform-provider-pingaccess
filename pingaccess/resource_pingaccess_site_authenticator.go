@@ -4,13 +4,9 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"net/http"
-
-	"github.com/tidwall/gjson"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"github.com/tidwall/sjson"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"net/http"
 )
 
 func resourcePingAccessSiteAuthenticator() *schema.Resource {
@@ -28,79 +24,78 @@ func resourcePingAccessSiteAuthenticator() *schema.Resource {
 
 func resourcePingAccessSiteAuthenticatorSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"class_name": &schema.Schema{
+		"class_name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"configuration": &schema.Schema{
-			Type:             schema.TypeString,
-			Required:         true,
-			DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
+		"configuration": {
+			Type:     schema.TypeString,
+			Required: true,
+			DiffSuppressFunc: suppressEquivalentJsonDiffs,
 		},
-		"hidden_fields": setOfString(),
 	}
 }
 
 func resourcePingAccessSiteAuthenticatorCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).SiteAuthenticators
-	input := pa.AddSiteAuthenticatorCommandInput{
+	svc := m.(*pingaccess.Client).SiteAuthenticators
+	input := pingaccess.AddSiteAuthenticatorCommandInput{
 		Body: *resourcePingAccessSiteAuthenticatorReadData(d),
 	}
 
 	result, _, err := svc.AddSiteAuthenticatorCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating site: %s", err)
+		return fmt.Errorf("Error creating site authenticator: %s", err.Error())
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessSiteAuthenticatorReadResult(d, result)
+	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
 
 func resourcePingAccessSiteAuthenticatorRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).SiteAuthenticators
-	input := &pa.GetSiteAuthenticatorCommandInput{
+	svc := m.(*pingaccess.Client).SiteAuthenticators
+	input := &pingaccess.GetSiteAuthenticatorCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetSiteAuthenticatorCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading site: %s", err)
+		return fmt.Errorf("Error reading site authenticator: %s", err.Error())
 	}
-	return resourcePingAccessSiteAuthenticatorReadResult(d, result)
+	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
 
 func resourcePingAccessSiteAuthenticatorUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).SiteAuthenticators
-	input := pa.UpdateSiteAuthenticatorCommandInput{
+	svc := m.(*pingaccess.Client).SiteAuthenticators
+	input := pingaccess.UpdateSiteAuthenticatorCommandInput{
 		Body: *resourcePingAccessSiteAuthenticatorReadData(d),
 		Id:   d.Id(),
 	}
 	result, _, err := svc.UpdateSiteAuthenticatorCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating virtualhost: %s", err)
+		return fmt.Errorf("Error updating site authenticator: %s", err.Error())
 	}
-	return resourcePingAccessSiteAuthenticatorReadResult(d, result)
+	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
 
 func resourcePingAccessSiteAuthenticatorDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).SiteAuthenticators
+	svc := m.(*pingaccess.Client).SiteAuthenticators
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	input := &pa.DeleteSiteAuthenticatorCommandInput{
+	input := &pingaccess.DeleteSiteAuthenticatorCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteSiteAuthenticatorCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting virtualhost: %s", err)
+		return fmt.Errorf("Error deleting site authenticator: %s", err.Error())
 	}
 	return nil
 }
 
-func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input *pa.SiteAuthenticatorView) error {
+func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input *pingaccess.SiteAuthenticatorView, svc *pingaccess.SiteAuthenticatorsService) error {
 	setResourceDataString(d, "name", input.Name)
 	setResourceDataString(d, "class_name", input.ClassName)
 
@@ -108,29 +103,24 @@ func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input
 	config := string(b)
 
 	originalConfig := d.Get("configuration").(string)
-	if _, ok := d.GetOkExists("hidden_fields"); ok {
-		hiddenFields := expandStringList(d.Get("hidden_fields").(*schema.Set).List())
-		for _, f := range hiddenFields {
-			path := fmt.Sprintf("%s.value", *f)
-			v := gjson.Get(originalConfig, path)
-			if v.Exists() {
-				config, _ = sjson.Set(config, path, v.String())
-			}
-			path = fmt.Sprintf("%s.encryptedValue", *f)
-			config, _ = sjson.Delete(config, path)
-		}
-	}
+
+	//Search the Site Authenticator descriptors for CONCEALED fields, and update the original value back as we cannot use the
+	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
+	//has changed and needs updating
+	desc, _, _ := svc.GetSiteAuthenticatorDescriptorsCommand()
+	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
+
 	if err := d.Set("configuration", config); err != nil {
 		return err
 	}
 	return nil
 }
 
-func resourcePingAccessSiteAuthenticatorReadData(d *schema.ResourceData) *pa.SiteAuthenticatorView {
+func resourcePingAccessSiteAuthenticatorReadData(d *schema.ResourceData) *pingaccess.SiteAuthenticatorView {
 	config := d.Get("configuration").(string)
 	var dat map[string]interface{}
 	_ = json.Unmarshal([]byte(config), &dat)
-	siteAuthenticator := &pa.SiteAuthenticatorView{
+	siteAuthenticator := &pingaccess.SiteAuthenticatorView{
 		Name:          String(d.Get("name").(string)),
 		ClassName:     String(d.Get("class_name").(string)),
 		Configuration: dat,

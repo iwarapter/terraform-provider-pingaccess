@@ -57,10 +57,10 @@ type GetKeyPairsCommandInput struct {
 	Order         string
 }
 
-//GenerateKeyPair - Generate a Key Pair
+//GenerateKeyPairCommand - Generate a Key Pair
 //RequestType: POST
-//Input: input *GenerateKeyPairInput
-func (s *KeyPairsService) GenerateKeyPair(input *GenerateKeyPairInput) (result *KeyPairView, resp *http.Response, err error) {
+//Input: input *GenerateKeyPairCommandInput
+func (s *KeyPairsService) GenerateKeyPairCommand(input *GenerateKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error) {
 	path := "/keyPairs/generate"
 	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
 	req, err := s.client.newRequest("POST", rel, input.Body)
@@ -76,8 +76,8 @@ func (s *KeyPairsService) GenerateKeyPair(input *GenerateKeyPairInput) (result *
 
 }
 
-type GenerateKeyPairInput struct {
-	Body NewKeyPairConfig
+type GenerateKeyPairCommandInput struct {
+	Body NewKeyPairConfigView
 }
 
 //ImportKeyPairCommand - Import a Key Pair from a PKCS12 file
@@ -194,7 +194,7 @@ type GetKeyPairCommandInput struct {
 //PatchKeyPairCommand - Update the chainCertificates of a Key Pair
 //RequestType: PATCH
 //Input: input *PatchKeyPairCommandInput
-func (s *KeyPairsService) PatchKeyPairCommand(input *PatchKeyPairCommandInput) (result *ChainCertificates, resp *http.Response, err error) {
+func (s *KeyPairsService) PatchKeyPairCommand(input *PatchKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error) {
 	path := "/keyPairs/{id}"
 	path = strings.Replace(path, "{id}", input.Id, -1)
 
@@ -213,7 +213,7 @@ func (s *KeyPairsService) PatchKeyPairCommand(input *PatchKeyPairCommandInput) (
 }
 
 type PatchKeyPairCommandInput struct {
-	Body ChainCertificates
+	Body ChainCertificatesDocView
 	Id   string
 }
 
@@ -268,10 +268,10 @@ type ExportKeyPairCertInput struct {
 	Id string
 }
 
-//GenerateCSR - Generate a Certificate Signing Request for a Key Pair
+//GenerateCsrCommand - Generate a Certificate Signing Request for a Key Pair
 //RequestType: GET
-//Input: input *GenerateCSRInput
-func (s *KeyPairsService) GenerateCSR(input *GenerateCSRInput) (resp *http.Response, err error) {
+//Input: input *GenerateCsrCommandInput
+func (s *KeyPairsService) GenerateCsrCommand(input *GenerateCsrCommandInput) (resp *http.Response, err error) {
 	path := "/keyPairs/{id}/csr"
 	path = strings.Replace(path, "{id}", input.Id, -1)
 
@@ -289,7 +289,7 @@ func (s *KeyPairsService) GenerateCSR(input *GenerateCSRInput) (resp *http.Respo
 
 }
 
-type GenerateCSRInput struct {
+type GenerateCsrCommandInput struct {
 	Id string
 }
 

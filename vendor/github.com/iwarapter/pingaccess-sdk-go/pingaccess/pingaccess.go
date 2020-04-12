@@ -6,9 +6,20 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 )
+
+const logReqMsg = `DEBUG: Request %s Details:
+---[ REQUEST ]--------------------------------------
+%s
+-----------------------------------------------------`
+const logRespMsg = `DEBUG: Response %s Details:
+---[ RESPONSE ]--------------------------------------
+%s
+-----------------------------------------------------`
 
 type Client struct {
 	Username   string
@@ -16,8 +27,10 @@ type Client struct {
 	BaseURL    *url.URL
 	Context    string
 	httpClient *http.Client
+	logDebug   bool
 
 	AccessTokenValidators      *AccessTokenValidatorsService
+	Acme                       *AcmeService
 	AdminConfigs               *AdminConfigService
 	AdminSessions              *AdminSessionInfoService
 	Agents                     *AgentsService
@@ -27,10 +40,12 @@ type Client struct {
 	AuthTokenManagements       *AuthTokenManagementService
 	Backups                    *BackupService
 	Certificates               *CertificatesService
+	Config                     *ConfigService
 	EngineListeners            *EngineListenersService
 	Engines                    *EnginesService
 	GlobalUnprotectedResources *GlobalUnprotectedResourcesService
 	HighAvailability           *HighAvailabilityService
+	HsmProviders               *HsmProvidersService
 	HttpConfig                 *HttpConfigService
 	HttpsListeners             *HttpsListenersService
 	IdentityMappings           *IdentityMappingsService
@@ -50,6 +65,7 @@ type Client struct {
 	SiteAuthenticators         *SiteAuthenticatorsService
 	Sites                      *SitesService
 	ThirdPartyServices         *ThirdPartyServicesService
+	TokenProvider              *TokenProviderService
 	TrustedCertificateGroups   *TrustedCertificateGroupsService
 	UnknownResources           *UnknownResourcesService
 	Users                      *UsersService
@@ -63,6 +79,10 @@ type service struct {
 	client *Client
 }
 
+func (c *Client) LogDebug(enable bool) {
+	c.logDebug = enable
+}
+
 func NewClient(username string, password string, baseUrl *url.URL, context string, httpClient *http.Client) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -74,6 +94,7 @@ func NewClient(username string, password string, baseUrl *url.URL, context strin
 	c.Context = context
 
 	c.AccessTokenValidators = &AccessTokenValidatorsService{client: c}
+	c.Acme = &AcmeService{client: c}
 	c.AdminConfigs = &AdminConfigService{client: c}
 	c.AdminSessions = &AdminSessionInfoService{client: c}
 	c.Agents = &AgentsService{client: c}
@@ -83,18 +104,22 @@ func NewClient(username string, password string, baseUrl *url.URL, context strin
 	c.AuthTokenManagements = &AuthTokenManagementService{client: c}
 	c.Backups = &BackupService{client: c}
 	c.Certificates = &CertificatesService{client: c}
+	c.Config = &ConfigService{client: c}
 	c.EngineListeners = &EngineListenersService{client: c}
 	c.Engines = &EnginesService{client: c}
 	c.GlobalUnprotectedResources = &GlobalUnprotectedResourcesService{client: c}
 	c.HighAvailability = &HighAvailabilityService{client: c}
+	c.HsmProviders = &HsmProvidersService{client: c}
 	c.HttpConfig = &HttpConfigService{client: c}
 	c.HttpsListeners = &HttpsListenersService{client: c}
 	c.IdentityMappings = &IdentityMappingsService{client: c}
 	c.KeyPairs = &KeyPairsService{client: c}
 	c.License = &LicenseService{client: c}
 	c.OAuth = &OauthService{client: c}
+	c.OauthKeyManagement = &OauthKeyManagementService{client: c}
 	c.Oidc = &OidcService{client: c}
 	c.PingFederate = &PingfederateService{client: c}
+	c.PingOne = &PingoneService{client: c}
 	c.Proxies = &ProxiesService{client: c}
 	c.Redirects = &RedirectsService{client: c}
 	c.RejectionHandlers = &RejectionHandlersService{client: c}
@@ -104,6 +129,7 @@ func NewClient(username string, password string, baseUrl *url.URL, context strin
 	c.SiteAuthenticators = &SiteAuthenticatorsService{client: c}
 	c.Sites = &SitesService{client: c}
 	c.ThirdPartyServices = &ThirdPartyServicesService{client: c}
+	c.TokenProvider = &TokenProviderService{client: c}
 	c.TrustedCertificateGroups = &TrustedCertificateGroupsService{client: c}
 	c.UnknownResources = &UnknownResourcesService{client: c}
 	c.Users = &UsersService{client: c}
@@ -137,11 +163,21 @@ func (c *Client) newRequest(method string, path *url.URL, body interface{}) (*ht
 }
 
 func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
-	// log.Println("[CLIENT] executing request")
-	// log.Printf("[CLIENT] METHOD: %s", req.Method)
-	// log.Printf("[CLIENT] URL: %s", req.URL.String())
-
+	if c.logDebug {
+		requestDump, err := httputil.DumpRequest(req, true)
+		if err != nil {
+			fmt.Println(err)
+		}
+		log.Printf(logReqMsg, "pingaccess-sdk-go", string(requestDump))
+	}
 	resp, err := c.httpClient.Do(req)
+	if c.logDebug {
+		responseDump, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			fmt.Println(err)
+		}
+		log.Printf(logRespMsg, "pingaccess-sdk-go", string(responseDump))
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -150,14 +186,7 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 		return resp, err
 	}
 	defer resp.Body.Close()
-	// if resp.StatusCode < 200 && resp.StatusCode > 299 {
-	// 	if w, ok := v.(io.Writer); ok {
-	// 		io.Copy(w, resp.Body)
-	// 	} else {
-	// 		err = json.NewDecoder(resp.Body).Decode(failure)
-	// 	}
-	// 	return resp, failure, err
-	// }
+
 	if v != nil {
 		if w, ok := v.(io.Writer); ok {
 			io.Copy(w, resp.Body)

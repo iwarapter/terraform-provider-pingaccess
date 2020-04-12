@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"fmt"
-
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -24,38 +23,38 @@ func resourcePingAccessOAuthServer() *schema.Resource {
 
 func resourcePingAccessOAuthServerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"audit_level": &schema.Schema{
+		"audit_level": {
 			Type:     schema.TypeString,
 			Optional: true,
 			Default:  "ON",
 		},
-		"cache_tokens": &schema.Schema{
+		"cache_tokens": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
 		"client_credentials": oAuthClientCredentials(),
-		"description": &schema.Schema{
+		"description": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"introspection_endpoint": &schema.Schema{
+		"introspection_endpoint": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
 
-		"secure": &schema.Schema{
+		"secure": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"send_audience": &schema.Schema{
+		"send_audience": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"subject_attribute_name": &schema.Schema{
+		"subject_attribute_name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"targets": &schema.Schema{
+		"targets": {
 			Type:     schema.TypeSet,
 			Required: true,
 			MinItems: 1,
@@ -63,16 +62,16 @@ func resourcePingAccessOAuthServerSchema() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 		},
-		"token_time_to_live_seconds": &schema.Schema{
+		"token_time_to_live_seconds": {
 			Type:     schema.TypeInt,
 			Optional: true,
 			Default:  -1,
 		},
-		"trusted_certificate_group_id": &schema.Schema{
+		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Required: true,
 		},
-		"use_proxy": &schema.Schema{
+		"use_proxy": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
@@ -88,7 +87,7 @@ func resourcePingAccessOAuthServerRead(d *schema.ResourceData, m interface{}) er
 	svc := m.(*pa.Client).OAuth
 	result, _, err := svc.GetAuthorizationServerCommand()
 	if err != nil {
-		return fmt.Errorf("Error reading oauth server settings: %s", err)
+		return fmt.Errorf("Error reading oauth server settings: %s", err.Error())
 	}
 
 	return resourcePingAccessOAuthServerReadResult(d, result)

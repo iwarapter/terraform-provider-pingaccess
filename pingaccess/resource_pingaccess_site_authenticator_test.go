@@ -2,9 +2,11 @@ package pingaccess
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
@@ -78,8 +80,18 @@ func testAccPingAccessSiteAuthenticatorConfig(name, password string) string {
 			}
 		}
 		EOF
-		hidden_fields = ["password"]
-	}`, name, password)
+	}
+
+	resource "pingaccess_site_authenticator" "acc_test_two" {
+		name          = "another"
+		class_name		= "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"
+		configuration = <<EOF
+		{
+			"username": "cheese",
+			"password": "%s"
+		}
+		EOF
+	}`, name, password, password)
 }
 
 func testAccCheckPingAccessSiteAuthenticatorExists(n string, c int64, out *pingaccess.SiteAuthenticatorView) resource.TestCheckFunc {
@@ -130,10 +142,39 @@ func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
 	for i, tc := range cases {
 		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
 
+			descs := pingaccess.DescriptorsView{
+				Items: []*pingaccess.DescriptorView{
+					{
+						ClassName: String("something"),
+						ConfigurationFields: []*pingaccess.ConfigurationField{
+							{
+								Name: String("password"),
+								Type: String("CONCEALED"),
+							},
+						},
+						Label: nil,
+						Type:  nil,
+					},
+				}}
+
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				// Test request parameters
+				equals(t, req.URL.String(), "/siteAuthenticators/descriptors")
+				// Send response to be tested
+				b, _ := json.Marshal(descs)
+				rw.Write(b)
+			}))
+			// Close the server when test finishes
+			defer server.Close()
+
+			// Use Client & URL from our local test server
+			url, _ := url.Parse(server.URL)
+			c := pingaccess.NewClient("", "", url, "", server.Client())
+
 			resourceSchema := resourcePingAccessSiteAuthenticatorSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourceLocalData.Set("hidden_fields", []string{"password"})
-			resourcePingAccessSiteAuthenticatorReadResult(resourceLocalData, &tc.SiteAuthenticator)
+			//resourceLocalData.Set("hidden_fields", []string{"password"})
+			resourcePingAccessSiteAuthenticatorReadResult(resourceLocalData, &tc.SiteAuthenticator, c.SiteAuthenticators)
 
 			if got := *resourcePingAccessSiteAuthenticatorReadData(resourceLocalData); !cmp.Equal(got, tc.SiteAuthenticator) {
 				t.Errorf("resourcePingAccessSiteAuthenticatorReadData() = %v", cmp.Diff(got, tc.SiteAuthenticator))

@@ -2,6 +2,7 @@ package pingaccess
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -28,6 +29,13 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
 				),
+			},
+			{
+				Config: testAccPingAccessOAuthServerConfig("https://thing/introspect", "secret"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
+				),
+				ExpectError: regexp.MustCompile(`Error updating oauth server settings: \[Save Failed\]\nIntrospection endpoint must be a valid relative path`),
 			},
 		},
 	})

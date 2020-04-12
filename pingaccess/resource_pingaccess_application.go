@@ -25,45 +25,45 @@ func resourcePingAccessApplication() *schema.Resource {
 
 func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"access_validator_id": &schema.Schema{
+		"access_validator_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
-		"agent_id": &schema.Schema{
+		"agent_id": {
 			Type:     schema.TypeInt,
 			Required: true,
 		},
-		"application_type": &schema.Schema{
+		"application_type": {
 			Type:     schema.TypeString,
 			Required: true,
 			ForceNew: true,
 		},
-		"case_sensitive_path": &schema.Schema{
+		"case_sensitive_path": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		contextRoot: &schema.Schema{
+		"context_root": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		defaultAuthType: &schema.Schema{
+		"default_auth_type": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		description: &schema.Schema{
+		"description": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		destination: &schema.Schema{
+		"destination": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		enabled: &schema.Schema{
+		"enabled": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"identity_mapping_ids": &schema.Schema{
+		"identity_mapping_ids": {
 			Type:     schema.TypeList,
 			Optional: true,
 			MaxItems: 1,
@@ -85,31 +85,36 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 				},
 			},
 		},
-		name: &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
 		"policy": applicationPolicySchema(),
-		realm: &schema.Schema{
+		"realm": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		requireHTTPS: &schema.Schema{
+		"require_https": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		siteID: &schema.Schema{
+		"site_id": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		virtualHostIDs: &schema.Schema{
+		"spa_support_enabled": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"virtual_host_ids": {
 			Type:     schema.TypeSet,
 			Required: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
-		"web_session_id": &schema.Schema{
+		"web_session_id": {
 			Type:     schema.TypeString,
 			Optional: true,
 			Default:  "0",
@@ -189,6 +194,7 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 	setResourceDataBool(d, "require_https", rv.RequireHTTPS)
 	siteID := strconv.Itoa(*rv.SiteId)
 	setResourceDataString(d, "site_id", &siteID)
+	setResourceDataBool(d, "spa_support_enabled", rv.SpaSupportEnabled)
 
 	if rv.VirtualHostIds != nil {
 		vhs := []string{}
@@ -219,7 +225,7 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 
 func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.ApplicationView {
 	siteID, _ := strconv.Atoi(d.Get("site_id").(string))
-	virtualHostIds := expandStringList(d.Get(virtualHostIDs).(*schema.Set).List())
+	virtualHostIds := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
 	vhIds := []*int{}
 	for _, i := range virtualHostIds {
 		text, _ := strconv.Atoi(*i)
@@ -227,13 +233,14 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 	}
 
 	application := &pa.ApplicationView{
-		AgentId:         Int(d.Get("agent_id").(int)),
-		Name:            String(d.Get("name").(string)),
-		ApplicationType: String(d.Get("application_type").(string)),
-		ContextRoot:     String(d.Get("context_root").(string)),
-		DefaultAuthType: String(d.Get("default_auth_type").(string)),
-		SiteId:          Int(siteID),
-		VirtualHostIds:  &vhIds,
+		AgentId:           Int(d.Get("agent_id").(int)),
+		Name:              String(d.Get("name").(string)),
+		ApplicationType:   String(d.Get("application_type").(string)),
+		ContextRoot:       String(d.Get("context_root").(string)),
+		DefaultAuthType:   String(d.Get("default_auth_type").(string)),
+		SiteId:            Int(siteID),
+		SpaSupportEnabled: Bool(d.Get("spa_support_enabled").(bool)),
+		VirtualHostIds:    &vhIds,
 	}
 
 	if _, ok := d.GetOkExists("access_validator_id"); ok {

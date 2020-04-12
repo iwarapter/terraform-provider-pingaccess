@@ -69,7 +69,7 @@ type UpdatePingOne4CCommandInput struct {
 	Body PingOne4CView
 }
 
-//GetPingOne4CMetadataCommand - Get the Ping One for Customers metadata
+//GetPingOne4CMetadataCommand - Get the PingOne for Customers metadata
 //RequestType: GET
 //Input:
 func (s *PingoneService) GetPingOne4CMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error) {

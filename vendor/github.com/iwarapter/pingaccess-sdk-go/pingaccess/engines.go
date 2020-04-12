@@ -156,7 +156,7 @@ type GetEngineCertificateCommandInput struct {
 //GetEngineStatusCommand - Get health status of all Engines
 //RequestType: GET
 //Input:
-func (s *EnginesService) GetEngineStatusCommand() (result *EngineHealthStatus, resp *http.Response, err error) {
+func (s *EnginesService) GetEngineStatusCommand() (result *EngineHealthStatusView, resp *http.Response, err error) {
 	path := "/engines/status"
 	rel := &url.URL{Path: fmt.Sprintf("%s%s", s.client.Context, path)}
 	req, err := s.client.newRequest("GET", rel, nil)

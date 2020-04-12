@@ -12,7 +12,7 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/hashicorp/terraform-plugin-sdk v1.9.0
-	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20190819192042-10d6fc750eb4
+	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405225845-0449df2d35ec
 	github.com/ory/dockertest v3.3.4+incompatible
 	github.com/tidwall/gjson v1.3.2
 	github.com/tidwall/sjson v1.0.4
