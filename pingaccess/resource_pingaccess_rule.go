@@ -3,12 +3,9 @@ package pingaccess
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"github.com/tidwall/sjson"
 )
 
 func resourcePingAccessRule() *schema.Resource {
@@ -35,6 +32,14 @@ func resourcePingAccessRule() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				DiffSuppressFunc: suppressEquivalentJsonDiffs,
+			},
+			"ignrored_configuration_fields": { //TODO remove in future release
+				Type:     schema.TypeSet,
+				Optional: true,
+				Deprecated: "This is no longer used to mask fields and will be removed in future versions.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 		CustomizeDiff: customdiff.ComputedIf("configuration", func(diff *schema.ResourceDiff, meta interface{}) bool {
@@ -76,7 +81,7 @@ func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pingaccess.Client).Rules
 	input := pingaccess.UpdateRuleCommandInput{
 		Body: *resourcePingAccessRuleReadData(d),
-		Id: d.Id(),
+		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateRuleCommand(&input)
@@ -126,24 +131,10 @@ func resourcePingAccessRuleReadData(d *schema.ResourceData) *pingaccess.RuleView
 	_ = json.Unmarshal([]byte(config), &dat)
 	supDests := expandStringList(d.Get("supported_destinations").(*schema.Set).List())
 	rule := &pingaccess.RuleView{
-		Name:          String(d.Get("name").(string)),
-		ClassName:     String(d.Get("class_name").(string)),
-		Configuration: dat,
+		Name:                  String(d.Get("name").(string)),
+		ClassName:             String(d.Get("class_name").(string)),
+		Configuration:         dat,
 		SupportedDestinations: &supDests,
 	}
 	return rule
-}
-
-func suppressEquivalentConfigurationDiffs(k, old, new string, d *schema.ResourceData) bool {
-	if _, ok := d.GetOkExists("ignrored_configuration_fields"); ok {
-		for _, f := range expandStringList(d.Get("ignrored_configuration_fields").(*schema.Set).List()) {
-			old, _ = sjson.Delete(old, *f)
-			new, _ = sjson.Delete(new, *f)
-		}
-	}
-	var o1 interface{}
-	var o2 interface{}
-	_ = json.Unmarshal([]byte(old), &o1)
-	_ = json.Unmarshal([]byte(new), &o2)
-	return reflect.DeepEqual(o1, o2)
 }

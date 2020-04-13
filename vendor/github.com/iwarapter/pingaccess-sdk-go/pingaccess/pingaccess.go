@@ -171,15 +171,15 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 		log.Printf(logReqMsg, "pingaccess-sdk-go", string(requestDump))
 	}
 	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	if c.logDebug {
 		responseDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			fmt.Println(err)
 		}
 		log.Printf(logRespMsg, "pingaccess-sdk-go", string(responseDump))
-	}
-	if err != nil {
-		return nil, err
 	}
 	err = CheckResponse(resp)
 	if err != nil {

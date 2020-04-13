@@ -1,8 +1,14 @@
 package pingaccess
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"log"
 	"net/http"
 	"net/url"
@@ -11,75 +17,63 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"github.com/ory/dockertest"
 )
 
 func TestMain(m *testing.M) {
 	_, acceptanceTesting := os.LookupEnv("TF_ACC")
 	if acceptanceTesting {
-		pool, err := dockertest.NewPool("")
-		if err != nil {
-			log.Fatalf("Could not connect to docker: %s", err)
-		}
 
 		devOpsUser, devOpsUserExists := os.LookupEnv("PING_IDENTITY_DEVOPS_USER")
 		devOpsKey, devOpsKeyExists := os.LookupEnv("PING_IDENTITY_DEVOPS_KEY")
 
-		var options *dockertest.RunOptions
-
-		if devOpsUserExists && devOpsKeyExists {
-			options = &dockertest.RunOptions{
-				Name: "terraform-provider-pingaccess-test",
-				Env:  []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
-				//Tag:        tag,
-			}
-		} else {
-			dir, _ := os.Getwd()
-			options = &dockertest.RunOptions{
-				Name:   "terraform-provider-pingaccess-test",
-				Env:    []string{"PING_IDENTITY_ACCEPT_EULA=YES"},
-				Mounts: []string{dir + "/pingaccess.lic:/opt/in/instance/conf/pingaccess.lic"},
-				//Tag:        tag,
-			}
+		if devOpsKeyExists != true || devOpsUserExists != true {
+			log.Fatalf("Both PING_IDENTITY_DEVOPS_USER and PING_IDENTITY_DEVOPS_KEY environment variables must be set for acceptance tests.")
 		}
 
-		// pulls an image, creates a container based on it and runs it
-		resource, err := pool.BuildAndRunWithOptions("../Dockerfile", options)
-		resource.Expire(90)
+		ctx := context.Background()
+		//networkName := "tf-pa-test-network"
+		gcr := testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				FromDockerfile: testcontainers.FromDockerfile{
+					Context:    "../",
+					Dockerfile: "Dockerfile",
+				},
+				//Networks:     []string{networkName},
+				ExposedPorts: []string{"9000/tcp"},
+				WaitingFor:   wait.ForLog("INFO: No file named /instance/data/data.json found, skipping import."),
+				Name:         "terraform-provider-pingaccess-test",
+				Env:          map[string]string{"PING_IDENTITY_ACCEPT_EULA": "YES", "PING_IDENTITY_DEVOPS_USER": devOpsUser, "PING_IDENTITY_DEVOPS_KEY": devOpsKey},
+			},
+			Started: true,
+		}
+		//provider, _ := gcr.ProviderType.GetProvider()
+		//net, _ := provider.CreateNetwork(ctx, testcontainers.NetworkRequest{
+		//	Name:           networkName,
+		//	CheckDuplicate: true,
+		//})
+
+		paContainer, err := testcontainers.GenericContainer(ctx, gcr)
 		if err != nil {
-			log.Fatalf("Could not start resource: %s", err)
+			log.Fatal(err)
 		}
-		pool.MaxWait = time.Minute * 2
+		//defer net.Remove(ctx)
+		defer paContainer.Terminate(ctx)
 
-		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
-		if err := pool.Retry(func() error {
-			var err error
-			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-			url, _ := url.Parse(fmt.Sprintf("https://localhost:%s", resource.GetPort("9000/tcp")))
-			client := pa.NewClient("administrator", "2FederateM0re", url, "/pa-admin-api/v3", nil)
-
-			log.Println("Attempting to connect to PingAccess admin API....")
-			_, _, err = client.Version.VersionCommand()
-			return err
-		}); err != nil {
-			log.Fatalf("Could not connect to docker: %s", err)
-		}
-
-		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", resource.GetPort("9000/tcp")))
+		port, _ := paContainer.MappedPort(ctx, "9000")
+		url, _ := url.Parse(fmt.Sprintf("https://localhost:%s", port.Port()))
+		os.Setenv("PINGACCESS_BASEURL", url.String())
 		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
-		log.Println("Connected to PingAccess admin API....")
+		log.Printf("Setting PingAccess admin API: %s", url.String())
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client := pingaccess.NewClient("Administrator", "2FederateM0re", url, "/pa-admin-api/v3", nil)
+		version, _, err := client.Version.VersionCommand()
+		if err != nil {
+			log.Fatalf("Failed to retrieve version from server: %v", err)
+		}
+		log.Printf("Connected to PingAccess version: %s", *version.Version)
+
 		code := m.Run()
 		log.Println("Tests complete shutting down container")
-
-		// You can't defer this because os.Exit doesn't care for defer
-		if err := pool.Purge(resource); err != nil {
-			log.Fatalf("Could not purge resource: %s", err)
-		}
 
 		os.Exit(code)
 	} else {

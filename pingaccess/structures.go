@@ -34,6 +34,26 @@ func requiredListOfString() *schema.Schema {
 	}
 }
 
+func acmeServerAccountsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"location": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
 func applicationPolicySchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -321,6 +341,39 @@ func configFieldHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
+func flattenLinkViewList(in []*pa.LinkView) []interface{} {
+	var m []interface{}
+	for _, v := range in {
+		m = append(m, flattenLinkView(v))
+	}
+	return m
+}
+
+func expandLinkView(in []interface{}) *pa.LinkView {
+	ca := &pa.LinkView{}
+	for _, raw := range in {
+		l := raw.(map[string]interface{})
+		if val, ok := l["id"]; ok {
+			ca.Id = String(val.(string))
+		}
+		if val, ok := l["location"]; ok {
+			ca.Location = String(val.(string))
+		}
+	}
+	return ca
+}
+
+func flattenLinkView(in *pa.LinkView) map[string]interface{} {
+	s := make(map[string]interface{})
+	if in.Id != nil {
+		s["id"] = *in.Id
+	}
+	if in.Location != nil {
+		s["location"] = *in.Location
+	}
+	return s
+}
+
 // Searches a given set of RuleDescriptors for a matching className, when found it will check all fields types for
 // a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by
 // current API and set the value back to the original defined. For COMPOSITE fields we then iterate recursively on its
@@ -342,7 +395,6 @@ func maskConfigFromRuleDescriptor(desc *pa.RuleDescriptorView, input *string, or
 	}
 	return config
 }
-
 
 // Searches a given set of descriptors for a matching className, when found it will check all fields types for
 // a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by

@@ -83,3 +83,11 @@ func validateHTTPListenerName(value interface{}, field string) (warns []string, 
 	}
 	return
 }
+
+func validateWebSessionSameSite(value interface{}, field string) (warns []string, errs []error) {
+	v := value.(string)
+	if v != "Disabled" && v != "Lax" && v != "None" {
+		errs = append(errs, fmt.Errorf("%q must be either 'Disabled', 'Lax' or 'None' not %s", field, v))
+	}
+	return
+}

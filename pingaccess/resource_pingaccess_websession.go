@@ -93,6 +93,12 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 			Default:    true,
 			Deprecated: "DEPRECATED - to be removed in a future release; please use 'scopes' instead",
 		},
+		"same_site": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      "None",
+			ValidateFunc: validateWebSessionSameSite,
+		},
 		"scopes": &schema.Schema{
 			Type:     schema.TypeSet,
 			Optional: true,
@@ -202,6 +208,7 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.We
 	setResourceDataInt(d, "refresh_user_info_claims_interval", input.RefreshUserInfoClaimsInterval)
 	setResourceDataString(d, "request_preservation_type", input.RequestPreservationType)
 	setResourceDataBool(d, "request_profile", input.RequestProfile)
+	setResourceDataString(d, "same_site", input.SameSite)
 	setResourceDataBool(d, "secure_cookie", input.SecureCookie)
 	setResourceDataBool(d, "send_requested_url_to_provider", input.SendRequestedUrlToProvider)
 	setResourceDataInt(d, "session_timeout_in_minutes", input.SessionTimeoutInMinutes)
@@ -275,6 +282,10 @@ func resourcePingAccessWebSessionReadData(d *schema.ResourceData) *pa.WebSession
 
 	if _, ok := d.GetOkExists("request_profile"); ok {
 		websession.RequestProfile = Bool(d.Get("request_profile").(bool))
+	}
+
+	if _, ok := d.GetOkExists("same_site"); ok {
+		websession.SameSite = String(d.Get("same_site").(string))
 	}
 
 	if _, ok := d.GetOkExists("scopes"); ok {

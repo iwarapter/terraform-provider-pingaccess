@@ -74,7 +74,7 @@ func resourcePingAccessAccessTokenValidatorUpdate(d *schema.ResourceData, m inte
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	input := pingaccess.UpdateAccessTokenValidatorCommandInput{
 		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
-		Id: d.Id(),
+		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateAccessTokenValidatorCommand(&input)

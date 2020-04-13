@@ -70,7 +70,7 @@ func resourcePingAccessIdentityMappingUpdate(d *schema.ResourceData, m interface
 	svc := m.(*pingaccess.Client).IdentityMappings
 	input := pingaccess.UpdateIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
-		Id: d.Id(),
+		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateIdentityMappingCommand(&input)

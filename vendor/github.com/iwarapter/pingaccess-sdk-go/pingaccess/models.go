@@ -25,6 +25,7 @@ type AcmeAccountView struct {
 	PrivateKey   *HiddenFieldView `json:"privateKey,omitempty"`
 	PublicKey    *PublicKeyView   `json:"publicKey,omitempty"`
 	Url          *string          `json:"url,omitempty"`
+	Id           json.Number      `json:"id,omitempty"`
 }
 
 //AcmeCertStatus
@@ -40,6 +41,7 @@ type AcmeCertificateRequestView struct {
 	AcmeServerId   *string         `json:"acmeServerId"`
 	KeyPairId      *int            `json:"keyPairId"`
 	Url            *string         `json:"url"`
+	Id             json.Number     `json:"id,omitempty"`
 }
 
 //AcmeServerView - An ACME server.
@@ -47,6 +49,7 @@ type AcmeServerView struct {
 	AcmeAccounts []*LinkView `json:"acmeAccounts,omitempty"`
 	Name         *string     `json:"name"`
 	Url          *string     `json:"url"`
+	Id           json.Number `json:"id,omitempty"`
 }
 
 //AcmeServersView - A collection of ACME servers.

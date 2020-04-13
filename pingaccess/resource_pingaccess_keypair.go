@@ -2,6 +2,7 @@ package pingaccess
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -58,6 +59,10 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 		"expires": &schema.Schema{
 			Type:     schema.TypeInt,
 			Computed: true,
+		},
+		"hsm_provider_id": {
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"issuer_dn": &schema.Schema{
 			Type:     schema.TypeString,
@@ -142,6 +147,10 @@ func resourcePingAccessKeyPairUpdate(d *schema.ResourceData, m interface{}) erro
 		},
 		Id: d.Id(),
 	}
+	if _, ok := d.GetOkExists("hsm_provider_id"); ok {
+		hsmId, _ := strconv.Atoi(d.Get("hsm_provider_id").(string))
+		input.Body.HsmProviderId = Int(hsmId)
+	}
 
 	svc := m.(*pa.Client).KeyPairs
 
@@ -177,6 +186,9 @@ func resourcePingAccessKeyPairReadResult(d *schema.ResourceData, rv *pa.KeyPairV
 	}
 	if err := d.Set("expires", rv.Expires); err != nil {
 		return err
+	}
+	if err := d.Set("hsm_provider_id", rv.HsmProviderId); err != nil {
+
 	}
 	if err := d.Set("issuer_dn", rv.IssuerDn); err != nil {
 		return err

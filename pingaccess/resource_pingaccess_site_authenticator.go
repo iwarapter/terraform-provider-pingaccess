@@ -33,9 +33,17 @@ func resourcePingAccessSiteAuthenticatorSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"configuration": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:             schema.TypeString,
+			Required:         true,
 			DiffSuppressFunc: suppressEquivalentJsonDiffs,
+		},
+		"hidden_fields": { //TODO remove in future release
+			Type:     schema.TypeSet,
+			Optional: true,
+			Deprecated: "This is no longer used to mask fields and will be removed in future versions.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
 	}
 }

@@ -1,19 +1,19 @@
 module github.com/iwarapter/terraform-provider-pingaccess
 
-go 1.12
-
-replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
+go 1.13
 
 require (
-	github.com/Microsoft/go-winio v0.4.13 // indirect
-	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/containerd/continuity v0.0.0-20190426062206-aaeac12a7ffc // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/Microsoft/go-winio v0.4.14 // indirect
+	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
+	github.com/containerd/continuity v0.0.0-20200228182428-0f16d7a0959c // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/hashicorp/terraform-plugin-sdk v1.9.0
 	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405225845-0449df2d35ec
-	github.com/ory/dockertest v3.3.4+incompatible
+	github.com/sirupsen/logrus v1.5.0 // indirect
+	github.com/testcontainers/testcontainers-go v0.4.0
 	github.com/tidwall/gjson v1.3.2
 	github.com/tidwall/sjson v1.0.4
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
+	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 )

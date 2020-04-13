@@ -1,3 +1,27 @@
+## 0.4.0 Unreleased
+
+NOTES:
+
+* This release is built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+* This release changes the way several resources handle the json configuration to mask sensitive values, the following resources are affected:
+    - `pingaccess_access_token_validator`
+    - `pingaccess_hsm_provider`
+    - `pingaccess_rule`
+    - `pingaccess_identity_mapping`
+    - `pingaccess_site_authenticator`
+
+FEATURES:
+
+* **New DataSource:** `pingaccess_acme_default`
+* **New Resource:** `pingaccess_acme_server`
+* **New Resource:** `pingaccess_hsm_provider`
+* resource/websession: Added support for `same_site` attribute.
+* resource/keypair: Added `hsm_provider_id` attribute.
+
+BUG FIXES:
+
+* resource/pingaccess_rule: Fixed issue with interpreted configuration producing inconsistent final plan. 
+
 ## 0.3.0 (November 13, 2019)
 
 FEATURES:
