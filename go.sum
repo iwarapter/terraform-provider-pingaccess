@@ -190,6 +190,8 @@ github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405203804-c9586fe42e17 h1:r68
 github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405203804-c9586fe42e17/go.mod h1:5FnKTPlitpx5z7Q/itbtKkgCEOBXXqhGOJqmryBZrZk=
 github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405225845-0449df2d35ec h1:0odiCiPgmr9XAxoq5avnKMKiB+S4RcT/9ERFJp813dM=
 github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405225845-0449df2d35ec/go.mod h1:5FnKTPlitpx5z7Q/itbtKkgCEOBXXqhGOJqmryBZrZk=
+github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200414193849-b443faf152d2 h1:UIKwldmS841vnb8eULEZ/DCyW2mCuiQlAv/Wu9z/1l0=
+github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200414193849-b443faf152d2/go.mod h1:5FnKTPlitpx5z7Q/itbtKkgCEOBXXqhGOJqmryBZrZk=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=

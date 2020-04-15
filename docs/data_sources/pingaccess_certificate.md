@@ -1,3 +1,5 @@
+#Data Source: pingaccess_certificate
+
 Use this data source to get the ID of a certificate in Ping Access, you can reference it by alias without having to hard code the IDs as input.
 
 ### Example Usage

@@ -1,3 +1,5 @@
+#Data Source: pingaccess_trusted_certificate_group
+
 Use this data source to get the ID of a trusted certificate group in Ping Access, you can reference it by name without having to hard code the IDs as input.
 
 ### Example Usage

@@ -1,3 +1,5 @@
+#Resource: pingaccess_https_listener
+
 Provides a https listener.
 
 ## Example Usage

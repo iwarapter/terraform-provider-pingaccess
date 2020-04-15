@@ -1,3 +1,5 @@
+#Resource: pingaccess_oauth_server
+
 Provides an Authorization Server configuration.
 
 ### Example Usage

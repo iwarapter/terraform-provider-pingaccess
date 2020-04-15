@@ -1,3 +1,5 @@
+#Resource: pingaccess_ruleset
+
 Provides a ruleset.
 
 ## Example Usage

@@ -1,3 +1,5 @@
+#Resource: pingaccess_trusted_certificate_group
+
 Provides a trusted certificate group.
 
 ## Example Usage
@@ -18,8 +20,6 @@ for the Trust Any certificate group.
 
 - [`skip_certificate_date_check`](#skip_certificate_date_check) -  This field is true if certificates that have expired or are not yet valid but have passed the other certificate checks should be trusted.
 
-- [`system_group`](#system_group) -  This field is read-only and indicates the trusted certificate group cannot be modified.
-
 - [`use_java_trust_store`](#use_java_trust_store) -  This field is true if the certificates in the group should also include all certificates in the Java Trust Store.
 
 ## Attributes Reference
@@ -27,6 +27,8 @@ for the Trust Any certificate group.
 In addition to all arguments above, the following attributes are exported:
 
 - [`id`](#id) - The trusted certificate group's ID.
+
+- [`system_group`](#system_group) -  This field is read-only and indicates the trusted certificate group cannot be modified.
 
 ## Import
 

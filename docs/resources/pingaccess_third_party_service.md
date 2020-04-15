@@ -1,3 +1,5 @@
+#Resource: pingaccess_third_party_service
+
 Provides a third party service.
 
 ## Example Usage

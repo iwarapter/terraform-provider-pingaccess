@@ -1,4 +1,9 @@
+#Resource: pingaccess_auth_token_management
+
 Provides a auth token management.
+
+!!! warning
+    This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource will resets the Auth Token Management configuration to default values
 
 ## Example Usage
 ```terraform

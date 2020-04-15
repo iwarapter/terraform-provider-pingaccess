@@ -10,6 +10,4 @@ resource "pingaccess_site_authenticator" "demo_site_authenticator" {
       }
     }
     EOF
-
-  hidden_fields = ["password"]
 }

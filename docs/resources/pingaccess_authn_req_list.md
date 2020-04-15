@@ -1,3 +1,5 @@
+#Resource: pingaccess_authn_req_list
+
 Provides a AuthN Req List.
 
 ## Example Usage

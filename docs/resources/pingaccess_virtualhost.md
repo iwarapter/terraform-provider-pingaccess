@@ -1,3 +1,5 @@
+#Resource: pingaccess_virtualhost
+
 Provides a virtualhost.
 
 ## Example Usage

@@ -1,7 +1,12 @@
+#Resource: pingaccess_site_authenticator
+
 Provides a site authenticator.
 
 !!! warning
-    This resource will store any credentials in the backend state file, please ensure you use an appropriate backend with the relevent encryption/access controls etc for this.
+    This resource will store any credentials in the backend state file, please ensure you use an appropriate backend with the relevant encryption/access controls etc for this.
+
+!!! tip
+    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
 
 ## Example Usage
 
@@ -18,9 +23,6 @@ The following arguments are supported:
 - [`configuration`](#configuration) - (Required) The site authenticator's configuration data.
 
 - [`name`](#name) - (Required) The site authenticator's name.
-
-- [`hidden_fields`](#hidden_fields) - (Optional) This is a configuration field, to help manage credentials within the resource. As the PingAccess API doesn't return the password used and the encryptedValue field changes on every call we need to store the password field and mask it so we can correctly identify when it has changed (according to the resource not the actual API).
-
 
 ## Attributes Reference
 

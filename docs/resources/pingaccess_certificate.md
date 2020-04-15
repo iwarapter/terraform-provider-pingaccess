@@ -1,3 +1,5 @@
+#Resource: pingaccess_ceritficate
+
 Provides a ceritficate.
 
 ### Example Usage

@@ -12,7 +12,7 @@ NOTES:
 
 FEATURES:
 
-* **New DataSource:** `pingaccess_acme_default`
+* **New Data Source:** `pingaccess_acme_default`
 * **New Resource:** `pingaccess_acme_server`
 * **New Resource:** `pingaccess_hsm_provider`
 * resource/websession: Added support for `same_site` attribute.

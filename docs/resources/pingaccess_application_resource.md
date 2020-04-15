@@ -1,3 +1,5 @@
+#Resource: pingaccess_application_resource
+
 Provides a application resource.
 
 ## Example Usage

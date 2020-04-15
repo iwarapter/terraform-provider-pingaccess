@@ -1,4 +1,9 @@
+#Resource: pingaccess_rule
+
 Provides a rule.
+
+!!! tip
+    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
 
 ## Example Usage
 ```terraform

@@ -1,3 +1,5 @@
+#Resource: pingaccess_site
+
 Provides a site.
 
 ## Example Usage

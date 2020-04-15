@@ -1,4 +1,9 @@
+#Resource: pingaccess_websession
+
 Provides a web session.
+
+!!! tip
+    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `client_credentials.client_secret` block.
 
 ## Example Usage
 ```terraform
@@ -14,6 +19,10 @@ The following arguments are supported:
 - [`cache_user_attributes`](#cache_user_attributes) -  Specify if PingAccess should cache user attribute information for use in policy decisions. When disabled, this data is encoded and stored in the session cookie.
 
 - [`client_credentials`](#client_credentials) - Specify the client credentials.
+  
+    - [`client_credentials.client_id`](#client_credentials-client_id) - Specify the client ID.
+    
+    - [`client_credentials.client_secret`](#client_credentials-client_secret) - Specify the client secret.
 
 - [`cookie_domain`](#cookie_domain) -  The domain where the cookie is stored--for example, corp.yourcompany.com.
 

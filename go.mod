@@ -9,7 +9,7 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/hashicorp/terraform-plugin-sdk v1.9.0
-	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405225845-0449df2d35ec
+	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200414193849-b443faf152d2
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/testcontainers/testcontainers-go v0.4.0
 	github.com/tidwall/gjson v1.3.2
