@@ -17,71 +17,39 @@ func resourcePingAccessPingFederateRuntime() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
 		Schema: resourcePingAccessPingFederateRuntimeSchema(),
 	}
 }
 
 func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"audit_level": &schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "ON",
-		},
-		"back_channel_base_path": &schema.Schema{
+		"description": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"back_channel_secure": &schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
-		},
-		"base_path": &schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"expected_hostname": &schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"host": &schema.Schema{
+		"issuer": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"port": &schema.Schema{
-			Type:     schema.TypeInt,
-			Required: true,
-		},
-		"secure": &schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
-		},
-		"skip_hostname_verification": &schema.Schema{
+		"skip_hostname_verification": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		"targets": &schema.Schema{
-			Type:     schema.TypeSet,
+		"sts_token_exchange_endpoint": {
+			Type:     schema.TypeString,
 			Optional: true,
-			MinItems: 0,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
 		},
-		"trusted_certificate_group_id": &schema.Schema{
+		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
-		"use_proxy": &schema.Schema{
+		"use_proxy": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		"use_slo": &schema.Schema{
+		"use_slo": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
@@ -96,7 +64,7 @@ func resourcePingAccessPingFederateRuntimeCreate(d *schema.ResourceData, m inter
 
 func resourcePingAccessPingFederateRuntimeRead(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pa.Client).PingFederate
-	result, _, err := svc.GetPingFederateCommand()
+	result, _, err := svc.GetPingFederateRuntimeCommand()
 	if err != nil {
 		return fmt.Errorf("Error reading pingfederate runtime settings: %s", err)
 	}
@@ -106,10 +74,10 @@ func resourcePingAccessPingFederateRuntimeRead(d *schema.ResourceData, m interfa
 
 func resourcePingAccessPingFederateRuntimeUpdate(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pa.Client).PingFederate
-	input := pa.UpdatePingFederateCommandInput{
+	input := pa.UpdatePingFederateRuntimeCommandInput{
 		Body: *resourcePingAccessPingFederateRuntimeReadData(d),
 	}
-	result, _, err := svc.UpdatePingFederateCommand(&input)
+	result, _, err := svc.UpdatePingFederateRuntimeCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating pingfederate runtime settings: %s", err)
 	}
@@ -127,64 +95,47 @@ func resourcePingAccessPingFederateRuntimeDelete(d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourcePingAccessPingFederateRuntimeReadResult(d *schema.ResourceData, input *pa.PingFederateRuntimeView) error {
-	setResourceDataString(d, "audit_level", input.AuditLevel)
-	setResourceDataString(d, "back_channel_base_path", input.BackChannelBasePath)
-	setResourceDataBool(d, "back_channel_secure", input.BackChannelSecure)
-	setResourceDataString(d, "base_path", input.BasePath)
-	setResourceDataString(d, "expected_hostname", input.ExpectedHostname)
-	setResourceDataString(d, "host", input.Host)
-	setResourceDataInt(d, "port", input.Port)
-	setResourceDataBool(d, "secure", input.Secure)
-	setResourceDataBool(d, "skip_hostname_verification", input.SkipHostnameVerification)
-	setResourceDataInt(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId)
-	setResourceDataBool(d, "use_proxy", input.UseProxy)
-	setResourceDataBool(d, "use_slo", input.UseSlo)
-
-	if err := d.Set("targets", input.Targets); err != nil {
+func resourcePingAccessPingFederateRuntimeReadResult(d *schema.ResourceData, input *pa.PingFederateMetadataRuntimeView) error {
+	if err := setResourceDataString(d, "description", input.Description); err != nil {
+		return err
+	}
+	if err := setResourceDataString(d, "issuer", input.Issuer); err != nil {
+		return err
+	}
+	if err := setResourceDataBool(d, "skip_hostname_verification", input.SkipHostnameVerification); err != nil {
+		return err
+	}
+	if err := setResourceDataString(d, "sts_token_exchange_endpoint", input.StsTokenExchangeEndpoint); err != nil {
+		return err
+	}
+	if err := setResourceDataInt(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId); err != nil {
+		return err
+	}
+	if err := setResourceDataBool(d, "use_proxy", input.UseProxy); err != nil {
+		return err
+	}
+	if err := setResourceDataBool(d, "use_slo", input.UseSlo); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func resourcePingAccessPingFederateRuntimeReadData(d *schema.ResourceData) *pa.PingFederateRuntimeView {
-	pfRuntime := &pa.PingFederateRuntimeView{
-		Host: String(d.Get("host").(string)),
-		Port: Int(d.Get("port").(int)),
+func resourcePingAccessPingFederateRuntimeReadData(d *schema.ResourceData) *pa.PingFederateMetadataRuntimeView {
+	pfRuntime := &pa.PingFederateMetadataRuntimeView{
+		Issuer: String(d.Get("issuer").(string)),
 	}
 
-	if v, ok := d.GetOkExists("audit_level"); ok {
-		pfRuntime.AuditLevel = String(v.(string))
-	}
-
-	if v, ok := d.GetOkExists("back_channel_base_path"); ok {
-		pfRuntime.BackChannelBasePath = String(v.(string))
-	}
-
-	if v, ok := d.GetOkExists("back_channel_secure"); ok {
-		pfRuntime.BackChannelSecure = Bool(v.(bool))
-	}
-
-	if v, ok := d.GetOkExists("base_path"); ok {
-		pfRuntime.BasePath = String(v.(string))
-	}
-
-	if v, ok := d.GetOkExists("expected_hostname"); ok {
-		pfRuntime.ExpectedHostname = String(v.(string))
-	}
-
-	if v, ok := d.GetOkExists("secure"); ok {
-		pfRuntime.Secure = Bool(v.(bool))
+	if v, ok := d.GetOkExists("description"); ok {
+		pfRuntime.Description = String(v.(string))
 	}
 
 	if v, ok := d.GetOkExists("skip_hostname_verification"); ok {
 		pfRuntime.SkipHostnameVerification = Bool(v.(bool))
 	}
 
-	if v, ok := d.GetOkExists("targets"); ok {
-		targets := expandStringList(v.(*schema.Set).List())
-		pfRuntime.Targets = &targets
+	if v, ok := d.GetOkExists("sts_token_exchange_endpoint"); ok {
+		pfRuntime.StsTokenExchangeEndpoint = String(v.(string))
 	}
 
 	if v, ok := d.GetOkExists("trusted_certificate_group_id"); ok {

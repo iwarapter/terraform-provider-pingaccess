@@ -34,6 +34,16 @@ func requiredListOfString() *schema.Schema {
 	}
 }
 
+func computedListOfString() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	}
+}
+
 func acmeServerAccountsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -115,8 +125,8 @@ func hiddenField() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"encrypted_value": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:          schema.TypeString,
+					Optional:      true,
 				},
 				"value": {
 					Type:      schema.TypeString,
@@ -126,6 +136,13 @@ func hiddenField() *schema.Schema {
 			},
 		},
 	}
+}
+
+func requiredHiddenField() *schema.Schema {
+	sch := hiddenField()
+	sch.Optional = false
+	sch.Required = true
+	return sch
 }
 
 func expandHiddenFieldView(in []interface{}) *pa.HiddenFieldView {

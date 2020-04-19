@@ -36,10 +36,11 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"pingaccess_acme_default":              dataSourcePingAccessAcmeDefault(),
-			"pingaccess_certificate":               dataSourcePingAccessCertificate(),
-			"pingaccess_keypair":                   dataSourcePingAccessKeyPair(),
-			"pingaccess_trusted_certificate_group": dataSourcePingAccessTrustedCertificateGroups(),
+			"pingaccess_acme_default":                  dataSourcePingAccessAcmeDefault(),
+			"pingaccess_certificate":                   dataSourcePingAccessCertificate(),
+			"pingaccess_keypair":                       dataSourcePingAccessKeyPair(),
+			"pingaccess_pingfederate_runtime_metadata": dataSourcePingAccessPingFederateRuntimeMetadata(),
+			"pingaccess_trusted_certificate_group":     dataSourcePingAccessTrustedCertificateGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"pingaccess_access_token_validator":          resourcePingAccessAccessTokenValidator(),
@@ -62,6 +63,7 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_site_authenticator":              resourcePingAccessSiteAuthenticator(),
 			"pingaccess_third_party_service":             resourcePingAccessThirdPartyService(),
 			"pingaccess_trusted_certificate_group":       resourcePingAccessTrustedCertificateGroups(),
+			"pingaccess_pingfederate_admin":              resourcePingAccessPingFederateAdmin(),
 			"pingaccess_pingfederate_runtime":            resourcePingAccessPingFederateRuntime(),
 			"pingaccess_pingfederate_oauth":              resourcePingAccessPingFederateOAuth(),
 			"pingaccess_oauth_server":                    resourcePingAccessOAuthServer(),

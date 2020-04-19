@@ -229,7 +229,7 @@ github.com/hashicorp/terraform-svchost/auth
 github.com/hashicorp/terraform-svchost/disco
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
-# github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200405225845-0449df2d35ec => /Users/iwarapter/golang-learning/terraform-provider-pingaccess/src/github.com/iwarapter/pingaccess-sdk-go
+# github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200414193849-b443faf152d2
 github.com/iwarapter/pingaccess-sdk-go/pingaccess
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath

@@ -145,8 +145,8 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-		host = "localhost"
-		port = 9031
+		issuer = "https://pf:9031"
+		trusted_certificate_group_id = 2
 	}
 
 	resource "pingaccess_websession" "my_session" {

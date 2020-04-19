@@ -11,6 +11,7 @@ nav:
       - pingaccess_acme_default: data_sources/pingaccess_acme_default.md
       - pingaccess_certificate: data_sources/pingaccess_certificate.md
       - pingaccess_keypair: data_sources/pingaccess_keypair.md
+      - pingaccess_pingfederate_runtime_metadata: data_sources/pingaccess_pingfederate_runtime_metadata.md
       - pingaccess_trusted_certificate_group: data_sources/pingaccess_trusted_certificate_group.md
     - Supported Resources:
       - pingaccess_access_token_validator: resources/pingaccess_access_token_validator.md
@@ -27,6 +28,9 @@ nav:
       - pingaccess_identity_mapping: resources/pingaccess_identity_mapping.md
       - pingaccess_keypair: resources/pingaccess_keypair.md
       - pingaccess_oauth_server: resources/pingaccess_oauth_server.md
+      - pingaccess_pingfederate_admin: resources/pingaccess_pingfederate_admin.md
+      - pingaccess_pingfederate_oauth: resources/pingaccess_pingfederate_oauth.md
+      - pingaccess_pingfederate_runtime: resources/pingaccess_pingfederate_runtime.md
       - pingaccess_rule: resources/pingaccess_rule.md
       - pingaccess_ruleset: resources/pingaccess_ruleset.md
       - pingaccess_site: resources/pingaccess_site.md
@@ -45,6 +49,7 @@ theme:
     - tabs
 markdown_extensions:
   - codehilite
+  - meta
   - admonition
   - markdown_include.include:
       base_path: docs

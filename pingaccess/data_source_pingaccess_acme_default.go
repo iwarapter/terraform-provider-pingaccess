@@ -25,9 +25,9 @@ func dataSourcePingAccessAcmeDefaultSchema() map[string]*schema.Schema {
 
 func dataSourcePingAccessAcmeDefaultRead(d *schema.ResourceData, m interface{}) error {
 	svc := m.(*pa.Client).Acme
-	result, _, err := svc.GetDefaultAcmeServerCommand()
+	result, resp, err := svc.GetDefaultAcmeServerCommand()
 	if err != nil {
-		return fmt.Errorf("Error reading ACME Default: %s", err)
+		return fmt.Errorf("Error reading ACME Default: %s\n%v", err.Error(), resp)
 	}
 	d.SetId(*result.Id)
 	return setResourceDataString(d, "location", result.Location)

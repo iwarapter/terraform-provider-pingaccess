@@ -120,9 +120,6 @@ func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input
 		if err := d.Set("client_secret", creds); err != nil {
 			return err
 		}
-		// if err := d.Set("client_secret", flattenHiddenFieldView(input.ClientSecret)); err != nil {
-		// 	return err
-		// }
 	}
 
 	return nil

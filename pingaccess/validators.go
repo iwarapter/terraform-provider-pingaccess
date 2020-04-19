@@ -91,3 +91,11 @@ func validateWebSessionSameSite(value interface{}, field string) (warns []string
 	}
 	return
 }
+
+func validateAuditLevel(value interface{}, field string) (warns []string, errs []error) {
+	v := value.(string)
+	if v != "ON" && v != "OFF" {
+		errs = append(errs, fmt.Errorf("%q must be either 'ON' or 'OFF' not %s", field, v))
+	}
+	return
+}

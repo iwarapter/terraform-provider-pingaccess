@@ -12,9 +12,11 @@ NOTES:
 
 FEATURES:
 
+* **New Data Source:** `pingaccess_pingfederate_runtime_metadata`
 * **New Data Source:** `pingaccess_acme_default`
 * **New Resource:** `pingaccess_acme_server`
 * **New Resource:** `pingaccess_hsm_provider`
+* **New Resource:** `pingaccess_pingfederate_admin`
 * resource/websession: Added support for `same_site` attribute.
 * resource/keypair: Added `hsm_provider_id` attribute.
 

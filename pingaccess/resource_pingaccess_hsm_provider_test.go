@@ -11,9 +11,8 @@ import (
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPingAccessHsmProviderDestroy,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPingAccessHsmProviderConfig("bar", "foo"),

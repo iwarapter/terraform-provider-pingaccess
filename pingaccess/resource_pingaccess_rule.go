@@ -34,8 +34,8 @@ func resourcePingAccessRule() *schema.Resource {
 				DiffSuppressFunc: suppressEquivalentJsonDiffs,
 			},
 			"ignrored_configuration_fields": { //TODO remove in future release
-				Type:     schema.TypeSet,
-				Optional: true,
+				Type:       schema.TypeSet,
+				Optional:   true,
 				Deprecated: "This is no longer used to mask fields and will be removed in future versions.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

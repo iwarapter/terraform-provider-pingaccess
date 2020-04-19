@@ -24,20 +24,18 @@ func resourcePingAccessHsmProvider() *schema.Resource {
 
 func resourcePingAccessHsmProviderSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"class_name": &schema.Schema{
+		"class_name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"configuration": &schema.Schema{
+		"configuration": {
 			Type:     schema.TypeString,
 			Required: true,
-			//DiffSuppressFunc: suppressEquivalentConfigurationDiffs,
 		},
-		//"hidden_fields": setOfString(),
 	}
 }
 
@@ -53,12 +51,6 @@ func resourcePingAccessHsmProviderCreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	d.SetId(result.Id.String())
-	//descriptors, _, err := svc.GetHsmProviderDescriptorsCommand()
-
-	//	for _,d := range descriptors.Items {
-	//d.ClassName
-	//	}
-
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
@@ -83,7 +75,8 @@ func resourcePingAccessHsmProviderUpdate(d *schema.ResourceData, m interface{}) 
 	result, _, err := svc.UpdateHsmProviderCommand(&input)
 	if err != nil {
 		return fmt.Errorf("Error updating HsmProvider: %s", err.Error())
-	} //d.SetId(result.Id.String())
+	}
+	d.SetId(result.Id.String())
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
