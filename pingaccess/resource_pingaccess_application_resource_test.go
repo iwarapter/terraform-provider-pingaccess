@@ -128,7 +128,7 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
     pattern = "/as/token.oauth2"
     type    = "WILDCARD"
 	}
-	
+
 	path_patterns {
     pattern = "%s"
     type    = "WILDCARD"
@@ -143,7 +143,7 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
   enabled = true
   root_resource = false
 	application_id = "${pingaccess_application.app_res_test.id}"
-	
+
 	policy {
 		%s
 	}
@@ -154,7 +154,7 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
   methods = [
     "*"
 	]
-	
+
   path_prefixes = [
 		"/*"
   ]

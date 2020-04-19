@@ -41,7 +41,7 @@ provider "pingaccess" {
 ```
 
 ### Environment variables
-You can provide your credentials via the `PINGACCESS_USERNAME`, `PINGACCESS_PASSWORD`, `PINGACCESS_CONTEXT` and `PINGACCESS_BASEURL` environment variables. 
+You can provide your credentials via the `PINGACCESS_USERNAME`, `PINGACCESS_PASSWORD`, `PINGACCESS_CONTEXT` and `PINGACCESS_BASEURL` environment variables.
 
 ```terraform
 provider "pingaccess" {}

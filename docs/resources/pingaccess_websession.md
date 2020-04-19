@@ -19,9 +19,9 @@ The following arguments are supported:
 - [`cache_user_attributes`](#cache_user_attributes) -  Specify if PingAccess should cache user attribute information for use in policy decisions. When disabled, this data is encoded and stored in the session cookie.
 
 - [`client_credentials`](#client_credentials) - Specify the client credentials.
-  
+
     - [`client_credentials.client_id`](#client_credentials-client_id) - Specify the client ID.
-    
+
     - [`client_credentials.client_secret`](#client_credentials-client_secret) - Specify the client secret.
 
 - [`cookie_domain`](#cookie_domain) -  The domain where the cookie is stored--for example, corp.yourcompany.com.

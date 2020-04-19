@@ -36,7 +36,7 @@ release:
 	GOOS=solaris GOARCH=amd64 go build -mod=vendor -o build/solaris_amd64/${NAME} -gcflags "all=-trimpath=$$GOPATH" . && zip -j build/solaris_amd64.zip build/solaris_amd64/${NAME}
 	GOOS=windows GOARCH=386 go build -mod=vendor -o build/windows_386/${NAME} -gcflags "all=-trimpath=$$GOPATH" . && zip -j build/windows_386.zip build/windows_386/${NAME}
 	GOOS=windows GOARCH=amd64 go build -mod=vendor -o build/windows_amd64/${NAME} -gcflags "all=-trimpath=$$GOPATH" . && zip -j build/windows_amd64.zip build/windows_amd64/${NAME}
-	
+
 deploy-local:
 	@mkdir -p ~/.terraform.d/plugins
 	@cp ${NAME} ~/.terraform.d/plugins/

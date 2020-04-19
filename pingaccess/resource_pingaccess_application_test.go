@@ -95,11 +95,11 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 		site_id							= "${pingaccess_site.acc_test_site.id}"
 		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
 	}
-	
+
 	resource "pingaccess_identity_mapping" "idm_foo" {
 		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
 		name       = "Foo"
-	
+
 		configuration = <<EOF
 		{
 			"attributeHeaderMappings": [
@@ -113,7 +113,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 		}
 		EOF
 	}
-	
+
 	resource "pingaccess_rule" "acc_test_app_rule" {
 		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
 		name = "acc_test_app_rule"

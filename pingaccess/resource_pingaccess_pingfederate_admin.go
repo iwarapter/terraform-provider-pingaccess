@@ -29,8 +29,8 @@ func resourcePingAccessPingFederateAdminSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"audit_level": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:         schema.TypeString,
+			Optional:     true,
 			ValidateFunc: validateAuditLevel,
 		},
 		"base_path": {
@@ -141,8 +141,8 @@ func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input
 func resourcePingAccessPingFederateAdminReadData(d *schema.ResourceData) *pa.PingFederateAdminView {
 	pfAdmin := &pa.PingFederateAdminView{
 		AdminUsername: String(d.Get("admin_username").(string)),
-		Host: String(d.Get("host").(string)),
-		Port: Int(d.Get("port").(int)),
+		Host:          String(d.Get("host").(string)),
+		Port:          Int(d.Get("port").(int)),
 	}
 	if v, ok := d.GetOkExists("admin_password"); ok {
 		pfAdmin.AdminPassword = expandHiddenFieldView(v.([]interface{}))

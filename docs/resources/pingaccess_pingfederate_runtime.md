@@ -7,7 +7,7 @@ Configured the PingFederate runtime.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/pingaccess_pingfederate_runtime.tf!}
+{!../pingaccess/test_cases/pingfederate_runtime.tf!}
 ```
 
 ## Argument Attributes

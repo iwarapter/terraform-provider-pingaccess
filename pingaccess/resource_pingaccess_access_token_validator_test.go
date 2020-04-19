@@ -48,7 +48,7 @@ func testAccPingAccessAccessTokenValidatorConfig(configUpdate string) string {
 	resource "pingaccess_access_token_validator" "test" {
 		class_name = "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"
 		name = "foo"
-		
+
 		configuration = <<EOF
 		{
 			"description": null,

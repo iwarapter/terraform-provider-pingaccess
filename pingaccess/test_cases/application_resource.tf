@@ -24,17 +24,17 @@ resource "pingaccess_application_resource" "demo_application_resource" {
   anonymous      = false
   enabled        = true
   root_resource  = false
-  application_id = "${pingaccess_application.demo_application.id}"
+  application_id = pingaccess_application.demo_application.id
 
   policy {
     web {
       type = "Rule"
-      id   = "${pingaccess_rule.demo_rule_one.id}"
+      id   = pingaccess_rule.demo_rule_one.id
     }
 
     web {
       type = "Rule"
-      id   = "${pingaccess_rule.demo_rule_two.id}"
+      id   = pingaccess_rule.demo_rule_two.id
     }
   }
 }

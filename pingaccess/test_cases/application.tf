@@ -4,13 +4,13 @@ resource "pingaccess_application" "demo_application" {
   context_root      = "/"
   default_auth_type = "Web"
   destination       = "Site"
-  site_id           = "${pingaccess_site.demo_site.id}"
-  virtual_host_ids  = ["${pingaccess_virtualhost.demo_virtualhost.id}"]
+  site_id           = pingaccess_site.demo_site.id
+  virtual_host_ids  = [pingaccess_virtualhost.demo_virtualhost.id]
 
   policy {
     web {
       type = "Rule"
-      id   = "${pingaccess_rule.demo_rule.id}"
+      id   = pingaccess_rule.demo_rule.id
     }
   }
 }

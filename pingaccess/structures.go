@@ -125,8 +125,8 @@ func hiddenField() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"encrypted_value": {
-					Type:          schema.TypeString,
-					Optional:      true,
+					Type:     schema.TypeString,
+					Optional: true,
 				},
 				"value": {
 					Type:      schema.TypeString,

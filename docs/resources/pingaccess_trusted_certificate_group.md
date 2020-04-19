@@ -13,7 +13,7 @@ The following arguments are supported:
 
 - [`cert_ids`](#cert_ids) - The IDs of the certificates that are in the trusted certificate group.
 
-- [`ignore_all_certificate_errors`](#ignore_all_certificate_errors) -  This field is read-only and is only set to true 
+- [`ignore_all_certificate_errors`](#ignore_all_certificate_errors) -  This field is read-only and is only set to true
 for the Trust Any certificate group.
 
 - [`name`](#name) -  The name of trusted certificate group.

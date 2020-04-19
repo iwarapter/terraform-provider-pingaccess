@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
-	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/containerd/continuity v0.0.0-20200228182428-0f16d7a0959c // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/google/go-cmp v0.3.1

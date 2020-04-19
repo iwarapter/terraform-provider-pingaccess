@@ -22,7 +22,7 @@ FEATURES:
 
 BUG FIXES:
 
-* resource/pingaccess_rule: Fixed issue with interpreted configuration producing inconsistent final plan. 
+* resource/pingaccess_rule: Fixed issue with interpreted configuration producing inconsistent final plan.
 
 ## 0.3.0 (November 13, 2019)
 
@@ -52,7 +52,7 @@ FEATURES:
 * **New Resource:** `pingaccess_access_token_validator`
 * **New Resource:** `pingaccess_keypair` ([#4](https://github.com/iwarapter/terraform-provider-pingaccess/issues/4))
 * **New Resource:** `pingaccess_auth_token_management` ([#11](https://github.com/iwarapter/terraform-provider-pingaccess/issues/11))
- 
+
 BUG FIXES:
 
 * resource/pingaccess_application: Fixing issue with an empty `policy` block ([#7](https://github.com/iwarapter/terraform-provider-pingaccess/issues/7))

@@ -7,7 +7,7 @@ Configured the PingFederate OAuth.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/pingaccess_pingfederate_oauth.tf!}
+{!../pingaccess/test_cases/pingfederate_oauth.tf!}
 ```
 
 ## Argument Attributes
