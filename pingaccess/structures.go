@@ -245,22 +245,6 @@ func flattenPolicyItem(in []*pa.PolicyItem) []interface{} {
 	return m
 }
 
-func policyItemHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(m["id"].(string))
-	if d, ok := m["type"]; ok && d.(string) != "" {
-		buf.WriteString(fmt.Sprintf("%s-", d.(string)))
-	}
-	return hashcode.String(buf.String())
-}
-
-func stringHash(v interface{}) int {
-	var buf bytes.Buffer
-	buf.WriteString(v.(string))
-	return hashcode.String(buf.String())
-}
-
 func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
 	ca := map[string]*[]*pa.PolicyItem{}
 

@@ -94,83 +94,31 @@ func dataSourcePingAccessPingFederateRuntimeMetadataRead(d *schema.ResourceData,
 		return fmt.Errorf("Error reading PingFederate Runtime Metadata: %s\n%v", err.Error(), resp)
 	}
 	d.SetId("pingfederate_runtime_metadata")
-	if err := d.Set("authorization_endpoint", result.Authorization_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("backchannel_authentication_endpoint", result.Backchannel_authentication_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("claim_types_supported", result.Claim_types_supported); err != nil {
-		return err
-	}
-	if err := d.Set("claims_parameter_supported", result.Claims_parameter_supported); err != nil {
-		return err
-	}
-	if err := d.Set("claims_supported", result.Claims_supported); err != nil {
-		return err
-	}
-	if err := d.Set("code_challenge_methods_supported", result.Code_challenge_methods_supported); err != nil {
-		return err
-	}
-	if err := d.Set("end_session_endpoint", result.End_session_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("grant_types_supported", result.Grant_types_supported); err != nil {
-		return err
-	}
-	if err := d.Set("id_token_signing_alg_values_supported", result.Id_token_signing_alg_values_supported); err != nil {
-		return err
-	}
-	if err := d.Set("introspection_endpoint", result.Introspection_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("issuer", result.Issuer); err != nil {
-		return err
-	}
-	if err := d.Set("jwks_uri", result.Jwks_uri); err != nil {
-		return err
-	}
-	if err := d.Set("ping_end_session_endpoint", result.Ping_end_session_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("ping_revoked_sris_endpoint", result.Ping_revoked_sris_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("request_object_signing_alg_values_supported", result.Request_object_signing_alg_values_supported); err != nil {
-		return err
-	}
-	if err := d.Set("request_parameter_supported", result.Request_parameter_supported); err != nil {
-		return err
-	}
-	if err := d.Set("request_uri_parameter_supported", result.Request_uri_parameter_supported); err != nil {
-		return err
-	}
-	if err := d.Set("response_modes_supported", result.Response_modes_supported); err != nil {
-		return err
-	}
-	if err := d.Set("response_types_supported", result.Response_types_supported); err != nil {
-		return err
-	}
-	if err := d.Set("revocation_endpoint", result.Revocation_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("scopes_supported", result.Scopes_supported); err != nil {
-		return err
-	}
-	if err := d.Set("subject_types_supported", result.Subject_types_supported); err != nil {
-		return err
-	}
-	if err := d.Set("token_endpoint", result.Token_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("token_endpoint_auth_methods_supported", result.Token_endpoint_auth_methods_supported); err != nil {
-		return err
-	}
-	if err := d.Set("userinfo_endpoint", result.Userinfo_endpoint); err != nil {
-		return err
-	}
-	if err := d.Set("userinfo_signing_alg_values_supported", result.Userinfo_signing_alg_values_supported); err != nil {
-		return err
-	}
+	d.Set("authorization_endpoint", result.Authorization_endpoint)
+	d.Set("backchannel_authentication_endpoint", result.Backchannel_authentication_endpoint)
+	d.Set("claim_types_supported", result.Claim_types_supported)
+	d.Set("claims_parameter_supported", result.Claims_parameter_supported)
+	d.Set("claims_supported", result.Claims_supported)
+	d.Set("code_challenge_methods_supported", result.Code_challenge_methods_supported)
+	d.Set("end_session_endpoint", result.End_session_endpoint)
+	d.Set("grant_types_supported", result.Grant_types_supported)
+	d.Set("id_token_signing_alg_values_supported", result.Id_token_signing_alg_values_supported)
+	d.Set("introspection_endpoint", result.Introspection_endpoint)
+	d.Set("issuer", result.Issuer)
+	d.Set("jwks_uri", result.Jwks_uri)
+	d.Set("ping_end_session_endpoint", result.Ping_end_session_endpoint)
+	d.Set("ping_revoked_sris_endpoint", result.Ping_revoked_sris_endpoint)
+	d.Set("request_object_signing_alg_values_supported", result.Request_object_signing_alg_values_supported)
+	d.Set("request_parameter_supported", result.Request_parameter_supported)
+	d.Set("request_uri_parameter_supported", result.Request_uri_parameter_supported)
+	d.Set("response_modes_supported", result.Response_modes_supported)
+	d.Set("response_types_supported", result.Response_types_supported)
+	d.Set("revocation_endpoint", result.Revocation_endpoint)
+	d.Set("scopes_supported", result.Scopes_supported)
+	d.Set("subject_types_supported", result.Subject_types_supported)
+	d.Set("token_endpoint", result.Token_endpoint)
+	d.Set("token_endpoint_auth_methods_supported", result.Token_endpoint_auth_methods_supported)
+	d.Set("userinfo_endpoint", result.Userinfo_endpoint)
+	d.Set("userinfo_signing_alg_values_supported", result.Userinfo_signing_alg_values_supported)
 	return nil
 }
