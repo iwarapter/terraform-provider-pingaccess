@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -93,7 +93,7 @@ func resourcePingAccessThirdPartyServiceCreate(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error creating third party service: %s", err)
 	}
 
-	d.SetId(result.Id.String())
+	d.SetId(*result.Id)
 	return resourcePingAccessThirdPartyServiceReadResult(d, result)
 }
 

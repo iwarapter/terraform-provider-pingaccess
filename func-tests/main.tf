@@ -1,5 +1,5 @@
 provider "pingaccess" {
-  // password = "2Access2"
+  password = "2FederateM0re"
 }
 
 resource "pingaccess_site" "demo" {
@@ -91,4 +91,7 @@ resource "pingaccess_rule" "demo_2" {
   EOF
 }
 
-
+resource "pingaccess_acme_server" "acc_test" {
+  name = "foo"
+  url  = "https://host.docker.internal:14000/dir"
+}

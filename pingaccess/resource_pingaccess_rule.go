@@ -1,10 +1,11 @@
 package pingaccess
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -42,7 +43,7 @@ func resourcePingAccessRule() *schema.Resource {
 				},
 			},
 		},
-		CustomizeDiff: customdiff.ComputedIf("configuration", func(diff *schema.ResourceDiff, meta interface{}) bool {
+		CustomizeDiff: customdiff.ComputedIf("configuration", func(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) bool {
 			return diff.HasChange("configuration")
 		}),
 	}

@@ -1,13 +1,14 @@
 package pingaccess
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 //Provider does stuff
 //
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": {
@@ -69,7 +70,7 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_oauth_server":                    resourcePingAccessOAuthServer(),
 			"pingaccess_http_config_request_host_source": resourcePingAccessHTTPConfigRequestHostSource(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
@@ -84,7 +85,8 @@ func init() {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+
 	config := &Config{
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),

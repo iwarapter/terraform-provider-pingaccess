@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"runtime"
 )
 
 const logReqMsg = `DEBUG: Request %s Details:
@@ -159,6 +160,7 @@ func (c *Client) newRequest(method string, path *url.URL, body interface{}) (*ht
 	}
 	req.SetBasicAuth(c.Username, c.Password)
 	req.Header.Add("X-Xsrf-Header", "PingAccess")
+	req.Header.Add("User-Agent", fmt.Sprintf("%s/%s (%s; %s; %s)", SDKName, SDKVersion, runtime.Version(), runtime.GOOS, runtime.GOARCH))
 	return req, nil
 }
 

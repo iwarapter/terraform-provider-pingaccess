@@ -2,12 +2,13 @@ package pingaccess
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -18,13 +19,13 @@ func TestAccPingAccessPingFederateRuntime(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessPingFederateRuntimeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessPingFederateRuntimeConfig("https://pf:9031"),
+				Config: testAccPingAccessPingFederateRuntimeConfig(fmt.Sprintf("https://%s:9031", os.Getenv("PINGFEDERATE_TEST_IP"))),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateRuntimeExists("pingaccess_pingfederate_runtime.demo_pfr"),
 				),
 			},
 			{
-				Config: testAccPingAccessPingFederateRuntimeConfig("https://pf:9031"),
+				Config: testAccPingAccessPingFederateRuntimeConfig(fmt.Sprintf("https://%s:9031", os.Getenv("PINGFEDERATE_TEST_IP"))),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateRuntimeExists("pingaccess_pingfederate_runtime.demo_pfr"),
 				),

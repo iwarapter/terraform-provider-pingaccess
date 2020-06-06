@@ -2,13 +2,14 @@ package pingaccess
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
@@ -145,7 +146,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-		issuer = "https://pf:9031"
+		issuer = "https://%s:9031"
 		trusted_certificate_group_id = 2
 	}
 
@@ -166,7 +167,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 			"phone"
 		]
 	}
-	`, name, context, appType, appType)
+	`, name, context, appType, appType, os.Getenv("PINGFEDERATE_TEST_IP"))
 }
 
 func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {

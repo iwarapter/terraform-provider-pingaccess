@@ -2,12 +2,13 @@ package pingaccess
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -18,13 +19,13 @@ func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessPingFederateAdminDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessPingFederateAdminConfig("pf", true),
+				Config: testAccPingAccessPingFederateAdminConfig(os.Getenv("PINGFEDERATE_TEST_IP"), true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateAdminExists("pingaccess_pingfederate_admin.demo"),
 				),
 			},
 			{
-				Config: testAccPingAccessPingFederateAdminConfig("pf", true),
+				Config: testAccPingAccessPingFederateAdminConfig(os.Getenv("PINGFEDERATE_TEST_IP"), true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateAdminExists("pingaccess_pingfederate_admin.demo"),
 				),
