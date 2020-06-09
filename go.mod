@@ -6,6 +6,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/containerd/continuity v0.0.0-20200228182428-0f16d7a0959c // indirect
 	github.com/google/go-cmp v0.3.1
+	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.0-rc.1
 	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20200605105101-6a0dcd01d169
 	github.com/ory/dockertest/v3 v3.6.0

@@ -1,43 +1,18 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"log"
-	"net/http"
-	"net/url"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_virtualhosts", &resource.Sweeper{
-		Name:         "pingaccess_virtualhosts",
-		F:            testSweepVirtualhosts,
-		Dependencies: []string{"pingaccess_application", "pingaccess_application_resource"},
-	})
-}
-
-func testSweepVirtualhosts(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Virtualhosts
-	result, _, _ := conn.GetVirtualHostsCommand(&pingaccess.GetVirtualHostsCommandInput{Filter: "acc-test-"})
-	for _, v := range result.Items {
-		log.Printf("Sweeper: Deleting %s", *v.Host)
-		conn.DeleteVirtualHostCommand(&pingaccess.DeleteVirtualHostCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessVirtualHost(t *testing.T) {
-	var out pingaccess.VirtualHostView
+	resourceName := "pingaccess_virtualhost.acc_test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -47,13 +22,13 @@ func TestAccPingAccessVirtualHost(t *testing.T) {
 			{
 				Config: testAccPingAccessVirtualHostConfig("cheese", 3000),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessVirtualHostExists("pingaccess_virtualhost.acc_test", 3, &out),
+					testAccCheckPingAccessVirtualHostExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessVirtualHostConfig("cheese", 3001),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessVirtualHostExists("pingaccess_virtualhost.acc_test", 6, &out),
+					testAccCheckPingAccessVirtualHostExists(resourceName),
 				),
 			},
 		},
@@ -75,7 +50,7 @@ func testAccPingAccessVirtualHostConfig(host string, port int) string {
 	}`, host, port)
 }
 
-func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *pingaccess.VirtualHostView) resource.TestCheckFunc {
+func testAccCheckPingAccessVirtualHostExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -86,8 +61,8 @@ func testAccCheckPingAccessVirtualHostExists(n string, c int64, out *pingaccess.
 			return fmt.Errorf("No virtualhost ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Virtualhosts
-		result, _, err := conn.GetVirtualHostCommand(&pingaccess.GetVirtualHostCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).Virtualhosts
+		result, _, err := conn.GetVirtualHostCommand(&pa.GetVirtualHostCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -107,12 +82,6 @@ func Test_resourcePingAccessVirtualhostReadData(t *testing.T) {
 	cases := []struct {
 		VirtualHost pa.VirtualHostView
 	}{
-		{
-			VirtualHost: pa.VirtualHostView{
-				Host: String("localhost"),
-				Port: Int(9999),
-			},
-		},
 		{
 			VirtualHost: pa.VirtualHostView{
 				Host:                      String("localhost"),

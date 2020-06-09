@@ -28,7 +28,7 @@ func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "claims_parameter_supported"),
 					resource.TestCheckNoResourceAttr(resourceName, "claims_supported.0"),
 					resource.TestCheckNoResourceAttr(resourceName, "code_challenge_methods_supported.0"),
-					resource.TestCheckResourceAttr(resourceName, "end_session_endpoint", ""),
+					resource.TestCheckNoResourceAttr(resourceName, "end_session_endpoint"),
 					resource.TestCheckResourceAttrSet(resourceName, "grant_types_supported.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "id_token_signing_alg_values_supported.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "introspection_endpoint"),

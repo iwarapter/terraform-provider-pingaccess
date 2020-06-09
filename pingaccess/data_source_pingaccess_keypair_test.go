@@ -37,7 +37,7 @@ func TestAccPingAccessKeyPairDataSource_NotFound(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccPingAccessKeyPairDataSourceConfigNonExistent(),
-				ExpectError: regexp.MustCompile(`Unable to find keypair with alias junk: `),
+				ExpectError: regexp.MustCompile(`unable to find KeyPair with alias 'junk' found '0' results`),
 			},
 		},
 	})

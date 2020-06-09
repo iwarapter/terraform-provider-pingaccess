@@ -1,8 +1,11 @@
 package pingaccess
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -10,15 +13,23 @@ import (
 
 func resourcePingAccessAccessTokenValidator() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessAccessTokenValidatorCreate,
-		Read:   resourcePingAccessAccessTokenValidatorRead,
-		Update: resourcePingAccessAccessTokenValidatorUpdate,
-		Delete: resourcePingAccessAccessTokenValidatorDelete,
+		CreateContext: resourcePingAccessAccessTokenValidatorCreate,
+		ReadContext:   resourcePingAccessAccessTokenValidatorRead,
+		UpdateContext: resourcePingAccessAccessTokenValidatorUpdate,
+		DeleteContext: resourcePingAccessAccessTokenValidatorDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
-
 		Schema: resourcePingAccessAccessTokenValidatorSchema(),
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			svc := m.(*pingaccess.Client).AccessTokenValidators
+			desc, _, _ := svc.GetAccessTokenValidatorDescriptorsCommand()
+			className := d.Get("class_name").(string)
+			if err := descriptorsHasClassName(className, desc); err != nil {
+				return err
+			}
+			return validateConfiguration(className, d, desc)
+		},
 	}
 }
 
@@ -35,12 +46,12 @@ func resourcePingAccessAccessTokenValidatorSchema() map[string]*schema.Schema {
 		"configuration": {
 			Type:             schema.TypeString,
 			Required:         true,
-			DiffSuppressFunc: suppressEquivalentJsonDiffs,
+			DiffSuppressFunc: suppressEquivalentJSONDiffs,
 		},
 	}
 }
 
-func resourcePingAccessAccessTokenValidatorCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAccessTokenValidatorCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	input := pingaccess.AddAccessTokenValidatorCommandInput{
 		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
@@ -48,14 +59,14 @@ func resourcePingAccessAccessTokenValidatorCreate(d *schema.ResourceData, m inte
 
 	result, _, err := svc.AddAccessTokenValidatorCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating AccessTokenValidator: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create AccessTokenValidator: %s", err))}
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessAccessTokenValidatorRead(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAccessTokenValidatorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 
 	input := &pingaccess.GetAccessTokenValidatorCommandInput{
@@ -64,13 +75,13 @@ func resourcePingAccessAccessTokenValidatorRead(d *schema.ResourceData, m interf
 
 	result, _, err := svc.GetAccessTokenValidatorCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading AccessTokenValidator: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read AccessTokenValidator: %s", err))}
 	}
 
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessAccessTokenValidatorUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAccessTokenValidatorUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	input := pingaccess.UpdateAccessTokenValidatorCommandInput{
 		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
@@ -79,25 +90,24 @@ func resourcePingAccessAccessTokenValidatorUpdate(d *schema.ResourceData, m inte
 
 	result, _, err := svc.UpdateAccessTokenValidatorCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating AccessTokenValidator: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update AccessTokenValidator: %s", err))}
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessAccessTokenValidatorDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAccessTokenValidatorDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	_, err := svc.DeleteAccessTokenValidatorCommand(&pingaccess.DeleteAccessTokenValidatorCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting AccessTokenValidator: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete AccessTokenValidator: %s", err))}
 	}
 	return nil
 }
 
-func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, input *pingaccess.AccessTokenValidatorView, svc *pingaccess.AccessTokenValidatorsService) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "class_name", input.ClassName)
+func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, input *pingaccess.AccessTokenValidatorView, svc *pingaccess.AccessTokenValidatorsService) diag.Diagnostics {
+	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
 
@@ -109,10 +119,10 @@ func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, in
 	desc, _, _ := svc.GetAccessTokenValidatorDescriptorsCommand()
 	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
 
-	if err := d.Set("configuration", config); err != nil {
-		return err
-	}
-	return nil
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "class_name", input.ClassName, &diags)
+	setResourceDataStringWithDiagnostic(d, "configuration", &config, &diags)
+	return diags
 }
 
 func resourcePingAccessAccessTokenValidatorReadData(d *schema.ResourceData) *pingaccess.AccessTokenValidatorView {

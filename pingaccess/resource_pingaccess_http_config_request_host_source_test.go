@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -60,7 +59,7 @@ func testAccCheckPingAccessHTTPConfigRequestHostSourceExists(n string) resource.
 			return fmt.Errorf("No http config request host source response ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).HttpConfig
+		conn := testAccProvider.Meta().(*pa.Client).HttpConfig
 		result, _, err := conn.GetHostSourceCommand()
 
 		if err != nil {

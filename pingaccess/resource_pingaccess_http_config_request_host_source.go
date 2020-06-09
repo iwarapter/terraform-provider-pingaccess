@@ -1,21 +1,22 @@
 package pingaccess
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessHTTPConfigRequestHostSource() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessHTTPConfigRequestHostSourceCreate,
-		Read:   resourcePingAccessHTTPConfigRequestHostSourceRead,
-		Update: resourcePingAccessHTTPConfigRequestHostSourceUpdate,
-		Delete: resourcePingAccessHTTPConfigRequestHostSourceDelete,
+		CreateContext: resourcePingAccessHTTPConfigRequestHostSourceCreate,
+		ReadContext:   resourcePingAccessHTTPConfigRequestHostSourceRead,
+		UpdateContext: resourcePingAccessHTTPConfigRequestHostSourceUpdate,
+		DeleteContext: resourcePingAccessHTTPConfigRequestHostSourceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessHTTPConfigRequestHostSourceResourceSchema(),
 	}
@@ -24,59 +25,56 @@ func resourcePingAccessHTTPConfigRequestHostSource() *schema.Resource {
 func resourcePingAccessHTTPConfigRequestHostSourceResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"header_name_list": requiredListOfString(),
-		"list_value_location": &schema.Schema{
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validateListLocationValue,
+		"list_value_location": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validateListLocationValue,
 		},
 	}
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceCreate(d *schema.ResourceData, m interface{}) error {
-	return resourcePingAccessHTTPConfigRequestHostSourceUpdate(d, m)
+func resourcePingAccessHTTPConfigRequestHostSourceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourcePingAccessHTTPConfigRequestHostSourceUpdate(ctx, d, m)
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceRead(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessHTTPConfigRequestHostSourceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpConfig
 	result, _, err := svc.GetHostSourceCommand()
 	if err != nil {
-		return fmt.Errorf("Error reading http config host source: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read HttpConfigHostSource: %s", err))}
 	}
 	return resourcePingAccessHTTPConfigRequestHostSourceReadResult(d, result)
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceUpdate(d *schema.ResourceData, m interface{}) error {
-
+func resourcePingAccessHTTPConfigRequestHostSourceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpConfig
-
 	input := &pa.UpdateHostSourceCommandInput{Body: *resourcePingAccessHTTPConfigRequestHostSourceReadData(d)}
 	result, _, err := svc.UpdateHostSourceCommand(input)
 	if err != nil {
-		b, _ := json.Marshal(input)
-		return fmt.Errorf("Error updating http config host source: %s, %s", err, string(b))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update HttpConfigHostSource: %s", err))}
 	}
 
 	d.SetId("http_config_host_source")
 	return resourcePingAccessHTTPConfigRequestHostSourceReadResult(d, result)
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessHTTPConfigRequestHostSourceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpConfig
 	_, err := svc.DeleteHostSourceCommand()
 	if err != nil {
-		return fmt.Errorf("Error deleting http config host source: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete HttpConfigHostSource: %s", err))}
+
 	}
 	return nil
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceReadResult(d *schema.ResourceData, rv *pa.HostMultiValueSourceView) error {
-	if err := d.Set("list_value_location", rv.ListValueLocation); err != nil {
-		return err
-	}
+func resourcePingAccessHTTPConfigRequestHostSourceReadResult(d *schema.ResourceData, rv *pa.HostMultiValueSourceView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "list_value_location", rv.ListValueLocation, &diags)
 	if err := d.Set("header_name_list", rv.HeaderNameList); err != nil {
-		return err
+		diags = append(diags, diag.FromErr(err))
 	}
-	return nil
+	return diags
 }
 
 func resourcePingAccessHTTPConfigRequestHostSourceReadData(d *schema.ResourceData) (body *pa.HostMultiValueSourceView) {

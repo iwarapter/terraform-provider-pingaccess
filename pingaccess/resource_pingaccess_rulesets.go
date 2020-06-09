@@ -1,51 +1,56 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessRuleSet() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessRuleSetCreate,
-		Read:   resourcePingAccessRuleSetRead,
-		Update: resourcePingAccessRuleSetUpdate,
-		Delete: resourcePingAccessRuleSetDelete,
+		CreateContext: resourcePingAccessRuleSetCreate,
+		ReadContext:   resourcePingAccessRuleSetRead,
+		UpdateContext: resourcePingAccessRuleSetUpdate,
+		DeleteContext: resourcePingAccessRuleSetDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Schema: resourcePingAccessRuleSetSchema(),
+	}
+}
 
-		Schema: map[string]*schema.Schema{
-			"element_type": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validateRuleOrRuleSet,
+func resourcePingAccessRuleSetSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"element_type": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validateRuleOrRuleSet,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"policy": {
+			Type:     schema.TypeSet,
+			Required: true,
+			MinItems: 1,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
 			},
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"policy": &schema.Schema{
-				Type:     schema.TypeSet,
-				Required: true,
-				MinItems: 1,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"success_criteria": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds,
-			},
+		},
+		"success_criteria": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds,
 		},
 	}
 }
 
-func resourcePingAccessRuleSetCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// log.Printf("[INFO] resourcePingAccessRuleSetCreate")
 	name := d.Get("name").(string)
 	elementType := d.Get("element_type").(string)
@@ -53,17 +58,17 @@ func resourcePingAccessRuleSetCreate(d *schema.ResourceData, m interface{}) erro
 	successCriteria := d.Get("success_criteria").(string)
 
 	//TODO generalise this into a helper function
-	pol_ids := []*int{}
+	var polIds []*int
 	for _, i := range policy {
 		text, _ := strconv.Atoi(*i)
-		pol_ids = append(pol_ids, &text)
+		polIds = append(polIds, &text)
 	}
 
 	input := pingaccess.AddRuleSetCommandInput{
 		Body: pingaccess.RuleSetView{
 			Name:            String(name),
 			ElementType:     String(elementType),
-			Policy:          &pol_ids,
+			Policy:          &polIds,
 			SuccessCriteria: String(successCriteria),
 		},
 	}
@@ -72,25 +77,25 @@ func resourcePingAccessRuleSetCreate(d *schema.ResourceData, m interface{}) erro
 
 	result, _, err := svc.AddRuleSetCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating RuleSet: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create RuleSet: %s", err))}
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
 
-func resourcePingAccessRuleSetRead(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessRuleSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Rulesets
 	result, _, err := svc.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
 		Id: d.Id(),
 	})
 	if err != nil {
-		return fmt.Errorf("Error reading RuleSet: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read RuleSet: %s", err))}
 	}
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
 
-func resourcePingAccessRuleSetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// log.Printf("[INFO] resourcePingAccessRuleSetUpdate")
 	name := d.Get("name").(string)
 	elementType := d.Get("element_type").(string)
@@ -98,17 +103,17 @@ func resourcePingAccessRuleSetUpdate(d *schema.ResourceData, m interface{}) erro
 	successCriteria := d.Get("success_criteria").(string)
 
 	//TODO generalise this into a helper function
-	pol_ids := []*int{}
+	var polIds []*int
 	for _, i := range policy {
 		text, _ := strconv.Atoi(*i)
-		pol_ids = append(pol_ids, &text)
+		polIds = append(polIds, &text)
 	}
 
 	input := pingaccess.UpdateRuleSetCommandInput{
 		Body: pingaccess.RuleSetView{
 			Name:            String(name),
 			ElementType:     String(elementType),
-			Policy:          &pol_ids,
+			Policy:          &polIds,
 			SuccessCriteria: String(successCriteria),
 		},
 		Id: d.Id(),
@@ -118,41 +123,35 @@ func resourcePingAccessRuleSetUpdate(d *schema.ResourceData, m interface{}) erro
 
 	result, _, err := svc.UpdateRuleSetCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating RuleSet: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update RuleSet: %s", err))}
 	}
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
 
-func resourcePingAccessRuleSetDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessRuleSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Rulesets
 
 	_, err := svc.DeleteRuleSetCommand(&pingaccess.DeleteRuleSetCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting RuleSet: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete RuleSet: %s", err))}
 	}
 	return nil
 }
 
-func resourcePingAccessRuleSetReadResult(d *schema.ResourceData, rv *pingaccess.RuleSetView) error {
-	if err := d.Set("name", rv.Name); err != nil {
-		return err
-	}
-	if err := d.Set("success_criteria", rv.SuccessCriteria); err != nil {
-		return err
-	}
-	if err := d.Set("element_type", rv.ElementType); err != nil {
-		return err
-	}
-
-	if rv.Policy != nil {
-		pol_ids := []string{}
-		for _, p := range *rv.Policy {
-			pol_ids = append(pol_ids, strconv.Itoa(*p))
+func resourcePingAccessRuleSetReadResult(d *schema.ResourceData, input *pingaccess.RuleSetView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "success_criteria", input.SuccessCriteria, &diags)
+	setResourceDataStringWithDiagnostic(d, "element_type", input.ElementType, &diags)
+	if input.Policy != nil {
+		var polIds []string
+		for _, p := range *input.Policy {
+			polIds = append(polIds, strconv.Itoa(*p))
 		}
-		if err := d.Set("policy", pol_ids); err != nil {
-			return err
+		if err := d.Set("policy", polIds); err != nil {
+			diags = append(diags, diag.FromErr(err))
 		}
 	}
-	return nil
+	return diags
 }

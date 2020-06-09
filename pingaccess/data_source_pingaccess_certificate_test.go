@@ -43,7 +43,7 @@ func TestAccPingAccessCertificateDataSource_NotFound(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccPingAccessCertificateDataSourceConfigNonExistent(),
-				ExpectError: regexp.MustCompile(`Unable to find certificate with alias junk: `),
+				ExpectError: regexp.MustCompile(` unable to find Certificate with alias 'junk' found '0' results`),
 			},
 		},
 	})

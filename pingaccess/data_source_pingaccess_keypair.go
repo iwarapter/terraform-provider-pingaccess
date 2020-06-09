@@ -1,8 +1,10 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
@@ -13,22 +15,23 @@ func dataSourcePingAccessKeyPair() *schema.Resource {
 	delete(sch, "file_data")
 	delete(sch, "password")
 	return &schema.Resource{
-		Read:   dataSourcePingAccessKeyPairRead,
-		Schema: sch,
+		ReadContext: dataSourcePingAccessKeyPairRead,
+		Schema:      sch,
 	}
 }
 
-func dataSourcePingAccessKeyPairRead(d *schema.ResourceData, m interface{}) error {
+func dataSourcePingAccessKeyPairRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).KeyPairs
 	input := &pa.GetKeyPairsCommandInput{
 		Alias: d.Get("alias").(string),
 	}
 	result, _, err := svc.GetKeyPairsCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading KeyPair: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read KeyPair: %s", err))}
+
 	}
 	if len(result.Items) != 1 {
-		return fmt.Errorf("Unable to find keypair with alias %s: %s", d.Get("alias").(string), err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to find KeyPair with alias '%s' found '%d' results", d.Get("alias").(string), len(result.Items)))}
 	}
 	d.SetId(result.Items[0].Id.String())
 	return resourcePingAccessKeyPairReadResult(d, result.Items[0])

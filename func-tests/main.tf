@@ -95,3 +95,48 @@ resource "pingaccess_acme_server" "acc_test" {
   name = "foo"
   url  = "https://host.docker.internal:14000/dir"
 }
+
+resource "pingaccess_identity_mapping" "demo_identity_mapping" {
+  class_name = "com.pingidentity.pa.identitymappings.JwtIdentityMapping"
+  name       = "demo_identity_mapping"
+
+  configuration = <<EOF
+  {
+    "headerName": "Authorization",
+    "audience": "microservices",
+    "exclusionList": false,
+    "exclusionListAttributes": [],
+    "exclusionListSubject": null,
+    "attributeMappings": [
+      {
+        "subject": true,
+        "userAttributeName": "sub",
+        "jwtClaimName": "sub"
+      }
+    ],
+    "cacheJwt": true,
+    "clientCertificateJwtClaimName": null,
+    "maxDepth": 1
+  }
+  EOF
+}
+
+resource "pingaccess_websession" "demo_session" {
+  name     = "demo-session"
+  audience = "example"
+
+  client_credentials {
+    client_id = "websession"
+
+    client_secret {
+      value = "changeme"
+    }
+  }
+
+  scopes = [
+    "profile",
+    "address",
+    "email",
+    "phone",
+  ]
+}

@@ -1,20 +1,21 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessAcmeServer() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessAcmeServerCreate,
-		Read:   resourcePingAccessAcmeServerRead,
-		//Update: resourcePingAccessAcmeServerUpdate,
-		Delete: resourcePingAccessAcmeServerDelete,
+		CreateContext: resourcePingAccessAcmeServerCreate,
+		ReadContext:   resourcePingAccessAcmeServerRead,
+		DeleteContext: resourcePingAccessAcmeServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessAcmeServerSchema(),
@@ -37,7 +38,7 @@ func resourcePingAccessAcmeServerSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessAcmeServerCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAcmeServerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Acme
 	input := pingaccess.AddAcmeServerCommandInput{
 		Body: *resourcePingAccessAcmeServerReadData(d),
@@ -45,25 +46,25 @@ func resourcePingAccessAcmeServerCreate(d *schema.ResourceData, m interface{}) e
 
 	result, _, err := svc.AddAcmeServerCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating AcmeServer: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create AcmeServer: %s", err))}
 	}
 	d.SetId(*result.Id)
 	return resourcePingAccessAcmeServerReadResult(d, &input.Body)
 }
 
-func resourcePingAccessAcmeServerRead(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAcmeServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Acme
 	input := &pingaccess.GetAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 	result, _, err := svc.GetAcmeServerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading AcmeServer: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read AcmeServer: %s", err))}
 	}
 	return resourcePingAccessAcmeServerReadResult(d, result)
 }
 
-func resourcePingAccessAcmeServerDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessAcmeServerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Acme
 	input := &pingaccess.DeleteAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
@@ -71,20 +72,21 @@ func resourcePingAccessAcmeServerDelete(d *schema.ResourceData, m interface{}) e
 
 	_, _, err := svc.DeleteAcmeServerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting AcmeServer: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete AcmeServer: %s", err))}
 	}
 	return nil
 }
 
-func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *pingaccess.AcmeServerView) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "url", input.Url)
+func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *pingaccess.AcmeServerView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "url", input.Url, &diags)
 	if input.AcmeAccounts != nil && len(input.AcmeAccounts) > 0 {
 		if err := d.Set("acme_accounts", flattenLinkViewList(input.AcmeAccounts)); err != nil {
-			return err
+			diags = append(diags, diag.FromErr(err))
 		}
 	}
-	return nil
+	return diags
 }
 
 func resourcePingAccessAcmeServerReadData(d *schema.ResourceData) *pingaccess.AcmeServerView {

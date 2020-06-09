@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -58,8 +57,8 @@ func testAccCheckPingAccessAcmeServerExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No AcmeServer ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Acme
-		result, _, err := conn.GetAcmeServerCommand(&pingaccess.GetAcmeServerCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).Acme
+		result, _, err := conn.GetAcmeServerCommand(&pa.GetAcmeServerCommandInput{
 			AcmeServerId: rs.Primary.ID,
 		})
 

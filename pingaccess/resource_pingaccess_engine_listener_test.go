@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -58,8 +57,8 @@ func testAccCheckPingAccessEngineListenerExists(n string) resource.TestCheckFunc
 			return fmt.Errorf("No EngineListener ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).EngineListeners
-		result, _, err := conn.GetEngineListenerCommand(&pingaccess.GetEngineListenerCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).EngineListeners
+		result, _, err := conn.GetEngineListenerCommand(&pa.GetEngineListenerCommandInput{
 			Id: rs.Primary.ID,
 		})
 

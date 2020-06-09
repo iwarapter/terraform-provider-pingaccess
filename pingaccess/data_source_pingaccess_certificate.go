@@ -1,8 +1,10 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
@@ -12,22 +14,23 @@ func dataSourcePingAccessCertificate() *schema.Resource {
 	//The normal certificate schema has a file data passed to it, this isnt required for the data resource
 	delete(sch, "file_data")
 	return &schema.Resource{
-		Read:   dataSourcePingAccessCertificateRead,
-		Schema: sch,
+		ReadContext: dataSourcePingAccessCertificateRead,
+		Schema:      sch,
 	}
 }
 
-func dataSourcePingAccessCertificateRead(d *schema.ResourceData, m interface{}) error {
+func dataSourcePingAccessCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Certificates
 	input := &pa.GetTrustedCertsInput{
 		Alias: d.Get("alias").(string),
 	}
 	result, _, err := svc.GetTrustedCerts(input)
 	if err != nil {
-		return fmt.Errorf("Error reading Certificate: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read Certificate: %s", err))}
+
 	}
 	if len(result.Items) != 1 {
-		return fmt.Errorf("Unable to find certificate with alias %s: %s", d.Get("alias").(string), err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to find Certificate with alias '%s' found '%d' results", d.Get("alias").(string), len(result.Items)))}
 	}
 	d.SetId(result.Items[0].Id.String())
 	return resourcePingAccessCertificateReadResult(d, result.Items[0])

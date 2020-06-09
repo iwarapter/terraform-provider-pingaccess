@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"log"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -211,15 +213,11 @@ func flattenIdentityMappingIds(in map[string]*int) []interface{} {
 	if in["API"] != nil {
 		m["api"] = strconv.Itoa(*in["API"])
 	}
-	log.Printf("FLATTENER: %v, %v", *in["API"], *in["Web"])
-	// if m["api"] == "0" && m["web"] == "0" {
-	// 	return []interface{}{}
-	// }
 	return []interface{}{m}
 }
 
 func expandPolicyItem(in []interface{}) []*pa.PolicyItem {
-	policies := []*pa.PolicyItem{}
+	var policies []*pa.PolicyItem
 	for _, raw := range in {
 		policy := &pa.PolicyItem{}
 		l := raw.(map[string]interface{})
@@ -235,7 +233,7 @@ func expandPolicyItem(in []interface{}) []*pa.PolicyItem {
 }
 
 func flattenPolicyItem(in []*pa.PolicyItem) []interface{} {
-	m := []interface{}{}
+	var m []interface{}
 	for _, v := range in {
 		s := make(map[string]interface{})
 		s["id"] = v.Id.String()
@@ -270,7 +268,7 @@ func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
 
 func flattenPolicy(in map[string]*[]*pa.PolicyItem) []interface{} {
 	// m := make([]map[string]interface{}, 0, 1)
-	m := []interface{}{}
+	var m []interface{}
 	s := make(map[string]interface{})
 	if val, ok := in["Web"]; ok { // && len(*in["Web"]) > 0 {
 		s["web"] = flattenPolicyItem(*val)
@@ -286,13 +284,11 @@ func flattenPolicy(in map[string]*[]*pa.PolicyItem) []interface{} {
 // Takes the result of flatmap.Expand for an array of strings
 // and returns a []string
 func expandStringList(configured []interface{}) []*string {
-	// log.Printf("[INFO] expandStringList %d", len(configured))
 	vs := make([]*string, 0, len(configured))
 	for _, v := range configured {
 		val := v.(string)
 		if val != "" {
 			vs = append(vs, &val)
-			// log.Printf("[DEBUG] Appending: %s", val)
 		}
 	}
 	return vs
@@ -313,7 +309,7 @@ func expandIntList(configured []interface{}) []*int {
 }
 
 func flattenChainCertificates(in []*pa.ChainCertificateView) *schema.Set {
-	m := []interface{}{}
+	var m []interface{}
 	for _, v := range in {
 		s := make(map[string]interface{})
 		s["alias"] = *v.Alias
@@ -348,20 +344,6 @@ func flattenLinkViewList(in []*pa.LinkView) []interface{} {
 		m = append(m, flattenLinkView(v))
 	}
 	return m
-}
-
-func expandLinkView(in []interface{}) *pa.LinkView {
-	ca := &pa.LinkView{}
-	for _, raw := range in {
-		l := raw.(map[string]interface{})
-		if val, ok := l["id"]; ok {
-			ca.Id = String(val.(string))
-		}
-		if val, ok := l["location"]; ok {
-			ca.Location = String(val.(string))
-		}
-	}
-	return ca
 }
 
 func flattenLinkView(in *pa.LinkView) map[string]interface{} {
@@ -439,4 +421,86 @@ func maskConfigFromConfigurationField(field *pa.ConfigurationField, input *strin
 		}
 	}
 	return config
+}
+
+//Checks all the fields in the descriptor to ensure all required fields are set
+//
+func descriptorsHasClassName(className string, desc *pa.DescriptorsView) error {
+	var classes []string
+	for _, value := range desc.Items {
+		classes = append(classes, *value.ClassName)
+		if *value.ClassName == className {
+			return nil
+		}
+	}
+	return fmt.Errorf("unable to find className '%s' available className's: %s", className, strings.Join(classes, ", "))
+}
+
+//Checks the class name specified exists in the DescriptorsView
+//
+func validateConfiguration(className string, d *schema.ResourceDiff, desc *pa.DescriptorsView) error {
+	var diags diag.Diagnostics
+	conf := d.Get("configuration").(string)
+	for _, value := range desc.Items {
+		if *value.ClassName == className {
+			for _, f := range value.ConfigurationFields {
+				if *f.Required {
+					if v := gjson.Get(conf, *f.Name); !v.Exists() {
+						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)))
+					}
+				}
+			}
+		}
+	}
+	if diags.HasError() {
+		msgs := []string{
+			"configuration validation failed against the class descriptor definition",
+		}
+		for _, diagnostic := range diags {
+			msgs = append(msgs, diagnostic.Summary)
+		}
+		return fmt.Errorf(strings.Join(msgs, "\n"))
+	}
+	return nil
+}
+
+//Checks the class name specified exists in the RuleDescriptorsView
+//
+func ruleDescriptorsHasClassName(className string, desc *pa.RuleDescriptorsView) error {
+	var classes []string
+	for _, value := range desc.Items {
+		classes = append(classes, *value.ClassName)
+		if *value.ClassName == className {
+			return nil
+		}
+	}
+	return fmt.Errorf("unable to find className '%s' available className's: %s", className, strings.Join(classes, ", "))
+}
+
+//Checks all the fields in the Rule descriptor to ensure all required fields are set
+//
+func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *pa.RuleDescriptorsView) error {
+	var diags diag.Diagnostics
+	conf := d.Get("configuration").(string)
+	for _, value := range desc.Items {
+		if *value.ClassName == className {
+			for _, f := range value.ConfigurationFields {
+				if *f.Required {
+					if v := gjson.Get(conf, *f.Name); !v.Exists() {
+						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)))
+					}
+				}
+			}
+		}
+	}
+	if diags.HasError() {
+		msgs := []string{
+			"configuration validation failed against the class descriptor definition",
+		}
+		for _, diagnostic := range diags {
+			msgs = append(msgs, diagnostic.Summary)
+		}
+		return fmt.Errorf(strings.Join(msgs, "\n"))
+	}
+	return nil
 }

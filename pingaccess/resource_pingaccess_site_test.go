@@ -1,11 +1,7 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"log"
-	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -14,52 +10,52 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_sites", &resource.Sweeper{
-		Name:         "pingaccess_sites",
-		F:            testSweepSites,
-		Dependencies: []string{"pingaccess_application", "pingaccess_application_resource"},
-	})
-}
-
-func testSweepSites(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Sites
-	result, _, _ := conn.GetSitesCommand(&pingaccess.GetSitesCommandInput{Filter: "acc_test_"})
-	for _, v := range result.Items {
-		log.Printf("Sweeper: Deleting %s", *v.Name)
-		conn.DeleteSiteCommand(&pingaccess.DeleteSiteCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessSite(t *testing.T) {
-	var out pingaccess.SiteView
-
+	resourceName := "pingaccess_site.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessSiteDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"\"localhost:1234\""}),
+				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"localhost:1234"}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test", 3, &out),
-					// testAccCheckPingAccessSiteAttributes(),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName}, []string{roleName}, []string{groupName}, &out),
+					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test"),
+					resource.TestCheckResourceAttr(resourceName, "availability_profile_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "keep_alive_timeout", "0"),
+					resource.TestCheckResourceAttr(resourceName, "load_balancing_strategy_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "max_web_socket_connections", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
+					resource.TestCheckResourceAttr(resourceName, "send_pa_cookie", "true"),
+					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "false"),
+					resource.TestCheckResourceAttr(resourceName, "targets.0", "localhost:1234"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "use_proxy", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_target_host_header", "false"),
 				),
 			},
 			{
-				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"\"localhost:1235\""}),
+				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"localhost:1235"}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test", 6, &out),
-					// testAccCheckAWSPolicyAttachmentAttributes([]string{userName2, userName3},
-					// 	[]string{roleName2, roleName3}, []string{groupName2, groupName3}, &out),
+					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test"),
+					resource.TestCheckResourceAttr(resourceName, "availability_profile_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "keep_alive_timeout", "0"),
+					resource.TestCheckResourceAttr(resourceName, "load_balancing_strategy_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "max_web_socket_connections", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
+					resource.TestCheckResourceAttr(resourceName, "send_pa_cookie", "true"),
+					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "false"),
+					resource.TestCheckResourceAttr(resourceName, "targets.0", "localhost:1235"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "use_proxy", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_target_host_header", "false"),
 				),
 			},
 		},
@@ -74,7 +70,7 @@ func testAccPingAccessSiteConfig(name string, targets []string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_site" "acc_test" {
 		name                         = "%s"
-		targets                      = [%s]
+		targets                      = ["%s"]
 		max_connections              = -1
 		max_web_socket_connections   = -1
 		availability_profile_id      = 1
@@ -82,28 +78,28 @@ func testAccPingAccessSiteConfig(name string, targets []string) string {
 	}`, name, strings.Join(targets, ","))
 }
 
-func testAccCheckPingAccessSiteExists(n string, c int64, out *pingaccess.SiteView) resource.TestCheckFunc {
+func testAccCheckPingAccessSiteExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("unable to find resource: %s", n)
 		}
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
-			return fmt.Errorf("No site ID is set")
+			return fmt.Errorf("no site ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Sites
-		result, _, err := conn.GetSiteCommand(&pingaccess.GetSiteCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).Sites
+		result, _, err := conn.GetSiteCommand(&pa.GetSiteCommandInput{
 			Id: rs.Primary.ID,
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error: Site (%s) not found", n)
+			return fmt.Errorf("unable to find Site (%s) with ID: %s", n, rs.Primary.ID)
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: Site response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("error Site response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil

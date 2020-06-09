@@ -77,7 +77,7 @@ func testAccPingAccessWebSessionConfig(audience, password string) string {
 			"email",
 			"phone"
 		]
-	}`, name, password)
+	}`, audience, password)
 }
 
 func testAccCheckPingAccessWebSessionExists(n string, c int64, out *pa.WebSessionView) resource.TestCheckFunc {
@@ -128,6 +128,7 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 				HttpOnlyCookie:                Bool(true),
 				IdleTimeoutInMinutes:          Int(0),
 				OidcLoginType:                 String("true"),
+				PkceChallengeType:             String("OFF"),
 				PfsessionStateCacheInSeconds:  Int(0),
 				RefreshUserInfoClaimsInterval: Int(0),
 				RequestPreservationType:       String("true"),
@@ -156,6 +157,7 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 				HttpOnlyCookie:                Bool(false),
 				IdleTimeoutInMinutes:          Int(1),
 				OidcLoginType:                 String(""),
+				PkceChallengeType:             String("SHA256"),
 				PfsessionStateCacheInSeconds:  Int(1),
 				RefreshUserInfoClaimsInterval: Int(1),
 				RequestPreservationType:       String(""),

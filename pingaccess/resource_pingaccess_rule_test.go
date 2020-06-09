@@ -1,10 +1,7 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
-	"net/url"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,27 +9,8 @@ import (
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_rule", &resource.Sweeper{
-		Name:         "pingaccess_rule",
-		F:            testSweepRules,
-		Dependencies: []string{"pingaccess_ruleset"},
-	})
-}
-
-func testSweepRules(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Rules
-	result, _, _ := conn.GetRulesCommand(&pingaccess.GetRulesCommandInput{Filter: "acc_test_"})
-	for _, v := range result.Items {
-		conn.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessRule(t *testing.T) {
-	var out pingaccess.RuleView
+	resourceName := "pingaccess_rule.acc_test_rule"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -40,15 +18,15 @@ func TestAccPingAccessRule(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessRuleConfig("bar", "404"),
+				Config: testAccPingAccessRuleConfig("404"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 3, &out),
+					testAccCheckPingAccessRuleExists(resourceName),
 				),
 			},
 			{
-				Config: testAccPingAccessRuleConfig("bar", "403"),
+				Config: testAccPingAccessRuleConfig("403"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessRuleExists("pingaccess_rule.acc_test_rule_bar", 6, &out),
+					testAccCheckPingAccessRuleExists(resourceName),
 				),
 			},
 		},
@@ -59,11 +37,11 @@ func testAccCheckPingAccessRuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessRuleConfig(name, configUpdate string) string {
+func testAccPingAccessRuleConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_rule" "acc_test_rule_%s" {
+	resource "pingaccess_rule" "acc_test_rule" {
 		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "%s"
+		name = "test"
 		supported_destinations = [
 			"Site",
 			"Agent"
@@ -92,10 +70,10 @@ func testAccPingAccessRuleConfig(name, configUpdate string) string {
 	   agent_resource_cache_ttl     = 900
 	   key_pair_id                  = 0
 	   trusted_certificate_group_id = 0
-	}`, name, name, configUpdate)
+	}`, configUpdate)
 }
 
-func testAccCheckPingAccessRuleExists(n string, c int64, out *pingaccess.RuleView) resource.TestCheckFunc {
+func testAccCheckPingAccessRuleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

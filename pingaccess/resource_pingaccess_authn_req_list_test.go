@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
@@ -60,8 +59,8 @@ func testAccCheckPingAccessAuthnReqListExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No AuthnReqList ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).AuthnReqLists
-		result, _, err := conn.GetAuthnReqListCommand(&pingaccess.GetAuthnReqListCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).AuthnReqLists
+		result, _, err := conn.GetAuthnReqListCommand(&pa.GetAuthnReqListCommandInput{
 			Id: rs.Primary.ID,
 		})
 

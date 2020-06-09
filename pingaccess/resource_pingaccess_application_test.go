@@ -10,12 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessApplication(t *testing.T) {
-	var out pingaccess.ApplicationView
+	var out pa.ApplicationView
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -170,7 +169,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	`, name, context, appType, appType, os.Getenv("PINGFEDERATE_TEST_IP"))
 }
 
-func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {
+func testAccCheckPingAccessApplicationExists(n string, c int64, out *pa.ApplicationView) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -184,8 +183,8 @@ func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.
 			return fmt.Errorf("No application ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
-		result, _, err := conn.GetApplicationCommand(&pingaccess.GetApplicationCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).Applications
+		result, _, err := conn.GetApplicationCommand(&pa.GetApplicationCommandInput{
 			Id: rs.Primary.ID,
 		})
 

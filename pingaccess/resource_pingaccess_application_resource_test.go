@@ -306,17 +306,17 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				// },
 				PathPrefixes: &[]*string{String("false")},
 				Policy: map[string]*[]*pa.PolicyItem{
-					"Web": &[]*pa.PolicyItem{
-						&pa.PolicyItem{
+					"Web": {
+						{
 							Id:   json.Number("1"),
 							Type: String("Rule"),
 						},
-						&pa.PolicyItem{
+						{
 							Id:   json.Number("2"),
 							Type: String("RuleSet"),
 						},
 					},
-					"API": &[]*pa.PolicyItem{},
+					"API": {},
 				},
 				RootResource: Bool(false),
 				Unprotected:  Bool(false),

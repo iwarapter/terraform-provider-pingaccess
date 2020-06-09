@@ -1,9 +1,12 @@
 package pingaccess
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -11,12 +14,12 @@ import (
 
 func resourcePingAccessWebSession() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessWebSessionCreate,
-		Read:   resourcePingAccessWebSessionRead,
-		Update: resourcePingAccessWebSessionUpdate,
-		Delete: resourcePingAccessWebSessionDelete,
+		CreateContext: resourcePingAccessWebSessionCreate,
+		ReadContext:   resourcePingAccessWebSessionRead,
+		UpdateContext: resourcePingAccessWebSessionUpdate,
+		DeleteContext: resourcePingAccessWebSessionDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessWebSessionSchema(),
@@ -25,81 +28,87 @@ func resourcePingAccessWebSession() *schema.Resource {
 
 func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"audience": &schema.Schema{
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validateAudience,
+		"audience": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validateAudience,
 		},
-		"cache_user_attributes": &schema.Schema{
+		"cache_user_attributes": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
 		"client_credentials": oAuthClientCredentials(),
-		"cookie_domain": &schema.Schema{
+		"cookie_domain": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"cookie_type": &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validateCookieType,
-			Default:      "Signed",
+		"cookie_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			ValidateDiagFunc: validateCookieType,
+			Default:          "Encrypted",
 		},
-		"enable_refresh_user": &schema.Schema{
+		"enable_refresh_user": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		"http_only_cookie": &schema.Schema{
+		"http_only_cookie": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		"idle_timeout_in_minutes": &schema.Schema{
+		"idle_timeout_in_minutes": {
 			Type:     schema.TypeInt,
 			Optional: true,
 			Default:  60,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"oidc_login_type": &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			Default:      "Code",
-			ValidateFunc: validateOidcLoginType,
+		"oidc_login_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "Code",
+			ValidateDiagFunc: validateOidcLoginType,
 		},
-		"pfsession_state_cache_in_seconds": &schema.Schema{
+		"pkce_challenge_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "OFF",
+			ValidateDiagFunc: validatePkceChallengeType,
+		},
+		"pfsession_state_cache_in_seconds": {
 			Type:     schema.TypeInt,
 			Optional: true,
 			Default:  60,
 		},
-		"refresh_user_info_claims_interval": &schema.Schema{
+		"refresh_user_info_claims_interval": {
 			Type:     schema.TypeInt,
 			Optional: true,
 			Default:  60,
 		},
-		"request_preservation_type": &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			Default:      "POST",
-			ValidateFunc: validateRequestPreservationType,
+		"request_preservation_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "POST",
+			ValidateDiagFunc: validateRequestPreservationType,
 		},
-		"request_profile": &schema.Schema{
+		"request_profile": {
 			Type:       schema.TypeBool,
 			Optional:   true,
 			Default:    true,
 			Deprecated: "DEPRECATED - to be removed in a future release; please use 'scopes' instead",
 		},
 		"same_site": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Default:      "None",
-			ValidateFunc: validateWebSessionSameSite,
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "None",
+			ValidateDiagFunc: validateWebSessionSameSite,
 		},
-		"scopes": &schema.Schema{
+		"scopes": {
 			Type:     schema.TypeSet,
 			Optional: true,
 			DefaultFunc: func() (interface{}, error) {
@@ -109,36 +118,36 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 		},
-		"secure_cookie": &schema.Schema{
+		"secure_cookie": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		"send_requested_url_to_provider": &schema.Schema{
+		"send_requested_url_to_provider": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		"session_timeout_in_minutes": &schema.Schema{
+		"session_timeout_in_minutes": {
 			Type:     schema.TypeInt,
 			Optional: true,
 			Default:  480,
 		},
-		"validate_session_is_alive": &schema.Schema{
+		"validate_session_is_alive": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		"web_storage_type": &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			Default:      "SessionStorage",
-			ValidateFunc: validateWebStorageType,
+		"web_storage_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "SessionStorage",
+			ValidateDiagFunc: validateWebStorageType,
 		},
 	}
 }
 
-func resourcePingAccessWebSessionCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessWebSessionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	input := pa.AddWebSessionCommandInput{
 		Body: *resourcePingAccessWebSessionReadData(d),
@@ -146,26 +155,26 @@ func resourcePingAccessWebSessionCreate(d *schema.ResourceData, m interface{}) e
 
 	result, _, err := svc.AddWebSessionCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating websession: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create WebSession: %s", err))}
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
-func resourcePingAccessWebSessionRead(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessWebSessionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	input := &pa.GetWebSessionCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetWebSessionCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading websession: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read WebSession: %s", err))}
 	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
-func resourcePingAccessWebSessionUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessWebSessionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	input := pa.UpdateWebSessionCommandInput{
 		Body: *resourcePingAccessWebSessionReadData(d),
@@ -173,12 +182,12 @@ func resourcePingAccessWebSessionUpdate(d *schema.ResourceData, m interface{}) e
 	}
 	result, _, err := svc.UpdateWebSessionCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating websession: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update WebSession: %s", err))}
 	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
-func resourcePingAccessWebSessionDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessWebSessionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -188,49 +197,51 @@ func resourcePingAccessWebSessionDelete(d *schema.ResourceData, m interface{}) e
 
 	_, err := svc.DeleteWebSessionCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting websession: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete WebSession: %s", err))}
 	}
 	return nil
 }
 
-func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.WebSessionView) (err error) {
-	setResourceDataString(d, "audience", input.Audience)
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "web_storage_type", input.WebStorageType)
-	setResourceDataBool(d, "cache_user_attributes", input.CacheUserAttributes)
-	setResourceDataString(d, "cookie_domain", input.CookieDomain)
-	setResourceDataString(d, "cookie_type", input.CookieType)
-	setResourceDataBool(d, "enable_refresh_user", input.EnableRefreshUser)
-	setResourceDataBool(d, "http_only_cookie", input.HttpOnlyCookie)
-	setResourceDataInt(d, "idle_timeout_in_minutes", input.IdleTimeoutInMinutes)
-	setResourceDataString(d, "oidc_login_type", input.OidcLoginType)
-	setResourceDataInt(d, "pfsession_state_cache_in_seconds", input.PfsessionStateCacheInSeconds)
-	setResourceDataInt(d, "refresh_user_info_claims_interval", input.RefreshUserInfoClaimsInterval)
-	setResourceDataString(d, "request_preservation_type", input.RequestPreservationType)
-	setResourceDataBool(d, "request_profile", input.RequestProfile)
-	setResourceDataString(d, "same_site", input.SameSite)
-	setResourceDataBool(d, "secure_cookie", input.SecureCookie)
-	setResourceDataBool(d, "send_requested_url_to_provider", input.SendRequestedUrlToProvider)
-	setResourceDataInt(d, "session_timeout_in_minutes", input.SessionTimeoutInMinutes)
-	setResourceDataBool(d, "validate_session_is_alive", input.ValidateSessionIsAlive)
+func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.WebSessionView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "audience", input.Audience, &diags)
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "web_storage_type", input.WebStorageType, &diags)
+	setResourceDataBoolWithDiagnostic(d, "cache_user_attributes", input.CacheUserAttributes, &diags)
+	setResourceDataStringWithDiagnostic(d, "cookie_domain", input.CookieDomain, &diags)
+	setResourceDataStringWithDiagnostic(d, "cookie_type", input.CookieType, &diags)
+	setResourceDataBoolWithDiagnostic(d, "enable_refresh_user", input.EnableRefreshUser, &diags)
+	setResourceDataBoolWithDiagnostic(d, "http_only_cookie", input.HttpOnlyCookie, &diags)
+	setResourceDataIntWithDiagnostic(d, "idle_timeout_in_minutes", input.IdleTimeoutInMinutes, &diags)
+	setResourceDataStringWithDiagnostic(d, "oidc_login_type", input.OidcLoginType, &diags)
+	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", input.PkceChallengeType, &diags)
+	setResourceDataIntWithDiagnostic(d, "pfsession_state_cache_in_seconds", input.PfsessionStateCacheInSeconds, &diags)
+	setResourceDataIntWithDiagnostic(d, "refresh_user_info_claims_interval", input.RefreshUserInfoClaimsInterval, &diags)
+	setResourceDataStringWithDiagnostic(d, "request_preservation_type", input.RequestPreservationType, &diags)
+	setResourceDataBoolWithDiagnostic(d, "request_profile", input.RequestProfile, &diags)
+	setResourceDataStringWithDiagnostic(d, "same_site", input.SameSite, &diags)
+	setResourceDataBoolWithDiagnostic(d, "secure_cookie", input.SecureCookie, &diags)
+	setResourceDataBoolWithDiagnostic(d, "send_requested_url_to_provider", input.SendRequestedUrlToProvider, &diags)
+	setResourceDataIntWithDiagnostic(d, "session_timeout_in_minutes", input.SessionTimeoutInMinutes, &diags)
+	setResourceDataBoolWithDiagnostic(d, "validate_session_is_alive", input.ValidateSessionIsAlive, &diags)
 
 	if input.Scopes != nil {
-		if err = d.Set("scopes", *input.Scopes); err != nil {
-			return err
+		if err := d.Set("scopes", *input.Scopes); err != nil {
+			diags = append(diags, diag.FromErr(err))
 		}
 	}
 	if input.ClientCredentials != nil {
 		//TODO we should look at encrypting the value
-		pw, ok := d.GetOkExists("client_credentials.0.client_secret.0.value")
+		pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 		creds := flattenOAuthClientCredentialsView(input.ClientCredentials)
 		if ok {
 			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
 		}
-		if err = d.Set("client_credentials", creds); err != nil {
-			return err
+		if err := d.Set("client_credentials", creds); err != nil {
+			diags = append(diags, diag.FromErr(err))
 		}
 	}
-	return nil
+	return diags
 }
 
 func resourcePingAccessWebSessionReadData(d *schema.ResourceData) *pa.WebSessionView {
@@ -266,6 +277,10 @@ func resourcePingAccessWebSessionReadData(d *schema.ResourceData) *pa.WebSession
 
 	if _, ok := d.GetOkExists("oidc_login_type"); ok {
 		websession.OidcLoginType = String(d.Get("oidc_login_type").(string))
+	}
+
+	if _, ok := d.GetOkExists("pkce_challenge_type"); ok {
+		websession.PkceChallengeType = String(d.Get("pkce_challenge_type").(string))
 	}
 
 	if _, ok := d.GetOkExists("pfsession_state_cache_in_seconds"); ok {

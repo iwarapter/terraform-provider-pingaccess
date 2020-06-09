@@ -2,100 +2,111 @@ package pingaccess
 
 import (
 	"fmt"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
-func validateWebOrAPI(value interface{}, field string) (warns []string, errs []error) {
+func validateWebOrAPI(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "Web" && v != "API" {
-		errs = append(errs, fmt.Errorf("%q must be either 'Web' or 'API' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'Web' or 'API' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateRuleOrRuleSet(value interface{}, field string) (warns []string, errs []error) {
+func validateRuleOrRuleSet(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "Rule" && v != "RuleSet" {
-		errs = append(errs, fmt.Errorf("%q must be either 'Rule' or 'RuleSet' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'Rule' or 'RuleSet' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds(value interface{}, field string) (warns []string, errs []error) {
+func validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "SuccessIfAllSucceed" && v != "SuccessIfAnyOneSucceeds" {
-		errs = append(errs, fmt.Errorf("%q must be either 'SuccessIfAllSucceed' or 'SuccessIfAnyOneSucceeds' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'SuccessIfAllSucceed' or 'SuccessIfAnyOneSucceeds' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateAudience(value interface{}, field string) (warns []string, errs []error) {
+func validateAudience(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if len(v) < 1 || len(v) > 31 {
-		errs = append(errs, fmt.Errorf("%q must be between 1 and 32 characters not %d", field, len(v)))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be between 1 and 32 characters not %d", len(v)))}
 	}
-	return
+	return nil
 }
 
-func validateCookieType(value interface{}, field string) (warns []string, errs []error) {
+func validateCookieType(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "Encrypted" && v != "Signed" {
-		errs = append(errs, fmt.Errorf("%q must be either 'Encrypted' or 'Signed' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'Encrypted' or 'Signed' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateOidcLoginType(value interface{}, field string) (warns []string, errs []error) {
+func validateOidcLoginType(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "Code" && v != "POST" && v != "x_post" {
-		errs = append(errs, fmt.Errorf("%q must be either 'Code', 'POST' or 'x_post' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'Code', 'POST' or 'x_post' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateRequestPreservationType(value interface{}, field string) (warns []string, errs []error) {
+func validatePkceChallengeType(value interface{}, path cty.Path) diag.Diagnostics {
+	v := value.(string)
+	if v != "SHA256" && v != "OFF" {
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'SHA256' or 'OFF' not %s", v))}
+	}
+	return nil
+}
+
+func validateRequestPreservationType(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "None" && v != "POST" && v != "All" {
-		errs = append(errs, fmt.Errorf("%q must be either 'None', 'POST' or 'All' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'None', 'POST' or 'All' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateWebStorageType(value interface{}, field string) (warns []string, errs []error) {
+func validateWebStorageType(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "SessionStorage" && v != "LocalStorage" {
-		errs = append(errs, fmt.Errorf("%q must be either 'SessionStorage' or 'LocalStorage' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'SessionStorage' or 'LocalStorage' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateListLocationValue(value interface{}, field string) (warns []string, errs []error) {
+func validateListLocationValue(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "FIRST" && v != "LAST" {
-		errs = append(errs, fmt.Errorf("%q must be either 'FIRST' or 'LAST' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'FIRST' or 'LAST' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateHTTPListenerName(value interface{}, field string) (warns []string, errs []error) {
+func validateHTTPListenerName(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "ADMIN" && v != "AGENT" && v != "ENGINE" {
-		errs = append(errs, fmt.Errorf("%q must be either 'ADMIN', 'AGENT' or 'ENGINE' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'ADMIN', 'AGENT' or 'ENGINE' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateWebSessionSameSite(value interface{}, field string) (warns []string, errs []error) {
+func validateWebSessionSameSite(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "Disabled" && v != "Lax" && v != "None" {
-		errs = append(errs, fmt.Errorf("%q must be either 'Disabled', 'Lax' or 'None' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'Disabled', 'Lax' or 'None' not %s", v))}
 	}
-	return
+	return nil
 }
 
-func validateAuditLevel(value interface{}, field string) (warns []string, errs []error) {
+func validateAuditLevel(value interface{}, path cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "ON" && v != "OFF" {
-		errs = append(errs, fmt.Errorf("%q must be either 'ON' or 'OFF' not %s", field, v))
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("must be either 'ON' or 'OFF' not %s", v))}
 	}
-	return
+	return nil
 }

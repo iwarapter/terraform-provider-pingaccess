@@ -111,6 +111,9 @@ func Test_resourcePingAccessThirdPartyServiceReadData(t *testing.T) {
 				SkipHostnameVerification:  Bool(false),
 				TrustedCertificateGroupId: Int(0),
 				UseProxy:                  Bool(false),
+				LoadBalancingStrategyId:   Int(0),
+				ExpectedHostname:          nil,
+				HostValue:                 nil,
 			},
 		},
 		{

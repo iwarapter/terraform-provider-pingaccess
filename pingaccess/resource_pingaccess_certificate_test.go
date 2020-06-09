@@ -82,7 +82,7 @@ func testAccCheckPingAccessCertificateExists(n string) resource.TestCheckFunc {
 
 func testAccCheckPingAccessCertificateAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No Certificate ID is set")
 		}

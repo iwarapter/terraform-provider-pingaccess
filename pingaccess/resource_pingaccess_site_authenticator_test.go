@@ -1,10 +1,8 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,32 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_site_authenticator", &resource.Sweeper{
-		Name:         "pingaccess_site_authenticator",
-		F:            testSweepSiteAuthenticators,
-		Dependencies: []string{"pingaccess_site"},
-	})
-}
-
-func testSweepSiteAuthenticators(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).SiteAuthenticators
-	result, _, _ := conn.GetSiteAuthenticatorsCommand(&pingaccess.GetSiteAuthenticatorsCommandInput{Filter: "acc_test_"})
-	for _, v := range result.Items {
-		log.Printf("Sweeper: Deleting %s", *v.Name)
-		conn.DeleteSiteAuthenticatorCommand(&pingaccess.DeleteSiteAuthenticatorCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessSiteAuthenticator(t *testing.T) {
-	var out pingaccess.SiteAuthenticatorView
+	resourceName := "pingaccess_site_authenticator.acc_test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -50,13 +27,19 @@ func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 			{
 				Config: testAccPingAccessSiteAuthenticatorConfig("acc_test_bar", "bar"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessSiteAuthenticatorExists("pingaccess_site_authenticator.acc_test", 3, &out),
+					testAccCheckPingAccessSiteAuthenticatorExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
+					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"password\":{\"value\":\"bar\"},\"username\":\"cheese\"}"),
 				),
 			},
 			{
 				Config: testAccPingAccessSiteAuthenticatorConfig("acc_test_bar", "foo"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessSiteAuthenticatorExists("pingaccess_site_authenticator.acc_test", 6, &out),
+					testAccCheckPingAccessSiteAuthenticatorExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
+					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"password\":{\"value\":\"foo\"},\"username\":\"cheese\"}"),
 				),
 			},
 		},
@@ -94,7 +77,7 @@ func testAccPingAccessSiteAuthenticatorConfig(name, password string) string {
 	}`, name, password, password)
 }
 
-func testAccCheckPingAccessSiteAuthenticatorExists(n string, c int64, out *pingaccess.SiteAuthenticatorView) resource.TestCheckFunc {
+func testAccCheckPingAccessSiteAuthenticatorExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -105,8 +88,8 @@ func testAccCheckPingAccessSiteAuthenticatorExists(n string, c int64, out *pinga
 			return fmt.Errorf("No site_authenticator ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).SiteAuthenticators
-		result, _, err := conn.GetSiteAuthenticatorCommand(&pingaccess.GetSiteAuthenticatorCommandInput{
+		conn := testAccProvider.Meta().(*pa.Client).SiteAuthenticators
+		result, _, err := conn.GetSiteAuthenticatorCommand(&pa.GetSiteAuthenticatorCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -123,6 +106,36 @@ func testAccCheckPingAccessSiteAuthenticatorExists(n string, c int64, out *pinga
 }
 
 func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
+
+	descs := pa.DescriptorsView{
+		Items: []*pa.DescriptorView{
+			{
+				ClassName: String("something"),
+				ConfigurationFields: []*pa.ConfigurationField{
+					{
+						Name: String("password"),
+						Type: String("CONCEALED"),
+					},
+				},
+				Label: nil,
+				Type:  nil,
+			},
+		}}
+
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		equals(t, req.URL.String(), "/siteAuthenticators/descriptors")
+		// Send response to be tested
+		b, _ := json.Marshal(descs)
+		rw.Write(b)
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	// Use Client & URL from our local test server
+	url, _ := url.Parse(server.URL)
+	c := pa.NewClient("", "", url, "", server.Client())
+
 	cases := []struct {
 		SiteAuthenticator pa.SiteAuthenticatorView
 	}{
@@ -141,39 +154,8 @@ func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
 	}
 	for i, tc := range cases {
 		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
-
-			descs := pingaccess.DescriptorsView{
-				Items: []*pingaccess.DescriptorView{
-					{
-						ClassName: String("something"),
-						ConfigurationFields: []*pingaccess.ConfigurationField{
-							{
-								Name: String("password"),
-								Type: String("CONCEALED"),
-							},
-						},
-						Label: nil,
-						Type:  nil,
-					},
-				}}
-
-			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-				// Test request parameters
-				equals(t, req.URL.String(), "/siteAuthenticators/descriptors")
-				// Send response to be tested
-				b, _ := json.Marshal(descs)
-				rw.Write(b)
-			}))
-			// Close the server when test finishes
-			defer server.Close()
-
-			// Use Client & URL from our local test server
-			url, _ := url.Parse(server.URL)
-			c := pingaccess.NewClient("", "", url, "", server.Client())
-
 			resourceSchema := resourcePingAccessSiteAuthenticatorSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			//resourceLocalData.Set("hidden_fields", []string{"password"})
 			resourcePingAccessSiteAuthenticatorReadResult(resourceLocalData, &tc.SiteAuthenticator, c.SiteAuthenticators)
 
 			if got := *resourcePingAccessSiteAuthenticatorReadData(resourceLocalData); !cmp.Equal(got, tc.SiteAuthenticator) {

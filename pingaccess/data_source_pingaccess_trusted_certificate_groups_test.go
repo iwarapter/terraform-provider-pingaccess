@@ -1,7 +1,6 @@
 package pingaccess
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
@@ -38,7 +37,7 @@ func TestAccPingAccessTrustedCertificateGroupsDataSource_NotFound(t *testing.T) 
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccPingAccessTrustedCertificateGroupsDataSourceConfigNonExistent(),
-				ExpectError: regexp.MustCompile(`Unable to find trusted certificate group with the name junk: `),
+				ExpectError: regexp.MustCompile(`unable to find TrustedCertificateGroup with the name 'junk' found '0' results`),
 			},
 		},
 	})
@@ -49,10 +48,10 @@ func testAccCheckPingAccessTrustedCertificateGroupsDataSourceDestroy(s *terrafor
 }
 
 func testAccPingAccessTrustedCertificateGroupsDataSourceConfig() string {
-	return fmt.Sprintf(`
+	return `
 	data "pingaccess_trusted_certificate_group" "test" {
 		name = "Trust Any"
-	}`)
+	}`
 }
 
 func testAccPingAccessTrustedCertificateGroupsDataSourceConfigNonExistent() string {

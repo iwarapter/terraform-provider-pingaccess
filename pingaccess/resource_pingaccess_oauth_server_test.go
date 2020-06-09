@@ -35,7 +35,7 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
 				),
-				ExpectError: regexp.MustCompile(`Error updating oauth server settings: \[Save Failed\]\nIntrospection endpoint must be a valid relative path`),
+				ExpectError: regexp.MustCompile(`unable to update OAuthServerSettings: \[Save Failed\]\nIntrospection endpoint must be a valid relative path`),
 			},
 		},
 	})

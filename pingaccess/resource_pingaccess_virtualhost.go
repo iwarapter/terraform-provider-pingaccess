@@ -1,20 +1,23 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessVirtualHost() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessVirtualHostCreate,
-		Read:   resourcePingAccessVirtualHostRead,
-		Update: resourcePingAccessVirtualHostUpdate,
-		Delete: resourcePingAccessVirtualHostDelete,
+		CreateContext: resourcePingAccessVirtualHostCreate,
+		ReadContext:   resourcePingAccessVirtualHostRead,
+		UpdateContext: resourcePingAccessVirtualHostUpdate,
+		DeleteContext: resourcePingAccessVirtualHostDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessVirtualHostSchema(),
@@ -26,6 +29,7 @@ func resourcePingAccessVirtualHostSchema() map[string]*schema.Schema {
 		"agent_resource_cache_ttl": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"host": {
 			Type:     schema.TypeString,
@@ -34,6 +38,7 @@ func resourcePingAccessVirtualHostSchema() map[string]*schema.Schema {
 		"key_pair_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"port": {
 			Type:     schema.TypeInt,
@@ -42,91 +47,84 @@ func resourcePingAccessVirtualHostSchema() map[string]*schema.Schema {
 		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 	}
 }
 
-func resourcePingAccessVirtualHostCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Virtualhosts
-	input := pingaccess.AddVirtualHostCommandInput{
+func resourcePingAccessVirtualHostCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Virtualhosts
+	input := pa.AddVirtualHostCommandInput{
 		Body: *resourcePingAccessVirtualHostReadData(d),
 	}
 
 	result, _, err := svc.AddVirtualHostCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating virtualhost: %s", err.Error())
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create VirtualHost: %s", err))}
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessVirtualHostReadResult(d, &input.Body)
 }
 
-func resourcePingAccessVirtualHostRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Virtualhosts
-	input := &pingaccess.GetVirtualHostCommandInput{
+func resourcePingAccessVirtualHostRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Virtualhosts
+	input := &pa.GetVirtualHostCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetVirtualHostCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading virtualhost: %s", err.Error())
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read VirtualHost: %s", err))}
 	}
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
 
-func resourcePingAccessVirtualHostUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Virtualhosts
-	input := pingaccess.UpdateVirtualHostCommandInput{
+func resourcePingAccessVirtualHostUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Virtualhosts
+	input := pa.UpdateVirtualHostCommandInput{
 		Body: *resourcePingAccessVirtualHostReadData(d),
 		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateVirtualHostCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating virtualhost: %s", err.Error())
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update VirtualHost: %s", err))}
 	}
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
 
-func resourcePingAccessVirtualHostDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Virtualhosts
-	input := &pingaccess.DeleteVirtualHostCommandInput{
+func resourcePingAccessVirtualHostDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Virtualhosts
+	input := &pa.DeleteVirtualHostCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteVirtualHostCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting virtualhost: %s", err.Error())
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete VirtualHost: %s", err))}
 	}
 	return nil
 }
 
-func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *pingaccess.VirtualHostView) error {
-	setResourceDataString(d, "host", input.Host)
-	setResourceDataInt(d, "port", input.Port)
-	setResourceDataInt(d, "agent_resource_cache_ttl", input.AgentResourceCacheTTL)
-	setResourceDataInt(d, "key_pair_id", input.KeyPairId)
-	setResourceDataInt(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId)
+func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *pa.VirtualHostView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "host", input.Host, &diags)
+	setResourceDataIntWithDiagnostic(d, "port", input.Port, &diags)
+	setResourceDataIntWithDiagnostic(d, "agent_resource_cache_ttl", input.AgentResourceCacheTTL, &diags)
+	setResourceDataIntWithDiagnostic(d, "key_pair_id", input.KeyPairId, &diags)
+	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
 
-	return nil
+	return diags
 }
 
-func resourcePingAccessVirtualHostReadData(d *schema.ResourceData) *pingaccess.VirtualHostView {
-	vh := &pingaccess.VirtualHostView{
+func resourcePingAccessVirtualHostReadData(d *schema.ResourceData) *pa.VirtualHostView {
+	vh := &pa.VirtualHostView{
 		Host: String(d.Get("host").(string)),
 		Port: Int(d.Get("port").(int)),
 	}
-
-	if _, ok := d.GetOkExists("agent_resource_cache_ttl"); ok {
-		vh.AgentResourceCacheTTL = Int(d.Get("agent_resource_cache_ttl").(int))
-	}
-
-	if _, ok := d.GetOkExists("key_pair_id"); ok {
-		vh.KeyPairId = Int(d.Get("key_pair_id").(int))
-	}
-
-	if _, ok := d.GetOkExists("trusted_certificate_group_id"); ok {
-		vh.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
-	}
+	vh.AgentResourceCacheTTL = Int(d.Get("agent_resource_cache_ttl").(int))
+	vh.KeyPairId = Int(d.Get("key_pair_id").(int))
+	vh.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
 
 	return vh
 }

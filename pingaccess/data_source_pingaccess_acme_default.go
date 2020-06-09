@@ -1,16 +1,18 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func dataSourcePingAccessAcmeDefault() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourcePingAccessAcmeDefaultRead,
-		Schema: dataSourcePingAccessAcmeDefaultSchema(),
+		ReadContext: dataSourcePingAccessAcmeDefaultRead,
+		Schema:      dataSourcePingAccessAcmeDefaultSchema(),
 	}
 }
 
@@ -23,12 +25,15 @@ func dataSourcePingAccessAcmeDefaultSchema() map[string]*schema.Schema {
 	}
 }
 
-func dataSourcePingAccessAcmeDefaultRead(d *schema.ResourceData, m interface{}) error {
+func dataSourcePingAccessAcmeDefaultRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Acme
 	result, resp, err := svc.GetDefaultAcmeServerCommand()
 	if err != nil {
-		return fmt.Errorf("Error reading ACME Default: %s\n%v", err.Error(), resp)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read ACME Default: %s\n%v", err.Error(), resp))}
+
 	}
 	d.SetId(*result.Id)
-	return setResourceDataString(d, "location", result.Location)
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "location", result.Location, &diags)
+	return diags
 }

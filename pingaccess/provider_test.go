@@ -6,12 +6,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"github.com/ory/dockertest/v3"
-	"github.com/tidwall/sjson"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -23,6 +17,13 @@ import (
 	"runtime"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/ory/dockertest/v3"
+	"github.com/tidwall/sjson"
 )
 
 func TestMain(m *testing.M) {
@@ -106,16 +107,16 @@ func TestMain(m *testing.M) {
 		}
 		log.Printf("Connected to PingAccess version: %s", *version.Version)
 		pfPort := pfCont.GetPort("9999/tcp")
-		pfUrl, _ := url.Parse(fmt.Sprintf("https://localhost:%s", pfPort))
+		pfURL, _ := url.Parse(fmt.Sprintf("https://localhost:%s", pfPort))
 		pfClient := &http.Client{}
 		if err = pool.Retry(func() error {
 			log.Println("Attempting to connect to PingFederate admin API....")
-			_, err := connectToPF(pfClient, pfUrl.String())
+			_, err := connectToPF(pfClient, pfURL.String())
 			return err
 		}); err != nil {
 			log.Fatalf("Could not connect to pingaccess: %s", err)
 		}
-		err = setupPF(pfUrl.String())
+		err = setupPF(pfURL.String())
 		if err != nil {
 			log.Fatalf("Failed to setup PF server: %v", err)
 		}
@@ -147,8 +148,8 @@ func init() {
 	}
 }
 
-func connectToPF(client *http.Client, adminUrl string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminUrl), nil)
+func connectToPF(client *http.Client, adminURL string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminURL), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -164,19 +165,19 @@ func connectToPF(client *http.Client, adminUrl string) (*http.Response, error) {
 	return resp, nil
 }
 
-func setupPF(adminUrl string) error {
+func setupPF(adminURL string) error {
 	client := &http.Client{}
-	resp, err := connectToPF(client, adminUrl)
+	resp, err := connectToPF(client, adminURL)
 	if err != nil {
 		return err
 	}
-	bodyText, err := ioutil.ReadAll(resp.Body)
+	bodyText, _ := ioutil.ReadAll(resp.Body)
 	s := string(bodyText)
 	s, err = sjson.Set(s, "rolesAndProtocols.oauthRole.enableOpenIdConnect", true)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminUrl), bytes.NewBuffer([]byte(s)))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminURL), bytes.NewBuffer([]byte(s)))
 	req.SetBasicAuth("Administrator", "2FederateM0re")
 	req.Header.Add("X-Xsrf-Header", "pingfederate")
 	req.Header.Set("Content-Type", "application/json")
@@ -205,24 +206,6 @@ func randomString(length int) string {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
 	return string(b)
-}
-
-// assert fails the test if the condition is false.
-func assert(tb testing.TB, condition bool, msg string, v ...interface{}) {
-	if !condition {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d: "+msg+"\033[39m\n\n", append([]interface{}{filepath.Base(file), line}, v...)...)
-		tb.FailNow()
-	}
-}
-
-// ok fails the test if an err is not nil.
-func ok(tb testing.TB, err error) {
-	if err != nil {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d: unexpected error: %s\033[39m\n\n", filepath.Base(file), line, err.Error())
-		tb.FailNow()
-	}
 }
 
 // equals fails the test if exp is not equal to act.

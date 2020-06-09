@@ -1,23 +1,24 @@
 package pingaccess
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessApplicationResource() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessApplicationResourceCreate,
-		Read:   resourcePingAccessApplicationResourceRead,
-		Update: resourcePingAccessApplicationResourceUpdate,
-		Delete: resourcePingAccessApplicationResourceDelete,
+		CreateContext: resourcePingAccessApplicationResourceCreate,
+		ReadContext:   resourcePingAccessApplicationResourceRead,
+		UpdateContext: resourcePingAccessApplicationResourceUpdate,
+		DeleteContext: resourcePingAccessApplicationResourceDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourcePingAccessApplicationResourceImport,
+			StateContext: resourcePingAccessApplicationResourceImport,
 		},
 
 		Schema: resourcePingAccessApplicationResourceSchema(),
@@ -26,39 +27,39 @@ func resourcePingAccessApplicationResource() *schema.Resource {
 
 func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		anonymous: &schema.Schema{
+		"anonymous": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		applicationID: &schema.Schema{
+		"application_id": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		auditLevel: &schema.Schema{
+		"audit_level": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		defaultAuthTypeOverride: &schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validateWebOrAPI,
+		"default_auth_type_override": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			ValidateDiagFunc: validateWebOrAPI,
 		},
-		enabled: &schema.Schema{
+		"enabled": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		methods: &schema.Schema{
+		"methods": {
 			Type:     schema.TypeSet,
 			Required: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
-		name: &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		pathPatterns: &schema.Schema{
+		"path_patterns": {
 			Type:     schema.TypeSet,
 			Optional: true,
 			Elem: &schema.Resource{
@@ -74,7 +75,7 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 				},
 			},
 		},
-		pathPrefixes: &schema.Schema{
+		"path_prefixes": {
 			Type:       schema.TypeSet,
 			Optional:   true,
 			Deprecated: "To be removed in a future release; please use 'path_patterns' instead",
@@ -83,69 +84,71 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 			},
 		},
 		"policy": applicationPolicySchema(),
-		rootResource: &schema.Schema{
+		"root_resource": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"unprotected": &schema.Schema{
+		"unprotected": {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
 	}
 }
 
-func resourcePingAccessApplicationResourceCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Applications
+func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	svc := m.(*pa.Client).Applications
 	applicationID := d.Get("application_id").(string)
 
 	if d.Get("root_resource").(bool) {
 		//Root Resources are created automatically, if one exists we will import it instead of failing to create.
-		input := pingaccess.GetApplicationResourcesCommandInput{
+		input := pa.GetApplicationResourcesCommandInput{
 			Id:   applicationID,
 			Name: "Root Resource",
 		}
 		result, _, err := svc.GetApplicationResourcesCommand(&input)
 		if err != nil {
-			return fmt.Errorf("Error creating application resource: %s", err)
+			return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))}
 		}
 		rv := result.Items[0]
 		d.SetId(rv.Id.String())
-		d.Set("application_id", strconv.Itoa(*rv.ApplicationId))
-		return resourcePingAccessApplicationResourceUpdate(d, m)
+		setResourceDataStringWithDiagnostic(d, "application_id", String(strconv.Itoa(*rv.ApplicationId)), &diags)
+		return resourcePingAccessApplicationResourceUpdate(ctx, d, m)
 	}
 
-	input := pingaccess.AddApplicationResourceCommandInput{
+	input := pa.AddApplicationResourceCommandInput{
 		Id:   applicationID,
 		Body: *resourcePingAccessApplicationResourceReadData(d),
 	}
 
 	result, _, err := svc.AddApplicationResourceCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating application resource: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))}
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
-func resourcePingAccessApplicationResourceRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Applications
-	input := &pingaccess.GetApplicationResourceCommandInput{
+func resourcePingAccessApplicationResourceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Applications
+	input := &pa.GetApplicationResourceCommandInput{
 		ApplicationId: d.Get("application_id").(string),
 		ResourceId:    d.Id(),
 	}
 
 	result, _, err := svc.GetApplicationResourceCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading application resource: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read ApplicationResource: %s", err))}
 	}
 
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
-func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Applications
-	input := pingaccess.UpdateApplicationResourceCommandInput{
+func resourcePingAccessApplicationResourceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Applications
+	input := pa.UpdateApplicationResourceCommandInput{
 		ApplicationId: d.Get("application_id").(string),
 		ResourceId:    d.Id(),
 		Body:          *resourcePingAccessApplicationResourceReadData(d),
@@ -153,153 +156,115 @@ func resourcePingAccessApplicationResourceUpdate(d *schema.ResourceData, m inter
 
 	result, _, err := svc.UpdateApplicationResourceCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating application: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update ApplicationResource: %s", err))}
 	}
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
-func resourcePingAccessApplicationResourceDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Applications
+func resourcePingAccessApplicationResourceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(*pa.Client).Applications
 
-	if d.Get(rootResource).(bool) {
+	if d.Get("root_resource").(bool) {
 		return nil
 	}
 
-	input := &pingaccess.DeleteApplicationResourceCommandInput{
+	input := &pa.DeleteApplicationResourceCommandInput{
 		ResourceId:    d.Id(),
-		ApplicationId: d.Get(applicationID).(string),
+		ApplicationId: d.Get("application_id").(string),
 	}
 
 	_, err := svc.DeleteApplicationResourceCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting application resource: %s", err)
+		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete ApplicationResource: %s", err))}
 	}
 	return nil
 }
 
-func resourcePingAccessApplicationResourceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourcePingAccessApplicationResourceImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	idParts := strings.SplitN(d.Id(), "/", 2)
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		return nil, fmt.Errorf("unexpected format of ID (%q), expected <application_id>/<resource_id>", d.Id())
 	}
-	d.Set("application_id", idParts[0])
+	_ = d.Set("application_id", idParts[0])
 	d.SetId(idParts[1])
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *pingaccess.ResourceView) error {
-	setResourceDataBool(d, anonymous, rv.Anonymous)
-	// if err := d.Set(anonymous, *rv.Anonymous); err != nil {
-	// 	return err
-	// }
-	// anonymous := d.Get("anonymous").(bool)
-	// setResourceDataString(d, applicationId, *rv.ApplicationId)
-	if rv.ApplicationId != nil {
-		if err := d.Set(applicationID, strconv.Itoa(*rv.ApplicationId)); err != nil {
-			return err
-		}
+func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *pa.ResourceView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataBoolWithDiagnostic(d, "anonymous", rv.Anonymous, &diags)
+	setResourceDataStringWithDiagnostic(d, "application_id", String(strconv.Itoa(*rv.ApplicationId)), &diags)
+	setResourceDataStringWithDiagnostic(d, "audit_level", rv.AuditLevel, &diags)
+	setResourceDataStringWithDiagnostic(d, "default_auth_type_override", rv.DefaultAuthTypeOverride, &diags)
+	setResourceDataBoolWithDiagnostic(d, "enabled", rv.Enabled, &diags)
+	if err := d.Set("methods", *rv.Methods); err != nil {
+		diags = append(diags, diag.FromErr(err))
 	}
-	// return nil
-	// if err := d.Set(applicationID, *rv.ApplicationId); err != nil {
-	// 	return err
-	// }
-	// application_id := d.Get("application_id").(string)
-	setResourceDataString(d, auditLevel, rv.AuditLevel)
-	// if err := d.Set(auditLevel, *rv.AuditLevel); err != nil {
-	// 	return err
-	// }
-	// audit_level := d.Get("audit_level").(string)
-	setResourceDataString(d, defaultAuthTypeOverride, rv.DefaultAuthTypeOverride)
-	// if err := d.Set(defaultAuthTypeOverride, *rv.DefaultAuthTypeOverride); err != nil {
-	// 	return err
-	// }
-	// default_auth_type_override := d.Get("default_auth_type_override").(string)
-	setResourceDataBool(d, enabled, rv.Enabled)
-	// if err := d.Set(enabled, *rv.Enabled); err != nil {
-	// 	return err
-	// }
-	// enabled := d.Get("enabled").(bool)
-	// methods := d.Get("methods").([]*string)
-	if err := d.Set(methods, *rv.Methods); err != nil {
-		return err
+	if err := d.Set("name", *rv.Name); err != nil {
+		diags = append(diags, diag.FromErr(err))
 	}
-	// methods := expandStringList(d.Get("methods").(*schema.Set).List())
-	if err := d.Set(name, *rv.Name); err != nil {
-		return err
-	}
-	// name := d.Get("name").(string)
-	// path_prefixes := d.Get("path_prefixes").([]*string)
 	if rv.PathPrefixes != nil {
-		if err := d.Set(pathPrefixes, *rv.PathPrefixes); err != nil {
-			return err
+		if err := d.Set("path_prefixes", *rv.PathPrefixes); err != nil {
+			diags = append(diags, diag.FromErr(err))
 		}
 	}
-
-	// if err := d.Set("path_patterns", *rv.PathPrefixes); err != nil {
-	// 	return err
-	// }
-	// path_prefixes := expandStringList(d.Get("path_prefixes").(*schema.Set).List())
-	// if err := d.Set("policy", rv.Policy); err != nil {
-	// 	return err
-	// }
-	// policy := d.Get("policy").(map[string]interface{})
-	setResourceDataBool(d, "root_resource", rv.RootResource)
-	setResourceDataBool(d, "unprotected", rv.Unprotected)
+	setResourceDataBoolWithDiagnostic(d, "root_resource", rv.RootResource, &diags)
+	setResourceDataBoolWithDiagnostic(d, "unprotected", rv.Unprotected, &diags)
 
 	if rv.Policy != nil && (len(*rv.Policy["Web"]) != 0 || len(*rv.Policy["API"]) != 0) {
 		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-			return err
+			diags = append(diags, diag.FromErr(err))
 		}
 	}
-	return nil
+	return diags
 }
 
 func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.ResourceView {
-	methods := expandStringList(d.Get(methods).(*schema.Set).List())
+	methods := expandStringList(d.Get("methods").(*schema.Set).List())
 
 	resource := &pa.ResourceView{
 		Name:    String(d.Get("name").(string)),
 		Methods: &methods,
 	}
 
-	if _, ok := d.GetOkExists("anonymous"); ok {
-		resource.Anonymous = Bool(d.Get("anonymous").(bool))
+	if v, ok := d.GetOkExists("anonymous"); ok {
+		resource.Anonymous = Bool(v.(bool))
 	}
 
-	if _, ok := d.GetOkExists("application_id"); ok {
-		applicationID, _ := strconv.Atoi(d.Get("application_id").(string))
+	if v, ok := d.GetOk("application_id"); ok {
+		applicationID, _ := strconv.Atoi(v.(string))
 		resource.ApplicationId = Int(applicationID)
 	}
 
-	if _, ok := d.GetOkExists("audit_level"); ok {
-		resource.AuditLevel = String(d.Get("audit_level").(string))
+	if v, ok := d.GetOk("audit_level"); ok {
+		resource.AuditLevel = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("default_auth_type_override"); ok {
-		resource.DefaultAuthTypeOverride = String(d.Get("default_auth_type_override").(string))
+	if v, ok := d.GetOk("default_auth_type_override"); ok {
+		resource.DefaultAuthTypeOverride = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("enabled"); ok {
-		resource.Enabled = Bool(d.Get("enabled").(bool))
+	if v, ok := d.GetOkExists("enabled"); ok {
+		resource.Enabled = Bool(v.(bool))
 	}
 
-	if _, ok := d.GetOkExists("root_resource"); ok {
-		resource.RootResource = Bool(d.Get("root_resource").(bool))
+	if v, ok := d.GetOkExists("root_resource"); ok {
+		resource.RootResource = Bool(v.(bool))
 	}
 
-	if _, ok := d.GetOkExists("unprotected"); ok {
-		resource.Unprotected = Bool(d.Get("unprotected").(bool))
+	if v, ok := d.GetOkExists("unprotected"); ok {
+		resource.Unprotected = Bool(v.(bool))
 	}
-	if _, ok := d.GetOkExists("path_prefixes"); ok {
-		pathPrefixes := expandStringList(d.Get("path_prefixes").(*schema.Set).List())
+	if v, ok := d.GetOk("path_prefixes"); ok {
+		pathPrefixes := expandStringList(v.(*schema.Set).List())
 		resource.PathPrefixes = &pathPrefixes
 	}
 
-	if _, ok := d.GetOk("path_patterns"); ok {
-		pathPatterns := d.Get("path_patterns").(*schema.Set).List()
+	if v, ok := d.GetOk("path_patterns"); ok {
+		pathPatterns := v.(*schema.Set).List()
 		for _, raw := range pathPatterns {
 			l := raw.(map[string]interface{})
-			p := &pingaccess.PathPatternView{
+			p := &pa.PathPatternView{
 				Pattern: String(l["pattern"].(string)),
 				Type:    String(l["type"].(string)),
 			}
@@ -307,8 +272,8 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.R
 		}
 	}
 
-	if val, ok := d.GetOkExists("policy"); ok {
-		resource.Policy = expandPolicy(val.([]interface{}))
+	if v, ok := d.GetOk("policy"); ok {
+		resource.Policy = expandPolicy(v.([]interface{}))
 
 	}
 

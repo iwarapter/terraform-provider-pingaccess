@@ -80,12 +80,6 @@ func Test_resourcePingAccessTrustedCertificateGroupsReadData(t *testing.T) {
 	}{
 		{
 			TrustedCertificateGroups: pa.TrustedCertificateGroupView{
-				Name:              String("localhost"),
-				UseJavaTrustStore: Bool(false),
-			},
-		},
-		{
-			TrustedCertificateGroups: pa.TrustedCertificateGroupView{
 				Name:                       String("localhost"),
 				CertIds:                    &[]*int{Int(1)},
 				UseJavaTrustStore:          Bool(false),

@@ -36,6 +36,7 @@ The following arguments are supported:
 
 - [`name`](#name) -  The name of the web session.
 - [`oidc_login_type`](#oidc_login_type) - ['Code' or 'POST' or 'x_post']:  The web session token type.
+- [`pkce_challenge_type`](#pkce_challenge_type) - ['SHA256' or 'OFF']: Specify the code_challenge_method to use for PKCE during the Code login flow. OFF signifies to not use PKCE.
 
 - [`pfsession_state_cache_in_seconds`](#pfsession_state_cache_in_seconds) -  Specify the number of seconds to cache PingFederate Session State information.
 

@@ -88,7 +88,7 @@ func testAccCheckPingAccessKeyPairExists(n string) resource.TestCheckFunc {
 
 func testAccCheckPingAccessKeyPairAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No KeyPair ID is set")
 		}
