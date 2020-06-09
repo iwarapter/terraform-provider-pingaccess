@@ -48,12 +48,13 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 			},
 			{
 				Config:      testAccPingAccessIdentityMappingConfigWrongClassName(),
-				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.identitymappings.foo' available className's: com.pingidentity.pa.identitymappings.HeaderIdentityMapping, com.pingidentity.pa.identitymappings.JwtIdentityMapping`),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.identitymappings.foo' available classNames: com.pingidentity.pa.identitymappings.HeaderIdentityMapping, com.pingidentity.pa.identitymappings.JwtIdentityMapping`),
 			},
-			{
-				Config:      testAccPingAccessIdentityMappingConfigMissingRequired(),
-				ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'headerName' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
-			},
+			//TODO disabling configuration validation until I can handle interpolated configuration
+			//{
+			//	Config:      testAccPingAccessIdentityMappingConfigMissingRequired(),
+			//	ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'headerName' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
+			//},
 		},
 	})
 }

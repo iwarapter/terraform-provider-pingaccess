@@ -15,8 +15,7 @@ unit-test:
 
 
 test-and-report:
-	@rm -f pingaccess/terraform.log coverage.out report.json
-	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
+	TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
 
 build:
 	@go build -mod=vendor -o ${NAME} -trimpath .
