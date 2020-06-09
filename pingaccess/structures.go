@@ -433,7 +433,7 @@ func descriptorsHasClassName(className string, desc *pa.DescriptorsView) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("unable to find className '%s' available className's: %s", className, strings.Join(classes, ", "))
+	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
 }
 
 //Checks the class name specified exists in the DescriptorsView
@@ -474,7 +474,7 @@ func ruleDescriptorsHasClassName(className string, desc *pa.RuleDescriptorsView)
 			return nil
 		}
 	}
-	return fmt.Errorf("unable to find className '%s' available className's: %s", className, strings.Join(classes, ", "))
+	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
 }
 
 //Checks all the fields in the Rule descriptor to ensure all required fields are set

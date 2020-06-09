@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -31,6 +32,9 @@ func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"password\":{\"value\":\"bar\"},\"username\":\"cheese\"}"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "name", "another"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "configuration", "{\"password\":\"bar\",\"username\":\"cheese\"}"),
 				),
 			},
 			{
@@ -40,7 +44,14 @@ func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"password\":{\"value\":\"foo\"},\"username\":\"cheese\"}"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "name", "another"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "configuration", "{\"password\":\"foo\",\"username\":\"cheese\"}"),
 				),
+			},
+			{
+				Config:      testAccPingAccessSiteAuthenticatorConfigInvalidClassName(),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.siteauthenticators.foo' available classNames: com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator, com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator, com.pingidentity.pa.siteauthenticators.TokenMediatorSiteAuthenticator`),
 			},
 		},
 	})
@@ -75,6 +86,22 @@ func testAccPingAccessSiteAuthenticatorConfig(name, password string) string {
 		}
 		EOF
 	}`, name, password, password)
+}
+
+func testAccPingAccessSiteAuthenticatorConfigInvalidClassName() string {
+	return `
+	resource "pingaccess_site_authenticator" "acc_test" {
+		name          = "break"
+		class_name		= "com.pingidentity.pa.siteauthenticators.foo"
+		configuration = <<EOF
+		{
+			"username": "cheese",
+			"password": {
+				"value": "breaking"
+			}
+		}
+		EOF
+	}`
 }
 
 func testAccCheckPingAccessSiteAuthenticatorExists(n string) resource.TestCheckFunc {

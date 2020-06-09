@@ -25,10 +25,11 @@ func resourcePingAccessAccessTokenValidator() *schema.Resource {
 			svc := m.(*pingaccess.Client).AccessTokenValidators
 			desc, _, _ := svc.GetAccessTokenValidatorDescriptorsCommand()
 			className := d.Get("class_name").(string)
-			if err := descriptorsHasClassName(className, desc); err != nil {
-				return err
-			}
-			return validateConfiguration(className, d, desc)
+			return descriptorsHasClassName(className, desc)
+			//if err := descriptorsHasClassName(className, desc); err != nil {
+			//	return err
+			//}
+			//return validateConfiguration(className, d, desc)
 		},
 	}
 }

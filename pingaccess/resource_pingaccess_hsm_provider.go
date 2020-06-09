@@ -22,6 +22,16 @@ func resourcePingAccessHsmProvider() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessHsmProviderSchema(),
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			svc := m.(*pingaccess.Client).HsmProviders
+			desc, _, _ := svc.GetHsmProviderDescriptorsCommand()
+			className := d.Get("class_name").(string)
+			return descriptorsHasClassName(className, desc)
+			//if err := descriptorsHasClassName(className, desc); err != nil {
+			//	return err
+			//}
+			//return validateConfiguration(className, d, desc)
+		},
 	}
 }
 

@@ -2,6 +2,7 @@ package pingaccess
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -10,30 +11,35 @@ import (
 )
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
+	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessHsmProviderConfig("bar", "foo"),
+				Config: testAccPingAccessHsmProviderConfig("foo"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessHsmProviderExists("pingaccess_hsm_provider.acc_test_idm_bar"),
-					testAccCheckPingAccessHsmProviderAttributes("pingaccess_hsm_provider.acc_test_idm_bar", "foo"),
+					testAccCheckPingAccessHsmProviderExists(resourceName),
+					testAccCheckPingAccessHsmProviderAttributes(resourceName, "foo"),
 				),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				//TODO The pingaccess AWS CloudHsm can be created but not deleted without a working HSM,
 				// and the current TestStep is unable to plan/apply without attempting to destroy atm it seems.
 			},
+			{
+				Config:      testAccPingAccessHsmProviderConfigInvalidClassName(),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.hsm.cloudhsm.plugin.foo' available classNames: com.pingidentity.pa.hsm.cloudhsm.plugin.AwsCloudHsmProvider`),
+			},
 		},
 	})
 }
 
-func testAccPingAccessHsmProviderConfig(name, configUpdate string) string {
+func testAccPingAccessHsmProviderConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_hsm_provider" "acc_test_idm_%s" {
+	resource "pingaccess_hsm_provider" "acc_test_hsm" {
 		class_name = "com.pingidentity.pa.hsm.cloudhsm.plugin.AwsCloudHsmProvider"
-		name = "%s"
+		name = "test"
 		configuration = <<EOF
 		{
 			"user": true,
@@ -41,7 +47,22 @@ func testAccPingAccessHsmProviderConfig(name, configUpdate string) string {
 			"partition": "%s"
 		}
 		EOF
-	}`, name, name, configUpdate)
+	}`, configUpdate)
+}
+
+func testAccPingAccessHsmProviderConfigInvalidClassName() string {
+	return `
+	resource "pingaccess_hsm_provider" "acc_test_hsm" {
+		class_name = "com.pingidentity.pa.hsm.cloudhsm.plugin.foo"
+		name = "test"
+		configuration = <<EOF
+		{
+			"user": true,
+			"password": "sub",
+			"partition": "test"
+		}
+		EOF
+	}`
 }
 
 func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {

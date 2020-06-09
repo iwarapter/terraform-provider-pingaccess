@@ -34,7 +34,7 @@ func resourcePingAccessPingFederateAdminSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ValidateDiagFunc: validateAuditLevel,
-			Default: "ON",
+			Default:          "ON",
 		},
 		"base_path": {
 			Type:     schema.TypeString,
@@ -55,12 +55,12 @@ func resourcePingAccessPingFederateAdminSchema() map[string]*schema.Schema {
 		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
-			Default: 0,
+			Default:  0,
 		},
 		"use_proxy": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Default: false,
+			Default:  false,
 		},
 	}
 }
@@ -147,7 +147,7 @@ func resourcePingAccessPingFederateAdminReadData(d *schema.ResourceData) *pa.Pin
 		pfAdmin.Secure = Bool(v.(bool))
 	}
 	//if v, ok := d.Get("trusted_certificate_group_id"); ok {
-		pfAdmin.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
+	pfAdmin.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
 	//}
 	if v, ok := d.GetOk("use_proxy"); ok {
 		pfAdmin.UseProxy = Bool(v.(bool))
