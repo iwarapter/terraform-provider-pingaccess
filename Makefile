@@ -13,9 +13,8 @@ test:
 unit-test:
 	@go test -mod=vendor ./... -v -trimpath
 
-
 test-and-report:
-	TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json > report.json && go tool cover -func=coverage.out
+	TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json | tee report.json
 
 build:
 	@go build -mod=vendor -o ${NAME} -trimpath .
