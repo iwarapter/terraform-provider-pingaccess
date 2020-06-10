@@ -327,6 +327,11 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				ApplicationId: Int(0),
 				Methods:       &[]*string{String("GET")},
 				Name:          String("false"),
+				Anonymous:     Bool(false),
+				AuditLevel:    String("OFF"),
+				Enabled:       Bool(false),
+				RootResource:  Bool(true),
+				Unprotected:   Bool(true),
 			},
 		},
 	}

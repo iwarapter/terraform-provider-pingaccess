@@ -1,10 +1,7 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
-	"net/url"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -14,27 +11,7 @@ import (
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_websession", &resource.Sweeper{
-		Name: "pingaccess_websession",
-		F:    testSweepWebSession,
-	})
-}
-
-func testSweepWebSession(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pa.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).WebSessions
-	result, _, _ := conn.GetWebSessionsCommand(&pa.GetWebSessionsCommandInput{Filter: "acc-test-"})
-	for _, v := range result.Items {
-		conn.DeleteWebSessionCommand(&pa.DeleteWebSessionCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessWebSession(t *testing.T) {
-	var out pa.WebSessionView
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -43,13 +20,13 @@ func TestAccPingAccessWebSession(t *testing.T) {
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "password"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session", 3, &out),
+					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session"),
 				),
 			},
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session", 6, &out),
+					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session"),
 				),
 			},
 		},
@@ -80,7 +57,7 @@ func testAccPingAccessWebSessionConfig(audience, password string) string {
 	}`, audience, password)
 }
 
-func testAccCheckPingAccessWebSessionExists(n string, c int64, out *pa.WebSessionView) resource.TestCheckFunc {
+func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -123,11 +100,11 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 				WebStorageType:                String("SessionStorage"),
 				CacheUserAttributes:           Bool(true),
 				CookieDomain:                  String("true"),
-				CookieType:                    String("true"),
+				CookieType:                    String("Signed"),
 				EnableRefreshUser:             Bool(true),
 				HttpOnlyCookie:                Bool(true),
 				IdleTimeoutInMinutes:          Int(0),
-				OidcLoginType:                 String("true"),
+				OidcLoginType:                 String("Code"),
 				PkceChallengeType:             String("OFF"),
 				PfsessionStateCacheInSeconds:  Int(0),
 				RefreshUserInfoClaimsInterval: Int(0),
@@ -151,16 +128,15 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 				},
 				WebStorageType:                String("SessionStorage"),
 				CacheUserAttributes:           Bool(false),
-				CookieDomain:                  String(""),
-				CookieType:                    String(""),
+				CookieType:                    String("Encrypted"),
 				EnableRefreshUser:             Bool(false),
 				HttpOnlyCookie:                Bool(false),
 				IdleTimeoutInMinutes:          Int(1),
-				OidcLoginType:                 String(""),
+				OidcLoginType:                 String("POST"),
 				PkceChallengeType:             String("SHA256"),
 				PfsessionStateCacheInSeconds:  Int(1),
 				RefreshUserInfoClaimsInterval: Int(1),
-				RequestPreservationType:       String(""),
+				RequestPreservationType:       String("All"),
 				RequestProfile:                Bool(false),
 				SameSite:                      String("Disabled"),
 				Scopes:                        &[]*string{},

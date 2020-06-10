@@ -251,82 +251,44 @@ func resourcePingAccessWebSessionReadData(d *schema.ResourceData) *pa.WebSession
 		ClientCredentials: expandOAuthClientCredentialsView(d.Get("client_credentials").([]interface{})),
 	}
 
-	if _, ok := d.GetOkExists("cache_user_attributes"); ok {
-		websession.CacheUserAttributes = Bool(d.Get("cache_user_attributes").(bool))
+	websession.CacheUserAttributes = Bool(d.Get("cache_user_attributes").(bool))
+
+	if v, ok := d.GetOk("cookie_domain"); ok && v.(string) != "" {
+		websession.CookieDomain = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("cookie_domain"); ok {
-		websession.CookieDomain = String(d.Get("cookie_domain").(string))
+	if v, ok := d.GetOk("cookie_type"); ok {
+		websession.CookieType = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("cookie_type"); ok {
-		websession.CookieType = String(d.Get("cookie_type").(string))
+	websession.EnableRefreshUser = Bool(d.Get("enable_refresh_user").(bool))
+	websession.HttpOnlyCookie = Bool(d.Get("http_only_cookie").(bool))
+	websession.IdleTimeoutInMinutes = Int(d.Get("idle_timeout_in_minutes").(int))
+
+	if v, ok := d.GetOk("oidc_login_type"); ok {
+		websession.OidcLoginType = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("enable_refresh_user"); ok {
-		websession.EnableRefreshUser = Bool(d.Get("enable_refresh_user").(bool))
+	if v, ok := d.GetOk("pkce_challenge_type"); ok {
+		websession.PkceChallengeType = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("http_only_cookie"); ok {
-		websession.HttpOnlyCookie = Bool(d.Get("http_only_cookie").(bool))
+	websession.PfsessionStateCacheInSeconds = Int(d.Get("pfsession_state_cache_in_seconds").(int))
+	websession.RefreshUserInfoClaimsInterval = Int(d.Get("refresh_user_info_claims_interval").(int))
+	websession.RequestPreservationType = String(d.Get("request_preservation_type").(string))
+	websession.RequestProfile = Bool(d.Get("request_profile").(bool))
+
+	if v, ok := d.GetOk("same_site"); ok {
+		websession.SameSite = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("idle_timeout_in_minutes"); ok {
-		websession.IdleTimeoutInMinutes = Int(d.Get("idle_timeout_in_minutes").(int))
-	}
-
-	if _, ok := d.GetOkExists("oidc_login_type"); ok {
-		websession.OidcLoginType = String(d.Get("oidc_login_type").(string))
-	}
-
-	if _, ok := d.GetOkExists("pkce_challenge_type"); ok {
-		websession.PkceChallengeType = String(d.Get("pkce_challenge_type").(string))
-	}
-
-	if _, ok := d.GetOkExists("pfsession_state_cache_in_seconds"); ok {
-		websession.PfsessionStateCacheInSeconds = Int(d.Get("pfsession_state_cache_in_seconds").(int))
-	}
-
-	if _, ok := d.GetOkExists("refresh_user_info_claims_interval"); ok {
-		websession.RefreshUserInfoClaimsInterval = Int(d.Get("refresh_user_info_claims_interval").(int))
-	}
-
-	if _, ok := d.GetOkExists("request_preservation_type"); ok {
-		websession.RequestPreservationType = String(d.Get("request_preservation_type").(string))
-	}
-
-	if _, ok := d.GetOkExists("request_profile"); ok {
-		websession.RequestProfile = Bool(d.Get("request_profile").(bool))
-	}
-
-	if _, ok := d.GetOkExists("same_site"); ok {
-		websession.SameSite = String(d.Get("same_site").(string))
-	}
-
-	if _, ok := d.GetOkExists("scopes"); ok {
-		scopes := expandStringList(d.Get("scopes").(*schema.Set).List())
-		websession.Scopes = &scopes
-	}
-
-	if _, ok := d.GetOkExists("secure_cookie"); ok {
-		websession.SecureCookie = Bool(d.Get("secure_cookie").(bool))
-	}
-
-	if _, ok := d.GetOkExists("send_requested_url_to_provider"); ok {
-		websession.SendRequestedUrlToProvider = Bool(d.Get("send_requested_url_to_provider").(bool))
-	}
-
-	if _, ok := d.GetOkExists("session_timeout_in_minutes"); ok {
-		websession.SessionTimeoutInMinutes = Int(d.Get("session_timeout_in_minutes").(int))
-	}
-
-	if _, ok := d.GetOkExists("validate_session_is_alive"); ok {
-		websession.ValidateSessionIsAlive = Bool(d.Get("validate_session_is_alive").(bool))
-	}
-
-	if _, ok := d.GetOkExists("web_storage_type"); ok {
-		websession.WebStorageType = String(d.Get("web_storage_type").(string))
-	}
+	scopes := expandStringList(d.Get("scopes").(*schema.Set).List())
+	websession.Scopes = &scopes
+	websession.SecureCookie = Bool(d.Get("secure_cookie").(bool))
+	websession.SendRequestedUrlToProvider = Bool(d.Get("send_requested_url_to_provider").(bool))
+	websession.SessionTimeoutInMinutes = Int(d.Get("session_timeout_in_minutes").(int))
+	websession.ValidateSessionIsAlive = Bool(d.Get("validate_session_is_alive").(bool))
+	websession.WebStorageType = String(d.Get("web_storage_type").(string))
 
 	return websession
 }

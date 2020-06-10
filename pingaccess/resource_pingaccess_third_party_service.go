@@ -164,34 +164,19 @@ func resourcePingAccessThirdPartyServiceReadData(d *schema.ResourceData) *pa.Thi
 		Name:    String(d.Get("name").(string)),
 		Targets: &targets,
 	}
-
-	if val, ok := d.GetOkExists("availability_profile_id"); ok {
-		tps.AvailabilityProfileId = Int(val.(int))
-	}
-	if val, ok := d.GetOkExists("expected_hostname"); ok {
+	tps.AvailabilityProfileId = Int(d.Get("availability_profile_id").(int))
+	if val, ok := d.GetOk("expected_hostname"); ok {
 		tps.ExpectedHostname = String(val.(string))
 	}
-	if val, ok := d.GetOkExists("host_value"); ok {
+	if val, ok := d.GetOk("host_value"); ok {
 		tps.HostValue = String(val.(string))
 	}
-	if val, ok := d.GetOkExists("load_balancing_strategy_id"); ok {
-		tps.LoadBalancingStrategyId = Int(val.(int))
-	}
-	if val, ok := d.GetOkExists("max_connections"); ok {
-		tps.MaxConnections = Int(val.(int))
-	}
-	if val, ok := d.GetOkExists("secure"); ok {
-		tps.Secure = Bool(val.(bool))
-	}
-	if val, ok := d.GetOkExists("skip_hostname_verification"); ok {
-		tps.SkipHostnameVerification = Bool(val.(bool))
-	}
-	if val, ok := d.GetOkExists("trusted_certificate_group_id"); ok {
-		tps.TrustedCertificateGroupId = Int(val.(int))
-	}
-	if val, ok := d.GetOkExists("use_proxy"); ok {
-		tps.UseProxy = Bool(val.(bool))
-	}
+	tps.LoadBalancingStrategyId = Int(d.Get("load_balancing_strategy_id").(int))
+	tps.MaxConnections = Int(d.Get("max_connections").(int))
+	tps.Secure = Bool(d.Get("secure").(bool))
+	tps.SkipHostnameVerification = Bool(d.Get("skip_hostname_verification").(bool))
+	tps.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
+	tps.UseProxy = Bool(d.Get("use_proxy").(bool))
 
 	return tps
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -441,6 +442,10 @@ func descriptorsHasClassName(className string, desc *pa.DescriptorsView) error {
 func validateConfiguration(className string, d *schema.ResourceDiff, desc *pa.DescriptorsView) error {
 	var diags diag.Diagnostics
 	conf := d.Get("configuration").(string)
+	if conf == "" {
+		log.Println("[INFO] configuration is in a potentially unknown state, gracefully skipping configuration validation")
+		return nil
+	}
 	for _, value := range desc.Items {
 		if *value.ClassName == className {
 			for _, f := range value.ConfigurationFields {
@@ -482,6 +487,10 @@ func ruleDescriptorsHasClassName(className string, desc *pa.RuleDescriptorsView)
 func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *pa.RuleDescriptorsView) error {
 	var diags diag.Diagnostics
 	conf := d.Get("configuration").(string)
+	if conf == "" {
+		log.Println("[INFO] configuration is in a potentially unknown state, gracefully skipping configuration validation")
+		return nil
+	}
 	for _, value := range desc.Items {
 		if *value.ClassName == className {
 			for _, f := range value.ConfigurationFields {

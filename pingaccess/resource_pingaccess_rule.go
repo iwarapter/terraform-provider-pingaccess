@@ -25,11 +25,10 @@ func resourcePingAccessRule() *schema.Resource {
 			svc := m.(*pingaccess.Client).Rules
 			desc, _, _ := svc.GetRuleDescriptorsCommand()
 			className := d.Get("class_name").(string)
-			return ruleDescriptorsHasClassName(className, desc)
-			//if err := ruleDescriptorsHasClassName(className, desc); err != nil {
-			//	return err
-			//}
-			//return validateRulesConfiguration(className, d, desc)
+			if err := ruleDescriptorsHasClassName(className, desc); err != nil {
+				return err
+			}
+			return validateRulesConfiguration(className, d, desc)
 		},
 	}
 }

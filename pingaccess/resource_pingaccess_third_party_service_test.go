@@ -123,7 +123,7 @@ func Test_resourcePingAccessThirdPartyServiceReadData(t *testing.T) {
 				AvailabilityProfileId:     Int(0),
 				ExpectedHostname:          String("localhost"),
 				HostValue:                 String("localhost"),
-				LoadBalancingStrategyId:   Int(0),
+				LoadBalancingStrategyId:   Int(1),
 				MaxConnections:            Int(10),
 				Secure:                    Bool(true),
 				SkipHostnameVerification:  Bool(true),

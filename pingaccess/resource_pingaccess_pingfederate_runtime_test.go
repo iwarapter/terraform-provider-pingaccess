@@ -84,10 +84,11 @@ func Test_resourcePingAccessPingFederateRuntimeReadData(t *testing.T) {
 	}{
 		{
 			PingFederateRuntime: pa.PingFederateMetadataRuntimeView{
-				Issuer:                   String("localhost"),
-				SkipHostnameVerification: Bool(true),
-				UseProxy:                 Bool(false),
-				UseSlo:                   Bool(false),
+				Issuer:                    String("localhost"),
+				SkipHostnameVerification:  Bool(true),
+				UseProxy:                  Bool(false),
+				UseSlo:                    Bool(false),
+				TrustedCertificateGroupId: Int(0),
 			},
 		},
 		{

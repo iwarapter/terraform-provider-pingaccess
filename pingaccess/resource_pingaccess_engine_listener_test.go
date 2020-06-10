@@ -80,15 +80,18 @@ func Test_resourcePingAccessEngineListenerReadData(t *testing.T) {
 	}{
 		{
 			EngineListener: pa.EngineListenerView{
-				Name: String("engine1"),
-				Port: Int(9999),
+				Name:                      String("engine1"),
+				Port:                      Int(9999),
+				Secure:                    Bool(true),
+				TrustedCertificateGroupId: Int(0),
 			},
 		},
 		{
 			EngineListener: pa.EngineListenerView{
-				Name:   String("engine2"),
-				Port:   Int(9999),
-				Secure: Bool(true),
+				Name:                      String("engine2"),
+				Port:                      Int(9999),
+				Secure:                    Bool(false),
+				TrustedCertificateGroupId: Int(2),
 			},
 		},
 	}

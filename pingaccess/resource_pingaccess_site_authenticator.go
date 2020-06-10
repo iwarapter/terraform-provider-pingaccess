@@ -26,11 +26,10 @@ func resourcePingAccessSiteAuthenticator() *schema.Resource {
 			svc := m.(*pingaccess.Client).SiteAuthenticators
 			desc, _, _ := svc.GetSiteAuthenticatorDescriptorsCommand()
 			className := d.Get("class_name").(string)
-			return descriptorsHasClassName(className, desc)
-			//if err := descriptorsHasClassName(className, desc); err != nil {
-			//	return err
-			//}
-			//return validateConfiguration(className, d, desc)
+			if err := descriptorsHasClassName(className, desc); err != nil {
+				return err
+			}
+			return validateConfiguration(className, d, desc)
 		},
 	}
 }

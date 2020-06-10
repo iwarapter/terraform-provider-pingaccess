@@ -36,6 +36,12 @@ func resourcePingAccessEngineListenerSchema() map[string]*schema.Schema {
 		"secure": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  true,
+		},
+		"trusted_certificate_group_id": {
+			Type:     schema.TypeInt,
+			Optional: true,
+			Default:  0,
 		},
 	}
 }
@@ -100,6 +106,7 @@ func resourcePingAccessEngineListenerReadResult(d *schema.ResourceData, input *p
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	setResourceDataIntWithDiagnostic(d, "port", input.Port, &diags)
 	setResourceDataBoolWithDiagnostic(d, "secure", input.Secure, &diags)
+	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
 	return diags
 }
 
@@ -108,9 +115,8 @@ func resourcePingAccessEngineListenerReadData(d *schema.ResourceData) *pa.Engine
 		Name: String(d.Get("name").(string)),
 		Port: Int(d.Get("port").(int)),
 	}
-	if v, ok := d.GetOkExists("secure"); ok {
-		engine.Secure = Bool(v.(bool))
-	}
+	engine.Secure = Bool(d.Get("secure").(bool))
+	engine.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
 
 	return engine
 }

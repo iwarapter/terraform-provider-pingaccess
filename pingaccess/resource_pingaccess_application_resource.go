@@ -30,14 +30,17 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		"anonymous": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 		"application_id": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
 		"audit_level": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "ON",
+			ValidateDiagFunc: validateAuditLevel,
 		},
 		"default_auth_type_override": {
 			Type:             schema.TypeString,
@@ -47,6 +50,7 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		"enabled": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  true,
 		},
 		"methods": {
 			Type:     schema.TypeSet,
@@ -87,10 +91,12 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		"root_resource": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 		"unprotected": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 	}
 }
@@ -227,9 +233,7 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.R
 		Methods: &methods,
 	}
 
-	if v, ok := d.GetOkExists("anonymous"); ok {
-		resource.Anonymous = Bool(v.(bool))
-	}
+	resource.Anonymous = Bool(d.Get("anonymous").(bool))
 
 	if v, ok := d.GetOk("application_id"); ok {
 		applicationID, _ := strconv.Atoi(v.(string))
@@ -244,17 +248,10 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.R
 		resource.DefaultAuthTypeOverride = String(v.(string))
 	}
 
-	if v, ok := d.GetOkExists("enabled"); ok {
-		resource.Enabled = Bool(v.(bool))
-	}
+	resource.Enabled = Bool(d.Get("enabled").(bool))
+	resource.RootResource = Bool(d.Get("root_resource").(bool))
+	resource.Unprotected = Bool(d.Get("unprotected").(bool))
 
-	if v, ok := d.GetOkExists("root_resource"); ok {
-		resource.RootResource = Bool(v.(bool))
-	}
-
-	if v, ok := d.GetOkExists("unprotected"); ok {
-		resource.Unprotected = Bool(v.(bool))
-	}
 	if v, ok := d.GetOk("path_prefixes"); ok {
 		pathPrefixes := expandStringList(v.(*schema.Set).List())
 		resource.PathPrefixes = &pathPrefixes

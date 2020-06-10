@@ -45,6 +45,7 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"use_proxy": {
 			Type:     schema.TypeBool,
@@ -116,20 +117,12 @@ func resourcePingAccessPingFederateRuntimeReadData(d *schema.ResourceData) *pa.P
 	if v, ok := d.GetOk("description"); ok {
 		pfRuntime.Description = String(v.(string))
 	}
-	if v, ok := d.GetOk("skip_hostname_verification"); ok {
-		pfRuntime.SkipHostnameVerification = Bool(v.(bool))
-	}
+	pfRuntime.SkipHostnameVerification = Bool(d.Get("skip_hostname_verification").(bool))
 	if v, ok := d.GetOk("sts_token_exchange_endpoint"); ok {
 		pfRuntime.StsTokenExchangeEndpoint = String(v.(string))
 	}
-	if v, ok := d.GetOkExists("trusted_certificate_group_id"); ok {
-		pfRuntime.TrustedCertificateGroupId = Int(v.(int))
-	}
-	if v, ok := d.GetOkExists("use_proxy"); ok {
-		pfRuntime.UseProxy = Bool(v.(bool))
-	}
-	if v, ok := d.GetOkExists("use_slo"); ok {
-		pfRuntime.UseSlo = Bool(v.(bool))
-	}
+	pfRuntime.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
+	pfRuntime.UseProxy = Bool(d.Get("use_proxy").(bool))
+	pfRuntime.UseSlo = Bool(d.Get("use_slo").(bool))
 	return pfRuntime
 }

@@ -50,11 +50,20 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 				Config:      testAccPingAccessIdentityMappingConfigWrongClassName(),
 				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.identitymappings.foo' available classNames: com.pingidentity.pa.identitymappings.HeaderIdentityMapping, com.pingidentity.pa.identitymappings.JwtIdentityMapping`),
 			},
-			//TODO disabling configuration validation until I can handle interpolated configuration
-			//{
-			//	Config:      testAccPingAccessIdentityMappingConfigMissingRequired(),
-			//	ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'headerName' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
-			//},
+			{
+				Config:      testAccPingAccessIdentityMappingConfigMissingRequired(),
+				ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'headerName' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
+			},
+			{
+				Config: testAccPingAccessIdentityMappingConfigInterpolatedSkipped(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessIdentityMappingExists(resourceName),
+					testAccCheckPingAccessIdentityMappingAttributes(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "interpolated"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"),
+					resource.TestCheckResourceAttrSet(resourceName, "configuration"),
+				),
+			},
 		},
 	})
 }
@@ -110,6 +119,32 @@ func testAccPingAccessIdentityMappingConfigMissingRequired() string {
 		name = "missing_required"
 		configuration = "{}"
 	}`
+}
+
+func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
+	return `
+	resource "pingaccess_identity_mapping" "acc_test_idm" {
+		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
+		name = "interpolated"
+		configuration = <<EOF
+		{
+			"attributeHeaderMappings": [
+				{
+					"subject": true,
+					"attributeName": "sub",
+					"headerName": "${pingaccess_virtualhost.interpolate_me.id}"
+				}
+			],
+			"headerClientCertificateMappings": []
+		}
+		EOF
+	}
+
+	resource "pingaccess_virtualhost" "interpolate_me" {
+	   host                         = "idmfoo"
+	   port                         = 80
+	}
+`
 }
 
 func testAccCheckPingAccessIdentityMappingExists(n string) resource.TestCheckFunc {
