@@ -9,6 +9,26 @@ import (
 
 type ApplicationsService service
 
+type ApplicationsAPI interface {
+	GetApplicationsCommand(input *GetApplicationsCommandInput) (result *ApplicationsView, resp *http.Response, err error)
+	AddApplicationCommand(input *AddApplicationCommandInput) (result *ApplicationView, resp *http.Response, err error)
+	DeleteReservedApplicationCommand() (resp *http.Response, err error)
+	GetReservedApplicationCommand() (result *ReservedApplicationView, resp *http.Response, err error)
+	UpdateReservedApplicationCommand(input *UpdateReservedApplicationCommandInput) (result *ReservedApplicationView, resp *http.Response, err error)
+	GetResourcesCommand(input *GetResourcesCommandInput) (result *ResourcesView, resp *http.Response, err error)
+	GetApplicationsResourcesMethodsCommand() (result *MethodsView, resp *http.Response, err error)
+	DeleteApplicationResourceCommand(input *DeleteApplicationResourceCommandInput) (resp *http.Response, err error)
+	GetApplicationResourceCommand(input *GetApplicationResourceCommandInput) (result *ResourceView, resp *http.Response, err error)
+	UpdateApplicationResourceCommand(input *UpdateApplicationResourceCommandInput) (result *ResourceView, resp *http.Response, err error)
+	DeleteApplicationCommand(input *DeleteApplicationCommandInput) (result *ApplicationView, resp *http.Response, err error)
+	GetApplicationCommand(input *GetApplicationCommandInput) (result *ApplicationView, resp *http.Response, err error)
+	UpdateApplicationCommand(input *UpdateApplicationCommandInput) (result *ApplicationView, resp *http.Response, err error)
+	GetResourceMatchingEvaluationOrderCommand(input *GetResourceMatchingEvaluationOrderCommandInput) (result *ResourceMatchingEvaluationOrderView, resp *http.Response, err error)
+	GetApplicationResourcesCommand(input *GetApplicationResourcesCommandInput) (result *ResourcesView, resp *http.Response, err error)
+	AddApplicationResourceCommand(input *AddApplicationResourceCommandInput) (result *ResourceView, resp *http.Response, err error)
+	GetResourceAutoOrderCommand(input *GetResourceAutoOrderCommandInput) (result *ResourceOrderView, resp *http.Response, err error)
+}
+
 //GetApplicationsCommand - Get all Applications
 //RequestType: GET
 //Input: input *GetApplicationsCommandInput

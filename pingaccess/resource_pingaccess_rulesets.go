@@ -77,7 +77,7 @@ func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData
 
 	result, _, err := svc.AddRuleSetCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create RuleSet: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create RuleSet: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -90,13 +90,12 @@ func resourcePingAccessRuleSetRead(ctx context.Context, d *schema.ResourceData, 
 		Id: d.Id(),
 	})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read RuleSet: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read RuleSet: %s", err))
 	}
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
 
 func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// log.Printf("[INFO] resourcePingAccessRuleSetUpdate")
 	name := d.Get("name").(string)
 	elementType := d.Get("element_type").(string)
 	policy := expandStringList(d.Get("policy").(*schema.Set).List())
@@ -123,7 +122,7 @@ func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData
 
 	result, _, err := svc.UpdateRuleSetCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update RuleSet: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update RuleSet: %s", err))
 	}
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleSetReadResult(d, result)
@@ -134,7 +133,7 @@ func resourcePingAccessRuleSetDelete(ctx context.Context, d *schema.ResourceData
 
 	_, err := svc.DeleteRuleSetCommand(&pingaccess.DeleteRuleSetCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete RuleSet: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete RuleSet: %s", err))
 	}
 	return nil
 }
@@ -150,7 +149,7 @@ func resourcePingAccessRuleSetReadResult(d *schema.ResourceData, input *pingacce
 			polIds = append(polIds, strconv.Itoa(*p))
 		}
 		if err := d.Set("policy", polIds); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	return diags

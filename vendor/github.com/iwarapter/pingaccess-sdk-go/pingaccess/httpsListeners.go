@@ -9,6 +9,12 @@ import (
 
 type HttpsListenersService service
 
+type HttpsListenersAPI interface {
+	GetHttpsListenersCommand(input *GetHttpsListenersCommandInput) (result *HttpsListenersView, resp *http.Response, err error)
+	GetHttpsListenerCommand(input *GetHttpsListenerCommandInput) (result *HttpsListenerView, resp *http.Response, err error)
+	UpdateHttpsListener(input *UpdateHttpsListenerInput) (result *HttpsListenerView, resp *http.Response, err error)
+}
+
 //GetHttpsListenersCommand - Get all HTTPS Listeners
 //RequestType: GET
 //Input: input *GetHttpsListenersCommandInput

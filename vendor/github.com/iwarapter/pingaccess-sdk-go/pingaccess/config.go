@@ -9,6 +9,18 @@ import (
 
 type ConfigService service
 
+type ConfigAPI interface {
+	ConfigExportCommand() (result *ExportData, resp *http.Response, err error)
+	GetConfigExportWorkflowsCommand() (result *ConfigStatusesView, resp *http.Response, err error)
+	AddConfigExportWorkflowCommand() (result *ConfigStatusView, resp *http.Response, err error)
+	GetConfigExportWorkflowCommand(input *GetConfigExportWorkflowCommandInput) (result *ConfigStatusView, resp *http.Response, err error)
+	GetConfigExportWorkflowDataCommand(input *GetConfigExportWorkflowDataCommandInput) (result *ExportData, resp *http.Response, err error)
+	ConfigImportCommand(input *ConfigImportCommandInput) (resp *http.Response, err error)
+	GetConfigImportWorkflowsCommand() (result *ConfigStatusesView, resp *http.Response, err error)
+	AddConfigImportWorkflowCommand(input *AddConfigImportWorkflowCommandInput) (resp *http.Response, err error)
+	GetConfigImportWorkflowCommand(input *GetConfigImportWorkflowCommandInput) (result *ConfigStatusView, resp *http.Response, err error)
+}
+
 //ConfigExportCommand - [Attention: The endpoint "/config/export" is deprecated. The "config/export/workflows" endpoint should be used instead.]    Export a JSON backup of the entire system
 //RequestType: GET
 //Input:

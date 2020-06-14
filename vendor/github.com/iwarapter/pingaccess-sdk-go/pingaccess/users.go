@@ -9,6 +9,13 @@ import (
 
 type UsersService service
 
+type UsersAPI interface {
+	GetUsersCommand(input *GetUsersCommandInput) (result *UsersView, resp *http.Response, err error)
+	GetUserCommand(input *GetUserCommandInput) (result *UserView, resp *http.Response, err error)
+	UpdateUserCommand(input *UpdateUserCommandInput) (result *UserView, resp *http.Response, err error)
+	UpdateUserPasswordCommand(input *UpdateUserPasswordCommandInput) (result *UserPasswordView, resp *http.Response, err error)
+}
+
 //GetUsersCommand - Get all Users
 //RequestType: GET
 //Input: input *GetUsersCommandInput

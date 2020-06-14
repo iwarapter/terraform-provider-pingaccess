@@ -9,6 +9,14 @@ import (
 
 type GlobalUnprotectedResourcesService service
 
+type GlobalUnprotectedResourcesAPI interface {
+	GetGlobalUnprotectedResourcesCommand(input *GetGlobalUnprotectedResourcesCommandInput) (result *GlobalUnprotectedResourcesView, resp *http.Response, err error)
+	AddGlobalUnprotectedResourceCommand(input *AddGlobalUnprotectedResourceCommandInput) (result *GlobalUnprotectedResourceView, resp *http.Response, err error)
+	DeleteGlobalUnprotectedResourceCommand(input *DeleteGlobalUnprotectedResourceCommandInput) (resp *http.Response, err error)
+	GetGlobalUnprotectedResourceCommand(input *GetGlobalUnprotectedResourceCommandInput) (result *GlobalUnprotectedResourceView, resp *http.Response, err error)
+	UpdateGlobalUnprotectedResourceCommand(input *UpdateGlobalUnprotectedResourceCommandInput) (result *GlobalUnprotectedResourceView, resp *http.Response, err error)
+}
+
 //GetGlobalUnprotectedResourcesCommand - Get all Global Unprotected Resources
 //RequestType: GET
 //Input: input *GetGlobalUnprotectedResourcesCommandInput

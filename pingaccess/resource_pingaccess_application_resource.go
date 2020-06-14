@@ -115,7 +115,7 @@ func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.
 		}
 		result, _, err := svc.GetApplicationResourcesCommand(&input)
 		if err != nil {
-			return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))}
+			return diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))
 		}
 		rv := result.Items[0]
 		d.SetId(rv.Id.String())
@@ -130,7 +130,7 @@ func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.
 
 	result, _, err := svc.AddApplicationResourceCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -146,7 +146,7 @@ func resourcePingAccessApplicationResourceRead(ctx context.Context, d *schema.Re
 
 	result, _, err := svc.GetApplicationResourceCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read ApplicationResource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read ApplicationResource: %s", err))
 	}
 
 	return resourcePingAccessApplicationResourceReadResult(d, result)
@@ -162,7 +162,7 @@ func resourcePingAccessApplicationResourceUpdate(ctx context.Context, d *schema.
 
 	result, _, err := svc.UpdateApplicationResourceCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update ApplicationResource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update ApplicationResource: %s", err))
 	}
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
@@ -181,7 +181,7 @@ func resourcePingAccessApplicationResourceDelete(ctx context.Context, d *schema.
 
 	_, err := svc.DeleteApplicationResourceCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete ApplicationResource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete ApplicationResource: %s", err))
 	}
 	return nil
 }
@@ -204,14 +204,14 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	setResourceDataStringWithDiagnostic(d, "default_auth_type_override", rv.DefaultAuthTypeOverride, &diags)
 	setResourceDataBoolWithDiagnostic(d, "enabled", rv.Enabled, &diags)
 	if err := d.Set("methods", *rv.Methods); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	if err := d.Set("name", *rv.Name); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	if rv.PathPrefixes != nil {
 		if err := d.Set("path_prefixes", *rv.PathPrefixes); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	setResourceDataBoolWithDiagnostic(d, "root_resource", rv.RootResource, &diags)
@@ -219,7 +219,7 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 
 	if rv.Policy != nil && (len(*rv.Policy["Web"]) != 0 || len(*rv.Policy["API"]) != 0) {
 		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	return diags

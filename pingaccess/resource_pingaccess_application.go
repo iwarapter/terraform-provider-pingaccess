@@ -3,7 +3,6 @@ package pingaccess
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -131,7 +130,7 @@ func resourcePingAccessApplicationCreate(ctx context.Context, d *schema.Resource
 	}
 	result, _, err := svc.AddApplicationCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create Application: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create Application: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -145,7 +144,7 @@ func resourcePingAccessApplicationRead(ctx context.Context, d *schema.ResourceDa
 	}
 	result, _, err := svc.GetApplicationCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read Application: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read Application: %s", err))
 	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
@@ -158,26 +157,22 @@ func resourcePingAccessApplicationUpdate(ctx context.Context, d *schema.Resource
 	}
 	result, _, err := svc.UpdateApplicationCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update Application: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update Application: %s", err))
 	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
 
 func resourcePingAccessApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] resourcePingAccessApplicationDelete")
 	svc := m.(*pa.Client).Applications
 
 	input := &pa.DeleteApplicationCommandInput{
 		Id: d.Id(),
 	}
 
-	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.Id)
 	_, _, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete Application: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete Application: %s", err))
 	}
-	log.Println("[DEBUG] End - resourcePingAccessSiteDelete")
 	return nil
 }
 
@@ -205,7 +200,7 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 			vhs = append(vhs, strconv.Itoa(*vh))
 		}
 		if err := d.Set("virtual_host_ids", vhs); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 
@@ -215,12 +210,12 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 
 	if rv.IdentityMappingIds != nil && (*rv.IdentityMappingIds["Web"] != 0 || *rv.IdentityMappingIds["API"] != 0) {
 		if err := d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	if rv.Policy != nil && (len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0) {
 		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	return diags

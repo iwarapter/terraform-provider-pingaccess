@@ -3,6 +3,7 @@ package pingaccess
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -88,10 +89,10 @@ func resourcePingAccessCertificateCreate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.ImportTrustedCert(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create Certificate: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create Certificate: %s", err))
 	}
 
-	d.SetId(result.Id.String())
+	d.SetId(strconv.Itoa(*result.Id))
 	return resourcePingAccessCertificateReadResult(d, result)
 }
 
@@ -102,7 +103,7 @@ func resourcePingAccessCertificateRead(ctx context.Context, d *schema.ResourceDa
 	}
 	result, _, err := svc.GetTrustedCert(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read Certificate: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read Certificate: %s", err))
 	}
 	return resourcePingAccessCertificateReadResult(d, result)
 }
@@ -120,10 +121,10 @@ func resourcePingAccessCertificateUpdate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.UpdateTrustedCert(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update Certificate: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update Certificate: %s", err))
 	}
 
-	d.SetId(result.Id.String())
+	d.SetId(strconv.Itoa(*result.Id))
 	return resourcePingAccessCertificateReadResult(d, result)
 }
 
@@ -131,7 +132,7 @@ func resourcePingAccessCertificateDelete(ctx context.Context, d *schema.Resource
 	svc := m.(*pa.Client).Certificates
 	_, err := svc.DeleteTrustedCertCommand(&pa.DeleteTrustedCertCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete Certificate: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete Certificate: %s", err))
 	}
 	return nil
 }

@@ -54,7 +54,7 @@ func resourcePingAccessEngineListenerCreate(ctx context.Context, d *schema.Resou
 
 	result, _, err := svc.AddEngineListenerCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create EngineListener: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create EngineListener: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -68,7 +68,7 @@ func resourcePingAccessEngineListenerRead(ctx context.Context, d *schema.Resourc
 	}
 	result, _, err := svc.GetEngineListenerCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read EngineListener: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read EngineListener: %s", err))
 	}
 	return resourcePingAccessEngineListenerReadResult(d, result)
 }
@@ -82,7 +82,7 @@ func resourcePingAccessEngineListenerUpdate(ctx context.Context, d *schema.Resou
 
 	result, _, err := svc.UpdateEngineListenerCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update EngineListener: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update EngineListener: %s", err))
 	}
 	return resourcePingAccessEngineListenerReadResult(d, result)
 }
@@ -95,7 +95,7 @@ func resourcePingAccessEngineListenerDelete(ctx context.Context, d *schema.Resou
 
 	_, err := svc.DeleteEngineListenerCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete EngineListener: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete EngineListener: %s", err))
 
 	}
 	return nil

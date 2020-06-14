@@ -9,6 +9,15 @@ import (
 
 type HsmProvidersService service
 
+type HsmProvidersAPI interface {
+	GetHsmProvidersCommand(input *GetHsmProvidersCommandInput) (result *HsmProviderView, resp *http.Response, err error)
+	AddHsmProviderCommand(input *AddHsmProviderCommandInput) (result *HsmProviderView, resp *http.Response, err error)
+	GetHsmProviderDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	DeleteHsmProviderCommand(input *DeleteHsmProviderCommandInput) (resp *http.Response, err error)
+	GetHsmProviderCommand(input *GetHsmProviderCommandInput) (result *HsmProviderView, resp *http.Response, err error)
+	UpdateHsmProviderCommand(input *UpdateHsmProviderCommandInput) (result *HsmProviderView, resp *http.Response, err error)
+}
+
 //GetHsmProvidersCommand - Get all HSM Providers
 //RequestType: GET
 //Input: input *GetHsmProvidersCommandInput

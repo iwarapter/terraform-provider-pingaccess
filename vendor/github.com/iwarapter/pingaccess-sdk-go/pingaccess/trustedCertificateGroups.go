@@ -9,6 +9,14 @@ import (
 
 type TrustedCertificateGroupsService service
 
+type TrustedCertificateGroupsAPI interface {
+	GetTrustedCertificateGroupsCommand(input *GetTrustedCertificateGroupsCommandInput) (result *TrustedCertificateGroupsView, resp *http.Response, err error)
+	AddTrustedCertificateGroupCommand(input *AddTrustedCertificateGroupCommandInput) (result *TrustedCertificateGroupView, resp *http.Response, err error)
+	DeleteTrustedCertificateGroupCommand(input *DeleteTrustedCertificateGroupCommandInput) (resp *http.Response, err error)
+	GetTrustedCertificateGroupCommand(input *GetTrustedCertificateGroupCommandInput) (result *TrustedCertificateGroupView, resp *http.Response, err error)
+	UpdateTrustedCertificateGroupCommand(input *UpdateTrustedCertificateGroupCommandInput) (result *TrustedCertificateGroupView, resp *http.Response, err error)
+}
+
 //GetTrustedCertificateGroupsCommand - Get all Trusted Certificate Groups
 //RequestType: GET
 //Input: input *GetTrustedCertificateGroupsCommandInput

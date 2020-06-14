@@ -35,7 +35,7 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
 				),
-				ExpectError: regexp.MustCompile(`unable to update OAuthServerSettings: \[Save Failed\]\nIntrospection endpoint must be a valid relative path`),
+				ExpectError: regexp.MustCompile(`unable to update OAuthServerSettings: Save Failed:\nintrospectionEndpoint contains 1 validation failures:\n\tIntrospection endpoint must be a valid relative path`),
 			},
 		},
 	})
@@ -73,7 +73,7 @@ func testAccCheckPingAccessOAuthServerExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).OAuth
+		conn := testAccProvider.Meta().(*pa.Client).Oauth
 		result, _, err := conn.GetAuthorizationServerCommand()
 
 		if err != nil {

@@ -46,7 +46,7 @@ func resourcePingAccessAcmeServerCreate(ctx context.Context, d *schema.ResourceD
 
 	result, _, err := svc.AddAcmeServerCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create AcmeServer: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create AcmeServer: %s", err))
 	}
 	d.SetId(*result.Id)
 	return resourcePingAccessAcmeServerReadResult(d, &input.Body)
@@ -59,7 +59,7 @@ func resourcePingAccessAcmeServerRead(ctx context.Context, d *schema.ResourceDat
 	}
 	result, _, err := svc.GetAcmeServerCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read AcmeServer: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read AcmeServer: %s", err))
 	}
 	return resourcePingAccessAcmeServerReadResult(d, result)
 }
@@ -70,9 +70,9 @@ func resourcePingAccessAcmeServerDelete(ctx context.Context, d *schema.ResourceD
 		AcmeServerId: d.Id(),
 	}
 
-	_, _, err := svc.DeleteAcmeServerCommand(input)
+	_, resp, err := svc.DeleteAcmeServerCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete AcmeServer: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete AcmeServer: %s resp: %v", err, *resp))
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *pinga
 	setResourceDataStringWithDiagnostic(d, "url", input.Url, &diags)
 	if input.AcmeAccounts != nil && len(input.AcmeAccounts) > 0 {
 		if err := d.Set("acme_accounts", flattenLinkViewList(input.AcmeAccounts)); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	return diags

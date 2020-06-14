@@ -8,6 +8,21 @@ import (
 
 type AuthService service
 
+type AuthAPI interface {
+	DeleteBasicAuthCommand() (resp *http.Response, err error)
+	GetBasicAuthCommand() (result *BasicConfig, resp *http.Response, err error)
+	UpdateBasicAuthCommand(input *UpdateBasicAuthCommandInput) (result *BasicAuthConfigView, resp *http.Response, err error)
+	DeleteOAuthAuthCommand() (resp *http.Response, err error)
+	GetOAuthAuthCommand() (result *OAuthConfigView, resp *http.Response, err error)
+	UpdateOAuthAuthCommand(input *UpdateOAuthAuthCommandInput) (result *OAuthConfigView, resp *http.Response, err error)
+	DeleteOidcAuthCommand() (resp *http.Response, err error)
+	GetOidcAuthCommand() (result *OidcConfigView, resp *http.Response, err error)
+	UpdateOidcAuthCommand(input *UpdateOidcAuthCommandInput) (result *OidcConfigView, resp *http.Response, err error)
+	DeleteAdminBasicWebSessionCommand() (resp *http.Response, err error)
+	GetAdminBasicWebSessionCommand() (result *AdminBasicWebSessionView, resp *http.Response, err error)
+	UpdateAdminBasicWebSessionCommand(input *UpdateAdminBasicWebSessionCommandInput) (result *AdminBasicWebSessionView, resp *http.Response, err error)
+}
+
 //DeleteBasicAuthCommand - Resets the HTTP Basic Authentication configuration to default values
 //RequestType: DELETE
 //Input:

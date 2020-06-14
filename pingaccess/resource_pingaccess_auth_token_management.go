@@ -59,23 +59,23 @@ func resourcePingAccessAuthTokenManagementCreate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessAuthTokenManagementRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).AuthTokenManagements
+	svc := m.(*pa.Client).AuthTokenManagement
 	result, _, err := svc.GetAuthTokenManagementCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read AuthTokenManagement: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read AuthTokenManagement: %s", err))
 	}
 
 	return resourcePingAccessAuthTokenManagementReadResult(d, result)
 }
 
 func resourcePingAccessAuthTokenManagementUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).AuthTokenManagements
+	svc := m.(*pa.Client).AuthTokenManagement
 	input := pa.UpdateAuthTokenManagementCommandInput{
 		Body: *resourcePingAccessAuthTokenManagementReadData(d),
 	}
 	result, _, err := svc.UpdateAuthTokenManagementCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update AuthTokenManagement: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update AuthTokenManagement: %s", err))
 	}
 
 	d.SetId("auth_token_management")
@@ -83,10 +83,10 @@ func resourcePingAccessAuthTokenManagementUpdate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessAuthTokenManagementDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).AuthTokenManagements
+	svc := m.(*pa.Client).AuthTokenManagement
 	_, err := svc.DeleteAuthTokenManagementCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete AuthTokenManagement: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete AuthTokenManagement: %s", err))
 
 	}
 	return nil

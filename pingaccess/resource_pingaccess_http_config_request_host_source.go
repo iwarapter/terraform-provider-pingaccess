@@ -41,7 +41,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceRead(ctx context.Context, d *s
 	svc := m.(*pa.Client).HttpConfig
 	result, _, err := svc.GetHostSourceCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read HttpConfigHostSource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read HttpConfigHostSource: %s", err))
 	}
 	return resourcePingAccessHTTPConfigRequestHostSourceReadResult(d, result)
 }
@@ -51,7 +51,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceUpdate(ctx context.Context, d 
 	input := &pa.UpdateHostSourceCommandInput{Body: *resourcePingAccessHTTPConfigRequestHostSourceReadData(d)}
 	result, _, err := svc.UpdateHostSourceCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update HttpConfigHostSource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update HttpConfigHostSource: %s", err))
 	}
 
 	d.SetId("http_config_host_source")
@@ -62,7 +62,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceDelete(ctx context.Context, d 
 	svc := m.(*pa.Client).HttpConfig
 	_, err := svc.DeleteHostSourceCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete HttpConfigHostSource: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete HttpConfigHostSource: %s", err))
 
 	}
 	return nil
@@ -72,7 +72,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceReadResult(d *schema.ResourceD
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "list_value_location", rv.ListValueLocation, &diags)
 	if err := d.Set("header_name_list", rv.HeaderNameList); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	return diags
 }

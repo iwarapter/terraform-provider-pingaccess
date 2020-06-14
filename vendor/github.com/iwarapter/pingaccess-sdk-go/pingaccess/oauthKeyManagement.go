@@ -8,6 +8,14 @@ import (
 
 type OauthKeyManagementService service
 
+type OauthKeyManagementAPI interface {
+	DeleteOAuthKeyManagementCommand() (resp *http.Response, err error)
+	GetOAuthKeyManagementCommand() (result *OAuthKeyManagementView, resp *http.Response, err error)
+	UpdateOAuthKeyManagementCommand(input *UpdateOAuthKeyManagementCommandInput) (result *OAuthKeyManagementView, resp *http.Response, err error)
+	GetOAuthKeySetCommand() (result *KeySetView, resp *http.Response, err error)
+	UpdateOAuthKeySetCommand(input *UpdateOAuthKeySetCommandInput) (result *KeySetView, resp *http.Response, err error)
+}
+
 //DeleteOAuthKeyManagementCommand - Resets the OAuth Key Management configuration to default values
 //RequestType: DELETE
 //Input:

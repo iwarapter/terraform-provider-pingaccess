@@ -9,6 +9,16 @@ import (
 
 type SiteAuthenticatorsService service
 
+type SiteAuthenticatorsAPI interface {
+	GetSiteAuthenticatorsCommand(input *GetSiteAuthenticatorsCommandInput) (result *SiteAuthenticatorsView, resp *http.Response, err error)
+	AddSiteAuthenticatorCommand(input *AddSiteAuthenticatorCommandInput) (result *SiteAuthenticatorView, resp *http.Response, err error)
+	GetSiteAuthenticatorDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	GetSiteAuthenticatorDescriptorCommand(input *GetSiteAuthenticatorDescriptorCommandInput) (result *DescriptorView, resp *http.Response, err error)
+	DeleteSiteAuthenticatorCommand(input *DeleteSiteAuthenticatorCommandInput) (resp *http.Response, err error)
+	GetSiteAuthenticatorCommand(input *GetSiteAuthenticatorCommandInput) (result *SiteAuthenticatorView, resp *http.Response, err error)
+	UpdateSiteAuthenticatorCommand(input *UpdateSiteAuthenticatorCommandInput) (result *SiteAuthenticatorView, resp *http.Response, err error)
+}
+
 //GetSiteAuthenticatorsCommand - Get all Site Authenticators
 //RequestType: GET
 //Input: input *GetSiteAuthenticatorsCommandInput

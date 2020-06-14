@@ -8,7 +8,7 @@ pa-init:
 
 test:
 	@rm -f pingaccess/terraform.log
-	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath
+	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out && go tool cover -func=coverage.out
 
 unit-test:
 	@go test -mod=vendor ./... -v -trimpath

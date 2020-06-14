@@ -59,7 +59,7 @@ func resourcePingAccessAccessTokenValidatorCreate(ctx context.Context, d *schema
 
 	result, _, err := svc.AddAccessTokenValidatorCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create AccessTokenValidator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create AccessTokenValidator: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -75,7 +75,7 @@ func resourcePingAccessAccessTokenValidatorRead(ctx context.Context, d *schema.R
 
 	result, _, err := svc.GetAccessTokenValidatorCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read AccessTokenValidator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read AccessTokenValidator: %s", err))
 	}
 
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
@@ -90,7 +90,7 @@ func resourcePingAccessAccessTokenValidatorUpdate(ctx context.Context, d *schema
 
 	result, _, err := svc.UpdateAccessTokenValidatorCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update AccessTokenValidator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update AccessTokenValidator: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -101,12 +101,12 @@ func resourcePingAccessAccessTokenValidatorDelete(ctx context.Context, d *schema
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	_, err := svc.DeleteAccessTokenValidatorCommand(&pingaccess.DeleteAccessTokenValidatorCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete AccessTokenValidator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete AccessTokenValidator: %s", err))
 	}
 	return nil
 }
 
-func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, input *pingaccess.AccessTokenValidatorView, svc *pingaccess.AccessTokenValidatorsService) diag.Diagnostics {
+func resourcePingAccessAccessTokenValidatorReadResult(d *schema.ResourceData, input *pingaccess.AccessTokenValidatorView, svc pingaccess.AccessTokenValidatorsAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)

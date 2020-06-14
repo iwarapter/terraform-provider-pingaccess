@@ -9,6 +9,15 @@ import (
 
 type OidcService service
 
+type OidcAPI interface {
+	DeleteOIDCProviderCommand() (resp *http.Response, err error)
+	GetOIDCProviderCommand() (result *OIDCProviderView, resp *http.Response, err error)
+	UpdateOIDCProviderCommand(input *UpdateOIDCProviderCommandInput) (result *OIDCProviderView, resp *http.Response, err error)
+	GetOIDCProviderPluginDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	GetOIDCProviderPluginDescriptorCommand(input *GetOIDCProviderPluginDescriptorCommandInput) (result *DescriptorView, resp *http.Response, err error)
+	GetOIDCProviderMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error)
+}
+
 //DeleteOIDCProviderCommand - Resets the OpenID Connect Provider configuration to default values
 //RequestType: DELETE
 //Input:

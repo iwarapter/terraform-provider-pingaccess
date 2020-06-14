@@ -3,6 +3,7 @@ package pingaccess
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,12 +27,12 @@ func dataSourcePingAccessCertificateRead(ctx context.Context, d *schema.Resource
 	}
 	result, _, err := svc.GetTrustedCerts(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read Certificate: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read Certificate: %s", err))
 
 	}
 	if len(result.Items) != 1 {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to find Certificate with alias '%s' found '%d' results", d.Get("alias").(string), len(result.Items)))}
+		return diag.FromErr(fmt.Errorf("unable to find Certificate with alias '%s' found '%d' results", d.Get("alias").(string), len(result.Items)))
 	}
-	d.SetId(result.Items[0].Id.String())
+	d.SetId(strconv.Itoa(*result.Items[0].Id))
 	return resourcePingAccessCertificateReadResult(d, result.Items[0])
 }

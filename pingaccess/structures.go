@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"hash/crc32"
 	"log"
 	"strconv"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
@@ -336,7 +336,7 @@ func configFieldHash(v interface{}) int {
 	if d, ok := m["md5sum"]; ok && d.(string) != "" {
 		buf.WriteString(fmt.Sprintf("%s-", d.(string)))
 	}
-	return hashcode.String(buf.String())
+	return hashString(buf.String())
 }
 
 func flattenLinkViewList(in []*pa.LinkView) []interface{} {
@@ -451,7 +451,7 @@ func validateConfiguration(className string, d *schema.ResourceDiff, desc *pa.De
 			for _, f := range value.ConfigurationFields {
 				if *f.Required {
 					if v := gjson.Get(conf, *f.Name); !v.Exists() {
-						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)))
+						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className))...)
 					}
 				}
 			}
@@ -496,7 +496,7 @@ func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *
 			for _, f := range value.ConfigurationFields {
 				if *f.Required {
 					if v := gjson.Get(conf, *f.Name); !v.Exists() {
-						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)))
+						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className))...)
 					}
 				}
 			}
@@ -512,4 +512,21 @@ func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *
 		return fmt.Errorf(strings.Join(msgs, "\n"))
 	}
 	return nil
+}
+
+// String hashes a string to a unique hashcode.
+//
+// crc32 returns a uint32, but for our use we need
+// and non negative integer. Here we cast to an integer
+// and invert it if the result is negative.
+func hashString(s string) int {
+	v := int(crc32.ChecksumIEEE([]byte(s)))
+	if v >= 0 {
+		return v
+	}
+	if -v >= 0 {
+		return -v
+	}
+	// v == MinInt
+	return 0
 }

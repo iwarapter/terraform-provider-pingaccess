@@ -9,6 +9,14 @@ import (
 
 type ProxiesService service
 
+type ProxiesAPI interface {
+	GetProxiesCommand(input *GetProxiesCommandInput) (result *HttpClientProxyView, resp *http.Response, err error)
+	AddProxyCommand(input *AddProxyCommandInput) (result *HttpClientProxyView, resp *http.Response, err error)
+	DeleteProxyCommand(input *DeleteProxyCommandInput) (resp *http.Response, err error)
+	GetProxyCommand(input *GetProxyCommandInput) (result *HttpClientProxyView, resp *http.Response, err error)
+	UpdateProxyCommand(input *UpdateProxyCommandInput) (result *HttpClientProxyView, resp *http.Response, err error)
+}
+
 //GetProxiesCommand - Get all Proxies
 //RequestType: GET
 //Input: input *GetProxiesCommandInput

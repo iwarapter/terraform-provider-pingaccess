@@ -8,6 +8,12 @@ import (
 
 type AdminSessionInfoService service
 
+type AdminSessionInfoAPI interface {
+	AdminSessionDeleteCommand() (resp *http.Response, err error)
+	AdminSessionInfoCommand() (result *SessionInfo, resp *http.Response, err error)
+	AdminSessionInfoCheckCommand() (result *SessionInfo, resp *http.Response, err error)
+}
+
 //AdminSessionDeleteCommand - Invalidate the Admin session information
 //RequestType: DELETE
 //Input:

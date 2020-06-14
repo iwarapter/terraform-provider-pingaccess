@@ -66,23 +66,23 @@ func resourcePingAccessPingFederateRuntimeCreate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessPingFederateRuntimeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	result, _, err := svc.GetPingFederateRuntimeCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read PingFederateRuntime: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read PingFederateRuntime: %s", err))
 	}
 
 	return resourcePingAccessPingFederateRuntimeReadResult(d, result)
 }
 
 func resourcePingAccessPingFederateRuntimeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	input := pa.UpdatePingFederateRuntimeCommandInput{
 		Body: *resourcePingAccessPingFederateRuntimeReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateRuntimeCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update PingFederateRuntime: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update PingFederateRuntime: %s", err))
 	}
 
 	d.SetId("pingfederate_runtime_settings")
@@ -90,10 +90,10 @@ func resourcePingAccessPingFederateRuntimeUpdate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessPingFederateRuntimeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	_, err := svc.DeletePingFederateCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to reset PingFederateRuntime: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to reset PingFederateRuntime: %s", err))
 	}
 	return nil
 }

@@ -21,35 +21,35 @@ type AccessTokenValidatorsView struct {
 //AcmeAccountView - An ACME Account associated with a CA.
 type AcmeAccountView struct {
 	AcmeServerId *string          `json:"acmeServerId,omitempty"`
+	Id           *string          `json:"id,omitempty"`
 	KeyAlgorithm *string          `json:"keyAlgorithm,omitempty"`
 	PrivateKey   *HiddenFieldView `json:"privateKey,omitempty"`
 	PublicKey    *PublicKeyView   `json:"publicKey,omitempty"`
 	Url          *string          `json:"url,omitempty"`
-	Id           json.Number      `json:"id,omitempty"`
 }
 
-//AcmeCertStatus
-type AcmeCertStatus struct {
-	Problems map[string]*ProblemDocument `json:"problems"`
-	State    *string                     `json:"state"`
+//AcmeCertStatusView - The status of a certificate.
+type AcmeCertStatusView struct {
+	Problems map[string]*ProblemDocumentView `json:"problems"`
+	State    *string                         `json:"state"`
 }
 
-//AcmeCertificateRequestView - A request for a signed certificate.
+//AcmeCertificateRequestView - A reference to a Key Pair to be signed by the ACME protocol.
 type AcmeCertificateRequestView struct {
-	AcmeAccountId  *string         `json:"acmeAccountId"`
-	AcmeCertStatus *AcmeCertStatus `json:"acmeCertStatus"`
-	AcmeServerId   *string         `json:"acmeServerId"`
-	KeyPairId      *int            `json:"keyPairId"`
-	Url            *string         `json:"url"`
-	Id             json.Number     `json:"id,omitempty"`
+	AcmeAccountId  *string             `json:"acmeAccountId"`
+	AcmeCertStatus *AcmeCertStatusView `json:"acmeCertStatus"`
+	AcmeServerId   *string             `json:"acmeServerId"`
+	Id             *string             `json:"id,omitempty"`
+	KeyPairId      *int                `json:"keyPairId"`
+	Url            *string             `json:"url"`
 }
 
 //AcmeServerView - An ACME server.
 type AcmeServerView struct {
 	AcmeAccounts []*LinkView `json:"acmeAccounts,omitempty"`
+	Id           *string     `json:"id,omitempty"`
 	Name         *string     `json:"name"`
 	Url          *string     `json:"url"`
-	Id           *string     `json:"id,omitempty"`
 }
 
 //AcmeServersView - A collection of ACME servers.
@@ -97,7 +97,7 @@ type AgentCertificateView struct {
 	Alias                   *string        `json:"alias"`
 	ChainCertificate        *bool          `json:"chainCertificate"`
 	Expires                 *string        `json:"expires"`
-	Id                      json.Number    `json:"id,omitempty"`
+	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	KeyPair                 *bool          `json:"keyPair"`
 	Md5sum                  *string        `json:"md5sum"`
@@ -153,8 +153,8 @@ type AlgorithmsView struct {
 
 //ApiErrorView - An API error used by the PingAccess Administrative UI.
 type ApiErrorView struct {
-	Flash *[]*string           `json:"flash"`
-	Form  map[string]*[]string `json:"form"`
+	Flash *[]*string            `json:"flash"`
+	Form  map[string]*[]*string `json:"form"`
 }
 
 //ApplicationView - An application.
@@ -318,7 +318,7 @@ type ConfigurationField struct {
 	Help         *Help                     `json:"help"`
 	Label        *string                   `json:"label"`
 	Name         *string                   `json:"name"`
-	Options      *[]*ConfigurationOption   `json:"options"`
+	Options      []*ConfigurationOption    `json:"options"`
 	ParentField  *ConfigurationParentField `json:"parentField"`
 	Required     *bool                     `json:"required"`
 	Type         *string                   `json:"type"`
@@ -360,7 +360,7 @@ type EngineCertificateView struct {
 	Alias                   *string        `json:"alias"`
 	ChainCertificate        *bool          `json:"chainCertificate"`
 	Expires                 *string        `json:"expires"`
-	Id                      json.Number    `json:"id,omitempty"`
+	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	KeyPair                 *bool          `json:"keyPair"`
 	Md5sum                  *string        `json:"md5sum"`
@@ -556,13 +556,13 @@ type ItemView struct {
 
 //JsonWebKey - A JSON Web Key.
 type JsonWebKey struct {
-	Algorithm *string        `json:"algorithm"`
-	Key       *Key           `json:"key"`
-	KeyId     *string        `json:"keyId"`
-	KeyOps    *[]*string     `json:"keyOps"`
-	KeyType   *string        `json:"keyType"`
-	PublicKey *PublicKeyView `json:"publicKey"`
-	Use       *string        `json:"use"`
+	Algorithm *string    `json:"algorithm"`
+	Key       *Key       `json:"key"`
+	KeyId     *string    `json:"keyId"`
+	KeyOps    *[]*string `json:"keyOps"`
+	KeyType   *string    `json:"keyType"`
+	PublicKey *PublicKey `json:"publicKey"`
+	Use       *string    `json:"use"`
 }
 
 //Key - A key.
@@ -593,7 +593,7 @@ type KeyPairView struct {
 	CsrPending              *bool                   `json:"csrPending"`
 	Expires                 *int                    `json:"expires"`
 	HsmProviderId           *int                    `json:"hsmProviderId,omitempty"`
-	Id                      json.Number             `json:"id,omitempty"`
+	Id                      *int                    `json:"id,omitempty"`
 	IssuerDn                *string                 `json:"issuerDn"`
 	Md5sum                  *string                 `json:"md5sum"`
 	SerialNumber            *string                 `json:"serialNumber"`
@@ -862,14 +862,14 @@ type PingOne4CView struct {
 	UseProxy                  *bool   `json:"useProxy,omitempty"`
 }
 
-//PolicyItem - The policy items associated with the application
+//PolicyItem - The policy items associated with the application - Now an undocumented model type
 type PolicyItem struct {
 	Id   json.Number `json:"id,omitempty"`
 	Type *string     `json:"type,omitempty"`
 }
 
-//ProblemDocument
-type ProblemDocument struct {
+//ProblemDocumentView - An RFC 7807 problem details object.
+type ProblemDocumentView struct {
 	Detail *string `json:"detail"`
 	Type   *string `json:"type"`
 }
@@ -877,6 +877,10 @@ type ProblemDocument struct {
 //ProtocolSourceView - Configuration for the protocol source.
 type ProtocolSourceView struct {
 	HeaderName *string `json:"headerName"`
+}
+
+//PublicKey - An undocumented model type
+type PublicKey struct {
 }
 
 //PublicKeyView - A public key.
@@ -894,7 +898,6 @@ type QueryParameterView struct {
 //RedirectView - A Redirect.
 type RedirectView struct {
 	AuditLevel   *string             `json:"auditLevel,omitempty"`
-	Id           json.Number         `json:"id,omitempty"`
 	ResponseCode *int                `json:"responseCode,omitempty"`
 	Source       *HostPortView       `json:"source,omitempty"`
 	Target       *TargetHostPortView `json:"target,omitempty"`
@@ -965,7 +968,6 @@ type ResourceMatchingEntryView struct {
 //ResourceMatchingEvaluationOrderView - Specifies an ordering of Resource Matching Entries.
 type ResourceMatchingEvaluationOrderView struct {
 	Entries []*ResourceMatchingEntryView `json:"entries"`
-	Id      json.Number                  `json:"id,omitempty"`
 }
 
 //ResourceOrderView - Specifies an ordering of Application Resources.
@@ -993,7 +995,6 @@ type ResourceView struct {
 
 //ResourcesView - A collection of resources.
 type ResourcesView struct {
-	Id    json.Number     `json:"id,omitempty"`
 	Items []*ResourceView `json:"items"`
 }
 
@@ -1011,7 +1012,7 @@ type RuleDescriptorView struct {
 	ClassName            *string               `json:"className"`
 	ConfigurationFields  []*ConfigurationField `json:"configurationFields"`
 	Label                *string               `json:"label"`
-	Modes                *[]*string            `json:"modes"`
+	Modes                []*string             `json:"modes"`
 	Type                 *string               `json:"type"`
 }
 
@@ -1058,7 +1059,7 @@ type RulesView struct {
 	Items []*RuleView `json:"items"`
 }
 
-//SanType - The valid General Names for creating Subject Alternative Names
+//SanType - An undocumented model type
 type SanType struct {
 	Description *string `json:"description,omitempty"`
 	Name        *string `json:"name,omitempty"`
@@ -1187,7 +1188,7 @@ type TokenProviderSettingView struct {
 type TrustedCertView struct {
 	Alias                   *string        `json:"alias"`
 	Expires                 *int           `json:"expires"`
-	Id                      json.Number    `json:"id,omitempty"`
+	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	Md5sum                  *string        `json:"md5sum"`
 	SerialNumber            *string        `json:"serialNumber"`

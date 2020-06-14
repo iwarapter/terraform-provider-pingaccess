@@ -59,7 +59,7 @@ func resourcePingAccessHsmProviderCreate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.AddHsmProviderCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create HsmProvider: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create HsmProvider: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -73,7 +73,7 @@ func resourcePingAccessHsmProviderRead(ctx context.Context, d *schema.ResourceDa
 	}
 	result, _, err := svc.GetHsmProviderCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read HsmProvider: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read HsmProvider: %s", err))
 	}
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
@@ -86,7 +86,7 @@ func resourcePingAccessHsmProviderUpdate(ctx context.Context, d *schema.Resource
 	}
 	result, _, err := svc.UpdateHsmProviderCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update HsmProvider: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update HsmProvider: %s", err))
 	}
 	d.SetId(result.Id.String())
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
@@ -98,12 +98,12 @@ func resourcePingAccessHsmProviderDelete(ctx context.Context, d *schema.Resource
 
 	_, err := svc.DeleteHsmProviderCommand(&pingaccess.DeleteHsmProviderCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete HsmProvider: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete HsmProvider: %s", err))
 	}
 	return nil
 }
 
-func resourcePingAccessHsmProviderReadResult(d *schema.ResourceData, input *pingaccess.HsmProviderView, svc *pingaccess.HsmProvidersService) diag.Diagnostics {
+func resourcePingAccessHsmProviderReadResult(d *schema.ResourceData, input *pingaccess.HsmProviderView, svc pingaccess.HsmProvidersAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)

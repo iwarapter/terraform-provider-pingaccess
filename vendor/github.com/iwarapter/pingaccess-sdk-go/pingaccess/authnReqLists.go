@@ -9,6 +9,14 @@ import (
 
 type AuthnReqListsService service
 
+type AuthnReqListsAPI interface {
+	GetAuthnReqListsCommand(input *GetAuthnReqListsCommandInput) (result *AuthnReqListsView, resp *http.Response, err error)
+	AddAuthnReqListCommand(input *AddAuthnReqListCommandInput) (result *AuthnReqListView, resp *http.Response, err error)
+	DeleteAuthnReqListCommand(input *DeleteAuthnReqListCommandInput) (resp *http.Response, err error)
+	GetAuthnReqListCommand(input *GetAuthnReqListCommandInput) (result *AuthnReqListView, resp *http.Response, err error)
+	UpdateAuthnReqListCommand(input *UpdateAuthnReqListCommandInput) (result *AuthnReqListView, resp *http.Response, err error)
+}
+
 //GetAuthnReqListsCommand - Get all Authentication Requirement Lists
 //RequestType: GET
 //Input: input *GetAuthnReqListsCommandInput

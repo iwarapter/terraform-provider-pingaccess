@@ -9,6 +9,18 @@ import (
 
 type EnginesService service
 
+type EnginesAPI interface {
+	GetEnginesCommand(input *GetEnginesCommandInput) (result *EnginesView, resp *http.Response, err error)
+	AddEngineCommand(input *AddEngineCommandInput) (result *EngineView, resp *http.Response, err error)
+	GetEngineCertificatesCommand(input *GetEngineCertificatesCommandInput) (result *EngineCertificateView, resp *http.Response, err error)
+	GetEngineCertificateCommand(input *GetEngineCertificateCommandInput) (result *EngineCertificateView, resp *http.Response, err error)
+	GetEngineStatusCommand() (result *EngineHealthStatusView, resp *http.Response, err error)
+	DeleteEngineCommand(input *DeleteEngineCommandInput) (resp *http.Response, err error)
+	GetEngineCommand(input *GetEngineCommandInput) (result *EngineView, resp *http.Response, err error)
+	UpdateEngineCommand(input *UpdateEngineCommandInput) (result *EngineView, resp *http.Response, err error)
+	GetEngineConfigFileCommand(input *GetEngineConfigFileCommandInput) (resp *http.Response, err error)
+}
+
 //GetEnginesCommand - Get all Engines
 //RequestType: GET
 //Input: input *GetEnginesCommandInput

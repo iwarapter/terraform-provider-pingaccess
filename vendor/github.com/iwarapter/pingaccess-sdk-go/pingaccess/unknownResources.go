@@ -8,6 +8,12 @@ import (
 
 type UnknownResourcesService service
 
+type UnknownResourcesAPI interface {
+	Delete() (resp *http.Response, err error)
+	Get() (result *UnknownResourceSettingsView, resp *http.Response, err error)
+	Update(input *UpdateInput) (result *UnknownResourceSettingsView, resp *http.Response, err error)
+}
+
 //Delete - Resets the global settings for unknown resources to default values
 //RequestType: DELETE
 //Input:

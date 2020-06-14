@@ -9,6 +9,13 @@ import (
 
 type SharedSecretsService service
 
+type SharedSecretsAPI interface {
+	GetSharedSecretsCommand(input *GetSharedSecretsCommandInput) (result *SharedSecretsView, resp *http.Response, err error)
+	AddSharedSecretCommand(input *AddSharedSecretCommandInput) (result *SharedSecretView, resp *http.Response, err error)
+	DeleteSharedSecretCommand(input *DeleteSharedSecretCommandInput) (resp *http.Response, err error)
+	GetSharedSecretCommand(input *GetSharedSecretCommandInput) (result *SharedSecretView, resp *http.Response, err error)
+}
+
 //GetSharedSecretsCommand - Get all Shared Secrets
 //RequestType: GET
 //Input: input *GetSharedSecretsCommandInput

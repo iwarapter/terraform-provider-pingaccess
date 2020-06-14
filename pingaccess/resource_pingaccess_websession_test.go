@@ -152,8 +152,8 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 
 			resourceSchema := resourcePingAccessWebSessionSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessWebSessionReadResult(resourceLocalData, &tc.WebSession)
 
+			resourcePingAccessWebSessionReadResult(resourceLocalData, &tc.WebSession)
 			if got := *resourcePingAccessWebSessionReadData(resourceLocalData); !cmp.Equal(got, tc.WebSession) {
 				t.Errorf("resourcePingAccessWebSessionReadData() = %v", cmp.Diff(got, tc.WebSession))
 			}

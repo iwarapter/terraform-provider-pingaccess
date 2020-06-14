@@ -8,6 +8,21 @@ import (
 
 type WebSessionManagementService service
 
+type WebSessionManagementAPI interface {
+	DeleteWebSessionManagementCommand() (resp *http.Response, err error)
+	GetWebSessionManagementCommand() (result *WebSessionManagementView, resp *http.Response, err error)
+	UpdateWebSessionManagementCommand(input *UpdateWebSessionManagementCommandInput) (result *WebSessionManagementView, resp *http.Response, err error)
+	GetCookieTypes() (result *CookieTypesView, resp *http.Response, err error)
+	GetWebSessionSupportedEncryptionAlgorithmsCommand() (result *AlgorithmsView, resp *http.Response, err error)
+	GetWebSessionKeySetCommand() (result *KeySetView, resp *http.Response, err error)
+	UpdateWebSessionKeySetCommand(input *UpdateWebSessionKeySetCommandInput) (result *KeySetView, resp *http.Response, err error)
+	GetOidcLoginTypes() (result *OidcLoginTypesView, resp *http.Response, err error)
+	GetOidcScopesCommand(input *GetOidcScopesCommandInput) (result *SupportedScopesView, resp *http.Response, err error)
+	GetRequestPreservationTypes() (result *RequestPreservationTypesView, resp *http.Response, err error)
+	GetWebSessionSupportedSigningAlgorithms() (result *SigningAlgorithmsView, resp *http.Response, err error)
+	GetWebStorageTypes() (result *WebStorageTypesView, resp *http.Response, err error)
+}
+
 //DeleteWebSessionManagementCommand - Resets the Web Session Management configuration to default values
 //RequestType: DELETE
 //Input:

@@ -9,6 +9,14 @@ import (
 
 type WebSessionsService service
 
+type WebSessionsAPI interface {
+	GetWebSessionsCommand(input *GetWebSessionsCommandInput) (result *WebSessionsView, resp *http.Response, err error)
+	AddWebSessionCommand(input *AddWebSessionCommandInput) (result *WebSessionView, resp *http.Response, err error)
+	DeleteWebSessionCommand(input *DeleteWebSessionCommandInput) (resp *http.Response, err error)
+	GetWebSessionCommand(input *GetWebSessionCommandInput) (result *WebSessionView, resp *http.Response, err error)
+	UpdateWebSessionCommand(input *UpdateWebSessionCommandInput) (result *WebSessionView, resp *http.Response, err error)
+}
+
 //GetWebSessionsCommand - Get all WebSessions
 //RequestType: GET
 //Input: input *GetWebSessionsCommandInput

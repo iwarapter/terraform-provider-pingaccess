@@ -9,6 +9,23 @@ import (
 
 type KeyPairsService service
 
+type KeyPairsAPI interface {
+	GetKeyPairsCommand(input *GetKeyPairsCommandInput) (result *KeyPairsView, resp *http.Response, err error)
+	GenerateKeyPairCommand(input *GenerateKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error)
+	ImportKeyPairCommand(input *ImportKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error)
+	KeyAlgorithms() (result *KeyAlgorithmsView, resp *http.Response, err error)
+	GetKeypairsCreatableGeneralNamesCommand() (result *SanTypes, resp *http.Response, err error)
+	DeleteKeyPairCommand(input *DeleteKeyPairCommandInput) (resp *http.Response, err error)
+	GetKeyPairCommand(input *GetKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error)
+	PatchKeyPairCommand(input *PatchKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error)
+	UpdateKeyPairCommand(input *UpdateKeyPairCommandInput) (result *KeyPairView, resp *http.Response, err error)
+	ExportKeyPairCert(input *ExportKeyPairCertInput) (resp *http.Response, err error)
+	GenerateCsrCommand(input *GenerateCsrCommandInput) (resp *http.Response, err error)
+	ImportCSRResponseCommand(input *ImportCSRResponseCommandInput) (result *KeyPairView, resp *http.Response, err error)
+	ExportKeyPair(input *ExportKeyPairInput) (resp *http.Response, err error)
+	DeleteChainCertificateCommand(input *DeleteChainCertificateCommandInput) (resp *http.Response, err error)
+}
+
 //GetKeyPairsCommand - Get all Key Pairs
 //RequestType: GET
 //Input: input *GetKeyPairsCommandInput

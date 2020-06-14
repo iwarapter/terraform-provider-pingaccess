@@ -57,7 +57,7 @@ func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckF
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).PingFederate
+		conn := testAccProvider.Meta().(*pa.Client).Pingfederate
 		result, _, err := conn.GetPingFederateAccessTokensCommand()
 
 		if err != nil {

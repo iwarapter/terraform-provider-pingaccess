@@ -71,23 +71,23 @@ func resourcePingAccessPingFederateAdminCreate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateAdminRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	result, _, err := svc.GetPingFederateAdminCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read PingFederateAdmin: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read PingFederateAdmin: %s", err))
 	}
 
 	return resourcePingAccessPingFederateAdminReadResult(d, result)
 }
 
 func resourcePingAccessPingFederateAdminUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	input := pa.UpdatePingFederateAdminCommandInput{
 		Body: *resourcePingAccessPingFederateAdminReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateAdminCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update PingFederateAdmin: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update PingFederateAdmin: %s", err))
 	}
 
 	d.SetId("pingfederate_admin_settings")
@@ -95,10 +95,10 @@ func resourcePingAccessPingFederateAdminUpdate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateAdminDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	_, err := svc.DeletePingFederateCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to reset PingFederateAdmin: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to reset PingFederateAdmin: %s", err))
 	}
 	return nil
 }
@@ -121,7 +121,7 @@ func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input
 			creds[0]["value"] = pw
 		}
 		if err := d.Set("admin_password", creds); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 

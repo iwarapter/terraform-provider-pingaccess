@@ -120,10 +120,10 @@ func resourcePingAccessKeyPairCreate(ctx context.Context, d *schema.ResourceData
 
 	result, _, err := svc.ImportKeyPairCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create KeyPair: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create KeyPair: %s", err))
 	}
 
-	d.SetId(result.Id.String())
+	d.SetId(strconv.Itoa(*result.Id))
 	return resourcePingAccessKeyPairReadResult(d, result)
 }
 
@@ -134,7 +134,7 @@ func resourcePingAccessKeyPairRead(ctx context.Context, d *schema.ResourceData, 
 	}
 	result, _, err := svc.GetKeyPairCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read KeyPair: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read KeyPair: %s", err))
 	}
 	return resourcePingAccessKeyPairReadResult(d, result)
 }
@@ -158,10 +158,10 @@ func resourcePingAccessKeyPairUpdate(ctx context.Context, d *schema.ResourceData
 
 	result, _, err := svc.UpdateKeyPairCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update KeyPair: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update KeyPair: %s", err))
 	}
 
-	d.SetId(result.Id.String())
+	d.SetId(strconv.Itoa(*result.Id))
 	return resourcePingAccessKeyPairReadResult(d, result)
 }
 
@@ -169,7 +169,7 @@ func resourcePingAccessKeyPairDelete(ctx context.Context, d *schema.ResourceData
 	svc := m.(*pa.Client).KeyPairs
 	_, err := svc.DeleteKeyPairCommand(&pa.DeleteKeyPairCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete KeyPair: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete KeyPair: %s", err))
 	}
 	return nil
 }
@@ -179,7 +179,8 @@ func resourcePingAccessKeyPairReadResult(d *schema.ResourceData, rv *pa.KeyPairV
 	setResourceDataStringWithDiagnostic(d, "alias", rv.Alias, &diags)
 	if rv.ChainCertificates != nil {
 		if err := d.Set("chain_certificates", flattenChainCertificates(rv.ChainCertificates)); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
+
 		}
 	}
 	setResourceDataBoolWithDiagnostic(d, "csr_pending", rv.CsrPending, &diags)

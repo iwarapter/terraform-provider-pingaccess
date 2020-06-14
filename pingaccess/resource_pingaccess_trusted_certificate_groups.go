@@ -70,7 +70,7 @@ func resourcePingAccessTrustedCertificateGroupsCreate(ctx context.Context, d *sc
 
 	result, _, err := svc.AddTrustedCertificateGroupCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create TrustedCertificateGroup: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create TrustedCertificateGroup: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -84,7 +84,7 @@ func resourcePingAccessTrustedCertificateGroupsRead(ctx context.Context, d *sche
 	}
 	result, _, err := svc.GetTrustedCertificateGroupCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read TrustedCertificateGroup: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read TrustedCertificateGroup: %s", err))
 	}
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result)
 }
@@ -97,7 +97,7 @@ func resourcePingAccessTrustedCertificateGroupsUpdate(ctx context.Context, d *sc
 	}
 	result, _, err := svc.UpdateTrustedCertificateGroupCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update TrustedCertificateGroup: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update TrustedCertificateGroup: %s", err))
 	}
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result)
 }
@@ -112,7 +112,7 @@ func resourcePingAccessTrustedCertificateGroupsDelete(ctx context.Context, d *sc
 
 	_, err := svc.DeleteTrustedCertificateGroupCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete TrustedCertificateGroup: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete TrustedCertificateGroup: %s", err))
 	}
 	return nil
 }
@@ -131,7 +131,7 @@ func resourcePingAccessTrustedCertificateGroupsReadResult(d *schema.ResourceData
 			certs = append(certs, strconv.Itoa(*cert))
 		}
 		if err := d.Set("cert_ids", certs); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 
 		}
 	}

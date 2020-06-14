@@ -3,6 +3,7 @@ package pingaccess
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,12 +28,11 @@ func dataSourcePingAccessKeyPairRead(ctx context.Context, d *schema.ResourceData
 	}
 	result, _, err := svc.GetKeyPairsCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read KeyPair: %s", err))}
-
+		return diag.FromErr(fmt.Errorf("unable to read KeyPair: %s", err))
 	}
 	if len(result.Items) != 1 {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to find KeyPair with alias '%s' found '%d' results", d.Get("alias").(string), len(result.Items)))}
+		return diag.FromErr(fmt.Errorf("unable to find KeyPair with alias '%s' found '%d' results", d.Get("alias").(string), len(result.Items)))
 	}
-	d.SetId(result.Items[0].Id.String())
+	d.SetId(strconv.Itoa(*result.Items[0].Id))
 	return resourcePingAccessKeyPairReadResult(d, result.Items[0])
 }

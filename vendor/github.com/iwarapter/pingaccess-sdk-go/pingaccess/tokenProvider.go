@@ -8,6 +8,12 @@ import (
 
 type TokenProviderService service
 
+type TokenProviderAPI interface {
+	DeleteTokenProviderSettingCommand() (resp *http.Response, err error)
+	GetTokenProviderSettingCommand() (result *TokenProviderSettingView, resp *http.Response, err error)
+	UpdateTokenProviderSettingCommand(input *UpdateTokenProviderSettingCommandInput) (result *TokenProviderSettingView, resp *http.Response, err error)
+}
+
 //DeleteTokenProviderSettingCommand - Resets the Token Provider settings to default values
 //RequestType: DELETE
 //Input:

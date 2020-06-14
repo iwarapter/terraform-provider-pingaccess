@@ -5,20 +5,16 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/logutils"
+	tftest "github.com/hashicorp/terraform-plugin-test"
 	testing "github.com/mitchellh/go-testing-interface"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/internal/addrs"
@@ -102,16 +98,7 @@ func TestMain(m interface {
 			os.Exit(1)
 		}
 	} else {
-		if acctest.TestHelper == nil {
-			log.Fatal("Please configure the acctest binary driver")
-		}
-
 		exitCode := m.Run()
-		err := acctest.TestHelper.Close()
-		if err != nil {
-			log.Printf("Error cleaning up temporary test files: %s", err)
-		}
-
 		os.Exit(exitCode)
 	}
 }
@@ -460,49 +447,6 @@ type TestStep struct {
 	providers map[string]*schema.Provider
 }
 
-// Set to a file mask in sprintf format where %s is test name
-const envLogPathMask = "TF_LOG_PATH_MASK"
-
-func logOutput(t testing.T) (logOutput io.Writer, err error) {
-	logOutput = ioutil.Discard
-
-	logLevel := logging.LogLevel()
-	if logLevel == "" {
-		return
-	}
-
-	logOutput = os.Stderr
-
-	if logPath := os.Getenv(logging.EnvLogFile); logPath != "" {
-		var err error
-		logOutput, err = os.OpenFile(logPath, syscall.O_CREAT|syscall.O_RDWR|syscall.O_APPEND, 0666)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if logPathMask := os.Getenv(envLogPathMask); logPathMask != "" {
-		// Escape special characters which may appear if we have subtests
-		testName := strings.Replace(t.Name(), "/", "__", -1)
-
-		logPath := fmt.Sprintf(logPathMask, testName)
-		var err error
-		logOutput, err = os.OpenFile(logPath, syscall.O_CREAT|syscall.O_RDWR|syscall.O_APPEND, 0666)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// This was the default since the beginning
-	logOutput = &logutils.LevelFilter{
-		Levels:   logging.ValidLevels,
-		MinLevel: logutils.LogLevel(logLevel),
-		Writer:   logOutput,
-	}
-
-	return
-}
-
 // ParallelTest performs an acceptance test on a resource, allowing concurrency
 // with other ParallelTest.
 //
@@ -535,24 +479,27 @@ func Test(t testing.T, c TestCase) {
 		return
 	}
 
-	logWriter, err := logOutput(t)
-	if err != nil {
-		t.Error(fmt.Errorf("error setting up logging: %s", err))
-	}
-	log.SetOutput(logWriter)
+	logging.SetOutput()
 
 	// get instances of all providers, so we can use the individual
 	// resources to shim the state during the tests.
 	providers := make(map[string]*schema.Provider)
+	var provider string
 	for name, pf := range c.ProviderFactories {
 		p, err := pf()
 		if err != nil {
 			t.Fatal(err)
 		}
 		providers[name] = p
+		provider = name
 	}
 	for name, p := range c.Providers {
 		providers[name] = p
+		provider = name
+	}
+
+	if len(providers) != 1 {
+		t.Fatalf("Only the provider under test should be set in TestCase, got %d providers. Other providers can be used by adding their provider blocks to their config; they will automatically be downloaded as part of terraform init.", len(providers))
 	}
 
 	// Auto-configure all providers.
@@ -570,11 +517,19 @@ func Test(t testing.T, c TestCase) {
 		c.PreCheck()
 	}
 
-	if acctest.TestHelper == nil {
-		t.Fatal("Please configure the acctest binary driver")
+	sourceDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Error getting working dir: %s", err)
 	}
+	helper := tftest.AutoInitProviderHelper(provider, sourceDir)
+	defer func(helper *tftest.Helper) {
+		err := helper.Close()
+		if err != nil {
+			log.Printf("Error cleaning up temporary test files: %s", err)
+		}
+	}(helper)
 
-	runNewTest(t, c, providers)
+	runNewTest(t, c, providers, helper)
 }
 
 // testProviderConfig takes the list of Providers in a TestCase and returns a

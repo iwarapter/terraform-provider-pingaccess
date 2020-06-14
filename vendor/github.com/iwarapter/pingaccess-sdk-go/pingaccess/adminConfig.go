@@ -9,6 +9,18 @@ import (
 
 type AdminConfigService service
 
+type AdminConfigAPI interface {
+	DeleteAdminConfigurationCommand() (resp *http.Response, err error)
+	GetAdminConfigurationCommand() (result *AdminConfigurationView, resp *http.Response, err error)
+	UpdateAdminConfigurationCommand(input *UpdateAdminConfigurationCommandInput) (result *AdminConfigurationView, resp *http.Response, err error)
+	GetReplicaAdminsCommand() (result *ReplicaAdminsView, resp *http.Response, err error)
+	AddReplicaAdminCommand(input *AddReplicaAdminCommandInput) (result *ReplicaAdminView, resp *http.Response, err error)
+	DeleteReplicaAdminCommand(input *DeleteReplicaAdminCommandInput) (resp *http.Response, err error)
+	GetReplicaAdminCommand(input *GetReplicaAdminCommandInput) (result *ReplicaAdminView, resp *http.Response, err error)
+	UpdateAdminReplicaCommand(input *UpdateAdminReplicaCommandInput) (result *ReplicaAdminView, resp *http.Response, err error)
+	GetAdminReplicaFileCommand(input *GetAdminReplicaFileCommandInput) (resp *http.Response, err error)
+}
+
 //DeleteAdminConfigurationCommand - Resets the Admin Config to default values
 //RequestType: DELETE
 //Input:

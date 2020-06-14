@@ -9,6 +9,16 @@ import (
 
 type RulesetsService service
 
+type RulesetsAPI interface {
+	GetRuleSetsCommand(input *GetRuleSetsCommandInput) (result *RuleSetsView, resp *http.Response, err error)
+	AddRuleSetCommand(input *AddRuleSetCommandInput) (result *RuleSetView, resp *http.Response, err error)
+	GetRuleSetElementTypesCommand() (result *RuleSetElementTypesView, resp *http.Response, err error)
+	GetRuleSetSuccessCriteriaCommand() (result *RuleSetSuccessCriteriaView, resp *http.Response, err error)
+	DeleteRuleSetCommand(input *DeleteRuleSetCommandInput) (resp *http.Response, err error)
+	GetRuleSetCommand(input *GetRuleSetCommandInput) (result *RuleSetView, resp *http.Response, err error)
+	UpdateRuleSetCommand(input *UpdateRuleSetCommandInput) (result *RuleSetView, resp *http.Response, err error)
+}
+
 //GetRuleSetsCommand - Get all Rule Sets
 //RequestType: GET
 //Input: input *GetRuleSetsCommandInput

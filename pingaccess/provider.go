@@ -113,7 +113,7 @@ func String(v string) *string { return &v }
 func setResourceDataStringWithDiagnostic(d *schema.ResourceData, name string, data *string, diags *diag.Diagnostics) {
 	if data != nil {
 		if err := d.Set(name, *data); err != nil {
-			*diags = append(*diags, diag.FromErr(err))
+			*diags = append(*diags, diag.FromErr(err)...)
 		}
 	}
 }
@@ -121,7 +121,7 @@ func setResourceDataStringWithDiagnostic(d *schema.ResourceData, name string, da
 func setResourceDataIntWithDiagnostic(d *schema.ResourceData, name string, data *int, diags *diag.Diagnostics) {
 	if data != nil {
 		if err := d.Set(name, *data); err != nil {
-			*diags = append(*diags, diag.FromErr(err))
+			*diags = append(*diags, diag.FromErr(err)...)
 		}
 	}
 }
@@ -129,7 +129,7 @@ func setResourceDataIntWithDiagnostic(d *schema.ResourceData, name string, data 
 func setResourceDataBoolWithDiagnostic(d *schema.ResourceData, name string, data *bool, diags *diag.Diagnostics) {
 	if data != nil {
 		if err := d.Set(name, *data); err != nil {
-			*diags = append(*diags, diag.FromErr(err))
+			*diags = append(*diags, diag.FromErr(err)...)
 		}
 	}
 }

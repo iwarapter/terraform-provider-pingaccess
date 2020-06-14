@@ -8,6 +8,11 @@ import (
 
 type LicenseService service
 
+type LicenseAPI interface {
+	GetLicenseCommand() (result *LicenseView, resp *http.Response, err error)
+	ImportLicenseCommand(input *ImportLicenseCommandInput) (result *LicenseView, resp *http.Response, err error)
+}
+
 //GetLicenseCommand - Get the License File
 //RequestType: GET
 //Input:

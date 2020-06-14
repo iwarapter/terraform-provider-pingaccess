@@ -55,13 +55,13 @@ func dataSourcePingAccessTrustedCertificateGroupsRead(ctx context.Context, d *sc
 	}
 	result, _, err := svc.GetTrustedCertificateGroupsCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read TrustedCertificateGroup: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read TrustedCertificateGroup: %s", err))
 	}
 	if result == nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to find TrustedCertificateGroup with the name '%s', result was nil", d.Get("name").(string)))}
+		return diag.FromErr(fmt.Errorf("unable to find TrustedCertificateGroup with the name '%s', result was nil", d.Get("name").(string)))
 	}
 	if len(result.Items) != 1 {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", d.Get("name").(string), len(result.Items)))}
+		return diag.FromErr(fmt.Errorf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", d.Get("name").(string), len(result.Items)))
 	}
 	d.SetId(result.Items[0].Id.String())
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result.Items[0])

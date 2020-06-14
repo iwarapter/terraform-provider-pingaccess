@@ -60,7 +60,7 @@ func resourcePingAccessSiteAuthenticatorCreate(ctx context.Context, d *schema.Re
 
 	result, _, err := svc.AddSiteAuthenticatorCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create SiteAuthenticator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create SiteAuthenticator: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -74,7 +74,7 @@ func resourcePingAccessSiteAuthenticatorRead(ctx context.Context, d *schema.Reso
 	}
 	result, _, err := svc.GetSiteAuthenticatorCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read SiteAuthenticator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read SiteAuthenticator: %s", err))
 	}
 	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
@@ -87,7 +87,7 @@ func resourcePingAccessSiteAuthenticatorUpdate(ctx context.Context, d *schema.Re
 	}
 	result, _, err := svc.UpdateSiteAuthenticatorCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update SiteAuthenticator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update SiteAuthenticator: %s", err))
 	}
 	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
@@ -102,12 +102,12 @@ func resourcePingAccessSiteAuthenticatorDelete(ctx context.Context, d *schema.Re
 
 	_, err := svc.DeleteSiteAuthenticatorCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete SiteAuthenticator: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete SiteAuthenticator: %s", err))
 	}
 	return nil
 }
 
-func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input *pingaccess.SiteAuthenticatorView, svc *pingaccess.SiteAuthenticatorsService) diag.Diagnostics {
+func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input *pingaccess.SiteAuthenticatorView, svc pingaccess.SiteAuthenticatorsAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)

@@ -18,7 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -27,7 +26,6 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	acctest.UseBinaryDriver("pingaccess", Provider)
 	_, acceptanceTesting := os.LookupEnv("TF_ACC")
 	if acceptanceTesting {
 		pool, err := dockertest.NewPool("")

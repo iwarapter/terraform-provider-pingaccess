@@ -25,7 +25,7 @@ func (c *config) Client() (interface{}, diag.Diagnostics) {
 	client := pingaccess.NewClient(c.Username, c.Password, url, c.Context, nil)
 
 	if os.Getenv("TF_LOG") == "DEBUG" || os.Getenv("TF_LOG") == "TRACE" {
-		client.LogDebug(true)
+		client.LogDebug = true
 	}
 	return client, nil
 }

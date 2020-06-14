@@ -11,6 +11,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"runtime"
+	"strings"
 )
 
 const logReqMsg = `DEBUG: Request %s Details:
@@ -27,61 +28,57 @@ type Client struct {
 	Password   string
 	BaseURL    *url.URL
 	Context    string
+	LogDebug   bool
 	httpClient *http.Client
-	logDebug   bool
 
-	AccessTokenValidators      *AccessTokenValidatorsService
-	Acme                       *AcmeService
-	AdminConfigs               *AdminConfigService
-	AdminSessions              *AdminSessionInfoService
-	Agents                     *AgentsService
-	Applications               *ApplicationsService
-	Auth                       *AuthService
-	AuthnReqLists              *AuthnReqListsService
-	AuthTokenManagements       *AuthTokenManagementService
-	Backups                    *BackupService
-	Certificates               *CertificatesService
-	Config                     *ConfigService
-	EngineListeners            *EngineListenersService
-	Engines                    *EnginesService
-	GlobalUnprotectedResources *GlobalUnprotectedResourcesService
-	HighAvailability           *HighAvailabilityService
-	HsmProviders               *HsmProvidersService
-	HttpConfig                 *HttpConfigService
-	HttpsListeners             *HttpsListenersService
-	IdentityMappings           *IdentityMappingsService
-	KeyPairs                   *KeyPairsService
-	License                    *LicenseService
-	OAuth                      *OauthService
-	OauthKeyManagement         *OauthKeyManagementService
-	Oidc                       *OidcService
-	PingFederate               *PingfederateService
-	PingOne                    *PingoneService
-	Proxies                    *ProxiesService
-	Redirects                  *RedirectsService
-	RejectionHandlers          *RejectionHandlersService
-	Rules                      *RulesService
-	Rulesets                   *RulesetsService
-	SharedSecrets              *SharedSecretsService
-	SiteAuthenticators         *SiteAuthenticatorsService
-	Sites                      *SitesService
-	ThirdPartyServices         *ThirdPartyServicesService
-	TokenProvider              *TokenProviderService
-	TrustedCertificateGroups   *TrustedCertificateGroupsService
-	UnknownResources           *UnknownResourcesService
-	Users                      *UsersService
-	Version                    *VersionService
-	Virtualhosts               *VirtualhostsService
-	WebSessionManagement       *WebSessionManagementService
-	WebSessions                *WebSessionsService
+	AccessTokenValidators      AccessTokenValidatorsAPI
+	Acme                       AcmeAPI
+	AdminConfig                AdminConfigAPI
+	AdminSessionInfo           AdminSessionInfoAPI
+	Agents                     AgentsAPI
+	Applications               ApplicationsAPI
+	Auth                       AuthAPI
+	AuthTokenManagement        AuthTokenManagementAPI
+	AuthnReqLists              AuthnReqListsAPI
+	Backup                     BackupAPI
+	Certificates               CertificatesAPI
+	Config                     ConfigAPI
+	EngineListeners            EngineListenersAPI
+	Engines                    EnginesAPI
+	GlobalUnprotectedResources GlobalUnprotectedResourcesAPI
+	HighAvailability           HighAvailabilityAPI
+	HsmProviders               HsmProvidersAPI
+	HttpConfig                 HttpConfigAPI
+	HttpsListeners             HttpsListenersAPI
+	IdentityMappings           IdentityMappingsAPI
+	KeyPairs                   KeyPairsAPI
+	License                    LicenseAPI
+	Oauth                      OauthAPI
+	OauthKeyManagement         OauthKeyManagementAPI
+	Oidc                       OidcAPI
+	Pingfederate               PingfederateAPI
+	Pingone                    PingoneAPI
+	Proxies                    ProxiesAPI
+	Redirects                  RedirectsAPI
+	RejectionHandlers          RejectionHandlersAPI
+	Rules                      RulesAPI
+	Rulesets                   RulesetsAPI
+	SharedSecrets              SharedSecretsAPI
+	SiteAuthenticators         SiteAuthenticatorsAPI
+	Sites                      SitesAPI
+	ThirdPartyServices         ThirdPartyServicesAPI
+	TokenProvider              TokenProviderAPI
+	TrustedCertificateGroups   TrustedCertificateGroupsAPI
+	UnknownResources           UnknownResourcesAPI
+	Users                      UsersAPI
+	Version                    VersionAPI
+	Virtualhosts               VirtualhostsAPI
+	WebSessionManagement       WebSessionManagementAPI
+	WebSessions                WebSessionsAPI
 }
 
 type service struct {
 	client *Client
-}
-
-func (c *Client) LogDebug(enable bool) {
-	c.logDebug = enable
 }
 
 func NewClient(username string, password string, baseUrl *url.URL, context string, httpClient *http.Client) *Client {
@@ -96,14 +93,14 @@ func NewClient(username string, password string, baseUrl *url.URL, context strin
 
 	c.AccessTokenValidators = &AccessTokenValidatorsService{client: c}
 	c.Acme = &AcmeService{client: c}
-	c.AdminConfigs = &AdminConfigService{client: c}
-	c.AdminSessions = &AdminSessionInfoService{client: c}
+	c.AdminConfig = &AdminConfigService{client: c}
+	c.AdminSessionInfo = &AdminSessionInfoService{client: c}
 	c.Agents = &AgentsService{client: c}
 	c.Applications = &ApplicationsService{client: c}
 	c.Auth = &AuthService{client: c}
+	c.AuthTokenManagement = &AuthTokenManagementService{client: c}
 	c.AuthnReqLists = &AuthnReqListsService{client: c}
-	c.AuthTokenManagements = &AuthTokenManagementService{client: c}
-	c.Backups = &BackupService{client: c}
+	c.Backup = &BackupService{client: c}
 	c.Certificates = &CertificatesService{client: c}
 	c.Config = &ConfigService{client: c}
 	c.EngineListeners = &EngineListenersService{client: c}
@@ -116,11 +113,11 @@ func NewClient(username string, password string, baseUrl *url.URL, context strin
 	c.IdentityMappings = &IdentityMappingsService{client: c}
 	c.KeyPairs = &KeyPairsService{client: c}
 	c.License = &LicenseService{client: c}
-	c.OAuth = &OauthService{client: c}
+	c.Oauth = &OauthService{client: c}
 	c.OauthKeyManagement = &OauthKeyManagementService{client: c}
 	c.Oidc = &OidcService{client: c}
-	c.PingFederate = &PingfederateService{client: c}
-	c.PingOne = &PingoneService{client: c}
+	c.Pingfederate = &PingfederateService{client: c}
+	c.Pingone = &PingoneService{client: c}
 	c.Proxies = &ProxiesService{client: c}
 	c.Redirects = &RedirectsService{client: c}
 	c.RejectionHandlers = &RejectionHandlersService{client: c}
@@ -165,7 +162,7 @@ func (c *Client) newRequest(method string, path *url.URL, body interface{}) (*ht
 }
 
 func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
-	if c.logDebug {
+	if c.LogDebug {
 		requestDump, err := httputil.DumpRequest(req, true)
 		if err != nil {
 			fmt.Println(err)
@@ -176,7 +173,7 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	if c.logDebug {
+	if c.LogDebug {
 		responseDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			fmt.Println(err)
@@ -191,7 +188,7 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 
 	if v != nil {
 		if w, ok := v.(io.Writer); ok {
-			io.Copy(w, resp.Body)
+			_, err = io.Copy(w, resp.Body)
 		} else {
 			decErr := json.NewDecoder(resp.Body).Decode(v)
 			if decErr == io.EOF {
@@ -205,11 +202,6 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	return resp, err
 }
 
-type FailureResponse struct {
-	Form  map[string][]string `json:"form"`
-	Flash []string            `json:"flash"`
-}
-
 // CheckResponse checks the API response for errors, and returns them if
 // present. A response is considered an error if it has a status code outside
 // the 200 range.
@@ -221,31 +213,37 @@ func CheckResponse(r *http.Response) error {
 		return nil
 	}
 
-	errorResponse := FailureResponse{}
+	errorResponse := ApiErrorView{}
 	data, err := ioutil.ReadAll(r.Body)
 	if err == nil && data != nil {
-		json.Unmarshal(data, &errorResponse)
-	}
-
-	return &PingAccessError{
-		Response: errorResponse,
-	}
-}
-
-// PingAccessError occurs when PingAccess returns a non 2XX response
-type PingAccessError struct {
-	Response FailureResponse
-}
-
-func (r *PingAccessError) Error() (message string) {
-	if r.Response.Flash != nil {
-		message = fmt.Sprintf("%s\n", r.Response.Flash)
-	}
-	for _, v := range r.Response.Form {
-		for _, s := range v {
-			message = fmt.Sprintf(message + s + "\n")
+		err = json.Unmarshal(data, &errorResponse)
+		if err != nil {
+			return fmt.Errorf("Unable to parse error response: " + string(data))
 		}
 	}
+
+	return &errorResponse
+}
+
+func (r *ApiErrorView) Error() (message string) {
+	if len(*r.Flash) > 0 {
+		var msgs []string
+		for i := range *r.Flash {
+			msgs = append(msgs, *(*r.Flash)[i])
+		}
+		message = strings.Join(msgs, ", ")
+	}
+
+	if len(r.Form) > 0 {
+		for s, i := range r.Form {
+			var msgs []string
+			for _, j := range *i {
+				msgs = append(msgs, *j)
+			}
+			message += fmt.Sprintf(":\n%s contains %d validation failures:\n\t%s", s, len(msgs), strings.Join(msgs, "\n\t"))
+		}
+	}
+
 	return
 }
 

@@ -86,23 +86,23 @@ func resourcePingAccessOAuthServerCreate(ctx context.Context, d *schema.Resource
 }
 
 func resourcePingAccessOAuthServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).OAuth
+	svc := m.(*pa.Client).Oauth
 	result, _, err := svc.GetAuthorizationServerCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read OAuthServerSettings: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read OAuthServerSettings: %s", err))
 	}
 
 	return resourcePingAccessOAuthServerReadResult(d, result)
 }
 
 func resourcePingAccessOAuthServerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).OAuth
+	svc := m.(*pa.Client).Oauth
 	input := pa.UpdateAuthorizationServerCommandInput{
 		Body: *resourcePingAccessOAuthServerReadData(d),
 	}
 	result, _, err := svc.UpdateAuthorizationServerCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update OAuthServerSettings: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update OAuthServerSettings: %s", err))
 	}
 
 	d.SetId("oauth_server_settings")
@@ -110,10 +110,10 @@ func resourcePingAccessOAuthServerUpdate(ctx context.Context, d *schema.Resource
 }
 
 func resourcePingAccessOAuthServerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).OAuth
+	svc := m.(*pa.Client).Oauth
 	_, err := svc.DeleteAuthorizationServerCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to reset OAuthServerSettings: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to reset OAuthServerSettings: %s", err))
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *pa.A
 	setResourceDataBoolWithDiagnostic(d, "use_proxy", input.UseProxy, &diags)
 
 	if err := d.Set("targets", input.Targets); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	if input.ClientCredentials != nil {
 		//TODO we should look at encrypting the value
@@ -142,7 +142,7 @@ func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *pa.A
 			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
 		}
 		if err := d.Set("client_credentials", creds); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 

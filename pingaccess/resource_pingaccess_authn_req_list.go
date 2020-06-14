@@ -41,7 +41,7 @@ func resourcePingAccessAuthnReqListCreate(ctx context.Context, d *schema.Resourc
 
 	result, _, err := svc.AddAuthnReqListCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create AuthnReqList: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create AuthnReqList: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -55,7 +55,7 @@ func resourcePingAccessAuthnReqListRead(ctx context.Context, d *schema.ResourceD
 	}
 	result, _, err := svc.GetAuthnReqListCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read AuthnReqList: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read AuthnReqList: %s", err))
 	}
 	return resourcePingAccessAuthnReqListReadResult(d, result)
 }
@@ -69,7 +69,7 @@ func resourcePingAccessAuthnReqListUpdate(ctx context.Context, d *schema.Resourc
 
 	result, _, err := svc.UpdateAuthnReqListCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update AuthnReqList: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update AuthnReqList: %s", err))
 	}
 	return resourcePingAccessAuthnReqListReadResult(d, result)
 }
@@ -82,7 +82,7 @@ func resourcePingAccessAuthnReqListDelete(ctx context.Context, d *schema.Resourc
 
 	_, err := svc.DeleteAuthnReqListCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete AuthnReqList: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete AuthnReqList: %s", err))
 	}
 	return nil
 }
@@ -91,7 +91,7 @@ func resourcePingAccessAuthnReqListReadResult(d *schema.ResourceData, input *pin
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	if err := d.Set("authn_reqs", input.AuthnReqs); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	return diags
 }

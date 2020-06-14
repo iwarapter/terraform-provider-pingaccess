@@ -9,6 +9,23 @@ import (
 
 type HighAvailabilityService service
 
+type HighAvailabilityAPI interface {
+	GetAvailabilityProfilesCommand(input *GetAvailabilityProfilesCommandInput) (result *AvailabilityProfilesView, resp *http.Response, err error)
+	AddAvailabilityProfileCommand(input *AddAvailabilityProfileCommandInput) (result *AvailabilityProfileView, resp *http.Response, err error)
+	GetAvailabilityProfileDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	GetAvailabilityProfileDescriptorCommand(input *GetAvailabilityProfileDescriptorCommandInput) (result *DescriptorView, resp *http.Response, err error)
+	DeleteAvailabilityProfileCommand(input *DeleteAvailabilityProfileCommandInput) (resp *http.Response, err error)
+	GetAvailabilityProfileCommand(input *GetAvailabilityProfileCommandInput) (result *AvailabilityProfileView, resp *http.Response, err error)
+	UpdateAvailabilityProfileCommand(input *UpdateAvailabilityProfileCommandInput) (result *AvailabilityProfileView, resp *http.Response, err error)
+	GetLoadBalancingStrategiesCommand(input *GetLoadBalancingStrategiesCommandInput) (result *LoadBalancingStrategiesView, resp *http.Response, err error)
+	AddLoadBalancingStrategyCommand(input *AddLoadBalancingStrategyCommandInput) (result *LoadBalancingStrategyView, resp *http.Response, err error)
+	GetLoadBalancingStrategyDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	GetLoadBalancingStrategyDescriptorCommand(input *GetLoadBalancingStrategyDescriptorCommandInput) (result *DescriptorView, resp *http.Response, err error)
+	DeleteLoadBalancingStrategyCommand(input *DeleteLoadBalancingStrategyCommandInput) (resp *http.Response, err error)
+	GetLoadBalancingStrategyCommand(input *GetLoadBalancingStrategyCommandInput) (result *LoadBalancingStrategyView, resp *http.Response, err error)
+	UpdateLoadBalancingStrategyCommand(input *UpdateLoadBalancingStrategyCommandInput) (result *LoadBalancingStrategyView, resp *http.Response, err error)
+}
+
 //GetAvailabilityProfilesCommand - Get all Availability Profiles
 //RequestType: GET
 //Input: input *GetAvailabilityProfilesCommandInput

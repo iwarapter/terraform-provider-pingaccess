@@ -9,6 +9,16 @@ import (
 
 type RulesService service
 
+type RulesAPI interface {
+	GetRulesCommand(input *GetRulesCommandInput) (result *RulesView, resp *http.Response, err error)
+	AddRuleCommand(input *AddRuleCommandInput) (result *RuleView, resp *http.Response, err error)
+	GetRuleDescriptorsCommand() (result *RuleDescriptorsView, resp *http.Response, err error)
+	GetRuleDescriptorCommand(input *GetRuleDescriptorCommandInput) (result *RuleDescriptorView, resp *http.Response, err error)
+	DeleteRuleCommand(input *DeleteRuleCommandInput) (resp *http.Response, err error)
+	GetRuleCommand(input *GetRuleCommandInput) (result *RuleView, resp *http.Response, err error)
+	UpdateRuleCommand(input *UpdateRuleCommandInput) (result *RuleView, resp *http.Response, err error)
+}
+
 //GetRulesCommand - Get all Rules
 //RequestType: GET
 //Input: input *GetRulesCommandInput

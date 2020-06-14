@@ -155,7 +155,7 @@ func resourcePingAccessWebSessionCreate(ctx context.Context, d *schema.ResourceD
 
 	result, _, err := svc.AddWebSessionCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create WebSession: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create WebSession: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -169,7 +169,7 @@ func resourcePingAccessWebSessionRead(ctx context.Context, d *schema.ResourceDat
 	}
 	result, _, err := svc.GetWebSessionCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read WebSession: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read WebSession: %s", err))
 	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
@@ -182,7 +182,7 @@ func resourcePingAccessWebSessionUpdate(ctx context.Context, d *schema.ResourceD
 	}
 	result, _, err := svc.UpdateWebSessionCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update WebSession: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update WebSession: %s", err))
 	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
@@ -197,7 +197,7 @@ func resourcePingAccessWebSessionDelete(ctx context.Context, d *schema.ResourceD
 
 	_, err := svc.DeleteWebSessionCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete WebSession: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete WebSession: %s", err))
 	}
 	return nil
 }
@@ -227,7 +227,7 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.We
 
 	if input.Scopes != nil {
 		if err := d.Set("scopes", *input.Scopes); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	if input.ClientCredentials != nil {
@@ -238,7 +238,7 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.We
 			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
 		}
 		if err := d.Set("client_credentials", creds); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	return diags

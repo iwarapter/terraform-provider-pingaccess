@@ -9,6 +9,14 @@ import (
 
 type VirtualhostsService service
 
+type VirtualhostsAPI interface {
+	GetVirtualHostsCommand(input *GetVirtualHostsCommandInput) (result *VirtualHostsView, resp *http.Response, err error)
+	AddVirtualHostCommand(input *AddVirtualHostCommandInput) (result *VirtualHostView, resp *http.Response, err error)
+	DeleteVirtualHostCommand(input *DeleteVirtualHostCommandInput) (resp *http.Response, err error)
+	GetVirtualHostCommand(input *GetVirtualHostCommandInput) (result *VirtualHostView, resp *http.Response, err error)
+	UpdateVirtualHostCommand(input *UpdateVirtualHostCommandInput) (result *VirtualHostView, resp *http.Response, err error)
+}
+
 //GetVirtualHostsCommand - Get all Virtual Hosts
 //RequestType: GET
 //Input: input *GetVirtualHostsCommandInput

@@ -9,6 +9,14 @@ import (
 
 type SitesService service
 
+type SitesAPI interface {
+	GetSitesCommand(input *GetSitesCommandInput) (result *SitesView, resp *http.Response, err error)
+	AddSiteCommand(input *AddSiteCommandInput) (result *SiteView, resp *http.Response, err error)
+	DeleteSiteCommand(input *DeleteSiteCommandInput) (resp *http.Response, err error)
+	GetSiteCommand(input *GetSiteCommandInput) (result *SiteView, resp *http.Response, err error)
+	UpdateSiteCommand(input *UpdateSiteCommandInput) (result *SiteView, resp *http.Response, err error)
+}
+
 //GetSitesCommand - Get all Sites
 //RequestType: GET
 //Input: input *GetSitesCommandInput

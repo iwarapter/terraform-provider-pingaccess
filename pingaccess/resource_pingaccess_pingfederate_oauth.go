@@ -71,23 +71,23 @@ func resourcePingAccessPingFederateOAuthCreate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateOAuthRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	result, _, err := svc.GetPingFederateAccessTokensCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))
 	}
 
 	return resourcePingAccessPingFederateOAuthReadResult(d, result)
 }
 
 func resourcePingAccessPingFederateOAuthUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	input := pa.UpdatePingFederateAccessTokensCommandInput{
 		Body: *resourcePingAccessPingFederateOAuthReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateAccessTokensCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))
 	}
 
 	d.SetId("pingfederate_oauth_settings")
@@ -95,10 +95,10 @@ func resourcePingAccessPingFederateOAuthUpdate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateOAuthDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).PingFederate
+	svc := m.(*pa.Client).Pingfederate
 	_, err := svc.DeletePingFederateAccessTokensCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))
 	}
 	return nil
 }
@@ -121,7 +121,7 @@ func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input
 			creds[0]["value"] = pw
 		}
 		if err := d.Set("client_secret", creds); err != nil {
-			diags = append(diags, diag.FromErr(err))
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 

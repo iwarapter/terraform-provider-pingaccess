@@ -9,6 +9,14 @@ import (
 
 type ThirdPartyServicesService service
 
+type ThirdPartyServicesAPI interface {
+	GetThirdPartyServicesCommand(input *GetThirdPartyServicesCommandInput) (result *ThirdPartyServicesView, resp *http.Response, err error)
+	AddThirdPartyServiceCommand(input *AddThirdPartyServiceCommandInput) (result *ThirdPartyServiceView, resp *http.Response, err error)
+	DeleteThirdPartyServiceCommand(input *DeleteThirdPartyServiceCommandInput) (resp *http.Response, err error)
+	GetThirdPartyServiceCommand(input *GetThirdPartyServiceCommandInput) (result *ThirdPartyServiceView, resp *http.Response, err error)
+	UpdateThirdPartyServiceCommand(input *UpdateThirdPartyServiceCommandInput) (result *ThirdPartyServiceView, resp *http.Response, err error)
+}
+
 //GetThirdPartyServicesCommand - Get all Third-Party Services
 //RequestType: GET
 //Input: input *GetThirdPartyServicesCommandInput

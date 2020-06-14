@@ -60,7 +60,7 @@ func resourcePingAccessRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	result, _, err := svc.AddRuleCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create Rule: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create Rule: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -75,7 +75,7 @@ func resourcePingAccessRuleRead(ctx context.Context, d *schema.ResourceData, m i
 
 	result, _, err := svc.GetRuleCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read Rule: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read Rule: %s", err))
 	}
 
 	return resourcePingAccessRuleReadResult(d, result, svc)
@@ -90,7 +90,7 @@ func resourcePingAccessRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	result, _, err := svc.UpdateRuleCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update Rule: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update Rule: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -101,12 +101,12 @@ func resourcePingAccessRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	svc := m.(*pingaccess.Client).Rules
 	_, err := svc.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete Rule: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete Rule: %s", err))
 	}
 	return nil
 }
 
-func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *pingaccess.RuleView, svc *pingaccess.RulesService) diag.Diagnostics {
+func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *pingaccess.RuleView, svc pingaccess.RulesAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
@@ -123,7 +123,7 @@ func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *pingaccess.
 	setResourceDataStringWithDiagnostic(d, "class_name", input.ClassName, &diags)
 	setResourceDataStringWithDiagnostic(d, "configuration", &config, &diags)
 	if err := d.Set("supported_destinations", input.SupportedDestinations); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	return diags
 }

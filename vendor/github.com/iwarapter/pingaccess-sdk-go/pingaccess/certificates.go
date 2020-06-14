@@ -9,6 +9,15 @@ import (
 
 type CertificatesService service
 
+type CertificatesAPI interface {
+	GetTrustedCerts(input *GetTrustedCertsInput) (result *TrustedCertsView, resp *http.Response, err error)
+	ImportTrustedCert(input *ImportTrustedCertInput) (result *TrustedCertView, resp *http.Response, err error)
+	DeleteTrustedCertCommand(input *DeleteTrustedCertCommandInput) (resp *http.Response, err error)
+	GetTrustedCert(input *GetTrustedCertInput) (result *TrustedCertView, resp *http.Response, err error)
+	UpdateTrustedCert(input *UpdateTrustedCertInput) (result *TrustedCertView, resp *http.Response, err error)
+	ExportTrustedCert(input *ExportTrustedCertInput) (resp *http.Response, err error)
+}
+
 //GetTrustedCerts - Get all Certificates
 //RequestType: GET
 //Input: input *GetTrustedCertsInput

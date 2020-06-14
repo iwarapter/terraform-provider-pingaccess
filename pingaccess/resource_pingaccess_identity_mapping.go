@@ -63,7 +63,7 @@ func resourcePingAccessIdentityMappingCreate(ctx context.Context, d *schema.Reso
 
 	result, _, err := svc.AddIdentityMappingCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create IdentityMapping: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create IdentityMapping: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -78,7 +78,7 @@ func resourcePingAccessIdentityMappingRead(ctx context.Context, d *schema.Resour
 	result, _, err := svc.GetIdentityMappingCommand(input)
 	if err != nil {
 
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read IdentityMapping: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read IdentityMapping: %s", err))
 	}
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
@@ -92,7 +92,7 @@ func resourcePingAccessIdentityMappingUpdate(ctx context.Context, d *schema.Reso
 
 	result, _, err := svc.UpdateIdentityMappingCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update IdentityMapping: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update IdentityMapping: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -106,12 +106,12 @@ func resourcePingAccessIdentityMappingDelete(ctx context.Context, d *schema.Reso
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	_, err := svc.DeleteIdentityMappingCommand(&pingaccess.DeleteIdentityMappingCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete IdentityMapping: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete IdentityMapping: %s", err))
 	}
 	return nil
 }
 
-func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *pingaccess.IdentityMappingView, svc *pingaccess.IdentityMappingsService) diag.Diagnostics {
+func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *pingaccess.IdentityMappingView, svc pingaccess.IdentityMappingsAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)

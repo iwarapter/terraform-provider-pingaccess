@@ -9,6 +9,17 @@ import (
 
 type AgentsService service
 
+type AgentsAPI interface {
+	GetAgentsCommand(input *GetAgentsCommandInput) (result *AgentsView, resp *http.Response, err error)
+	AddAgentCommand(input *AddAgentCommandInput) (result *AgentView, resp *http.Response, err error)
+	GetAgentCertificatesCommand(input *GetAgentCertificatesCommandInput) (result *AgentCertificatesView, resp *http.Response, err error)
+	GetAgentCertificateCommand(input *GetAgentCertificateCommandInput) (result *AgentCertificateView, resp *http.Response, err error)
+	GetAgentFileCommand(input *GetAgentFileCommandInput) (resp *http.Response, err error)
+	DeleteAgentCommand(input *DeleteAgentCommandInput) (resp *http.Response, err error)
+	GetAgentCommand(input *GetAgentCommandInput) (result *AgentView, resp *http.Response, err error)
+	UpdateAgentCommand(input *UpdateAgentCommandInput) (result *AgentView, resp *http.Response, err error)
+}
+
 //GetAgentsCommand - Get all Agents
 //RequestType: GET
 //Input: input *GetAgentsCommandInput

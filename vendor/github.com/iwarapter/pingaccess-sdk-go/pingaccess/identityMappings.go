@@ -9,6 +9,16 @@ import (
 
 type IdentityMappingsService service
 
+type IdentityMappingsAPI interface {
+	GetIdentityMappingsCommand(input *GetIdentityMappingsCommandInput) (result *IdentityMappingsView, resp *http.Response, err error)
+	AddIdentityMappingCommand(input *AddIdentityMappingCommandInput) (result *IdentityMappingView, resp *http.Response, err error)
+	GetIdentityMappingDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	GetIdentityMappingDescriptorCommand(input *GetIdentityMappingDescriptorCommandInput) (result *DescriptorView, resp *http.Response, err error)
+	DeleteIdentityMappingCommand(input *DeleteIdentityMappingCommandInput) (resp *http.Response, err error)
+	GetIdentityMappingCommand(input *GetIdentityMappingCommandInput) (result *IdentityMappingView, resp *http.Response, err error)
+	UpdateIdentityMappingCommand(input *UpdateIdentityMappingCommandInput) (result *IdentityMappingView, resp *http.Response, err error)
+}
+
 //GetIdentityMappingsCommand - Get all Identity Mappings
 //RequestType: GET
 //Input: input *GetIdentityMappingsCommandInput

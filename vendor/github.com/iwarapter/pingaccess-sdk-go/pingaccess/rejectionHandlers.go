@@ -9,6 +9,16 @@ import (
 
 type RejectionHandlersService service
 
+type RejectionHandlersAPI interface {
+	GetRejectionHandlersCommand(input *GetRejectionHandlersCommandInput) (result *RejectionHandlersView, resp *http.Response, err error)
+	AddRejectionHandlerCommand(input *AddRejectionHandlerCommandInput) (result *RejectionHandlerView, resp *http.Response, err error)
+	GetRejectionHandlerDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	GetRejecitonHandlerDescriptorCommand(input *GetRejecitonHandlerDescriptorCommandInput) (result *DescriptorView, resp *http.Response, err error)
+	DeleteRejectionHandlerCommand(input *DeleteRejectionHandlerCommandInput) (resp *http.Response, err error)
+	GetRejectionHandlerCommand(input *GetRejectionHandlerCommandInput) (result *RejectionHandlerView, resp *http.Response, err error)
+	UpdateRejectionHandlerCommand(input *UpdateRejectionHandlerCommandInput) (result *RejectionHandlerView, resp *http.Response, err error)
+}
+
 //GetRejectionHandlersCommand - Get all Rejection Handlers
 //RequestType: GET
 //Input: input *GetRejectionHandlersCommandInput

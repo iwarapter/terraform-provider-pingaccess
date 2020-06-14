@@ -2,10 +2,7 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/http"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -92,7 +89,7 @@ func resourcePingAccessThirdPartyServiceCreate(ctx context.Context, d *schema.Re
 
 	result, _, err := svc.AddThirdPartyServiceCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create ThirdPartyService: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create ThirdPartyService: %s", err))
 
 	}
 
@@ -107,7 +104,7 @@ func resourcePingAccessThirdPartyServiceRead(ctx context.Context, d *schema.Reso
 	}
 	result, _, err := svc.GetThirdPartyServiceCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read ThirdPartyService: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read ThirdPartyService: %s", err))
 	}
 	return resourcePingAccessThirdPartyServiceReadResult(d, result)
 }
@@ -120,14 +117,13 @@ func resourcePingAccessThirdPartyServiceUpdate(ctx context.Context, d *schema.Re
 	}
 	result, _, err := svc.UpdateThirdPartyServiceCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update ThirdPartyService: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update ThirdPartyService: %s", err))
 	}
 	return resourcePingAccessThirdPartyServiceReadResult(d, result)
 }
 
 func resourcePingAccessThirdPartyServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).ThirdPartyServices
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	input := &pa.DeleteThirdPartyServiceCommandInput{
 		Id: d.Id(),
@@ -135,7 +131,7 @@ func resourcePingAccessThirdPartyServiceDelete(ctx context.Context, d *schema.Re
 
 	_, err := svc.DeleteThirdPartyServiceCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete ThirdPartyService: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete ThirdPartyService: %s", err))
 	}
 	return nil
 }
@@ -153,7 +149,7 @@ func resourcePingAccessThirdPartyServiceReadResult(d *schema.ResourceData, input
 	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_proxy", input.UseProxy, &diags)
 	if err := d.Set("targets", input.Targets); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	return diags
 }

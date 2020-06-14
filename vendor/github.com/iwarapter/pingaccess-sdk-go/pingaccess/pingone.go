@@ -8,6 +8,13 @@ import (
 
 type PingoneService service
 
+type PingoneAPI interface {
+	DeletePingOne4CCommand() (resp *http.Response, err error)
+	GetPingOne4CCommand() (result *PingOne4CView, resp *http.Response, err error)
+	UpdatePingOne4CCommand(input *UpdatePingOne4CCommandInput) (result *PingOne4CView, resp *http.Response, err error)
+	GetPingOne4CMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error)
+}
+
 //DeletePingOne4CCommand - Resets the PingOne For Customers configuration to default values
 //RequestType: DELETE
 //Input:

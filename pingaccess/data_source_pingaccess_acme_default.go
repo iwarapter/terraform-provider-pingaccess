@@ -29,7 +29,7 @@ func dataSourcePingAccessAcmeDefaultRead(ctx context.Context, d *schema.Resource
 	svc := m.(*pa.Client).Acme
 	result, resp, err := svc.GetDefaultAcmeServerCommand()
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read ACME Default: %s\n%v", err.Error(), resp))}
+		return diag.FromErr(fmt.Errorf("unable to read ACME Default: %s\n%v", err.Error(), resp))
 
 	}
 	d.SetId(*result.Id)

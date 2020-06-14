@@ -8,6 +8,23 @@ import (
 
 type PingfederateService service
 
+type PingfederateAPI interface {
+	DeletePingFederateCommand() (resp *http.Response, err error)
+	GetPingFederateCommand() (result *PingFederateRuntimeView, resp *http.Response, err error)
+	UpdatePingFederateCommand(input *UpdatePingFederateCommandInput) (result *PingFederateRuntimeView, resp *http.Response, err error)
+	DeletePingFederateAccessTokensCommand() (resp *http.Response, err error)
+	GetPingFederateAccessTokensCommand() (result *PingFederateAccessTokenView, resp *http.Response, err error)
+	UpdatePingFederateAccessTokensCommand(input *UpdatePingFederateAccessTokensCommandInput) (result *PingFederateAccessTokenView, resp *http.Response, err error)
+	DeletePingFederateAdminCommand() (resp *http.Response, err error)
+	GetPingFederateAdminCommand() (result *PingFederateAdminView, resp *http.Response, err error)
+	UpdatePingFederateAdminCommand(input *UpdatePingFederateAdminCommandInput) (result *PingFederateAdminView, resp *http.Response, err error)
+	GetLegacyPingFederateMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error)
+	DeletePingFederateRuntimeCommand() (resp *http.Response, err error)
+	GetPingFederateRuntimeCommand() (result *PingFederateMetadataRuntimeView, resp *http.Response, err error)
+	UpdatePingFederateRuntimeCommand(input *UpdatePingFederateRuntimeCommandInput) (result *PingFederateMetadataRuntimeView, resp *http.Response, err error)
+	GetPingFederateMetadataCommand() (result *OIDCProviderMetadata, resp *http.Response, err error)
+}
+
 //DeletePingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Resets the PingFederate configuration to default values
 //RequestType: DELETE
 //Input:

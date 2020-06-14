@@ -9,6 +9,14 @@ import (
 
 type RedirectsService service
 
+type RedirectsAPI interface {
+	GetRedirectsCommand(input *GetRedirectsCommandInput) (result *RedirectsView, resp *http.Response, err error)
+	AddRedirectCommand(input *AddRedirectCommandInput) (result *RedirectView, resp *http.Response, err error)
+	DeleteRedirectCommand(input *DeleteRedirectCommandInput) (resp *http.Response, err error)
+	GetRedirectCommand(input *GetRedirectCommandInput) (result *RedirectView, resp *http.Response, err error)
+	UpdateRedirectCommand(input *UpdateRedirectCommandInput) (result *RedirectView, resp *http.Response, err error)
+}
+
 //GetRedirectsCommand - Get all Redirects
 //RequestType: GET
 //Input: input *GetRedirectsCommandInput

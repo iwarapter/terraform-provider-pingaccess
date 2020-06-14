@@ -108,7 +108,7 @@ func resourcePingAccessSiteCreate(ctx context.Context, d *schema.ResourceData, m
 
 	result, _, err := svc.AddSiteCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to create Site: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to create Site: %s", err))
 	}
 
 	d.SetId(result.Id.String())
@@ -122,7 +122,7 @@ func resourcePingAccessSiteRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 	result, _, err := svc.GetSiteCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to read Site: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to read Site: %s", err))
 	}
 	return resourcePingAccessSiteReadResult(d, result)
 }
@@ -135,7 +135,7 @@ func resourcePingAccessSiteUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 	result, _, err := svc.UpdateSiteCommand(&input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to update Site: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to update Site: %s", err))
 	}
 	return resourcePingAccessSiteReadResult(d, result)
 }
@@ -150,7 +150,7 @@ func resourcePingAccessSiteDelete(ctx context.Context, d *schema.ResourceData, m
 
 	_, err := svc.DeleteSiteCommand(input)
 	if err != nil {
-		return diag.Diagnostics{diag.FromErr(fmt.Errorf("unable to delete Site: %s", err))}
+		return diag.FromErr(fmt.Errorf("unable to delete Site: %s", err))
 	}
 	return nil
 }
@@ -167,11 +167,11 @@ func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *pa.SiteView
 	setResourceDataBoolWithDiagnostic(d, "secure", input.Secure, &diags)
 	setResourceDataBoolWithDiagnostic(d, "send_pa_cookie", input.SendPaCookie, &diags)
 	if err := d.Set("site_authenticator_ids", input.SiteAuthenticatorIds); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	setResourceDataBoolWithDiagnostic(d, "skip_hostname_verification", input.SkipHostnameVerification, &diags)
 	if err := d.Set("targets", input.Targets); err != nil {
-		diags = append(diags, diag.FromErr(err))
+		diags = append(diags, diag.FromErr(err)...)
 	}
 	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_proxy", input.UseProxy, &diags)

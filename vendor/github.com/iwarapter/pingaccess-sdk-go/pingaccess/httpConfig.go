@@ -8,6 +8,21 @@ import (
 
 type HttpConfigService service
 
+type HttpConfigAPI interface {
+	DeleteHttpMonitoringCommand() (resp *http.Response, err error)
+	GetHttpMonitoringCommand() (result *HttpMonitoringView, resp *http.Response, err error)
+	UpdateHttpMonitoringCommand(input *UpdateHttpMonitoringCommandInput) (result *HttpMonitoringView, resp *http.Response, err error)
+	DeleteHostSourceCommand() (resp *http.Response, err error)
+	GetHostSourceCommand() (result *HostMultiValueSourceView, resp *http.Response, err error)
+	UpdateHostSourceCommand(input *UpdateHostSourceCommandInput) (result *HostMultiValueSourceView, resp *http.Response, err error)
+	DeleteIpSourceCommand() (resp *http.Response, err error)
+	GetIpSourceCommand() (result *IpMultiValueSourceView, resp *http.Response, err error)
+	UpdateIpSourceCommand(input *UpdateIpSourceCommandInput) (result *IpMultiValueSourceView, resp *http.Response, err error)
+	DeleteProtoSourceCommand() (resp *http.Response, err error)
+	GetProtoSourceCommand() (result *ProtocolSourceView, resp *http.Response, err error)
+	UpdateProtocolSourceCommand(input *UpdateProtocolSourceCommandInput) (result *ProtocolSourceView, resp *http.Response, err error)
+}
+
 //DeleteHttpMonitoringCommand - Resets the HTTP monitoring auditLevel to default value
 //RequestType: DELETE
 //Input:

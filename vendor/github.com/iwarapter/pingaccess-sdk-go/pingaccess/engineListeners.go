@@ -9,6 +9,14 @@ import (
 
 type EngineListenersService service
 
+type EngineListenersAPI interface {
+	GetEngineListenersCommand(input *GetEngineListenersCommandInput) (result *EngineListenersView, resp *http.Response, err error)
+	AddEngineListenerCommand(input *AddEngineListenerCommandInput) (result *EngineListenerView, resp *http.Response, err error)
+	DeleteEngineListenerCommand(input *DeleteEngineListenerCommandInput) (resp *http.Response, err error)
+	GetEngineListenerCommand(input *GetEngineListenerCommandInput) (result *EngineListenerView, resp *http.Response, err error)
+	UpdateEngineListenerCommand(input *UpdateEngineListenerCommandInput) (result *EngineListenerView, resp *http.Response, err error)
+}
+
 //GetEngineListenersCommand - Get all Engine Listeners
 //RequestType: GET
 //Input: input *GetEngineListenersCommandInput

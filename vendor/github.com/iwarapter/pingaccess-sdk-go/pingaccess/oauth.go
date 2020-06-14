@@ -8,6 +8,12 @@ import (
 
 type OauthService service
 
+type OauthAPI interface {
+	DeleteAuthorizationServerCommand() (resp *http.Response, err error)
+	GetAuthorizationServerCommand() (result *AuthorizationServerView, resp *http.Response, err error)
+	UpdateAuthorizationServerCommand(input *UpdateAuthorizationServerCommandInput) (result *AuthorizationServerView, resp *http.Response, err error)
+}
+
 //DeleteAuthorizationServerCommand - Resets the OpenID Connect Provider configuration to default values
 //RequestType: DELETE
 //Input:

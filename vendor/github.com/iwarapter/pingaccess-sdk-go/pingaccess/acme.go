@@ -9,6 +9,23 @@ import (
 
 type AcmeService service
 
+type AcmeAPI interface {
+	GetAcmeServersCommand(input *GetAcmeServersCommandInput) (result *AcmeServersView, resp *http.Response, err error)
+	AddAcmeServerCommand(input *AddAcmeServerCommandInput) (result *AcmeServerView, resp *http.Response, err error)
+	GetDefaultAcmeServerCommand() (result *LinkView, resp *http.Response, err error)
+	UpdateDefaultAcmeServerCommand(input *UpdateDefaultAcmeServerCommandInput) (result *LinkView, resp *http.Response, err error)
+	DeleteAcmeServerCommand(input *DeleteAcmeServerCommandInput) (result *AcmeServerView, resp *http.Response, err error)
+	GetAcmeServerCommand(input *GetAcmeServerCommandInput) (result *AcmeServerView, resp *http.Response, err error)
+	GetAcmeAccountsCommand(input *GetAcmeAccountsCommandInput) (result *AcmeAccountView, resp *http.Response, err error)
+	AddAcmeAccountCommand(input *AddAcmeAccountCommandInput) (result *AcmeAccountView, resp *http.Response, err error)
+	DeleteAcmeAccountCommand(input *DeleteAcmeAccountCommandInput) (result *AcmeAccountView, resp *http.Response, err error)
+	GetAcmeAccountCommand(input *GetAcmeAccountCommandInput) (result *AcmeAccountView, resp *http.Response, err error)
+	GetAcmeCertificateRequestsCommand(input *GetAcmeCertificateRequestsCommandInput) (result *AcmeCertificateRequestView, resp *http.Response, err error)
+	AddAcmeCertificateRequestCommand(input *AddAcmeCertificateRequestCommandInput) (result *AcmeCertificateRequestView, resp *http.Response, err error)
+	DeleteAcmeCertificateRequestCommand(input *DeleteAcmeCertificateRequestCommandInput) (result *AcmeCertificateRequestView, resp *http.Response, err error)
+	GetAcmeCertificateRequestCommand(input *GetAcmeCertificateRequestCommandInput) (result *AcmeCertificateRequestView, resp *http.Response, err error)
+}
+
 //GetAcmeServersCommand - Get all ACME Servers
 //RequestType: GET
 //Input: input *GetAcmeServersCommandInput

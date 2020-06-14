@@ -8,6 +8,10 @@ import (
 
 type BackupService service
 
+type BackupAPI interface {
+	BackupCommand() (resp *http.Response, err error)
+}
+
 //BackupCommand - Create a local database backup
 //RequestType: GET
 //Input:

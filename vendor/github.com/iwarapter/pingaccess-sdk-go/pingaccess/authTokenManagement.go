@@ -8,6 +8,14 @@ import (
 
 type AuthTokenManagementService service
 
+type AuthTokenManagementAPI interface {
+	DeleteAuthTokenManagementCommand() (resp *http.Response, err error)
+	GetAuthTokenManagementCommand() (result *AuthTokenManagementView, resp *http.Response, err error)
+	UpdateAuthTokenManagementCommand(input *UpdateAuthTokenManagementCommandInput) (result *AuthTokenManagementView, resp *http.Response, err error)
+	GetAuthTokenKeySetCommand() (result *KeySetView, resp *http.Response, err error)
+	UpdateAuthTokenKeySetCommand(input *UpdateAuthTokenKeySetCommandInput) (result *KeySetView, resp *http.Response, err error)
+}
+
 //DeleteAuthTokenManagementCommand - Resets the Auth Token Management configuration to default values
 //RequestType: DELETE
 //Input:

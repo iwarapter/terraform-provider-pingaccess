@@ -9,6 +9,15 @@ import (
 
 type AccessTokenValidatorsService service
 
+type AccessTokenValidatorsAPI interface {
+	GetAccessTokenValidatorsCommand(input *GetAccessTokenValidatorsCommandInput) (result *AccessTokenValidatorsView, resp *http.Response, err error)
+	AddAccessTokenValidatorCommand(input *AddAccessTokenValidatorCommandInput) (result *AccessTokenValidatorView, resp *http.Response, err error)
+	GetAccessTokenValidatorDescriptorsCommand() (result *DescriptorsView, resp *http.Response, err error)
+	DeleteAccessTokenValidatorCommand(input *DeleteAccessTokenValidatorCommandInput) (resp *http.Response, err error)
+	GetAccessTokenValidatorCommand(input *GetAccessTokenValidatorCommandInput) (result *AccessTokenValidatorView, resp *http.Response, err error)
+	UpdateAccessTokenValidatorCommand(input *UpdateAccessTokenValidatorCommandInput) (result *AccessTokenValidatorView, resp *http.Response, err error)
+}
+
 //GetAccessTokenValidatorsCommand - Get all Access Token Validators
 //RequestType: GET
 //Input: input *GetAccessTokenValidatorsCommandInput

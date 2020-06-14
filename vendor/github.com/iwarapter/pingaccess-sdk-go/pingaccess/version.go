@@ -8,6 +8,10 @@ import (
 
 type VersionService service
 
+type VersionAPI interface {
+	VersionCommand() (result *VersionDocClass, resp *http.Response, err error)
+}
+
 //VersionCommand - Get the PingAccess version number
 //RequestType: GET
 //Input:

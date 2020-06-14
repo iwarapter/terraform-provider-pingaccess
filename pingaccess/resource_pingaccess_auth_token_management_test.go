@@ -58,7 +58,7 @@ func testAccCheckPingAccessAuthTokenManagementExists(n string) resource.TestChec
 			return fmt.Errorf("No auth token management ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).AuthTokenManagements
+		conn := testAccProvider.Meta().(*pa.Client).AuthTokenManagement
 		result, _, err := conn.GetAuthTokenManagementCommand()
 
 		if err != nil {
