@@ -5,7 +5,7 @@ PingAccess Terraform Provider
 - [![Gitter](https://badges.gitter.im/iwarapter/terraform-provider-pingaccess.svg)](https://gitter.im/iwarapter/terraform-provider-pingaccess?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
   [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=github.com.iwarapter.terraform-provider-pingaccess&metric=coverage)](https://sonarcloud.io/dashboard?id=github.com.iwarapter.terraform-provider-pingaccess)
   [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=github.com.iwarapter.terraform-provider-pingaccess&metric=alert_status)](https://sonarcloud.io/dashboard?id=github.com.iwarapter.terraform-provider-pingaccess)
-  [![Build Status](https://travis-ci.org/iwarapter/terraform-provider-pingaccess.svg?branch=master)](https://travis-ci.org/iwarapter/terraform-provider-pingaccess)
+  ![ci](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/ci/badge.svg)
   ![GitHub release (latest by date)](https://img.shields.io/github/v/release/iwarapter/terraform-provider-pingaccess)
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
