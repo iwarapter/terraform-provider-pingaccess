@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -77,7 +76,7 @@ func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData
 
 	result, _, err := svc.AddRuleSetCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create RuleSet: %s", err))
+		return diag.Errorf("unable to create RuleSet: %s", err)
 	}
 
 	d.SetId(result.Id.String())
@@ -90,7 +89,7 @@ func resourcePingAccessRuleSetRead(ctx context.Context, d *schema.ResourceData, 
 		Id: d.Id(),
 	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read RuleSet: %s", err))
+		return diag.Errorf("unable to read RuleSet: %s", err)
 	}
 	return resourcePingAccessRuleSetReadResult(d, result)
 }
@@ -122,7 +121,7 @@ func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData
 
 	result, _, err := svc.UpdateRuleSetCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update RuleSet: %s", err))
+		return diag.Errorf("unable to update RuleSet: %s", err)
 	}
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleSetReadResult(d, result)
@@ -133,7 +132,7 @@ func resourcePingAccessRuleSetDelete(ctx context.Context, d *schema.ResourceData
 
 	_, err := svc.DeleteRuleSetCommand(&pingaccess.DeleteRuleSetCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete RuleSet: %s", err))
+		return diag.Errorf("unable to delete RuleSet: %s", err)
 	}
 	return nil
 }

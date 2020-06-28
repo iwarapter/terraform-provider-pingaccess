@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -25,11 +24,11 @@ func dataSourcePingAccessAcmeDefaultSchema() map[string]*schema.Schema {
 	}
 }
 
-func dataSourcePingAccessAcmeDefaultRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourcePingAccessAcmeDefaultRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Acme
-	result, resp, err := svc.GetDefaultAcmeServerCommand()
+	result, _, err := svc.GetDefaultAcmeServerCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read ACME Default: %s\n%v", err.Error(), resp))
+		return diag.Errorf("unable to read ACME Default: %s", err)
 
 	}
 	d.SetId(*result.Id)

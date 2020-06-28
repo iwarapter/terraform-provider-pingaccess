@@ -23,7 +23,10 @@ func resourcePingAccessRule() *schema.Resource {
 		Schema: resourcePingAccessRuleSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			svc := m.(*pingaccess.Client).Rules
-			desc, _, _ := svc.GetRuleDescriptorsCommand()
+			desc, _, err := svc.GetRuleDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve Rule descriptors %s", err)
+			}
 			className := d.Get("class_name").(string)
 			if err := ruleDescriptorsHasClassName(className, desc); err != nil {
 				return err
@@ -52,7 +55,7 @@ func resourcePingAccessRuleSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessRuleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessRuleCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Rules
 	input := pingaccess.AddRuleCommandInput{
 		Body: *resourcePingAccessRuleReadData(d),
@@ -60,14 +63,14 @@ func resourcePingAccessRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	result, _, err := svc.AddRuleCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create Rule: %s", err))
+		return diag.Errorf("unable to create Rule: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
-func resourcePingAccessRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Rules
 	input := &pingaccess.GetRuleCommandInput{
 		Id: d.Id(),
@@ -75,13 +78,13 @@ func resourcePingAccessRuleRead(ctx context.Context, d *schema.ResourceData, m i
 
 	result, _, err := svc.GetRuleCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read Rule: %s", err))
+		return diag.Errorf("unable to read Rule: %s", err)
 	}
 
 	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
-func resourcePingAccessRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessRuleUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Rules
 	input := pingaccess.UpdateRuleCommandInput{
 		Body: *resourcePingAccessRuleReadData(d),
@@ -90,18 +93,18 @@ func resourcePingAccessRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	result, _, err := svc.UpdateRuleCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update Rule: %s", err))
+		return diag.Errorf("unable to update Rule: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
-func resourcePingAccessRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Rules
 	_, err := svc.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete Rule: %s", err))
+		return diag.Errorf("unable to delete Rule: %s", err)
 	}
 	return nil
 }

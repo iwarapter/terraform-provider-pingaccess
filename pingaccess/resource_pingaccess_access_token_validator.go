@@ -23,7 +23,10 @@ func resourcePingAccessAccessTokenValidator() *schema.Resource {
 		Schema: resourcePingAccessAccessTokenValidatorSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			svc := m.(*pingaccess.Client).AccessTokenValidators
-			desc, _, _ := svc.GetAccessTokenValidatorDescriptorsCommand()
+			desc, _, err := svc.GetAccessTokenValidatorDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve AccessTokenValidator descriptors %s", err)
+			}
 			className := d.Get("class_name").(string)
 			if err := descriptorsHasClassName(className, desc); err != nil {
 				return err
@@ -51,7 +54,7 @@ func resourcePingAccessAccessTokenValidatorSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessAccessTokenValidatorCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAccessTokenValidatorCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	input := pingaccess.AddAccessTokenValidatorCommandInput{
 		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
@@ -59,14 +62,14 @@ func resourcePingAccessAccessTokenValidatorCreate(ctx context.Context, d *schema
 
 	result, _, err := svc.AddAccessTokenValidatorCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create AccessTokenValidator: %s", err))
+		return diag.Errorf("unable to create AccessTokenValidator: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessAccessTokenValidatorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAccessTokenValidatorRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 
 	input := &pingaccess.GetAccessTokenValidatorCommandInput{
@@ -75,13 +78,13 @@ func resourcePingAccessAccessTokenValidatorRead(ctx context.Context, d *schema.R
 
 	result, _, err := svc.GetAccessTokenValidatorCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read AccessTokenValidator: %s", err))
+		return diag.Errorf("unable to read AccessTokenValidator: %s", err)
 	}
 
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessAccessTokenValidatorUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAccessTokenValidatorUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	input := pingaccess.UpdateAccessTokenValidatorCommandInput{
 		Body: *resourcePingAccessAccessTokenValidatorReadData(d),
@@ -90,18 +93,18 @@ func resourcePingAccessAccessTokenValidatorUpdate(ctx context.Context, d *schema
 
 	result, _, err := svc.UpdateAccessTokenValidatorCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update AccessTokenValidator: %s", err))
+		return diag.Errorf("unable to update AccessTokenValidator: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessAccessTokenValidatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessAccessTokenValidatorDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAccessTokenValidatorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).AccessTokenValidators
 	_, err := svc.DeleteAccessTokenValidatorCommand(&pingaccess.DeleteAccessTokenValidatorCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete AccessTokenValidator: %s", err))
+		return diag.Errorf("unable to delete AccessTokenValidator: %s", err)
 	}
 	return nil
 }

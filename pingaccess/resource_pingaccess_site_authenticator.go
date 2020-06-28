@@ -2,10 +2,8 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,7 +22,10 @@ func resourcePingAccessSiteAuthenticator() *schema.Resource {
 		Schema: resourcePingAccessSiteAuthenticatorSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			svc := m.(*pingaccess.Client).SiteAuthenticators
-			desc, _, _ := svc.GetSiteAuthenticatorDescriptorsCommand()
+			desc, _, err := svc.GetSiteAuthenticatorDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve SiteAuthenticator descriptors %s", err)
+			}
 			className := d.Get("class_name").(string)
 			if err := descriptorsHasClassName(className, desc); err != nil {
 				return err
@@ -52,7 +53,7 @@ func resourcePingAccessSiteAuthenticatorSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessSiteAuthenticatorCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteAuthenticatorCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).SiteAuthenticators
 	input := pingaccess.AddSiteAuthenticatorCommandInput{
 		Body: *resourcePingAccessSiteAuthenticatorReadData(d),
@@ -60,26 +61,26 @@ func resourcePingAccessSiteAuthenticatorCreate(ctx context.Context, d *schema.Re
 
 	result, _, err := svc.AddSiteAuthenticatorCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create SiteAuthenticator: %s", err))
+		return diag.Errorf("unable to create SiteAuthenticator: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessSiteAuthenticatorRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteAuthenticatorRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).SiteAuthenticators
 	input := &pingaccess.GetSiteAuthenticatorCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetSiteAuthenticatorCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read SiteAuthenticator: %s", err))
+		return diag.Errorf("unable to read SiteAuthenticator: %s", err)
 	}
 	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessSiteAuthenticatorUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteAuthenticatorUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).SiteAuthenticators
 	input := pingaccess.UpdateSiteAuthenticatorCommandInput{
 		Body: *resourcePingAccessSiteAuthenticatorReadData(d),
@@ -87,22 +88,20 @@ func resourcePingAccessSiteAuthenticatorUpdate(ctx context.Context, d *schema.Re
 	}
 	result, _, err := svc.UpdateSiteAuthenticatorCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update SiteAuthenticator: %s", err))
+		return diag.Errorf("unable to update SiteAuthenticator: %s", err)
 	}
 	return resourcePingAccessSiteAuthenticatorReadResult(d, result, svc)
 }
 
-func resourcePingAccessSiteAuthenticatorDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteAuthenticatorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).SiteAuthenticators
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	input := &pingaccess.DeleteSiteAuthenticatorCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteSiteAuthenticatorCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete SiteAuthenticator: %s", err))
+		return diag.Errorf("unable to delete SiteAuthenticator: %s", err)
 	}
 	return nil
 }

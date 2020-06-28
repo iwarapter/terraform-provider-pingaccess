@@ -24,7 +24,6 @@ resource "pingaccess_application" "demo" {
   agent_id            = 0
   name                = "demo"
   context_root        = "/"
-  default_auth_type   = "API"
   destination         = "Site"
   site_id             = pingaccess_site.demo.id
   virtual_host_ids    = [pingaccess_virtualhost.demo.id]

@@ -1,20 +1,19 @@
 package pingaccess
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -22,7 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 	"github.com/ory/dockertest/v3"
-	"github.com/tidwall/sjson"
 )
 
 func TestMain(m *testing.M) {
@@ -32,12 +30,46 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("Could not connect to docker: %s", err)
 		}
-		networkName := "tf-pa-test-network"
-		network, err := pool.CreateNetwork(networkName)
-		if err != nil {
-			log.Fatalf("Could not create docker network: %s", err)
-		}
-		defer network.Close()
+		server := httptest.NewTLSServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			// Send response to be tested
+			rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+			rw.Write([]byte(`
+{
+  "issuer": "https://localhost:9031",
+  "authorization_endpoint": "https://localhost:9031/as/authorization.oauth2",
+  "token_endpoint": "https://localhost:9031/as/token.oauth2",
+  "revocation_endpoint": "https://localhost:9031/as/revoke_token.oauth2",
+  "userinfo_endpoint": "https://localhost:9031/idp/userinfo.openid",
+  "introspection_endpoint": "https://localhost:9031/as/introspect.oauth2",
+  "jwks_uri": "https://localhost:9031/pf/JWKS",
+  "registration_endpoint": "https://localhost:9031/as/clients.oauth2",
+  "ping_revoked_sris_endpoint": "https://localhost:9031/pf-ws/rest/sessionMgmt/revokedSris",
+  "ping_end_session_endpoint": "https://localhost:9031/idp/startSLO.ping",
+  "device_authorization_endpoint": "https://localhost:9031/as/device_authz.oauth2",
+  "scopes_supported": [ "address", "mail", "phone", "openid", "profile", "group1" ],
+  "response_types_supported": [ "code", "token", "id_token", "code token", "code id_token", "token id_token", "code token id_token" ],
+  "response_modes_supported": [ "fragment", "query", "form_post" ],
+  "grant_types_supported": [ "implicit", "authorization_code", "refresh_token", "password", "client_credentials", "urn:pingidentity.com:oauth2:grant_type:validate_bearer", "urn:ietf:params:oauth:grant-type:jwt-bearer", "urn:ietf:params:oauth:grant-type:saml2-bearer", "urn:ietf:params:oauth:grant-type:device_code", "urn:openid:params:grant-type:ciba" ],
+  "subject_types_supported": [ "public", "pairwise" ],
+  "id_token_signing_alg_values_supported": [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "token_endpoint_auth_methods_supported": [ "client_secret_basic", "client_secret_post", "private_key_jwt" ],
+  "token_endpoint_auth_signing_alg_values_supported":  [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "claim_types_supported": [ "normal" ],
+  "claims_parameter_supported": false,
+  "request_parameter_supported": true,
+  "request_uri_parameter_supported": false,
+  "request_object_signing_alg_values_supported": [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "id_token_encryption_alg_values_supported": [ "dir", "A128KW", "A192KW", "A256KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "RSA-OAEP" ],
+  "id_token_encryption_enc_values_supported": [ "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
+  "backchannel_authentication_endpoint": "https://localhost:9031/as/bc-auth.ciba",
+  "backchannel_token_delivery_modes_supported": [ "poll", "ping" ],
+  "backchannel_authentication_request_signing_alg_values_supported": [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "backchannel_user_code_parameter_supported": false
+}
+`))
+		}))
+		// Close the server when test finishes
+		defer server.Close()
 
 		devOpsUser, devOpsUserExists := os.LookupEnv("PING_IDENTITY_DEVOPS_USER")
 		devOpsKey, devOpsKeyExists := os.LookupEnv("PING_IDENTITY_DEVOPS_KEY")
@@ -50,42 +82,22 @@ func TestMain(m *testing.M) {
 		paOpts := &dockertest.RunOptions{
 			Name:       fmt.Sprintf("pa-%s", randomID),
 			Repository: "pingidentity/pingaccess",
-			Tag:        "6.0.1-edge",
-			NetworkID:  network.Network.ID,
+			Tag:        "6.0.2-edge",
 			Env:        []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
 		}
-		pfOpts := &dockertest.RunOptions{
-			Name:       fmt.Sprintf("pf-%s", randomID),
-			Repository: "pingidentity/pingfederate",
-			Tag:        "10.0.2-edge",
-			NetworkID:  network.Network.ID,
-			Env: []string{
-				"PING_IDENTITY_ACCEPT_EULA=YES",
-				fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser),
-				fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey),
-				"SERVER_PROFILE_URL=https://github.com/pingidentity/pingidentity-server-profiles.git",
-				"SERVER_PROFILE_PATH=getting-started/pingfederate",
-			},
-		}
-		// pulls an image, creates a container based on it and runs it
 		paCont, err := pool.RunWithOptions(paOpts)
 		if err != nil {
 			log.Fatalf("Could not create pingaccess container: %s", err)
 		}
 		defer paCont.Close()
-		pfCont, err := pool.RunWithOptions(pfOpts)
-		if err != nil {
-			log.Fatalf("Could not create pingfederate container: %s", err)
-		}
-		defer pfCont.Close()
 
 		pool.MaxWait = time.Minute * 2
 
 		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
-		url, _ := url.Parse(fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
-		log.Printf("Setting PingAccess admin API: %s", url.String())
+		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
+		log.Printf("Setting PingAccess admin API: %s", u.String())
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		client := pingaccess.NewClient("administrator", "2FederateM0re", url, "/pa-admin-api/v3", nil)
+		client := pingaccess.NewClient("administrator", "2FederateM0re", u, "/pa-admin-api/v3", nil)
 		if err = pool.Retry(func() error {
 			log.Println("Attempting to connect to PingAccess admin API....")
 			_, _, err = client.Version.VersionCommand()
@@ -95,44 +107,23 @@ func TestMain(m *testing.M) {
 		}
 		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
 		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
-		os.Setenv("PINGFEDERATE_TEST_IP", pfCont.GetIPInNetwork(network))
+		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "127.0.0.1", "host.docker.internal", -1))
 		log.Println("Connected to PingAccess admin API....")
 
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		version, _, err := client.Version.VersionCommand()
 		if err != nil {
 			log.Fatalf("Failed to retrieve version from server: %v", err)
 		}
 		log.Printf("Connected to PingAccess version: %s", *version.Version)
-		pfPort := pfCont.GetPort("9999/tcp")
-		pfURL, _ := url.Parse(fmt.Sprintf("https://localhost:%s", pfPort))
-		pfClient := &http.Client{}
-		if err = pool.Retry(func() error {
-			log.Println("Attempting to connect to PingFederate admin API....")
-			_, err := connectToPF(pfClient, pfURL.String())
-			return err
-		}); err != nil {
-			log.Fatalf("Could not connect to pingaccess: %s", err)
-		}
-		err = setupPF(pfURL.String())
-		if err != nil {
-			log.Fatalf("Failed to setup PF server: %v", err)
-		}
-		log.Printf("Connected to PingFederate setup complete")
 
 		paCont.Expire(360)
-		pfCont.Expire(360)
-		//resource.TestMain(m)
 		code := m.Run()
 		paCont.Close()
-		pfCont.Close()
-		network.Close()
 		log.Printf("Tests complete shutting down container")
 
 		os.Exit(code)
 	} else {
 		m.Run()
-		//resource.TestMain(m)
 	}
 }
 
@@ -144,49 +135,6 @@ func init() {
 	testAccProviders = map[string]*schema.Provider{
 		"pingaccess": testAccProvider,
 	}
-}
-
-func connectToPF(client *http.Client, adminURL string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminURL), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.SetBasicAuth("Administrator", "2FederateM0re")
-	req.Header.Add("X-Xsrf-Header", "pingfederate")
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New("Incorrect response code from admin: " + resp.Status)
-	}
-	return resp, nil
-}
-
-func setupPF(adminURL string) error {
-	client := &http.Client{}
-	resp, err := connectToPF(client, adminURL)
-	if err != nil {
-		return err
-	}
-	bodyText, _ := ioutil.ReadAll(resp.Body)
-	s := string(bodyText)
-	s, err = sjson.Set(s, "rolesAndProtocols.oauthRole.enableOpenIdConnect", true)
-	if err != nil {
-		return err
-	}
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminURL), bytes.NewBuffer([]byte(s)))
-	req.SetBasicAuth("Administrator", "2FederateM0re")
-	req.Header.Add("X-Xsrf-Header", "pingfederate")
-	req.Header.Set("Content-Type", "application/json")
-	resp, err = client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New("Incorrect response code from admin: " + resp.Status)
-	}
-	return nil
 }
 
 func testAccPreCheck(t *testing.T) {

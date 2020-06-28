@@ -11,6 +11,7 @@ import (
 
 func TestAccPingAccessKeyPair(t *testing.T) {
 	resourceName := "pingaccess_keypair.test"
+	resourceNameGen := "pingaccess_keypair.test_generate"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -35,10 +36,20 @@ func TestAccPingAccessKeyPair(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPingAccessKeyPairConfig(),
+				Config: testAccPingAccessKeyPairConfigGenerate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessKeyPairExists(resourceName),
-					testAccCheckPingAccessKeyPairAttributes(resourceName),
+					testAccCheckPingAccessKeyPairExists(resourceNameGen),
+					testAccCheckPingAccessKeyPairAttributes(resourceNameGen),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "md5sum"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "expires"),
+					resource.TestCheckResourceAttr(resourceNameGen, "issuer_dn", "CN=Test, OU=Test, O=Test, L=Test, ST=Test, C=GB"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "serial_number"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "sha1sum"),
+					resource.TestCheckResourceAttr(resourceNameGen, "signature_algorithm", "SHA256withRSA"),
+					resource.TestCheckResourceAttr(resourceNameGen, "status", "Valid"),
+					resource.TestCheckResourceAttr(resourceNameGen, "subject_dn", "CN=Test, OU=Test, O=Test, L=Test, ST=Test, C=GB"),
+					resource.TestCheckResourceAttr(resourceNameGen, "subject_cn", "Test"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "valid_from"),
 				),
 			},
 		},
@@ -55,6 +66,22 @@ func testAccPingAccessKeyPairConfig() string {
 		alias = "test"
 		file_data = filebase64("test_cases/provider.p12")
 		password = "password"
+	}`
+}
+
+func testAccPingAccessKeyPairConfigGenerate() string {
+	return `
+	resource "pingaccess_keypair" "test_generate" {
+		alias = "test2"
+		city = "Test"
+		common_name = "Test"
+		country = "GB"
+		key_algorithm = "RSA"
+		key_size = 2048
+		organization = "Test"
+		organization_unit = "Test"
+		state = "Test"
+		valid_days = 365
 	}`
 }
 

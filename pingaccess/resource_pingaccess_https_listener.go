@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,13 +41,13 @@ func resourcePingAccessHTTPSListenerSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessHTTPSListenerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPSListenerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpsListeners
 	input := pa.GetHttpsListenersCommandInput{}
 
 	result, _, err := svc.GetHttpsListenersCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to retrieving listener: %s", err))
+		return diag.Errorf("unable to retrieving listener: %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -58,22 +57,22 @@ func resourcePingAccessHTTPSListenerCreate(ctx context.Context, d *schema.Resour
 			return resourcePingAccessHTTPSListenerReadResult(d, listener)
 		}
 	}
-	return diag.FromErr(fmt.Errorf("unable to manage listener: %s", err))
+	return diag.Errorf("unable to manage listener: %s", err)
 }
 
-func resourcePingAccessHTTPSListenerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPSListenerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpsListeners
 	input := &pa.GetHttpsListenerCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetHttpsListenerCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read listener: %s", err))
+		return diag.Errorf("unable to read listener: %s", err)
 	}
 	return resourcePingAccessHTTPSListenerReadResult(d, result)
 }
 
-func resourcePingAccessHTTPSListenerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPSListenerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpsListeners
 	input := pa.UpdateHttpsListenerInput{
 		Body: *resourcePingAccessHTTPSListenerReadData(d),
@@ -82,12 +81,12 @@ func resourcePingAccessHTTPSListenerUpdate(ctx context.Context, d *schema.Resour
 
 	result, _, err := svc.UpdateHttpsListener(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update listener: %s", err))
+		return diag.Errorf("unable to update listener: %s", err)
 	}
 	return resourcePingAccessHTTPSListenerReadResult(d, result)
 }
 
-func resourcePingAccessHTTPSListenerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPSListenerDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	return nil
 }
 

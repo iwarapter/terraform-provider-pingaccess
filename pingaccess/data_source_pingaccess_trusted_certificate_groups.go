@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -48,20 +47,20 @@ func dataSourcePingAccessTrustedCertificateGroupsSchema() map[string]*schema.Sch
 	}
 }
 
-func dataSourcePingAccessTrustedCertificateGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourcePingAccessTrustedCertificateGroupsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).TrustedCertificateGroups
 	input := &pa.GetTrustedCertificateGroupsCommandInput{
 		Name: d.Get("name").(string),
 	}
 	result, _, err := svc.GetTrustedCertificateGroupsCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read TrustedCertificateGroup: %s", err))
+		return diag.Errorf("unable to read TrustedCertificateGroup: %s", err)
 	}
 	if result == nil {
-		return diag.FromErr(fmt.Errorf("unable to find TrustedCertificateGroup with the name '%s', result was nil", d.Get("name").(string)))
+		return diag.Errorf("unable to find TrustedCertificateGroup with the name '%s', result was nil", d.Get("name").(string))
 	}
 	if len(result.Items) != 1 {
-		return diag.FromErr(fmt.Errorf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", d.Get("name").(string), len(result.Items)))
+		return diag.Errorf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", d.Get("name").(string), len(result.Items))
 	}
 	d.SetId(result.Items[0].Id.String())
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result.Items[0])

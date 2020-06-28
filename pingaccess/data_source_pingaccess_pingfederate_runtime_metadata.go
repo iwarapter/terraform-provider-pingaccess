@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -89,11 +88,11 @@ func dataSourcePingAccessPingFederateRuntimeMetadataSchema() map[string]*schema.
 	}
 }
 
-func dataSourcePingAccessPingFederateRuntimeMetadataRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourcePingAccessPingFederateRuntimeMetadataRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Pingfederate
 	result, resp, err := svc.GetPingFederateMetadataCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read PingFederate Runtime Metadata: %s\n%v", err, resp))
+		return diag.Errorf("unable to read PingFederate Runtime Metadata: %s\n%v", err, resp)
 	}
 	var diags diag.Diagnostics
 	d.SetId("pingfederate_runtime_metadata")

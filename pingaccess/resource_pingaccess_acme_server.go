@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -38,7 +37,7 @@ func resourcePingAccessAcmeServerSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessAcmeServerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAcmeServerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Acme
 	input := pingaccess.AddAcmeServerCommandInput{
 		Body: *resourcePingAccessAcmeServerReadData(d),
@@ -46,33 +45,33 @@ func resourcePingAccessAcmeServerCreate(ctx context.Context, d *schema.ResourceD
 
 	result, _, err := svc.AddAcmeServerCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create AcmeServer: %s", err))
+		return diag.Errorf("unable to create AcmeServer: %s", err)
 	}
 	d.SetId(*result.Id)
 	return resourcePingAccessAcmeServerReadResult(d, &input.Body)
 }
 
-func resourcePingAccessAcmeServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAcmeServerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Acme
 	input := &pingaccess.GetAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 	result, _, err := svc.GetAcmeServerCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read AcmeServer: %s", err))
+		return diag.Errorf("unable to read AcmeServer: %s", err)
 	}
 	return resourcePingAccessAcmeServerReadResult(d, result)
 }
 
-func resourcePingAccessAcmeServerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAcmeServerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).Acme
 	input := &pingaccess.DeleteAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 
-	_, resp, err := svc.DeleteAcmeServerCommand(input)
+	_, _, err := svc.DeleteAcmeServerCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete AcmeServer: %s resp: %v", err, *resp))
+		return diag.Errorf("unable to delete AcmeServer: %s", err)
 	}
 	return nil
 }

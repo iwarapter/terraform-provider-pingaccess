@@ -2,7 +2,7 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -89,7 +89,7 @@ func resourcePingAccessThirdPartyServiceCreate(ctx context.Context, d *schema.Re
 
 	result, _, err := svc.AddThirdPartyServiceCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create ThirdPartyService: %s", err))
+		return diag.Errorf("unable to create ThirdPartyService: %s", err)
 
 	}
 
@@ -104,7 +104,7 @@ func resourcePingAccessThirdPartyServiceRead(ctx context.Context, d *schema.Reso
 	}
 	result, _, err := svc.GetThirdPartyServiceCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read ThirdPartyService: %s", err))
+		return diag.Errorf("unable to read ThirdPartyService: %s", err)
 	}
 	return resourcePingAccessThirdPartyServiceReadResult(d, result)
 }
@@ -117,7 +117,7 @@ func resourcePingAccessThirdPartyServiceUpdate(ctx context.Context, d *schema.Re
 	}
 	result, _, err := svc.UpdateThirdPartyServiceCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update ThirdPartyService: %s", err))
+		return diag.Errorf("unable to update ThirdPartyService: %s", err)
 	}
 	return resourcePingAccessThirdPartyServiceReadResult(d, result)
 }
@@ -131,7 +131,7 @@ func resourcePingAccessThirdPartyServiceDelete(ctx context.Context, d *schema.Re
 
 	_, err := svc.DeleteThirdPartyServiceCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete ThirdPartyService: %s", err))
+		return diag.Errorf("unable to delete ThirdPartyService: %s", err)
 	}
 	return nil
 }

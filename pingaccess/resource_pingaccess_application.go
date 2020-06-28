@@ -2,9 +2,9 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
@@ -38,6 +38,13 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Required: true,
 			ForceNew: true,
+			ValidateDiagFunc: func(value interface{}, path cty.Path) diag.Diagnostics {
+				v := value.(string)
+				if v != "Web" && v != "API" && v != "Dynamic" {
+					return diag.Errorf("must be either 'Web', 'API' or 'Dynamic' not %s", v)
+				}
+				return nil
+			},
 		},
 		"case_sensitive_path": {
 			Type:     schema.TypeBool,
@@ -49,8 +56,9 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"default_auth_type": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:       schema.TypeString,
+			Optional:   true,
+			Deprecated: "This field is no longer used and should be removed.",
 		},
 		"description": {
 			Type:     schema.TypeString,
@@ -123,33 +131,33 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 	input := &pa.AddApplicationCommandInput{
 		Body: *resourcePingAccessApplicationReadData(d),
 	}
 	result, _, err := svc.AddApplicationCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create Application: %s", err))
+		return diag.Errorf("unable to create Application: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessApplicationReadResult(d, &input.Body)
 }
 
-func resourcePingAccessApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 	input := &pa.GetApplicationCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetApplicationCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read Application: %s", err))
+		return diag.Errorf("unable to read Application: %s", err)
 	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
 
-func resourcePingAccessApplicationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 	input := pa.UpdateApplicationCommandInput{
 		Body: *resourcePingAccessApplicationReadData(d),
@@ -157,12 +165,12 @@ func resourcePingAccessApplicationUpdate(ctx context.Context, d *schema.Resource
 	}
 	result, _, err := svc.UpdateApplicationCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update Application: %s", err))
+		return diag.Errorf("unable to update Application: %s", err)
 	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
 
-func resourcePingAccessApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 
 	input := &pa.DeleteApplicationCommandInput{
@@ -171,7 +179,7 @@ func resourcePingAccessApplicationDelete(ctx context.Context, d *schema.Resource
 
 	_, _, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete Application: %s", err))
+		return diag.Errorf("unable to delete Application: %s", err)
 	}
 	return nil
 }
@@ -183,7 +191,6 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 	setResourceDataStringWithDiagnostic(d, "application_type", rv.ApplicationType, &diags)
 	setResourceDataBoolWithDiagnostic(d, "case_sensitive_path", rv.CaseSensitivePath, &diags)
 	setResourceDataStringWithDiagnostic(d, "context_root", rv.ContextRoot, &diags)
-	setResourceDataStringWithDiagnostic(d, "default_auth_type", rv.DefaultAuthType, &diags)
 	setResourceDataStringWithDiagnostic(d, "description", rv.Description, &diags)
 	setResourceDataStringWithDiagnostic(d, "destination", rv.Destination, &diags)
 	setResourceDataBoolWithDiagnostic(d, "enabled", rv.Enabled, &diags)
@@ -224,7 +231,7 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.ApplicationView {
 	siteID, _ := strconv.Atoi(d.Get("site_id").(string))
 	virtualHostIds := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
-	vhIds := []*int{}
+	var vhIds []*int
 	for _, i := range virtualHostIds {
 		text, _ := strconv.Atoi(*i)
 		vhIds = append(vhIds, &text)
@@ -235,10 +242,13 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		Name:              String(d.Get("name").(string)),
 		ApplicationType:   String(d.Get("application_type").(string)),
 		ContextRoot:       String(d.Get("context_root").(string)),
-		DefaultAuthType:   String(d.Get("default_auth_type").(string)),
 		SiteId:            Int(siteID),
 		SpaSupportEnabled: Bool(d.Get("spa_support_enabled").(bool)),
 		VirtualHostIds:    &vhIds,
+	}
+
+	if *application.ApplicationType != "Dynamic" {
+		application.DefaultAuthType = application.ApplicationType
 	}
 
 	if _, ok := d.GetOk("access_validator_id"); ok {

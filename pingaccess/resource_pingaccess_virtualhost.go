@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -60,7 +59,7 @@ func resourcePingAccessVirtualHostCreate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.AddVirtualHostCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create VirtualHost: %s", err))
+		return diag.Errorf("unable to create VirtualHost: %s", err)
 	}
 
 	d.SetId(result.Id.String())
@@ -74,7 +73,7 @@ func resourcePingAccessVirtualHostRead(ctx context.Context, d *schema.ResourceDa
 	}
 	result, _, err := svc.GetVirtualHostCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read VirtualHost: %s", err))
+		return diag.Errorf("unable to read VirtualHost: %s", err)
 	}
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
@@ -88,7 +87,7 @@ func resourcePingAccessVirtualHostUpdate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.UpdateVirtualHostCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update VirtualHost: %s", err))
+		return diag.Errorf("unable to update VirtualHost: %s", err)
 	}
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
@@ -101,7 +100,7 @@ func resourcePingAccessVirtualHostDelete(ctx context.Context, d *schema.Resource
 
 	_, err := svc.DeleteVirtualHostCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete VirtualHost: %s", err))
+		return diag.Errorf("unable to delete VirtualHost: %s", err)
 	}
 	return nil
 }

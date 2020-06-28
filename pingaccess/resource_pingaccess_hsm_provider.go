@@ -2,10 +2,8 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,7 +22,10 @@ func resourcePingAccessHsmProvider() *schema.Resource {
 		Schema: resourcePingAccessHsmProviderSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			svc := m.(*pingaccess.Client).HsmProviders
-			desc, _, _ := svc.GetHsmProviderDescriptorsCommand()
+			desc, _, err := svc.GetHsmProviderDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve HsmProvider descriptors %s", err)
+			}
 			className := d.Get("class_name").(string)
 			if err := descriptorsHasClassName(className, desc); err != nil {
 				return err
@@ -51,7 +52,7 @@ func resourcePingAccessHsmProviderSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessHsmProviderCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHsmProviderCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).HsmProviders
 	input := pingaccess.AddHsmProviderCommandInput{
 		Body: *resourcePingAccessHsmProviderReadData(d),
@@ -59,26 +60,26 @@ func resourcePingAccessHsmProviderCreate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.AddHsmProviderCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create HsmProvider: %s", err))
+		return diag.Errorf("unable to create HsmProvider: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
-func resourcePingAccessHsmProviderRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHsmProviderRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).HsmProviders
 	input := &pingaccess.GetHsmProviderCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetHsmProviderCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read HsmProvider: %s", err))
+		return diag.Errorf("unable to read HsmProvider: %s", err)
 	}
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
-func resourcePingAccessHsmProviderUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHsmProviderUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).HsmProviders
 	input := pingaccess.UpdateHsmProviderCommandInput{
 		Body: *resourcePingAccessHsmProviderReadData(d),
@@ -86,19 +87,17 @@ func resourcePingAccessHsmProviderUpdate(ctx context.Context, d *schema.Resource
 	}
 	result, _, err := svc.UpdateHsmProviderCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update HsmProvider: %s", err))
+		return diag.Errorf("unable to update HsmProvider: %s", err)
 	}
 	d.SetId(result.Id.String())
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
-func resourcePingAccessHsmProviderDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHsmProviderDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).HsmProviders
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	_, err := svc.DeleteHsmProviderCommand(&pingaccess.DeleteHsmProviderCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete HsmProvider: %s", err))
+		return diag.Errorf("unable to delete HsmProvider: %s", err)
 	}
 	return nil
 }

@@ -451,7 +451,7 @@ func validateConfiguration(className string, d *schema.ResourceDiff, desc *pa.De
 			for _, f := range value.ConfigurationFields {
 				if *f.Required {
 					if v := gjson.Get(conf, *f.Name); !v.Exists() {
-						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className))...)
+						diags = append(diags, diag.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)...)
 					}
 				}
 			}
@@ -496,7 +496,7 @@ func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *
 			for _, f := range value.ConfigurationFields {
 				if *f.Required {
 					if v := gjson.Get(conf, *f.Name); !v.Exists() {
-						diags = append(diags, diag.FromErr(fmt.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className))...)
+						diags = append(diags, diag.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)...)
 					}
 				}
 			}

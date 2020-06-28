@@ -2,9 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
-	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -100,7 +97,7 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessSiteCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Sites
 	input := pa.AddSiteCommandInput{
 		Body: *resourcePingAccessSiteReadData(d),
@@ -108,26 +105,26 @@ func resourcePingAccessSiteCreate(ctx context.Context, d *schema.ResourceData, m
 
 	result, _, err := svc.AddSiteCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create Site: %s", err))
+		return diag.Errorf("unable to create Site: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessSiteReadResult(d, result)
 }
 
-func resourcePingAccessSiteRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Sites
 	input := &pa.GetSiteCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetSiteCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read Site: %s", err))
+		return diag.Errorf("unable to read Site: %s", err)
 	}
 	return resourcePingAccessSiteReadResult(d, result)
 }
 
-func resourcePingAccessSiteUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Sites
 	input := pa.UpdateSiteCommandInput{
 		Body: *resourcePingAccessSiteReadData(d),
@@ -135,22 +132,20 @@ func resourcePingAccessSiteUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 	result, _, err := svc.UpdateSiteCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update Site: %s", err))
+		return diag.Errorf("unable to update Site: %s", err)
 	}
 	return resourcePingAccessSiteReadResult(d, result)
 }
 
-func resourcePingAccessSiteDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessSiteDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Sites
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	input := &pa.DeleteSiteCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteSiteCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete Site: %s", err))
+		return diag.Errorf("unable to delete Site: %s", err)
 	}
 	return nil
 }

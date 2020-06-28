@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -77,7 +76,7 @@ func resourcePingAccessCertificateSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessCertificateCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessCertificateCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	input := pa.ImportTrustedCertInput{
 		Body: pa.X509FileImportDocView{
 			Alias:    String(d.Get("alias").(string)),
@@ -89,26 +88,26 @@ func resourcePingAccessCertificateCreate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.ImportTrustedCert(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create Certificate: %s", err))
+		return diag.Errorf("unable to create Certificate: %s", err)
 	}
 
 	d.SetId(strconv.Itoa(*result.Id))
 	return resourcePingAccessCertificateReadResult(d, result)
 }
 
-func resourcePingAccessCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessCertificateRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Certificates
 	input := &pa.GetTrustedCertInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetTrustedCert(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read Certificate: %s", err))
+		return diag.Errorf("unable to read Certificate: %s", err)
 	}
 	return resourcePingAccessCertificateReadResult(d, result)
 }
 
-func resourcePingAccessCertificateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessCertificateUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	input := pa.UpdateTrustedCertInput{
 		Body: pa.X509FileImportDocView{
 			Alias:    String(d.Get("alias").(string)),
@@ -121,18 +120,18 @@ func resourcePingAccessCertificateUpdate(ctx context.Context, d *schema.Resource
 
 	result, _, err := svc.UpdateTrustedCert(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update Certificate: %s", err))
+		return diag.Errorf("unable to update Certificate: %s", err)
 	}
 
 	d.SetId(strconv.Itoa(*result.Id))
 	return resourcePingAccessCertificateReadResult(d, result)
 }
 
-func resourcePingAccessCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessCertificateDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Certificates
 	_, err := svc.DeleteTrustedCertCommand(&pa.DeleteTrustedCertCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete Certificate: %s", err))
+		return diag.Errorf("unable to delete Certificate: %s", err)
 	}
 	return nil
 }

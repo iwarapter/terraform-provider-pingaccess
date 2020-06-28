@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 
@@ -58,35 +57,35 @@ func resourcePingAccessAuthTokenManagementCreate(ctx context.Context, d *schema.
 	return resourcePingAccessAuthTokenManagementUpdate(ctx, d, m)
 }
 
-func resourcePingAccessAuthTokenManagementRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAuthTokenManagementRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).AuthTokenManagement
 	result, _, err := svc.GetAuthTokenManagementCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read AuthTokenManagement: %s", err))
+		return diag.Errorf("unable to read AuthTokenManagement: %s", err)
 	}
 
 	return resourcePingAccessAuthTokenManagementReadResult(d, result)
 }
 
-func resourcePingAccessAuthTokenManagementUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAuthTokenManagementUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).AuthTokenManagement
 	input := pa.UpdateAuthTokenManagementCommandInput{
 		Body: *resourcePingAccessAuthTokenManagementReadData(d),
 	}
 	result, _, err := svc.UpdateAuthTokenManagementCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update AuthTokenManagement: %s", err))
+		return diag.Errorf("unable to update AuthTokenManagement: %s", err)
 	}
 
 	d.SetId("auth_token_management")
 	return resourcePingAccessAuthTokenManagementReadResult(d, result)
 }
 
-func resourcePingAccessAuthTokenManagementDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessAuthTokenManagementDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).AuthTokenManagement
 	_, err := svc.DeleteAuthTokenManagementCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete AuthTokenManagement: %s", err))
+		return diag.Errorf("unable to delete AuthTokenManagement: %s", err)
 
 	}
 	return nil

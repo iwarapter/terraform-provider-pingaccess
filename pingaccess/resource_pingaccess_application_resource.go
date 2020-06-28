@@ -115,7 +115,7 @@ func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.
 		}
 		result, _, err := svc.GetApplicationResourcesCommand(&input)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))
+			return diag.Errorf("unable to create ApplicationResource: %s", err)
 		}
 		rv := result.Items[0]
 		d.SetId(rv.Id.String())
@@ -130,14 +130,14 @@ func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.
 
 	result, _, err := svc.AddApplicationResourceCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create ApplicationResource: %s", err))
+		return diag.Errorf("unable to create ApplicationResource: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
-func resourcePingAccessApplicationResourceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationResourceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 	input := &pa.GetApplicationResourceCommandInput{
 		ApplicationId: d.Get("application_id").(string),
@@ -146,13 +146,13 @@ func resourcePingAccessApplicationResourceRead(ctx context.Context, d *schema.Re
 
 	result, _, err := svc.GetApplicationResourceCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read ApplicationResource: %s", err))
+		return diag.Errorf("unable to read ApplicationResource: %s", err)
 	}
 
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
-func resourcePingAccessApplicationResourceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationResourceUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 	input := pa.UpdateApplicationResourceCommandInput{
 		ApplicationId: d.Get("application_id").(string),
@@ -162,12 +162,12 @@ func resourcePingAccessApplicationResourceUpdate(ctx context.Context, d *schema.
 
 	result, _, err := svc.UpdateApplicationResourceCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update ApplicationResource: %s", err))
+		return diag.Errorf("unable to update ApplicationResource: %s", err)
 	}
 	return resourcePingAccessApplicationResourceReadResult(d, result)
 }
 
-func resourcePingAccessApplicationResourceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessApplicationResourceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Applications
 
 	if d.Get("root_resource").(bool) {
@@ -181,12 +181,12 @@ func resourcePingAccessApplicationResourceDelete(ctx context.Context, d *schema.
 
 	_, err := svc.DeleteApplicationResourceCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete ApplicationResource: %s", err))
+		return diag.Errorf("unable to delete ApplicationResource: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessApplicationResourceImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourcePingAccessApplicationResourceImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	idParts := strings.SplitN(d.Id(), "/", 2)
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		return nil, fmt.Errorf("unexpected format of ID (%q), expected <application_id>/<resource_id>", d.Id())

@@ -145,7 +145,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-		issuer = "https://%s:9031"
+		issuer = "%s"
 		trusted_certificate_group_id = 2
 	}
 

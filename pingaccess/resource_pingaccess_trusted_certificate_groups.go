@@ -2,9 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
-	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -62,7 +59,7 @@ func resourcePingAccessTrustedCertificateGroupsSchema() map[string]*schema.Schem
 	}
 }
 
-func resourcePingAccessTrustedCertificateGroupsCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessTrustedCertificateGroupsCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).TrustedCertificateGroups
 	input := pa.AddTrustedCertificateGroupCommandInput{
 		Body: *resourcePingAccessTrustedCertificateGroupsReadData(d),
@@ -70,26 +67,26 @@ func resourcePingAccessTrustedCertificateGroupsCreate(ctx context.Context, d *sc
 
 	result, _, err := svc.AddTrustedCertificateGroupCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create TrustedCertificateGroup: %s", err))
+		return diag.Errorf("unable to create TrustedCertificateGroup: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result)
 }
 
-func resourcePingAccessTrustedCertificateGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessTrustedCertificateGroupsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).TrustedCertificateGroups
 	input := &pa.GetTrustedCertificateGroupCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetTrustedCertificateGroupCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read TrustedCertificateGroup: %s", err))
+		return diag.Errorf("unable to read TrustedCertificateGroup: %s", err)
 	}
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result)
 }
 
-func resourcePingAccessTrustedCertificateGroupsUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessTrustedCertificateGroupsUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).TrustedCertificateGroups
 	input := pa.UpdateTrustedCertificateGroupCommandInput{
 		Body: *resourcePingAccessTrustedCertificateGroupsReadData(d),
@@ -97,22 +94,20 @@ func resourcePingAccessTrustedCertificateGroupsUpdate(ctx context.Context, d *sc
 	}
 	result, _, err := svc.UpdateTrustedCertificateGroupCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update TrustedCertificateGroup: %s", err))
+		return diag.Errorf("unable to update TrustedCertificateGroup: %s", err)
 	}
 	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result)
 }
 
-func resourcePingAccessTrustedCertificateGroupsDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessTrustedCertificateGroupsDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).TrustedCertificateGroups
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	input := &pa.DeleteTrustedCertificateGroupCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteTrustedCertificateGroupCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete TrustedCertificateGroup: %s", err))
+		return diag.Errorf("unable to delete TrustedCertificateGroup: %s", err)
 	}
 	return nil
 }

@@ -1,7 +1,6 @@
 package pingaccess
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -27,7 +26,7 @@ func Test_validateWebOrAPI(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'Web' or 'API' not other")),
+			expectedDiags: diag.Errorf("must be either 'Web' or 'API' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -70,7 +69,7 @@ func Test_validateRuleOrRuleSet(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'Rule' or 'RuleSet' not other")),
+			expectedDiags: diag.Errorf("must be either 'Rule' or 'RuleSet' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -113,7 +112,7 @@ func Test_validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'SuccessIfAllSucceed' or 'SuccessIfAnyOneSucceeds' not other")),
+			expectedDiags: diag.Errorf("must be either 'SuccessIfAllSucceed' or 'SuccessIfAnyOneSucceeds' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -151,12 +150,12 @@ func Test_validateAudience(t *testing.T) {
 		{
 			name:          "Empty value failes",
 			value:         "",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be between 1 and 32 characters not 0")),
+			expectedDiags: diag.Errorf("must be between 1 and 32 characters not 0"),
 		},
 		{
 			name:          "Very long value fails",
 			value:         "12345678901234567890123456789012",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be between 1 and 32 characters not 32")),
+			expectedDiags: diag.Errorf("must be between 1 and 32 characters not 32"),
 		},
 	}
 	for _, tc := range tests {
@@ -199,7 +198,7 @@ func Test_validateCookieType(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'Encrypted' or 'Signed' not other")),
+			expectedDiags: diag.Errorf("must be either 'Encrypted' or 'Signed' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -247,7 +246,7 @@ func Test_validateOidcLoginType(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'Code', 'POST' or 'x_post' not other")),
+			expectedDiags: diag.Errorf("must be either 'Code', 'POST' or 'x_post' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -295,7 +294,7 @@ func Test_validateRequestPreservationType(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'None', 'POST' or 'All' not other")),
+			expectedDiags: diag.Errorf("must be either 'None', 'POST' or 'All' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -338,7 +337,7 @@ func Test_validateWebStorageType(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'SessionStorage' or 'LocalStorage' not other")),
+			expectedDiags: diag.Errorf("must be either 'SessionStorage' or 'LocalStorage' not other"),
 		},
 	}
 	for _, tc := range tests {
@@ -381,7 +380,7 @@ func Test_validateListLocationValue(t *testing.T) {
 		{
 			name:          "junk does not pass",
 			value:         "other",
-			expectedDiags: diag.FromErr(fmt.Errorf("must be either 'FIRST' or 'LAST' not other")),
+			expectedDiags: diag.Errorf("must be either 'FIRST' or 'LAST' not other"),
 		},
 	}
 	for _, tc := range tests {

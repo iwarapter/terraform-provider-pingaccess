@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -46,7 +45,7 @@ func resourcePingAccessEngineListenerSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessEngineListenerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessEngineListenerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).EngineListeners
 	input := pa.AddEngineListenerCommandInput{
 		Body: *resourcePingAccessEngineListenerReadData(d),
@@ -54,26 +53,26 @@ func resourcePingAccessEngineListenerCreate(ctx context.Context, d *schema.Resou
 
 	result, _, err := svc.AddEngineListenerCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create EngineListener: %s", err))
+		return diag.Errorf("unable to create EngineListener: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessEngineListenerReadResult(d, &input.Body)
 }
 
-func resourcePingAccessEngineListenerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessEngineListenerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).EngineListeners
 	input := &pa.GetEngineListenerCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetEngineListenerCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read EngineListener: %s", err))
+		return diag.Errorf("unable to read EngineListener: %s", err)
 	}
 	return resourcePingAccessEngineListenerReadResult(d, result)
 }
 
-func resourcePingAccessEngineListenerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessEngineListenerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).EngineListeners
 	input := pa.UpdateEngineListenerCommandInput{
 		Body: *resourcePingAccessEngineListenerReadData(d),
@@ -82,12 +81,12 @@ func resourcePingAccessEngineListenerUpdate(ctx context.Context, d *schema.Resou
 
 	result, _, err := svc.UpdateEngineListenerCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update EngineListener: %s", err))
+		return diag.Errorf("unable to update EngineListener: %s", err)
 	}
 	return resourcePingAccessEngineListenerReadResult(d, result)
 }
 
-func resourcePingAccessEngineListenerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessEngineListenerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).EngineListeners
 	input := &pa.DeleteEngineListenerCommandInput{
 		Id: d.Id(),
@@ -95,7 +94,7 @@ func resourcePingAccessEngineListenerDelete(ctx context.Context, d *schema.Resou
 
 	_, err := svc.DeleteEngineListenerCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete EngineListener: %s", err))
+		return diag.Errorf("unable to delete EngineListener: %s", err)
 
 	}
 	return nil

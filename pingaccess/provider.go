@@ -86,7 +86,7 @@ func init() {
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	config := &config{
 		Username: d.Get("username").(string),

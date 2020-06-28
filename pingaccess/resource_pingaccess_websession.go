@@ -2,9 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
-	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -147,7 +144,7 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessWebSessionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessWebSessionCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	input := pa.AddWebSessionCommandInput{
 		Body: *resourcePingAccessWebSessionReadData(d),
@@ -155,26 +152,26 @@ func resourcePingAccessWebSessionCreate(ctx context.Context, d *schema.ResourceD
 
 	result, _, err := svc.AddWebSessionCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create WebSession: %s", err))
+		return diag.Errorf("unable to create WebSession: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
-func resourcePingAccessWebSessionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessWebSessionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	input := &pa.GetWebSessionCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetWebSessionCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read WebSession: %s", err))
+		return diag.Errorf("unable to read WebSession: %s", err)
 	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
-func resourcePingAccessWebSessionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessWebSessionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
 	input := pa.UpdateWebSessionCommandInput{
 		Body: *resourcePingAccessWebSessionReadData(d),
@@ -182,22 +179,20 @@ func resourcePingAccessWebSessionUpdate(ctx context.Context, d *schema.ResourceD
 	}
 	result, _, err := svc.UpdateWebSessionCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update WebSession: %s", err))
+		return diag.Errorf("unable to update WebSession: %s", err)
 	}
 	return resourcePingAccessWebSessionReadResult(d, result)
 }
 
-func resourcePingAccessWebSessionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessWebSessionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).WebSessions
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	input := &pa.DeleteWebSessionCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteWebSessionCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete WebSession: %s", err))
+		return diag.Errorf("unable to delete WebSession: %s", err)
 	}
 	return nil
 }

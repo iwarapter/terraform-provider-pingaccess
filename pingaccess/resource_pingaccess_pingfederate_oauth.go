@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 
@@ -70,35 +69,35 @@ func resourcePingAccessPingFederateOAuthCreate(ctx context.Context, d *schema.Re
 	return resourcePingAccessPingFederateOAuthUpdate(ctx, d, m)
 }
 
-func resourcePingAccessPingFederateOAuthRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessPingFederateOAuthRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Pingfederate
 	result, _, err := svc.GetPingFederateAccessTokensCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))
+		return diag.Errorf("unable to read PingFederateOAuth: %s", err)
 	}
 
 	return resourcePingAccessPingFederateOAuthReadResult(d, result)
 }
 
-func resourcePingAccessPingFederateOAuthUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessPingFederateOAuthUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Pingfederate
 	input := pa.UpdatePingFederateAccessTokensCommandInput{
 		Body: *resourcePingAccessPingFederateOAuthReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateAccessTokensCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))
+		return diag.Errorf("unable to update PingFederateOAuth: %s", err)
 	}
 
 	d.SetId("pingfederate_oauth_settings")
 	return resourcePingAccessPingFederateOAuthReadResult(d, result)
 }
 
-func resourcePingAccessPingFederateOAuthDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessPingFederateOAuthDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Pingfederate
 	_, err := svc.DeletePingFederateAccessTokensCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to reset PingFederateOAuth: %s", err))
+		return diag.Errorf("unable to reset PingFederateOAuth: %s", err)
 	}
 	return nil
 }

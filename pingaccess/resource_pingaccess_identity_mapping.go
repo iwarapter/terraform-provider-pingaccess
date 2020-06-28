@@ -2,11 +2,9 @@ package pingaccess
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -27,7 +25,10 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 		Schema: resourcePingAccessIdentityMappingSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			svc := m.(*pingaccess.Client).IdentityMappings
-			desc, _, _ := svc.GetIdentityMappingDescriptorsCommand()
+			desc, _, err := svc.GetIdentityMappingDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve IdentityMapping descriptors %s", err)
+			}
 			className := d.Get("class_name").(string)
 			if err := descriptorsHasClassName(className, desc); err != nil {
 				return err
@@ -55,7 +56,7 @@ func resourcePingAccessIdentityMappingSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessIdentityMappingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessIdentityMappingCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).IdentityMappings
 	input := pingaccess.AddIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
@@ -63,14 +64,14 @@ func resourcePingAccessIdentityMappingCreate(ctx context.Context, d *schema.Reso
 
 	result, _, err := svc.AddIdentityMappingCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to create IdentityMapping: %s", err))
+		return diag.Errorf("unable to create IdentityMapping: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
-func resourcePingAccessIdentityMappingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessIdentityMappingRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).IdentityMappings
 	input := &pingaccess.GetIdentityMappingCommandInput{
 		Id: d.Id(),
@@ -78,12 +79,12 @@ func resourcePingAccessIdentityMappingRead(ctx context.Context, d *schema.Resour
 	result, _, err := svc.GetIdentityMappingCommand(input)
 	if err != nil {
 
-		return diag.FromErr(fmt.Errorf("unable to read IdentityMapping: %s", err))
+		return diag.Errorf("unable to read IdentityMapping: %s", err)
 	}
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
-func resourcePingAccessIdentityMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessIdentityMappingUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).IdentityMappings
 	input := pingaccess.UpdateIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
@@ -92,21 +93,19 @@ func resourcePingAccessIdentityMappingUpdate(ctx context.Context, d *schema.Reso
 
 	result, _, err := svc.UpdateIdentityMappingCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update IdentityMapping: %s", err))
+		return diag.Errorf("unable to update IdentityMapping: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
-func resourcePingAccessIdentityMappingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessIdentityMappingDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pingaccess.Client).IdentityMappings
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	log.Printf("[INFO] ResourceID: %s", d.Id())
 	_, err := svc.DeleteIdentityMappingCommand(&pingaccess.DeleteIdentityMappingCommandInput{Id: d.Id()})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete IdentityMapping: %s", err))
+		return diag.Errorf("unable to delete IdentityMapping: %s", err)
 	}
 	return nil
 }

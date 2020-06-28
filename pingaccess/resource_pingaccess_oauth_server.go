@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 
@@ -85,35 +84,35 @@ func resourcePingAccessOAuthServerCreate(ctx context.Context, d *schema.Resource
 	return resourcePingAccessOAuthServerUpdate(ctx, d, m)
 }
 
-func resourcePingAccessOAuthServerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessOAuthServerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Oauth
 	result, _, err := svc.GetAuthorizationServerCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read OAuthServerSettings: %s", err))
+		return diag.Errorf("unable to read OAuthServerSettings: %s", err)
 	}
 
 	return resourcePingAccessOAuthServerReadResult(d, result)
 }
 
-func resourcePingAccessOAuthServerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessOAuthServerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Oauth
 	input := pa.UpdateAuthorizationServerCommandInput{
 		Body: *resourcePingAccessOAuthServerReadData(d),
 	}
 	result, _, err := svc.UpdateAuthorizationServerCommand(&input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update OAuthServerSettings: %s", err))
+		return diag.Errorf("unable to update OAuthServerSettings: %s", err)
 	}
 
 	d.SetId("oauth_server_settings")
 	return resourcePingAccessOAuthServerReadResult(d, result)
 }
 
-func resourcePingAccessOAuthServerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessOAuthServerDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).Oauth
 	_, err := svc.DeleteAuthorizationServerCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to reset OAuthServerSettings: %s", err))
+		return diag.Errorf("unable to reset OAuthServerSettings: %s", err)
 	}
 	return nil
 }

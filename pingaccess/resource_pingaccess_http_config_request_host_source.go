@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -37,32 +36,32 @@ func resourcePingAccessHTTPConfigRequestHostSourceCreate(ctx context.Context, d 
 	return resourcePingAccessHTTPConfigRequestHostSourceUpdate(ctx, d, m)
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPConfigRequestHostSourceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpConfig
 	result, _, err := svc.GetHostSourceCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to read HttpConfigHostSource: %s", err))
+		return diag.Errorf("unable to read HttpConfigHostSource: %s", err)
 	}
 	return resourcePingAccessHTTPConfigRequestHostSourceReadResult(d, result)
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPConfigRequestHostSourceUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpConfig
 	input := &pa.UpdateHostSourceCommandInput{Body: *resourcePingAccessHTTPConfigRequestHostSourceReadData(d)}
 	result, _, err := svc.UpdateHostSourceCommand(input)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to update HttpConfigHostSource: %s", err))
+		return diag.Errorf("unable to update HttpConfigHostSource: %s", err)
 	}
 
 	d.SetId("http_config_host_source")
 	return resourcePingAccessHTTPConfigRequestHostSourceReadResult(d, result)
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPConfigRequestHostSourceDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(*pa.Client).HttpConfig
 	_, err := svc.DeleteHostSourceCommand()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("unable to delete HttpConfigHostSource: %s", err))
+		return diag.Errorf("unable to delete HttpConfigHostSource: %s", err)
 
 	}
 	return nil
