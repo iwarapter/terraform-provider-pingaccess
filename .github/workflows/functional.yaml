@@ -1,0 +1,72 @@
+on:  [push]
+name: e2e
+jobs:
+  e2e:
+    name: e2e
+    strategy:
+      matrix:
+        pingaccess-version: [5.2.3, 5.3.2, 6.0.2, 6.1.0]
+    services:
+      pingaccess:
+        image: pingidentity/pingaccess:${{ matrix.pingaccess-version }}-edge
+        env:
+          PING_IDENTITY_ACCEPT_EULA: YES
+          PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
+          PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
+        ports:
+          - 9000:9000
+      pingfederate:
+        image: pingidentity/pingfederate:10.0.2-edge
+        env:
+          PING_IDENTITY_ACCEPT_EULA: YES
+          PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
+          PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
+          SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+          SERVER_PROFILE_PATH: getting-started/pingfederate
+        ports:
+          - 9999:9999
+          - 9031:9031
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Setup Test Environment
+        run: |
+          curl -k -i -H "Content-Type: application/json" -H "X-Xsrf-Header: PingFederate" --user Administrator:2FederateM0re -d "@func-tests/pf-settings.json" -X PUT https://localhost:9999/pf-admin-api/v1/serverSettings
+          curl -k https://localhost:9031/.well-known/openid-configuration
+
+      - name: Change default PA password for 5.2
+        if: ${{ startsWith( matrix.pingaccess-version , '5.2') }}
+        run: sed -i 's/2FederateM0re/2Access/g' func-tests/main.tf
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Install Build and Deploy
+        run: make build deploy-local
+
+      - name: Terraform Init
+        run: make func-init
+
+      - name: Terraform Plan
+        run: make func-plan
+        env:
+          TF_VAR_pa6: ${{ startsWith( matrix.pingaccess-version , '6') }}
+
+      - name: Terraform Apply
+        run: make func-apply
+        env:
+          TF_VAR_pa6: ${{ startsWith( matrix.pingaccess-version , '6') }}
+
+      - name: Terraform Plan
+        run: make func-plan
+        env:
+          TF_VAR_pa6: ${{ startsWith( matrix.pingaccess-version , '6') }}
