@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -30,7 +31,7 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Fatalf("Could not connect to docker: %s", err)
 		}
-		server := httptest.NewTLSServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		server := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			// Send response to be tested
 			rw.Header().Set("Content-Type", "application/json;charset=utf-8")
 			rw.Write([]byte(`
@@ -68,6 +69,9 @@ func TestMain(m *testing.M) {
 }
 `))
 		}))
+		l, err := net.Listen("tcp", ":0")
+		server.Listener = l //for CI tests as host.docker.internal is window/macosx
+		server.StartTLS()
 		// Close the server when test finishes
 		defer server.Close()
 
@@ -83,7 +87,8 @@ func TestMain(m *testing.M) {
 			Name:       fmt.Sprintf("pa-%s", randomID),
 			Repository: "pingidentity/pingaccess",
 			Tag:        "6.0.2-edge",
-			Env:        []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
+			//ExtraHosts: []string{"host.docker.internal:host-gateway"},
+			Env: []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
 		}
 		paCont, err := pool.RunWithOptions(paOpts)
 		if err != nil {
@@ -107,7 +112,8 @@ func TestMain(m *testing.M) {
 		}
 		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
 		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
-		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "127.0.0.1", "host.docker.internal", -1))
+		host , _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
+		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
 		log.Println("Connected to PingAccess admin API....")
 
 		version, _, err := client.Version.VersionCommand()
