@@ -20,6 +20,7 @@ type config struct {
 
 // Client configures and returns a fully initialized PAClient
 func (c *config) Client() (interface{}, diag.Diagnostics) {
+	/* #nosec */
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	url, _ := url.Parse(c.BaseURL)
 	client := pingaccess.NewClient(c.Username, c.Password, url, c.Context, nil)

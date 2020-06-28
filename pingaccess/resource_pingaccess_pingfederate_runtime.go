@@ -22,6 +22,7 @@ func resourcePingAccessPingFederateRuntime() *schema.Resource {
 }
 
 func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
+	deprecationMsg := "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead."
 	return map[string]*schema.Schema{
 		//New API
 		"description": {
@@ -48,53 +49,53 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			Optional:      true,
 			Default:       "ON",
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"back_channel_base_path": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"back_channel_secure": {
 			Type:          schema.TypeBool,
 			Optional:      true,
 			Default:       false,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"base_path": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"expected_hostname": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"host": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			RequiredWith:  []string{"host", "port"},
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"port": {
 			Type:          schema.TypeInt,
 			Optional:      true,
 			RequiredWith:  []string{"host", "port"},
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"secure": {
 			Type:          schema.TypeBool,
 			Optional:      true,
 			Default:       false,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 		"targets": {
 			Type:     schema.TypeSet,
@@ -104,7 +105,7 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
-			Deprecated:    "This is the deprecated pingfederate runtime configuration and is only to provide support for 5.x. If you are using 6.x please use 'issuer' configuration instead.",
+			Deprecated:    deprecationMsg,
 		},
 
 		//Common
