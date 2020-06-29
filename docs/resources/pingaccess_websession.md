@@ -7,7 +7,7 @@ Provides a web session.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/websession.tf!}
+{!../func-tests//websession.tf!}
 ```
 
 ## Argument Attributes

@@ -7,7 +7,7 @@ Provides a rule.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/rule.tf!}
+{!../func-tests//rule.tf!}
 ```
 
 ## Argument Attributes

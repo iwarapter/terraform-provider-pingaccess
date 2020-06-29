@@ -7,7 +7,7 @@ Provides a HSM provider.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/hsm_provider.tf!}
+{!../func-tests//hsm_provider.tf!}
 ```
 
 ## Argument Attributes

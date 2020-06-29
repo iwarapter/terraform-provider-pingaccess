@@ -2,7 +2,7 @@ resource "pingaccess_pingfederate_oauth" "demo" {
   access_validator_id    = 1
   cache_tokens           = true
   subject_attribute_name = "san"
-  name                   = "foo"
+  name                   = "PingFederate"
   client_id              = "oauth"
   client_secret {
     value = "top_secret"

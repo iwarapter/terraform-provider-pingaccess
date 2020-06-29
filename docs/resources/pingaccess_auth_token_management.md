@@ -7,7 +7,7 @@ Provides a auth token management.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/auth_token_management.tf!}
+{!../func-tests//auth_token_management.tf!}
 ```
 
 ## Argument Attributes

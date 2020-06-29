@@ -1,4 +1,4 @@
-resource "pingaccess_site" "demo_site" {
+resource "pingaccess_site" "demo" {
   name    = "demo-site"
   targets = ["localhost:1234"]
 }

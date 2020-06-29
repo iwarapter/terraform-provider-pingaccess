@@ -4,7 +4,7 @@ Provides a trusted certificate group.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/trusted_certificate_group.tf!}
+{!../func-tests//trusted_certificate_group.tf!}
 ```
 
 ## Argument Attributes

@@ -46,8 +46,9 @@ func resourcePingAccessHsmProviderSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"configuration": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: suppressEquivalentJSONDiffs,
 		},
 	}
 }

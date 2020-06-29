@@ -7,7 +7,7 @@ Provides a access token validator.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/access_token_validator.tf!}
+{!../func-tests//access_token_validator.tf!}
 ```
 
 ## Argument Attributes

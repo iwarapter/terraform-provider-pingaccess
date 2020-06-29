@@ -3,9 +3,9 @@ resource "pingaccess_hsm_provider" "test" {
   name          = "demo"
   configuration = <<EOF
   {
-      "user": "bob",
-      "password": "top_secret",
-      "partition": "p1"
+    "user": "bob",
+    "password": "top_secret",
+    "partition": "p1"
   }
   EOF
 }

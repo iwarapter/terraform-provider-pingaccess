@@ -4,7 +4,7 @@ Provides a application resource.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/application_resource.tf!}
+{!../func-tests//application_resource.tf!}
 ```
 
 ## Argument Attributes

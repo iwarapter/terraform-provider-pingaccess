@@ -4,7 +4,7 @@ Provides a third party service.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/third_party_service.tf!}
+{!../func-tests//third_party_service.tf!}
 ```
 
 ## Argument Attributes

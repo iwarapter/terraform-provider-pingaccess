@@ -32,7 +32,8 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 		},
 		"agent_id": {
 			Type:     schema.TypeInt,
-			Required: true,
+			Optional: true,
+			Default:  0,
 		},
 		"application_type": {
 			Type:     schema.TypeString,

@@ -4,7 +4,7 @@ Provides a site.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/site.tf!}
+{!../func-tests//site.tf!}
 ```
 
 ## Argument Attributes

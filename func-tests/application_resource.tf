@@ -11,13 +11,13 @@ resource "pingaccess_application_resource" "demo_application_resource" {
   }
 
   path_patterns {
-    pattern = "%s"
+    pattern = "/foo"
     type    = "WILDCARD"
   }
 
   path_prefixes = [
     "/as/token.oauth2",
-    "%s",
+    "/foo",
   ]
 
   audit_level    = "OFF"
@@ -29,12 +29,12 @@ resource "pingaccess_application_resource" "demo_application_resource" {
   policy {
     web {
       type = "Rule"
-      id   = pingaccess_rule.demo_rule_one.id
+      id   = pingaccess_rule.demo_1.id
     }
 
     web {
       type = "Rule"
-      id   = pingaccess_rule.demo_rule_two.id
+      id   = pingaccess_rule.demo_2.id
     }
   }
 }

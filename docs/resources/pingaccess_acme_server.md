@@ -4,7 +4,7 @@ Provides a acme server.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/acme_server.tf!}
+{!../func-tests//acme_server.tf!}
 ```
 
 ## Argument Attributes

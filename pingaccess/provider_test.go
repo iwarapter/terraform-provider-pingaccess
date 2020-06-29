@@ -112,7 +112,7 @@ func TestMain(m *testing.M) {
 		}
 		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
 		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
-		host , _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
+		host, _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
 		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
 		log.Println("Connected to PingAccess admin API....")
 

@@ -4,7 +4,7 @@ Provides a ceritficate.
 
 ### Example Usage
 ```terraform
-{!../pingaccess/test_cases/certificate.tf!}
+{!../func-tests//certificate.tf!}
 ```
 ### Argument Attributes
 The following arguments are supported:

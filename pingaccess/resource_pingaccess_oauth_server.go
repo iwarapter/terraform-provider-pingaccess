@@ -133,7 +133,7 @@ func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *pa.A
 	if err := d.Set("targets", input.Targets); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if input.ClientCredentials != nil {
+	if input.ClientCredentials != nil && input.ClientCredentials.ClientSecret != nil {
 		//TODO we should look at encrypting the value
 		pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 		creds := flattenOAuthClientCredentialsView(input.ClientCredentials)

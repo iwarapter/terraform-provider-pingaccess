@@ -26,6 +26,7 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 		"availability_profile_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  1,
 		},
 		"expected_hostname": {
 			Type:     schema.TypeString,
@@ -34,10 +35,12 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 		"keep_alive_timeout": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"load_balancing_strategy_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"max_connections": {
 			Type:     schema.TypeInt,
@@ -56,6 +59,7 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 		"secure": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 		"send_pa_cookie": {
 			Type:     schema.TypeBool,
@@ -72,6 +76,7 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 		"skip_hostname_verification": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 		"targets": {
 			Type:     schema.TypeSet,
@@ -84,10 +89,12 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"use_proxy": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 		"use_target_host_header": {
 			Type:     schema.TypeBool,
