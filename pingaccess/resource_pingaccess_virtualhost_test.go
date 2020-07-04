@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/virtualhosts"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessVirtualHost(t *testing.T) {
@@ -61,8 +63,8 @@ func testAccCheckPingAccessVirtualHostExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No virtualhost ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Virtualhosts
-		result, _, err := conn.GetVirtualHostCommand(&pa.GetVirtualHostCommandInput{
+		conn := testAccProvider.Meta().(paClient).Virtualhosts
+		result, _, err := conn.GetVirtualHostCommand(&virtualhosts.GetVirtualHostCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -80,10 +82,10 @@ func testAccCheckPingAccessVirtualHostExists(n string) resource.TestCheckFunc {
 
 func Test_resourcePingAccessVirtualhostReadData(t *testing.T) {
 	cases := []struct {
-		VirtualHost pa.VirtualHostView
+		VirtualHost models.VirtualHostView
 	}{
 		{
-			VirtualHost: pa.VirtualHostView{
+			VirtualHost: models.VirtualHostView{
 				Host:                      String("localhost"),
 				Port:                      Int(9999),
 				AgentResourceCacheTTL:     Int(0),
@@ -92,7 +94,7 @@ func Test_resourcePingAccessVirtualhostReadData(t *testing.T) {
 			},
 		},
 		{
-			VirtualHost: pa.VirtualHostView{
+			VirtualHost: models.VirtualHostView{
 				Host:                      String("localhost"),
 				Port:                      Int(9999),
 				AgentResourceCacheTTL:     Int(30),

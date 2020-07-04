@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/thirdPartyServices"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessThirdPartyService() *schema.Resource {
@@ -82,8 +84,8 @@ func resourcePingAccessThirdPartyServiceSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessThirdPartyServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).ThirdPartyServices
-	input := pa.AddThirdPartyServiceCommandInput{
+	svc := m.(paClient).ThirdPartyServices
+	input := thirdPartyServices.AddThirdPartyServiceCommandInput{
 		Body: *resourcePingAccessThirdPartyServiceReadData(d),
 	}
 
@@ -98,8 +100,8 @@ func resourcePingAccessThirdPartyServiceCreate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessThirdPartyServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).ThirdPartyServices
-	input := &pa.GetThirdPartyServiceCommandInput{
+	svc := m.(paClient).ThirdPartyServices
+	input := &thirdPartyServices.GetThirdPartyServiceCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetThirdPartyServiceCommand(input)
@@ -110,8 +112,8 @@ func resourcePingAccessThirdPartyServiceRead(ctx context.Context, d *schema.Reso
 }
 
 func resourcePingAccessThirdPartyServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).ThirdPartyServices
-	input := pa.UpdateThirdPartyServiceCommandInput{
+	svc := m.(paClient).ThirdPartyServices
+	input := thirdPartyServices.UpdateThirdPartyServiceCommandInput{
 		Body: *resourcePingAccessThirdPartyServiceReadData(d),
 		Id:   d.Id(),
 	}
@@ -123,9 +125,9 @@ func resourcePingAccessThirdPartyServiceUpdate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessThirdPartyServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).ThirdPartyServices
+	svc := m.(paClient).ThirdPartyServices
 
-	input := &pa.DeleteThirdPartyServiceCommandInput{
+	input := &thirdPartyServices.DeleteThirdPartyServiceCommandInput{
 		Id: d.Id(),
 	}
 
@@ -136,7 +138,7 @@ func resourcePingAccessThirdPartyServiceDelete(ctx context.Context, d *schema.Re
 	return nil
 }
 
-func resourcePingAccessThirdPartyServiceReadResult(d *schema.ResourceData, input *pa.ThirdPartyServiceView) diag.Diagnostics {
+func resourcePingAccessThirdPartyServiceReadResult(d *schema.ResourceData, input *models.ThirdPartyServiceView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataIntWithDiagnostic(d, "availability_profile_id", input.AvailabilityProfileId, &diags)
 	setResourceDataStringWithDiagnostic(d, "expected_hostname", input.ExpectedHostname, &diags)
@@ -154,9 +156,9 @@ func resourcePingAccessThirdPartyServiceReadResult(d *schema.ResourceData, input
 	return diags
 }
 
-func resourcePingAccessThirdPartyServiceReadData(d *schema.ResourceData) *pa.ThirdPartyServiceView {
+func resourcePingAccessThirdPartyServiceReadData(d *schema.ResourceData) *models.ThirdPartyServiceView {
 	targets := expandStringList(d.Get("targets").(*schema.Set).List())
-	tps := &pa.ThirdPartyServiceView{
+	tps := &models.ThirdPartyServiceView{
 		Name:    String(d.Get("name").(string)),
 		Targets: &targets,
 	}

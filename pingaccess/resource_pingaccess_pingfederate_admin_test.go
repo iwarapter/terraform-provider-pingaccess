@@ -6,12 +6,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessPingFederateAdmin(t *testing.T) {
@@ -69,7 +70,7 @@ func testAccCheckPingAccessPingFederateAdminExists(n string) resource.TestCheckF
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Pingfederate
+		conn := testAccProvider.Meta().(paClient).Pingfederate
 		result, _, err := conn.GetPingFederateAdminCommand()
 
 		if err != nil {
@@ -86,11 +87,11 @@ func testAccCheckPingAccessPingFederateAdminExists(n string) resource.TestCheckF
 
 func Test_resourcePingAccessPingFederateAdminReadData(t *testing.T) {
 	cases := []struct {
-		PingFederateAdmin pa.PingFederateAdminView
+		PingFederateAdmin models.PingFederateAdminView
 	}{
 		{
-			PingFederateAdmin: pa.PingFederateAdminView{
-				AdminPassword: &pa.HiddenFieldView{
+			PingFederateAdmin: models.PingFederateAdminView{
+				AdminPassword: &models.HiddenFieldView{
 					Value: String("secret"),
 				},
 				AdminUsername:             String("admin"),
@@ -101,8 +102,8 @@ func Test_resourcePingAccessPingFederateAdminReadData(t *testing.T) {
 			},
 		},
 		{
-			PingFederateAdmin: pa.PingFederateAdminView{
-				AdminPassword: &pa.HiddenFieldView{
+			PingFederateAdmin: models.PingFederateAdminView{
+				AdminPassword: &models.HiddenFieldView{
 					Value: String("secret"),
 				},
 				AdminUsername:             String("admin"),

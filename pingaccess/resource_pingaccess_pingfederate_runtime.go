@@ -2,7 +2,9 @@ package pingaccess
 
 import (
 	"context"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -138,7 +140,7 @@ func resourcePingAccessPingFederateRuntimeCreate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessPingFederateRuntimeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	if _, ok := d.GetOk("issuer"); ok {
 		result, _, err := svc.GetPingFederateRuntimeCommand()
 		if err != nil {
@@ -157,10 +159,10 @@ func resourcePingAccessPingFederateRuntimeRead(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessPingFederateRuntimeUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 
 	if _, ok := d.GetOk("issuer"); ok {
-		input := pa.UpdatePingFederateRuntimeCommandInput{
+		input := pingfederate.UpdatePingFederateRuntimeCommandInput{
 			Body: *resourcePingAccessPingFederateRuntimeReadData(d),
 		}
 		result, _, err := svc.UpdatePingFederateRuntimeCommand(&input)
@@ -172,7 +174,7 @@ func resourcePingAccessPingFederateRuntimeUpdate(_ context.Context, d *schema.Re
 		return resourcePingAccessPingFederateRuntimeReadResult(d, result)
 	}
 
-	input := pa.UpdatePingFederateCommandInput{
+	input := pingfederate.UpdatePingFederateCommandInput{
 		Body: *resourcePingAccessPingFederateDeprecatedRuntimeReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateCommand(&input)
@@ -185,7 +187,7 @@ func resourcePingAccessPingFederateRuntimeUpdate(_ context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateRuntimeDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	if _, ok := d.GetOk("issuer"); ok {
 		_, err := svc.DeletePingFederateRuntimeCommand()
 		if err != nil {
@@ -201,7 +203,7 @@ func resourcePingAccessPingFederateRuntimeDelete(_ context.Context, d *schema.Re
 	return nil
 }
 
-func resourcePingAccessPingFederateRuntimeReadResult(d *schema.ResourceData, input *pa.PingFederateMetadataRuntimeView) diag.Diagnostics {
+func resourcePingAccessPingFederateRuntimeReadResult(d *schema.ResourceData, input *models.PingFederateMetadataRuntimeView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "description", input.Description, &diags)
 	setResourceDataStringWithDiagnostic(d, "issuer", input.Issuer, &diags)
@@ -213,7 +215,7 @@ func resourcePingAccessPingFederateRuntimeReadResult(d *schema.ResourceData, inp
 	return diags
 }
 
-func resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d *schema.ResourceData, input *pa.PingFederateRuntimeView) diag.Diagnostics {
+func resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d *schema.ResourceData, input *models.PingFederateRuntimeView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "audit_level", input.AuditLevel, &diags)
 	setResourceDataStringWithDiagnostic(d, "back_channel_base_path", input.BackChannelBasePath, &diags)
@@ -235,8 +237,8 @@ func resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d *schema.Resourc
 	return diags
 }
 
-func resourcePingAccessPingFederateRuntimeReadData(d *schema.ResourceData) *pa.PingFederateMetadataRuntimeView {
-	pfRuntime := &pa.PingFederateMetadataRuntimeView{
+func resourcePingAccessPingFederateRuntimeReadData(d *schema.ResourceData) *models.PingFederateMetadataRuntimeView {
+	pfRuntime := &models.PingFederateMetadataRuntimeView{
 		Issuer:                    String(d.Get("issuer").(string)),
 		TrustedCertificateGroupId: Int(d.Get("trusted_certificate_group_id").(int)),
 		UseProxy:                  Bool(d.Get("use_proxy").(bool)),
@@ -253,8 +255,8 @@ func resourcePingAccessPingFederateRuntimeReadData(d *schema.ResourceData) *pa.P
 	return pfRuntime
 }
 
-func resourcePingAccessPingFederateDeprecatedRuntimeReadData(d *schema.ResourceData) *pa.PingFederateRuntimeView {
-	pfRuntime := &pa.PingFederateRuntimeView{
+func resourcePingAccessPingFederateDeprecatedRuntimeReadData(d *schema.ResourceData) *models.PingFederateRuntimeView {
+	pfRuntime := &models.PingFederateRuntimeView{
 		Host:                      String(d.Get("host").(string)),
 		Port:                      Int(d.Get("port").(int)),
 		TrustedCertificateGroupId: Int(d.Get("trusted_certificate_group_id").(int)),

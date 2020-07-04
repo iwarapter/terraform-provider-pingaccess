@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/rules"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessRule(t *testing.T) {
@@ -84,8 +85,8 @@ func testAccCheckPingAccessRuleExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No rule ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Rules
-		result, _, err := conn.GetRuleCommand(&pingaccess.GetRuleCommandInput{
+		conn := testAccProvider.Meta().(paClient).Rules
+		result, _, err := conn.GetRuleCommand(&rules.GetRuleCommandInput{
 			Id: rs.Primary.ID,
 		})
 

@@ -2,9 +2,8 @@ package pingaccess
 
 import (
 	"encoding/json"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"testing"
-
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func testHiddenFieldView() map[string]interface{} {
@@ -15,7 +14,7 @@ func testHiddenFieldView() map[string]interface{} {
 }
 
 func Test_weCanFlattenHiddenFieldView(t *testing.T) {
-	initialHiddenFieldView := &pa.HiddenFieldView{
+	initialHiddenFieldView := &models.HiddenFieldView{
 		Value:          String("atat"),
 		EncryptedValue: String("atat"),
 	}
@@ -49,9 +48,9 @@ func testOAuthClientCredentials() map[string]interface{} {
 }
 
 func Test_weCanFlattenOAuthClientCredentials(t *testing.T) {
-	initialOAuthClientCredentialsView := &pa.OAuthClientCredentialsView{
+	initialOAuthClientCredentialsView := &models.OAuthClientCredentialsView{
 		ClientId: String("atat"),
-		ClientSecret: &pa.HiddenFieldView{
+		ClientSecret: &models.HiddenFieldView{
 			Value:          String("atat"),
 			EncryptedValue: String("atat"),
 		},
@@ -81,8 +80,8 @@ func testPolicyItem() map[string]interface{} {
 }
 
 func Test_weCanFlattenPolicy(t *testing.T) {
-	initialPolicyItem := []*pa.PolicyItem{
-		&pa.PolicyItem{
+	initialPolicyItem := []*models.PolicyItem{
+		&models.PolicyItem{
 			Id:   json.Number("1334"),
 			Type: String("Rule"),
 		},

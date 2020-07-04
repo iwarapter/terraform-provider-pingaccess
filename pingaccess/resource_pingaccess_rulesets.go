@@ -4,9 +4,11 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/rulesets"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessRuleSet() *schema.Resource {
@@ -63,8 +65,8 @@ func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData
 		polIds = append(polIds, &text)
 	}
 
-	input := pingaccess.AddRuleSetCommandInput{
-		Body: pingaccess.RuleSetView{
+	input := rulesets.AddRuleSetCommandInput{
+		Body: models.RuleSetView{
 			Name:            String(name),
 			ElementType:     String(elementType),
 			Policy:          &polIds,
@@ -72,7 +74,7 @@ func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData
 		},
 	}
 
-	svc := m.(*pingaccess.Client).Rulesets
+	svc := m.(paClient).Rulesets
 
 	result, _, err := svc.AddRuleSetCommand(&input)
 	if err != nil {
@@ -84,8 +86,8 @@ func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePingAccessRuleSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).Rulesets
-	result, _, err := svc.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
+	svc := m.(paClient).Rulesets
+	result, _, err := svc.GetRuleSetCommand(&rulesets.GetRuleSetCommandInput{
 		Id: d.Id(),
 	})
 	if err != nil {
@@ -107,8 +109,8 @@ func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData
 		polIds = append(polIds, &text)
 	}
 
-	input := pingaccess.UpdateRuleSetCommandInput{
-		Body: pingaccess.RuleSetView{
+	input := rulesets.UpdateRuleSetCommandInput{
+		Body: models.RuleSetView{
 			Name:            String(name),
 			ElementType:     String(elementType),
 			Policy:          &polIds,
@@ -117,7 +119,7 @@ func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData
 		Id: d.Id(),
 	}
 
-	svc := m.(*pingaccess.Client).Rulesets
+	svc := m.(paClient).Rulesets
 
 	result, _, err := svc.UpdateRuleSetCommand(&input)
 	if err != nil {
@@ -128,16 +130,16 @@ func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePingAccessRuleSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).Rulesets
+	svc := m.(paClient).Rulesets
 
-	_, err := svc.DeleteRuleSetCommand(&pingaccess.DeleteRuleSetCommandInput{Id: d.Id()})
+	_, err := svc.DeleteRuleSetCommand(&rulesets.DeleteRuleSetCommandInput{Id: d.Id()})
 	if err != nil {
 		return diag.Errorf("unable to delete RuleSet: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessRuleSetReadResult(d *schema.ResourceData, input *pingaccess.RuleSetView) diag.Diagnostics {
+func resourcePingAccessRuleSetReadResult(d *schema.ResourceData, input *models.RuleSetView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	setResourceDataStringWithDiagnostic(d, "success_criteria", input.SuccessCriteria, &diags)

@@ -3,7 +3,8 @@ package pingaccess
 import (
 	"context"
 
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,7 +71,7 @@ func resourcePingAccessPingFederateAdminCreate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateAdminRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	result, _, err := svc.GetPingFederateAdminCommand()
 	if err != nil {
 		return diag.Errorf("unable to read PingFederateAdmin: %s", err)
@@ -80,8 +81,8 @@ func resourcePingAccessPingFederateAdminRead(_ context.Context, d *schema.Resour
 }
 
 func resourcePingAccessPingFederateAdminUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
-	input := pa.UpdatePingFederateAdminCommandInput{
+	svc := m.(paClient).Pingfederate
+	input := pingfederate.UpdatePingFederateAdminCommandInput{
 		Body: *resourcePingAccessPingFederateAdminReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateAdminCommand(&input)
@@ -94,7 +95,7 @@ func resourcePingAccessPingFederateAdminUpdate(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessPingFederateAdminDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	_, err := svc.DeletePingFederateCommand()
 	if err != nil {
 		return diag.Errorf("unable to reset PingFederateAdmin: %s", err)
@@ -102,7 +103,7 @@ func resourcePingAccessPingFederateAdminDelete(_ context.Context, _ *schema.Reso
 	return nil
 }
 
-func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input *pa.PingFederateAdminView) diag.Diagnostics {
+func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input *models.PingFederateAdminView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "admin_username", input.AdminUsername, &diags)
 	setResourceDataStringWithDiagnostic(d, "audit_level", input.AuditLevel, &diags)
@@ -127,8 +128,8 @@ func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input
 	return nil
 }
 
-func resourcePingAccessPingFederateAdminReadData(d *schema.ResourceData) *pa.PingFederateAdminView {
-	pfAdmin := &pa.PingFederateAdminView{
+func resourcePingAccessPingFederateAdminReadData(d *schema.ResourceData) *models.PingFederateAdminView {
+	pfAdmin := &models.PingFederateAdminView{
 		AdminUsername: String(d.Get("admin_username").(string)),
 		Host:          String(d.Get("host").(string)),
 		Port:          Int(d.Get("port").(int)),

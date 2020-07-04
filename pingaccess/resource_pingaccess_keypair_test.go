@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessKeyPair(t *testing.T) {
@@ -96,8 +97,8 @@ func testAccCheckPingAccessKeyPairExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No KeyPair ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).KeyPairs
-		result, _, err := conn.GetKeyPairCommand(&pa.GetKeyPairCommandInput{
+		conn := testAccProvider.Meta().(paClient).KeyPairs
+		result, _, err := conn.GetKeyPairCommand(&keyPairs.GetKeyPairCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -120,8 +121,8 @@ func testAccCheckPingAccessKeyPairAttributes(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No KeyPair ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).KeyPairs
-		result, _, err := conn.GetKeyPairCommand(&pa.GetKeyPairCommandInput{
+		conn := testAccProvider.Meta().(paClient).KeyPairs
+		result, _, err := conn.GetKeyPairCommand(&keyPairs.GetKeyPairCommandInput{
 			Id: rs.Primary.ID,
 		})
 

@@ -1,39 +1,20 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"strconv"
 	"testing"
+
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
-
-func init() {
-	resource.AddTestSweepers("pingaccess_application_resource", &resource.Sweeper{
-		Name: "pingaccess_application_resource",
-		F:    testSweepApplicationResources,
-	})
-}
-
-func testSweepApplicationResources(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pa.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Applications
-	result, _, _ := conn.GetResourcesCommand(&pa.GetResourcesCommandInput{Filter: "acc_test_"})
-	for _, v := range result.Items {
-		conn.DeleteApplicationResourceCommand(&pa.DeleteApplicationResourceCommandInput{ApplicationId: strconv.Itoa(*v.ApplicationId), ResourceId: v.Id.String()})
-	}
-	return nil
-}
 
 func TestAccPingAccessApplicationResource(t *testing.T) {
 	policy1 := `web {
@@ -233,8 +214,8 @@ func testAccCheckPingAccessApplicationResourceExists(n string) resource.TestChec
 			return fmt.Errorf("No application resource ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Applications
-		result, _, err := conn.GetApplicationResourceCommand(&pa.GetApplicationResourceCommandInput{
+		conn := testAccProvider.Meta().(paClient).Applications
+		result, _, err := conn.GetApplicationResourceCommand(&applications.GetApplicationResourceCommandInput{
 			ApplicationId: rs.Primary.Attributes["application_id"],
 			ResourceId:    rs.Primary.ID,
 		})
@@ -259,8 +240,8 @@ func testAccCheckPingAccessApplicationResourceAttributes(n, name, context string
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Applications
-		result, _, err := conn.GetApplicationResourceCommand(&pa.GetApplicationResourceCommandInput{
+		conn := testAccProvider.Meta().(paClient).Applications
+		result, _, err := conn.GetApplicationResourceCommand(&applications.GetApplicationResourceCommandInput{
 			ApplicationId: rs.Primary.Attributes["application_id"],
 			ResourceId:    rs.Primary.ID,
 		})
@@ -287,10 +268,10 @@ func testAccCheckPingAccessApplicationResourceAttributes(n, name, context string
 
 func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 	cases := []struct {
-		Resource pa.ResourceView
+		Resource models.ResourceView
 	}{
 		{
-			Resource: pa.ResourceView{
+			Resource: models.ResourceView{
 				Anonymous:               Bool(false),
 				ApplicationId:           Int(0),
 				AuditLevel:              String("false"),
@@ -305,7 +286,7 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				// 	},
 				// },
 				PathPrefixes: &[]*string{String("false")},
-				Policy: map[string]*[]*pa.PolicyItem{
+				Policy: map[string]*[]*models.PolicyItem{
 					"Web": {
 						{
 							Id:   json.Number("1"),
@@ -323,7 +304,7 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 			},
 		},
 		{
-			Resource: pa.ResourceView{
+			Resource: models.ResourceView{
 				ApplicationId: Int(0),
 				Methods:       &[]*string{String("GET")},
 				Name:          String("false"),

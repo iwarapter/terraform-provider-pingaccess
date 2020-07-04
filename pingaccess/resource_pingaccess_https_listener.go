@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessHTTPSListener() *schema.Resource {
@@ -42,8 +44,8 @@ func resourcePingAccessHTTPSListenerSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessHTTPSListenerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).HttpsListeners
-	input := pa.GetHttpsListenersCommandInput{}
+	svc := m.(paClient).HttpsListeners
+	input := httpsListeners.GetHttpsListenersCommandInput{}
 
 	result, _, err := svc.GetHttpsListenersCommand(&input)
 	if err != nil {
@@ -61,8 +63,8 @@ func resourcePingAccessHTTPSListenerCreate(_ context.Context, d *schema.Resource
 }
 
 func resourcePingAccessHTTPSListenerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).HttpsListeners
-	input := &pa.GetHttpsListenerCommandInput{
+	svc := m.(paClient).HttpsListeners
+	input := &httpsListeners.GetHttpsListenerCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetHttpsListenerCommand(input)
@@ -73,8 +75,8 @@ func resourcePingAccessHTTPSListenerRead(_ context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessHTTPSListenerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).HttpsListeners
-	input := pa.UpdateHttpsListenerInput{
+	svc := m.(paClient).HttpsListeners
+	input := httpsListeners.UpdateHttpsListenerInput{
 		Body: *resourcePingAccessHTTPSListenerReadData(d),
 		Id:   d.Id(),
 	}
@@ -90,7 +92,7 @@ func resourcePingAccessHTTPSListenerDelete(_ context.Context, _ *schema.Resource
 	return nil
 }
 
-func resourcePingAccessHTTPSListenerReadResult(d *schema.ResourceData, input *pa.HttpsListenerView) diag.Diagnostics {
+func resourcePingAccessHTTPSListenerReadResult(d *schema.ResourceData, input *models.HttpsListenerView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	setResourceDataIntWithDiagnostic(d, "key_pair_id", input.KeyPairId, &diags)
@@ -98,8 +100,8 @@ func resourcePingAccessHTTPSListenerReadResult(d *schema.ResourceData, input *pa
 	return diags
 }
 
-func resourcePingAccessHTTPSListenerReadData(d *schema.ResourceData) *pa.HttpsListenerView {
-	engine := &pa.HttpsListenerView{
+func resourcePingAccessHTTPSListenerReadData(d *schema.ResourceData) *models.HttpsListenerView {
+	engine := &models.HttpsListenerView{
 		Name:                      String(d.Get("name").(string)),
 		KeyPairId:                 Int(d.Get("key_pair_id").(int)),
 		UseServerCipherSuiteOrder: Bool(d.Get("use_server_cipher_suite_order").(bool)),

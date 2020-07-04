@@ -5,9 +5,10 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessAccessTokenValidator(t *testing.T) {
@@ -95,8 +96,8 @@ func testAccCheckPingAccessAccessTokenValidatorExists(n string) resource.TestChe
 			return fmt.Errorf("No access_token_validator ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).AccessTokenValidators
-		result, _, err := conn.GetAccessTokenValidatorCommand(&pingaccess.GetAccessTokenValidatorCommandInput{
+		conn := testAccProvider.Meta().(paClient).AccessTokenValidators
+		result, _, err := conn.GetAccessTokenValidatorCommand(&accessTokenValidators.GetAccessTokenValidatorCommandInput{
 			Id: rs.Primary.ID,
 		})
 

@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessAcmeServer() *schema.Resource {
@@ -38,8 +40,8 @@ func resourcePingAccessAcmeServerSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessAcmeServerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).Acme
-	input := pingaccess.AddAcmeServerCommandInput{
+	svc := m.(paClient).Acme
+	input := acme.AddAcmeServerCommandInput{
 		Body: *resourcePingAccessAcmeServerReadData(d),
 	}
 
@@ -52,8 +54,8 @@ func resourcePingAccessAcmeServerCreate(_ context.Context, d *schema.ResourceDat
 }
 
 func resourcePingAccessAcmeServerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).Acme
-	input := &pingaccess.GetAcmeServerCommandInput{
+	svc := m.(paClient).Acme
+	input := &acme.GetAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 	result, _, err := svc.GetAcmeServerCommand(input)
@@ -64,8 +66,8 @@ func resourcePingAccessAcmeServerRead(_ context.Context, d *schema.ResourceData,
 }
 
 func resourcePingAccessAcmeServerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).Acme
-	input := &pingaccess.DeleteAcmeServerCommandInput{
+	svc := m.(paClient).Acme
+	input := &acme.DeleteAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 
@@ -76,7 +78,7 @@ func resourcePingAccessAcmeServerDelete(_ context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *pingaccess.AcmeServerView) diag.Diagnostics {
+func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *models.AcmeServerView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	setResourceDataStringWithDiagnostic(d, "url", input.Url, &diags)
@@ -88,8 +90,8 @@ func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *pinga
 	return diags
 }
 
-func resourcePingAccessAcmeServerReadData(d *schema.ResourceData) *pingaccess.AcmeServerView {
-	return &pingaccess.AcmeServerView{
+func resourcePingAccessAcmeServerReadData(d *schema.ResourceData) *models.AcmeServerView {
+	return &models.AcmeServerView{
 		Name: String(d.Get("name").(string)),
 		Url:  String(d.Get("url").(string)),
 	}

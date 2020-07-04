@@ -4,9 +4,10 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func dataSourcePingAccessCertificate() *schema.Resource {
@@ -20,8 +21,8 @@ func dataSourcePingAccessCertificate() *schema.Resource {
 }
 
 func dataSourcePingAccessCertificateRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Certificates
-	input := &pa.GetTrustedCertsInput{
+	svc := m.(paClient).Certificates
+	input := &certificates.GetTrustedCertsInput{
 		Alias: d.Get("alias").(string),
 	}
 	result, _, err := svc.GetTrustedCerts(input)

@@ -4,10 +4,12 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessTrustedCertificateGroups() *schema.Resource {
@@ -60,8 +62,8 @@ func resourcePingAccessTrustedCertificateGroupsSchema() map[string]*schema.Schem
 }
 
 func resourcePingAccessTrustedCertificateGroupsCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).TrustedCertificateGroups
-	input := pa.AddTrustedCertificateGroupCommandInput{
+	svc := m.(paClient).TrustedCertificateGroups
+	input := trustedCertificateGroups.AddTrustedCertificateGroupCommandInput{
 		Body: *resourcePingAccessTrustedCertificateGroupsReadData(d),
 	}
 
@@ -75,8 +77,8 @@ func resourcePingAccessTrustedCertificateGroupsCreate(_ context.Context, d *sche
 }
 
 func resourcePingAccessTrustedCertificateGroupsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).TrustedCertificateGroups
-	input := &pa.GetTrustedCertificateGroupCommandInput{
+	svc := m.(paClient).TrustedCertificateGroups
+	input := &trustedCertificateGroups.GetTrustedCertificateGroupCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetTrustedCertificateGroupCommand(input)
@@ -87,8 +89,8 @@ func resourcePingAccessTrustedCertificateGroupsRead(_ context.Context, d *schema
 }
 
 func resourcePingAccessTrustedCertificateGroupsUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).TrustedCertificateGroups
-	input := pa.UpdateTrustedCertificateGroupCommandInput{
+	svc := m.(paClient).TrustedCertificateGroups
+	input := trustedCertificateGroups.UpdateTrustedCertificateGroupCommandInput{
 		Body: *resourcePingAccessTrustedCertificateGroupsReadData(d),
 		Id:   d.Id(),
 	}
@@ -100,8 +102,8 @@ func resourcePingAccessTrustedCertificateGroupsUpdate(_ context.Context, d *sche
 }
 
 func resourcePingAccessTrustedCertificateGroupsDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).TrustedCertificateGroups
-	input := &pa.DeleteTrustedCertificateGroupCommandInput{
+	svc := m.(paClient).TrustedCertificateGroups
+	input := &trustedCertificateGroups.DeleteTrustedCertificateGroupCommandInput{
 		Id: d.Id(),
 	}
 
@@ -112,7 +114,7 @@ func resourcePingAccessTrustedCertificateGroupsDelete(_ context.Context, d *sche
 	return nil
 }
 
-func resourcePingAccessTrustedCertificateGroupsReadResult(d *schema.ResourceData, input *pa.TrustedCertificateGroupView) diag.Diagnostics {
+func resourcePingAccessTrustedCertificateGroupsReadResult(d *schema.ResourceData, input *models.TrustedCertificateGroupView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataBoolWithDiagnostic(d, "ignore_all_certificate_errors", input.IgnoreAllCertificateErrors, &diags)
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
@@ -133,9 +135,9 @@ func resourcePingAccessTrustedCertificateGroupsReadResult(d *schema.ResourceData
 	return diags
 }
 
-func resourcePingAccessTrustedCertificateGroupsReadData(d *schema.ResourceData) *pa.TrustedCertificateGroupView {
+func resourcePingAccessTrustedCertificateGroupsReadData(d *schema.ResourceData) *models.TrustedCertificateGroupView {
 
-	tcg := &pa.TrustedCertificateGroupView{
+	tcg := &models.TrustedCertificateGroupView{
 		Name: String(d.Get("name").(string)),
 	}
 

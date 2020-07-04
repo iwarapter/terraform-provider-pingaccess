@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessAuthTokenManagement(t *testing.T) {
@@ -58,7 +59,7 @@ func testAccCheckPingAccessAuthTokenManagementExists(n string) resource.TestChec
 			return fmt.Errorf("No auth token management ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).AuthTokenManagement
+		conn := testAccProvider.Meta().(paClient).AuthTokenManagement
 		result, _, err := conn.GetAuthTokenManagementCommand()
 
 		if err != nil {
@@ -75,10 +76,10 @@ func testAccCheckPingAccessAuthTokenManagementExists(n string) resource.TestChec
 
 func Test_resourcePingAccessAuthTokenManagementReadData(t *testing.T) {
 	cases := []struct {
-		AuthTokenManagementView pa.AuthTokenManagementView
+		AuthTokenManagementView models.AuthTokenManagementView
 	}{
 		{
-			AuthTokenManagementView: pa.AuthTokenManagementView{
+			AuthTokenManagementView: models.AuthTokenManagementView{
 				Issuer:               String("PingAccessAuthTokenDemo"),
 				KeyRollEnabled:       Bool(false),
 				KeyRollPeriodInHours: Int(23),

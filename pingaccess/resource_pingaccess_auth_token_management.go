@@ -3,7 +3,8 @@ package pingaccess
 import (
 	"context"
 
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/authTokenManagement"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -58,7 +59,7 @@ func resourcePingAccessAuthTokenManagementCreate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessAuthTokenManagementRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).AuthTokenManagement
+	svc := m.(paClient).AuthTokenManagement
 	result, _, err := svc.GetAuthTokenManagementCommand()
 	if err != nil {
 		return diag.Errorf("unable to read AuthTokenManagement: %s", err)
@@ -68,8 +69,8 @@ func resourcePingAccessAuthTokenManagementRead(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessAuthTokenManagementUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).AuthTokenManagement
-	input := pa.UpdateAuthTokenManagementCommandInput{
+	svc := m.(paClient).AuthTokenManagement
+	input := authTokenManagement.UpdateAuthTokenManagementCommandInput{
 		Body: *resourcePingAccessAuthTokenManagementReadData(d),
 	}
 	result, _, err := svc.UpdateAuthTokenManagementCommand(&input)
@@ -82,7 +83,7 @@ func resourcePingAccessAuthTokenManagementUpdate(_ context.Context, d *schema.Re
 }
 
 func resourcePingAccessAuthTokenManagementDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).AuthTokenManagement
+	svc := m.(paClient).AuthTokenManagement
 	_, err := svc.DeleteAuthTokenManagementCommand()
 	if err != nil {
 		return diag.Errorf("unable to delete AuthTokenManagement: %s", err)
@@ -91,7 +92,7 @@ func resourcePingAccessAuthTokenManagementDelete(_ context.Context, _ *schema.Re
 	return nil
 }
 
-func resourcePingAccessAuthTokenManagementReadResult(d *schema.ResourceData, input *pa.AuthTokenManagementView) diag.Diagnostics {
+func resourcePingAccessAuthTokenManagementReadResult(d *schema.ResourceData, input *models.AuthTokenManagementView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "issuer", input.Issuer, &diags)
 	setResourceDataBoolWithDiagnostic(d, "key_roll_enabled", input.KeyRollEnabled, &diags)
@@ -100,8 +101,8 @@ func resourcePingAccessAuthTokenManagementReadResult(d *schema.ResourceData, inp
 	return diags
 }
 
-func resourcePingAccessAuthTokenManagementReadData(d *schema.ResourceData) *pa.AuthTokenManagementView {
-	atm := &pa.AuthTokenManagementView{
+func resourcePingAccessAuthTokenManagementReadData(d *schema.ResourceData) *models.AuthTokenManagementView {
+	atm := &models.AuthTokenManagementView{
 		Issuer:               String(d.Get("issuer").(string)),
 		KeyRollEnabled:       Bool(d.Get("key_roll_enabled").(bool)),
 		KeyRollPeriodInHours: Int(d.Get("key_roll_period_in_hours").(int)),

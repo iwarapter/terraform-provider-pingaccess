@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessTrustedCertificateGroups(t *testing.T) {
@@ -57,8 +59,8 @@ func testAccCheckPingAccessTrustedCertificateGroupsExists(n string) resource.Tes
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).TrustedCertificateGroups
-		result, _, err := conn.GetTrustedCertificateGroupCommand(&pa.GetTrustedCertificateGroupCommandInput{
+		conn := testAccProvider.Meta().(paClient).TrustedCertificateGroups
+		result, _, err := conn.GetTrustedCertificateGroupCommand(&trustedCertificateGroups.GetTrustedCertificateGroupCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -76,10 +78,10 @@ func testAccCheckPingAccessTrustedCertificateGroupsExists(n string) resource.Tes
 
 func Test_resourcePingAccessTrustedCertificateGroupsReadData(t *testing.T) {
 	cases := []struct {
-		TrustedCertificateGroups pa.TrustedCertificateGroupView
+		TrustedCertificateGroups models.TrustedCertificateGroupView
 	}{
 		{
-			TrustedCertificateGroups: pa.TrustedCertificateGroupView{
+			TrustedCertificateGroups: models.TrustedCertificateGroupView{
 				Name:                       String("localhost"),
 				CertIds:                    &[]*int{Int(1)},
 				UseJavaTrustStore:          Bool(false),

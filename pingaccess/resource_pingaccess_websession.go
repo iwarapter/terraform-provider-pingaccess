@@ -3,10 +3,12 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/webSessions"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessWebSession() *schema.Resource {
@@ -145,8 +147,8 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessWebSessionCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).WebSessions
-	input := pa.AddWebSessionCommandInput{
+	svc := m.(paClient).WebSessions
+	input := webSessions.AddWebSessionCommandInput{
 		Body: *resourcePingAccessWebSessionReadData(d),
 	}
 
@@ -160,8 +162,8 @@ func resourcePingAccessWebSessionCreate(_ context.Context, d *schema.ResourceDat
 }
 
 func resourcePingAccessWebSessionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).WebSessions
-	input := &pa.GetWebSessionCommandInput{
+	svc := m.(paClient).WebSessions
+	input := &webSessions.GetWebSessionCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetWebSessionCommand(input)
@@ -172,8 +174,8 @@ func resourcePingAccessWebSessionRead(_ context.Context, d *schema.ResourceData,
 }
 
 func resourcePingAccessWebSessionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).WebSessions
-	input := pa.UpdateWebSessionCommandInput{
+	svc := m.(paClient).WebSessions
+	input := webSessions.UpdateWebSessionCommandInput{
 		Body: *resourcePingAccessWebSessionReadData(d),
 		Id:   d.Id(),
 	}
@@ -185,8 +187,8 @@ func resourcePingAccessWebSessionUpdate(_ context.Context, d *schema.ResourceDat
 }
 
 func resourcePingAccessWebSessionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).WebSessions
-	input := &pa.DeleteWebSessionCommandInput{
+	svc := m.(paClient).WebSessions
+	input := &webSessions.DeleteWebSessionCommandInput{
 		Id: d.Id(),
 	}
 
@@ -197,7 +199,7 @@ func resourcePingAccessWebSessionDelete(_ context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.WebSessionView) diag.Diagnostics {
+func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *models.WebSessionView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "audience", input.Audience, &diags)
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
@@ -239,8 +241,8 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *pa.We
 	return diags
 }
 
-func resourcePingAccessWebSessionReadData(d *schema.ResourceData) *pa.WebSessionView {
-	websession := &pa.WebSessionView{
+func resourcePingAccessWebSessionReadData(d *schema.ResourceData) *models.WebSessionView {
+	websession := &models.WebSessionView{
 		Audience:          String(d.Get("audience").(string)),
 		Name:              String(d.Get("name").(string)),
 		ClientCredentials: expandOAuthClientCredentialsView(d.Get("client_credentials").([]interface{})),

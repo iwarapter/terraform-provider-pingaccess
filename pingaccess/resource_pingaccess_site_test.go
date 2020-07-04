@@ -5,12 +5,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/sites"
+
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessSite(t *testing.T) {
@@ -89,8 +91,8 @@ func testAccCheckPingAccessSiteExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("no site ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Sites
-		result, _, err := conn.GetSiteCommand(&pa.GetSiteCommandInput{
+		conn := testAccProvider.Meta().(paClient).Sites
+		result, _, err := conn.GetSiteCommand(&sites.GetSiteCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -108,10 +110,10 @@ func testAccCheckPingAccessSiteExists(n string) resource.TestCheckFunc {
 
 func Test_resourcePingAccessSiteReadData(t *testing.T) {
 	cases := []struct {
-		Site pa.SiteView
+		Site models.SiteView
 	}{
 		{
-			Site: pa.SiteView{
+			Site: models.SiteView{
 				Name:                      String("demo"),
 				Targets:                   &[]*string{String("localhost:1234")},
 				AvailabilityProfileId:     Int(1),
@@ -130,7 +132,7 @@ func Test_resourcePingAccessSiteReadData(t *testing.T) {
 			},
 		},
 		{
-			Site: pa.SiteView{
+			Site: models.SiteView{
 				Name:                      String("demo"),
 				Targets:                   &[]*string{String("localhost:1234")},
 				AvailabilityProfileId:     Int(0),

@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/webSessions"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessWebSession(t *testing.T) {
@@ -68,8 +70,8 @@ func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No websession ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).WebSessions
-		result, _, err := conn.GetWebSessionCommand(&pa.GetWebSessionCommandInput{
+		conn := testAccProvider.Meta().(paClient).WebSessions
+		result, _, err := conn.GetWebSessionCommand(&webSessions.GetWebSessionCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -87,15 +89,15 @@ func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
 
 func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 	cases := []struct {
-		WebSession pa.WebSessionView
+		WebSession models.WebSessionView
 	}{
 		{
-			WebSession: pa.WebSessionView{
+			WebSession: models.WebSessionView{
 				Audience: String("localhost"),
 				Name:     String("localhost"),
-				ClientCredentials: &pa.OAuthClientCredentialsView{
+				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId:     String("client"),
-					ClientSecret: &pa.HiddenFieldView{},
+					ClientSecret: &models.HiddenFieldView{},
 				},
 				WebStorageType:                String("SessionStorage"),
 				CacheUserAttributes:           Bool(true),
@@ -119,12 +121,12 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 			},
 		},
 		{
-			WebSession: pa.WebSessionView{
+			WebSession: models.WebSessionView{
 				Audience: String("localhost"),
 				Name:     String("localhost"),
-				ClientCredentials: &pa.OAuthClientCredentialsView{
+				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId:     String("client"),
-					ClientSecret: &pa.HiddenFieldView{},
+					ClientSecret: &models.HiddenFieldView{},
 				},
 				WebStorageType:                String("SessionStorage"),
 				CacheUserAttributes:           Bool(false),

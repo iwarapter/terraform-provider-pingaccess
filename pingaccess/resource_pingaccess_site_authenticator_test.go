@@ -1,20 +1,19 @@
 package pingaccess
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"regexp"
 	"testing"
+
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators"
 
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessSiteAuthenticator(t *testing.T) {
@@ -115,8 +114,8 @@ func testAccCheckPingAccessSiteAuthenticatorExists(n string) resource.TestCheckF
 			return fmt.Errorf("No site_authenticator ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).SiteAuthenticators
-		result, _, err := conn.GetSiteAuthenticatorCommand(&pa.GetSiteAuthenticatorCommandInput{
+		conn := testAccProvider.Meta().(paClient).SiteAuthenticators
+		result, _, err := conn.GetSiteAuthenticatorCommand(&siteAuthenticators.GetSiteAuthenticatorCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -132,13 +131,16 @@ func testAccCheckPingAccessSiteAuthenticatorExists(n string) resource.TestCheckF
 	}
 }
 
-func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
+type siteAuthsMock struct {
+	siteAuthenticators.SiteAuthenticatorsAPI
+}
 
-	descs := pa.DescriptorsView{
-		Items: []*pa.DescriptorView{
+func (s siteAuthsMock) GetSiteAuthenticatorDescriptorsCommand() (output *models.DescriptorsView, resp *http.Response, err error) {
+	return &models.DescriptorsView{
+		Items: []*models.DescriptorView{
 			{
 				ClassName: String("something"),
-				ConfigurationFields: []*pa.ConfigurationField{
+				ConfigurationFields: []*models.ConfigurationField{
 					{
 						Name: String("password"),
 						Type: String("CONCEALED"),
@@ -147,27 +149,15 @@ func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
 				Label: nil,
 				Type:  nil,
 			},
-		}}
+		}}, nil, err
+}
 
-	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		// Test request parameters
-		equals(t, req.URL.String(), "/siteAuthenticators/descriptors")
-		// Send response to be tested
-		b, _ := json.Marshal(descs)
-		rw.Write(b)
-	}))
-	// Close the server when test finishes
-	defer server.Close()
-
-	// Use Client & URL from our local test server
-	url, _ := url.Parse(server.URL)
-	c := pa.NewClient("", "", url, "", server.Client())
-
+func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
 	cases := []struct {
-		SiteAuthenticator pa.SiteAuthenticatorView
+		SiteAuthenticator models.SiteAuthenticatorView
 	}{
 		{
-			SiteAuthenticator: pa.SiteAuthenticatorView{
+			SiteAuthenticator: models.SiteAuthenticatorView{
 				Name:      String("demo"),
 				ClassName: String("something"),
 				Configuration: map[string]interface{}{
@@ -183,7 +173,7 @@ func Test_resourcePingAccessSiteAuthenticatorReadData(t *testing.T) {
 		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
 			resourceSchema := resourcePingAccessSiteAuthenticatorSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessSiteAuthenticatorReadResult(resourceLocalData, &tc.SiteAuthenticator, c.SiteAuthenticators)
+			resourcePingAccessSiteAuthenticatorReadResult(resourceLocalData, &tc.SiteAuthenticator, siteAuthsMock{})
 
 			if got := *resourcePingAccessSiteAuthenticatorReadData(resourceLocalData); !cmp.Equal(got, tc.SiteAuthenticator) {
 				t.Errorf("resourcePingAccessSiteAuthenticatorReadData() = %v", cmp.Diff(got, tc.SiteAuthenticator))

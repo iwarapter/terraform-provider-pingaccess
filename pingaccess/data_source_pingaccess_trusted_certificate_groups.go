@@ -3,9 +3,10 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func dataSourcePingAccessTrustedCertificateGroups() *schema.Resource {
@@ -48,8 +49,8 @@ func dataSourcePingAccessTrustedCertificateGroupsSchema() map[string]*schema.Sch
 }
 
 func dataSourcePingAccessTrustedCertificateGroupsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).TrustedCertificateGroups
-	input := &pa.GetTrustedCertificateGroupsCommandInput{
+	svc := m.(paClient).TrustedCertificateGroups
+	input := &trustedCertificateGroups.GetTrustedCertificateGroupsCommandInput{
 		Name: d.Get("name").(string),
 	}
 	result, _, err := svc.GetTrustedCertificateGroupsCommand(input)

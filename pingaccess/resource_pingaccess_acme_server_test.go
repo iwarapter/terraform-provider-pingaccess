@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessAcmeServer(t *testing.T) {
@@ -57,8 +59,8 @@ func testAccCheckPingAccessAcmeServerExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No AcmeServer ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Acme
-		result, _, err := conn.GetAcmeServerCommand(&pa.GetAcmeServerCommandInput{
+		conn := testAccProvider.Meta().(paClient).Acme
+		result, _, err := conn.GetAcmeServerCommand(&acme.GetAcmeServerCommandInput{
 			AcmeServerId: rs.Primary.ID,
 		})
 
@@ -75,10 +77,10 @@ func testAccCheckPingAccessAcmeServerExists(n string) resource.TestCheckFunc {
 
 func Test_resourcePingAccessAcmeServerReadData(t *testing.T) {
 	cases := []struct {
-		AcmeServer pa.AcmeServerView
+		AcmeServer models.AcmeServerView
 	}{
 		{
-			AcmeServer: pa.AcmeServerView{
+			AcmeServer: models.AcmeServerView{
 				Name: String("engine1"),
 				Url:  String("foo"),
 			},

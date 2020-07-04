@@ -4,9 +4,11 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessKeyPair() *schema.Resource {
@@ -165,10 +167,10 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessKeyPairCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).KeyPairs
+	svc := m.(paClient).KeyPairs
 	if _, ok := d.GetOk("file_data"); ok {
-		input := pa.ImportKeyPairCommandInput{
-			Body: pa.PKCS12FileImportDocView{
+		input := keyPairs.ImportKeyPairCommandInput{
+			Body: models.PKCS12FileImportDocView{
 				Alias:             String(d.Get("alias").(string)),
 				FileData:          String(d.Get("file_data").(string)),
 				Password:          String(d.Get("password").(string)),
@@ -185,8 +187,8 @@ func resourcePingAccessKeyPairCreate(_ context.Context, d *schema.ResourceData, 
 		return resourcePingAccessKeyPairReadResult(d, result)
 	}
 
-	input := pa.GenerateKeyPairCommandInput{
-		Body: pa.NewKeyPairConfigView{
+	input := keyPairs.GenerateKeyPairCommandInput{
+		Body: models.NewKeyPairConfigView{
 			Alias:            String(d.Get("alias").(string)),
 			City:             String(d.Get("city").(string)),
 			CommonName:       String(d.Get("common_name").(string)),
@@ -211,8 +213,8 @@ func resourcePingAccessKeyPairCreate(_ context.Context, d *schema.ResourceData, 
 }
 
 func resourcePingAccessKeyPairRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).KeyPairs
-	input := &pa.GetKeyPairCommandInput{
+	svc := m.(paClient).KeyPairs
+	input := &keyPairs.GetKeyPairCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetKeyPairCommand(input)
@@ -223,8 +225,8 @@ func resourcePingAccessKeyPairRead(_ context.Context, d *schema.ResourceData, m 
 }
 
 func resourcePingAccessKeyPairUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	input := pa.UpdateKeyPairCommandInput{
-		Body: pa.PKCS12FileImportDocView{
+	input := keyPairs.UpdateKeyPairCommandInput{
+		Body: models.PKCS12FileImportDocView{
 			Alias:             String(d.Get("alias").(string)),
 			FileData:          String(d.Get("file_data").(string)),
 			Password:          String(d.Get("password").(string)),
@@ -237,7 +239,7 @@ func resourcePingAccessKeyPairUpdate(_ context.Context, d *schema.ResourceData, 
 		input.Body.HsmProviderId = Int(hsmID)
 	}
 
-	svc := m.(*pa.Client).KeyPairs
+	svc := m.(paClient).KeyPairs
 
 	result, _, err := svc.UpdateKeyPairCommand(&input)
 	if err != nil {
@@ -249,15 +251,15 @@ func resourcePingAccessKeyPairUpdate(_ context.Context, d *schema.ResourceData, 
 }
 
 func resourcePingAccessKeyPairDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).KeyPairs
-	_, err := svc.DeleteKeyPairCommand(&pa.DeleteKeyPairCommandInput{Id: d.Id()})
+	svc := m.(paClient).KeyPairs
+	_, err := svc.DeleteKeyPairCommand(&keyPairs.DeleteKeyPairCommandInput{Id: d.Id()})
 	if err != nil {
 		return diag.Errorf("unable to delete KeyPair: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessKeyPairReadResult(d *schema.ResourceData, rv *pa.KeyPairView) diag.Diagnostics {
+func resourcePingAccessKeyPairReadResult(d *schema.ResourceData, rv *models.KeyPairView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "alias", rv.Alias, &diags)
 	if rv.ChainCertificates != nil {

@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessSiteAuthenticator() *schema.Resource {
@@ -21,7 +23,7 @@ func resourcePingAccessSiteAuthenticator() *schema.Resource {
 		},
 		Schema: resourcePingAccessSiteAuthenticatorSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			svc := m.(*pingaccess.Client).SiteAuthenticators
+			svc := m.(paClient).SiteAuthenticators
 			desc, _, err := svc.GetSiteAuthenticatorDescriptorsCommand()
 			if err != nil {
 				return fmt.Errorf("unable to retrieve SiteAuthenticator descriptors %s", err)
@@ -54,8 +56,8 @@ func resourcePingAccessSiteAuthenticatorSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessSiteAuthenticatorCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).SiteAuthenticators
-	input := pingaccess.AddSiteAuthenticatorCommandInput{
+	svc := m.(paClient).SiteAuthenticators
+	input := siteAuthenticators.AddSiteAuthenticatorCommandInput{
 		Body: *resourcePingAccessSiteAuthenticatorReadData(d),
 	}
 
@@ -69,8 +71,8 @@ func resourcePingAccessSiteAuthenticatorCreate(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessSiteAuthenticatorRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).SiteAuthenticators
-	input := &pingaccess.GetSiteAuthenticatorCommandInput{
+	svc := m.(paClient).SiteAuthenticators
+	input := &siteAuthenticators.GetSiteAuthenticatorCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetSiteAuthenticatorCommand(input)
@@ -81,8 +83,8 @@ func resourcePingAccessSiteAuthenticatorRead(_ context.Context, d *schema.Resour
 }
 
 func resourcePingAccessSiteAuthenticatorUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).SiteAuthenticators
-	input := pingaccess.UpdateSiteAuthenticatorCommandInput{
+	svc := m.(paClient).SiteAuthenticators
+	input := siteAuthenticators.UpdateSiteAuthenticatorCommandInput{
 		Body: *resourcePingAccessSiteAuthenticatorReadData(d),
 		Id:   d.Id(),
 	}
@@ -94,8 +96,8 @@ func resourcePingAccessSiteAuthenticatorUpdate(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessSiteAuthenticatorDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).SiteAuthenticators
-	input := &pingaccess.DeleteSiteAuthenticatorCommandInput{
+	svc := m.(paClient).SiteAuthenticators
+	input := &siteAuthenticators.DeleteSiteAuthenticatorCommandInput{
 		Id: d.Id(),
 	}
 
@@ -106,7 +108,7 @@ func resourcePingAccessSiteAuthenticatorDelete(_ context.Context, d *schema.Reso
 	return nil
 }
 
-func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input *pingaccess.SiteAuthenticatorView, svc pingaccess.SiteAuthenticatorsAPI) diag.Diagnostics {
+func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input *models.SiteAuthenticatorView, svc siteAuthenticators.SiteAuthenticatorsAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
@@ -125,11 +127,11 @@ func resourcePingAccessSiteAuthenticatorReadResult(d *schema.ResourceData, input
 	return diags
 }
 
-func resourcePingAccessSiteAuthenticatorReadData(d *schema.ResourceData) *pingaccess.SiteAuthenticatorView {
+func resourcePingAccessSiteAuthenticatorReadData(d *schema.ResourceData) *models.SiteAuthenticatorView {
 	config := d.Get("configuration").(string)
 	var dat map[string]interface{}
 	_ = json.Unmarshal([]byte(config), &dat)
-	siteAuthenticator := &pingaccess.SiteAuthenticatorView{
+	siteAuthenticator := &models.SiteAuthenticatorView{
 		Name:          String(d.Get("name").(string)),
 		ClassName:     String(d.Get("class_name").(string)),
 		Configuration: dat,

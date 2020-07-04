@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/engineListeners"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessEngineListener() *schema.Resource {
@@ -46,8 +48,8 @@ func resourcePingAccessEngineListenerSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessEngineListenerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).EngineListeners
-	input := pa.AddEngineListenerCommandInput{
+	svc := m.(paClient).EngineListeners
+	input := engineListeners.AddEngineListenerCommandInput{
 		Body: *resourcePingAccessEngineListenerReadData(d),
 	}
 
@@ -61,8 +63,8 @@ func resourcePingAccessEngineListenerCreate(_ context.Context, d *schema.Resourc
 }
 
 func resourcePingAccessEngineListenerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).EngineListeners
-	input := &pa.GetEngineListenerCommandInput{
+	svc := m.(paClient).EngineListeners
+	input := &engineListeners.GetEngineListenerCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetEngineListenerCommand(input)
@@ -73,8 +75,8 @@ func resourcePingAccessEngineListenerRead(_ context.Context, d *schema.ResourceD
 }
 
 func resourcePingAccessEngineListenerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).EngineListeners
-	input := pa.UpdateEngineListenerCommandInput{
+	svc := m.(paClient).EngineListeners
+	input := engineListeners.UpdateEngineListenerCommandInput{
 		Body: *resourcePingAccessEngineListenerReadData(d),
 		Id:   d.Id(),
 	}
@@ -87,8 +89,8 @@ func resourcePingAccessEngineListenerUpdate(_ context.Context, d *schema.Resourc
 }
 
 func resourcePingAccessEngineListenerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).EngineListeners
-	input := &pa.DeleteEngineListenerCommandInput{
+	svc := m.(paClient).EngineListeners
+	input := &engineListeners.DeleteEngineListenerCommandInput{
 		Id: d.Id(),
 	}
 
@@ -100,7 +102,7 @@ func resourcePingAccessEngineListenerDelete(_ context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourcePingAccessEngineListenerReadResult(d *schema.ResourceData, input *pa.EngineListenerView) diag.Diagnostics {
+func resourcePingAccessEngineListenerReadResult(d *schema.ResourceData, input *models.EngineListenerView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	setResourceDataIntWithDiagnostic(d, "port", input.Port, &diags)
@@ -109,8 +111,8 @@ func resourcePingAccessEngineListenerReadResult(d *schema.ResourceData, input *p
 	return diags
 }
 
-func resourcePingAccessEngineListenerReadData(d *schema.ResourceData) *pa.EngineListenerView {
-	engine := &pa.EngineListenerView{
+func resourcePingAccessEngineListenerReadData(d *schema.ResourceData) *models.EngineListenerView {
+	engine := &models.EngineListenerView{
 		Name: String(d.Get("name").(string)),
 		Port: Int(d.Get("port").(int)),
 	}

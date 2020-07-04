@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"regexp"
 	"testing"
+
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/identityMappings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessIdentityMapping(t *testing.T) {
@@ -158,8 +158,8 @@ func testAccCheckPingAccessIdentityMappingExists(n string) resource.TestCheckFun
 			return fmt.Errorf("No IdentityMapping ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).IdentityMappings
-		result, _, err := conn.GetIdentityMappingCommand(&pa.GetIdentityMappingCommandInput{
+		conn := testAccProvider.Meta().(paClient).IdentityMappings
+		result, _, err := conn.GetIdentityMappingCommand(&identityMappings.GetIdentityMappingCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -182,8 +182,8 @@ func testAccCheckPingAccessIdentityMappingAttributes(n string) resource.TestChec
 			return fmt.Errorf("No IdentityMapping ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).IdentityMappings
-		result, _, err := conn.GetIdentityMappingCommand(&pa.GetIdentityMappingCommandInput{
+		conn := testAccProvider.Meta().(paClient).IdentityMappings
+		result, _, err := conn.GetIdentityMappingCommand(&identityMappings.GetIdentityMappingCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -208,12 +208,16 @@ func testAccCheckPingAccessIdentityMappingAttributes(n string) resource.TestChec
 	}
 }
 
-func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
-	descs := pa.DescriptorsView{
-		Items: []*pa.DescriptorView{
+type idmappingsMock struct {
+	identityMappings.IdentityMappingsAPI
+}
+
+func (i idmappingsMock) GetIdentityMappingDescriptorsCommand() (output *models.DescriptorsView, resp *http.Response, err error) {
+	return &models.DescriptorsView{
+		Items: []*models.DescriptorView{
 			{
 				ClassName: String("something"),
-				ConfigurationFields: []*pa.ConfigurationField{
+				ConfigurationFields: []*models.ConfigurationField{
 					{
 						Name: String("password"),
 						Type: String("CONCEALED"),
@@ -222,30 +226,19 @@ func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
 				Label: nil,
 				Type:  nil,
 			},
-		}}
+		}}, nil, nil
+}
 
-	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		// Test request parameters
-		equals(t, req.URL.String(), "/identityMappings/descriptors")
-		// Send response to be tested
-		b, _ := json.Marshal(descs)
-		rw.Write(b)
-	}))
-	// Close the server when test finishes
-	defer server.Close()
-
-	// Use Client & URL from our local test server
-	url, _ := url.Parse(server.URL)
-	c := pa.NewClient("", "", url, "", server.Client())
+func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
 
 	cases := []struct {
 		Name            string
-		IdentityMapping pa.IdentityMappingView
+		IdentityMapping models.IdentityMappingView
 		ExpectedDiags   diag.Diagnostics
 	}{
 		{
 			Name: "Stuff breaks",
-			IdentityMapping: pa.IdentityMappingView{
+			IdentityMapping: models.IdentityMappingView{
 				Name:      String("foo"),
 				ClassName: String("foo"),
 			},
@@ -257,7 +250,7 @@ func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
 
 			resourceSchema := resourcePingAccessIdentityMappingSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			diags := resourcePingAccessIdentityMappingReadResult(resourceLocalData, &tc.IdentityMapping, c.IdentityMappings)
+			diags := resourcePingAccessIdentityMappingReadResult(resourceLocalData, &tc.IdentityMapping, idmappingsMock{})
 
 			checkDiagnostics(t, tc.Name, diags, tc.ExpectedDiags)
 

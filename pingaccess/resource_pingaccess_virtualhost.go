@@ -3,10 +3,12 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/virtualhosts"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessVirtualHost() *schema.Resource {
@@ -52,8 +54,8 @@ func resourcePingAccessVirtualHostSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessVirtualHostCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Virtualhosts
-	input := pa.AddVirtualHostCommandInput{
+	svc := m.(paClient).Virtualhosts
+	input := virtualhosts.AddVirtualHostCommandInput{
 		Body: *resourcePingAccessVirtualHostReadData(d),
 	}
 
@@ -67,8 +69,8 @@ func resourcePingAccessVirtualHostCreate(ctx context.Context, d *schema.Resource
 }
 
 func resourcePingAccessVirtualHostRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Virtualhosts
-	input := &pa.GetVirtualHostCommandInput{
+	svc := m.(paClient).Virtualhosts
+	input := &virtualhosts.GetVirtualHostCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetVirtualHostCommand(input)
@@ -79,8 +81,8 @@ func resourcePingAccessVirtualHostRead(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessVirtualHostUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Virtualhosts
-	input := pa.UpdateVirtualHostCommandInput{
+	svc := m.(paClient).Virtualhosts
+	input := virtualhosts.UpdateVirtualHostCommandInput{
 		Body: *resourcePingAccessVirtualHostReadData(d),
 		Id:   d.Id(),
 	}
@@ -93,8 +95,8 @@ func resourcePingAccessVirtualHostUpdate(ctx context.Context, d *schema.Resource
 }
 
 func resourcePingAccessVirtualHostDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Virtualhosts
-	input := &pa.DeleteVirtualHostCommandInput{
+	svc := m.(paClient).Virtualhosts
+	input := &virtualhosts.DeleteVirtualHostCommandInput{
 		Id: d.Id(),
 	}
 
@@ -105,7 +107,7 @@ func resourcePingAccessVirtualHostDelete(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *pa.VirtualHostView) diag.Diagnostics {
+func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *models.VirtualHostView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "host", input.Host, &diags)
 	setResourceDataIntWithDiagnostic(d, "port", input.Port, &diags)
@@ -116,8 +118,8 @@ func resourcePingAccessVirtualHostReadResult(d *schema.ResourceData, input *pa.V
 	return diags
 }
 
-func resourcePingAccessVirtualHostReadData(d *schema.ResourceData) *pa.VirtualHostView {
-	vh := &pa.VirtualHostView{
+func resourcePingAccessVirtualHostReadData(d *schema.ResourceData) *models.VirtualHostView {
+	vh := &models.VirtualHostView{
 		Host: String(d.Get("host").(string)),
 		Port: Int(d.Get("port").(int)),
 	}

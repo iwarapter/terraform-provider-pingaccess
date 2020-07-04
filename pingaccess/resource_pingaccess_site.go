@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/sites"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessSite() *schema.Resource {
@@ -105,8 +107,8 @@ func resourcePingAccessSiteSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessSiteCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Sites
-	input := pa.AddSiteCommandInput{
+	svc := m.(paClient).Sites
+	input := sites.AddSiteCommandInput{
 		Body: *resourcePingAccessSiteReadData(d),
 	}
 
@@ -120,8 +122,8 @@ func resourcePingAccessSiteCreate(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourcePingAccessSiteRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Sites
-	input := &pa.GetSiteCommandInput{
+	svc := m.(paClient).Sites
+	input := &sites.GetSiteCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetSiteCommand(input)
@@ -132,8 +134,8 @@ func resourcePingAccessSiteRead(_ context.Context, d *schema.ResourceData, m int
 }
 
 func resourcePingAccessSiteUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Sites
-	input := pa.UpdateSiteCommandInput{
+	svc := m.(paClient).Sites
+	input := sites.UpdateSiteCommandInput{
 		Body: *resourcePingAccessSiteReadData(d),
 		Id:   d.Id(),
 	}
@@ -145,8 +147,8 @@ func resourcePingAccessSiteUpdate(_ context.Context, d *schema.ResourceData, m i
 }
 
 func resourcePingAccessSiteDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Sites
-	input := &pa.DeleteSiteCommandInput{
+	svc := m.(paClient).Sites
+	input := &sites.DeleteSiteCommandInput{
 		Id: d.Id(),
 	}
 
@@ -157,7 +159,7 @@ func resourcePingAccessSiteDelete(_ context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *pa.SiteView) diag.Diagnostics {
+func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *models.SiteView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataIntWithDiagnostic(d, "availability_profile_id", input.AvailabilityProfileId, &diags)
 	setResourceDataStringWithDiagnostic(d, "expected_hostname", input.ExpectedHostname, &diags)
@@ -181,9 +183,9 @@ func resourcePingAccessSiteReadResult(d *schema.ResourceData, input *pa.SiteView
 	return diags
 }
 
-func resourcePingAccessSiteReadData(d *schema.ResourceData) *pa.SiteView {
+func resourcePingAccessSiteReadData(d *schema.ResourceData) *models.SiteView {
 	targets := expandStringList(d.Get("targets").(*schema.Set).List())
-	site := &pa.SiteView{
+	site := &models.SiteView{
 		Name:    String(d.Get("name").(string)),
 		Targets: &targets,
 	}

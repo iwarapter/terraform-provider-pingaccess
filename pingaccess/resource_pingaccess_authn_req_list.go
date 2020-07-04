@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/authnReqLists"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessAuthnReqList() *schema.Resource {
@@ -33,8 +35,8 @@ func resourcePingAccessAuthnReqListSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessAuthnReqListCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).AuthnReqLists
-	input := pingaccess.AddAuthnReqListCommandInput{
+	svc := m.(paClient).AuthnReqLists
+	input := authnReqLists.AddAuthnReqListCommandInput{
 		Body: *resourcePingAccessAuthnReqListReadData(d),
 	}
 
@@ -48,8 +50,8 @@ func resourcePingAccessAuthnReqListCreate(_ context.Context, d *schema.ResourceD
 }
 
 func resourcePingAccessAuthnReqListRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).AuthnReqLists
-	input := &pingaccess.GetAuthnReqListCommandInput{
+	svc := m.(paClient).AuthnReqLists
+	input := &authnReqLists.GetAuthnReqListCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetAuthnReqListCommand(input)
@@ -60,8 +62,8 @@ func resourcePingAccessAuthnReqListRead(_ context.Context, d *schema.ResourceDat
 }
 
 func resourcePingAccessAuthnReqListUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).AuthnReqLists
-	input := pingaccess.UpdateAuthnReqListCommandInput{
+	svc := m.(paClient).AuthnReqLists
+	input := authnReqLists.UpdateAuthnReqListCommandInput{
 		Body: *resourcePingAccessAuthnReqListReadData(d),
 		Id:   d.Id(),
 	}
@@ -74,8 +76,8 @@ func resourcePingAccessAuthnReqListUpdate(_ context.Context, d *schema.ResourceD
 }
 
 func resourcePingAccessAuthnReqListDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).AuthnReqLists
-	input := &pingaccess.DeleteAuthnReqListCommandInput{
+	svc := m.(paClient).AuthnReqLists
+	input := &authnReqLists.DeleteAuthnReqListCommandInput{
 		Id: d.Id(),
 	}
 
@@ -86,7 +88,7 @@ func resourcePingAccessAuthnReqListDelete(_ context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourcePingAccessAuthnReqListReadResult(d *schema.ResourceData, input *pingaccess.AuthnReqListView) diag.Diagnostics {
+func resourcePingAccessAuthnReqListReadResult(d *schema.ResourceData, input *models.AuthnReqListView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	if err := d.Set("authn_reqs", input.AuthnReqs); err != nil {
@@ -95,9 +97,9 @@ func resourcePingAccessAuthnReqListReadResult(d *schema.ResourceData, input *pin
 	return diags
 }
 
-func resourcePingAccessAuthnReqListReadData(d *schema.ResourceData) *pingaccess.AuthnReqListView {
+func resourcePingAccessAuthnReqListReadData(d *schema.ResourceData) *models.AuthnReqListView {
 	auths := expandStringList(d.Get("authn_reqs").([]interface{}))
-	engine := &pingaccess.AuthnReqListView{
+	engine := &models.AuthnReqListView{
 		Name:      String(d.Get("name").(string)),
 		AuthnReqs: &auths,
 	}

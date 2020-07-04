@@ -88,7 +88,7 @@ func init() {
 
 func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
-	config := &config{
+	config := &cfg{
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),
 		BaseURL:  d.Get("base_url").(string),

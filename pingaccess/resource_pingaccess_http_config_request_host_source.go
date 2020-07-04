@@ -3,9 +3,11 @@ package pingaccess
 import (
 	"context"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/httpConfig"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessHTTPConfigRequestHostSource() *schema.Resource {
@@ -37,7 +39,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceCreate(ctx context.Context, d 
 }
 
 func resourcePingAccessHTTPConfigRequestHostSourceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).HttpConfig
+	svc := m.(paClient).HttpConfig
 	result, _, err := svc.GetHostSourceCommand()
 	if err != nil {
 		return diag.Errorf("unable to read HttpConfigHostSource: %s", err)
@@ -46,8 +48,8 @@ func resourcePingAccessHTTPConfigRequestHostSourceRead(_ context.Context, d *sch
 }
 
 func resourcePingAccessHTTPConfigRequestHostSourceUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).HttpConfig
-	input := &pa.UpdateHostSourceCommandInput{Body: *resourcePingAccessHTTPConfigRequestHostSourceReadData(d)}
+	svc := m.(paClient).HttpConfig
+	input := &httpConfig.UpdateHostSourceCommandInput{Body: *resourcePingAccessHTTPConfigRequestHostSourceReadData(d)}
 	result, _, err := svc.UpdateHostSourceCommand(input)
 	if err != nil {
 		return diag.Errorf("unable to update HttpConfigHostSource: %s", err)
@@ -58,7 +60,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceUpdate(_ context.Context, d *s
 }
 
 func resourcePingAccessHTTPConfigRequestHostSourceDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).HttpConfig
+	svc := m.(paClient).HttpConfig
 	_, err := svc.DeleteHostSourceCommand()
 	if err != nil {
 		return diag.Errorf("unable to delete HttpConfigHostSource: %s", err)
@@ -67,7 +69,7 @@ func resourcePingAccessHTTPConfigRequestHostSourceDelete(_ context.Context, _ *s
 	return nil
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceReadResult(d *schema.ResourceData, rv *pa.HostMultiValueSourceView) diag.Diagnostics {
+func resourcePingAccessHTTPConfigRequestHostSourceReadResult(d *schema.ResourceData, rv *models.HostMultiValueSourceView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "list_value_location", rv.ListValueLocation, &diags)
 	if err := d.Set("header_name_list", rv.HeaderNameList); err != nil {
@@ -76,9 +78,9 @@ func resourcePingAccessHTTPConfigRequestHostSourceReadResult(d *schema.ResourceD
 	return diags
 }
 
-func resourcePingAccessHTTPConfigRequestHostSourceReadData(d *schema.ResourceData) (body *pa.HostMultiValueSourceView) {
+func resourcePingAccessHTTPConfigRequestHostSourceReadData(d *schema.ResourceData) (body *models.HostMultiValueSourceView) {
 	headerNameList := expandStringList(d.Get("header_name_list").([]interface{}))
-	body = &pa.HostMultiValueSourceView{
+	body = &models.HostMultiValueSourceView{
 		HeaderNameList:    &headerNameList,
 		ListValueLocation: String(d.Get("list_value_location").(string)),
 	}

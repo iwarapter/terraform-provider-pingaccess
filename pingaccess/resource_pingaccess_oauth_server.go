@@ -3,7 +3,8 @@ package pingaccess
 import (
 	"context"
 
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/oauth"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -85,7 +86,7 @@ func resourcePingAccessOAuthServerCreate(ctx context.Context, d *schema.Resource
 }
 
 func resourcePingAccessOAuthServerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Oauth
+	svc := m.(paClient).Oauth
 	result, _, err := svc.GetAuthorizationServerCommand()
 	if err != nil {
 		return diag.Errorf("unable to read OAuthServerSettings: %s", err)
@@ -95,8 +96,8 @@ func resourcePingAccessOAuthServerRead(_ context.Context, d *schema.ResourceData
 }
 
 func resourcePingAccessOAuthServerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Oauth
-	input := pa.UpdateAuthorizationServerCommandInput{
+	svc := m.(paClient).Oauth
+	input := oauth.UpdateAuthorizationServerCommandInput{
 		Body: *resourcePingAccessOAuthServerReadData(d),
 	}
 	result, _, err := svc.UpdateAuthorizationServerCommand(&input)
@@ -109,7 +110,7 @@ func resourcePingAccessOAuthServerUpdate(_ context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessOAuthServerDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Oauth
+	svc := m.(paClient).Oauth
 	_, err := svc.DeleteAuthorizationServerCommand()
 	if err != nil {
 		return diag.Errorf("unable to reset OAuthServerSettings: %s", err)
@@ -117,7 +118,7 @@ func resourcePingAccessOAuthServerDelete(_ context.Context, _ *schema.ResourceDa
 	return nil
 }
 
-func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *pa.AuthorizationServerView) diag.Diagnostics {
+func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *models.AuthorizationServerView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "audit_level", input.AuditLevel, &diags)
 	setResourceDataBoolWithDiagnostic(d, "cache_tokens", input.CacheTokens, &diags)
@@ -148,9 +149,9 @@ func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *pa.A
 	return diags
 }
 
-func resourcePingAccessOAuthServerReadData(d *schema.ResourceData) *pa.AuthorizationServerView {
+func resourcePingAccessOAuthServerReadData(d *schema.ResourceData) *models.AuthorizationServerView {
 	targets := expandStringList(d.Get("targets").(*schema.Set).List())
-	oauth := &pa.AuthorizationServerView{
+	oauth := &models.AuthorizationServerView{
 		IntrospectionEndpoint:     String(d.Get("introspection_endpoint").(string)),
 		SubjectAttributeName:      String(d.Get("subject_attribute_name").(string)),
 		Targets:                   &targets,

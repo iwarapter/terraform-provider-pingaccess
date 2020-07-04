@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/identityMappings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessIdentityMapping() *schema.Resource {
@@ -24,7 +26,7 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 
 		Schema: resourcePingAccessIdentityMappingSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			svc := m.(*pingaccess.Client).IdentityMappings
+			svc := m.(paClient).IdentityMappings
 			desc, _, err := svc.GetIdentityMappingDescriptorsCommand()
 			if err != nil {
 				return fmt.Errorf("unable to retrieve IdentityMapping descriptors %s", err)
@@ -57,8 +59,8 @@ func resourcePingAccessIdentityMappingSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessIdentityMappingCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	input := pingaccess.AddIdentityMappingCommandInput{
+	svc := m.(paClient).IdentityMappings
+	input := identityMappings.AddIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
 	}
 
@@ -72,8 +74,8 @@ func resourcePingAccessIdentityMappingCreate(_ context.Context, d *schema.Resour
 }
 
 func resourcePingAccessIdentityMappingRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	input := &pingaccess.GetIdentityMappingCommandInput{
+	svc := m.(paClient).IdentityMappings
+	input := &identityMappings.GetIdentityMappingCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetIdentityMappingCommand(input)
@@ -85,8 +87,8 @@ func resourcePingAccessIdentityMappingRead(_ context.Context, d *schema.Resource
 }
 
 func resourcePingAccessIdentityMappingUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	input := pingaccess.UpdateIdentityMappingCommandInput{
+	svc := m.(paClient).IdentityMappings
+	input := identityMappings.UpdateIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
 		Id:   d.Id(),
 	}
@@ -101,16 +103,16 @@ func resourcePingAccessIdentityMappingUpdate(_ context.Context, d *schema.Resour
 }
 
 func resourcePingAccessIdentityMappingDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pingaccess.Client).IdentityMappings
+	svc := m.(paClient).IdentityMappings
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	_, err := svc.DeleteIdentityMappingCommand(&pingaccess.DeleteIdentityMappingCommandInput{Id: d.Id()})
+	_, err := svc.DeleteIdentityMappingCommand(&identityMappings.DeleteIdentityMappingCommandInput{Id: d.Id()})
 	if err != nil {
 		return diag.Errorf("unable to delete IdentityMapping: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *pingaccess.IdentityMappingView, svc pingaccess.IdentityMappingsAPI) diag.Diagnostics {
+func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *models.IdentityMappingView, svc identityMappings.IdentityMappingsAPI) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
@@ -129,11 +131,11 @@ func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *
 	return diags
 }
 
-func resourcePingAccessIdentityMappingReadData(d *schema.ResourceData) *pingaccess.IdentityMappingView {
+func resourcePingAccessIdentityMappingReadData(d *schema.ResourceData) *models.IdentityMappingView {
 	config := d.Get("configuration").(string)
 	var dat map[string]interface{}
 	_ = json.Unmarshal([]byte(config), &dat)
-	idMapping := &pingaccess.IdentityMappingView{
+	idMapping := &models.IdentityMappingView{
 		Name:          String(d.Get("name").(string)),
 		ClassName:     String(d.Get("class_name").(string)),
 		Configuration: dat,

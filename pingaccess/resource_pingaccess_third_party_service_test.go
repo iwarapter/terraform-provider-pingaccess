@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/thirdPartyServices"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessThirdPartyService(t *testing.T) {
@@ -80,8 +82,8 @@ func testAccCheckPingAccessThirdPartyServiceExists(n string) resource.TestCheckF
 			return fmt.Errorf("no third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).ThirdPartyServices
-		result, _, err := conn.GetThirdPartyServiceCommand(&pa.GetThirdPartyServiceCommandInput{
+		conn := testAccProvider.Meta().(paClient).ThirdPartyServices
+		result, _, err := conn.GetThirdPartyServiceCommand(&thirdPartyServices.GetThirdPartyServiceCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -99,10 +101,10 @@ func testAccCheckPingAccessThirdPartyServiceExists(n string) resource.TestCheckF
 
 func Test_resourcePingAccessThirdPartyServiceReadData(t *testing.T) {
 	cases := []struct {
-		ThirdPartyService pa.ThirdPartyServiceView
+		ThirdPartyService models.ThirdPartyServiceView
 	}{
 		{
-			ThirdPartyService: pa.ThirdPartyServiceView{
+			ThirdPartyService: models.ThirdPartyServiceView{
 				Name:                      String("localhost"),
 				Targets:                   &[]*string{String("localhost:1234")},
 				AvailabilityProfileId:     Int(1),
@@ -117,7 +119,7 @@ func Test_resourcePingAccessThirdPartyServiceReadData(t *testing.T) {
 			},
 		},
 		{
-			ThirdPartyService: pa.ThirdPartyServiceView{
+			ThirdPartyService: models.ThirdPartyServiceView{
 				Name:                      String("localhost"),
 				Targets:                   &[]*string{String("localhost:1234")},
 				AvailabilityProfileId:     Int(0),

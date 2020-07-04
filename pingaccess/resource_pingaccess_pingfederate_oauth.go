@@ -3,7 +3,8 @@ package pingaccess
 import (
 	"context"
 
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,7 +71,7 @@ func resourcePingAccessPingFederateOAuthCreate(ctx context.Context, d *schema.Re
 }
 
 func resourcePingAccessPingFederateOAuthRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	result, _, err := svc.GetPingFederateAccessTokensCommand()
 	if err != nil {
 		return diag.Errorf("unable to read PingFederateOAuth: %s", err)
@@ -80,8 +81,8 @@ func resourcePingAccessPingFederateOAuthRead(_ context.Context, d *schema.Resour
 }
 
 func resourcePingAccessPingFederateOAuthUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
-	input := pa.UpdatePingFederateAccessTokensCommandInput{
+	svc := m.(paClient).Pingfederate
+	input := pingfederate.UpdatePingFederateAccessTokensCommandInput{
 		Body: *resourcePingAccessPingFederateOAuthReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateAccessTokensCommand(&input)
@@ -94,7 +95,7 @@ func resourcePingAccessPingFederateOAuthUpdate(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessPingFederateOAuthDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	_, err := svc.DeletePingFederateAccessTokensCommand()
 	if err != nil {
 		return diag.Errorf("unable to reset PingFederateOAuth: %s", err)
@@ -102,7 +103,7 @@ func resourcePingAccessPingFederateOAuthDelete(_ context.Context, _ *schema.Reso
 	return nil
 }
 
-func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input *pa.PingFederateAccessTokenView) diag.Diagnostics {
+func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input *models.PingFederateAccessTokenView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataIntWithDiagnostic(d, "access_validator_id", input.AccessValidatorId, &diags)
 	setResourceDataBoolWithDiagnostic(d, "cache_tokens", input.CacheTokens, &diags)
@@ -127,8 +128,8 @@ func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input
 	return diags
 }
 
-func resourcePingAccessPingFederateOAuthReadData(d *schema.ResourceData) *pa.PingFederateAccessTokenView {
-	oauth := &pa.PingFederateAccessTokenView{
+func resourcePingAccessPingFederateOAuthReadData(d *schema.ResourceData) *models.PingFederateAccessTokenView {
+	oauth := &models.PingFederateAccessTokenView{
 		ClientId:             String(d.Get("client_id").(string)),
 		SubjectAttributeName: String(d.Get("subject_attribute_name").(string)),
 	}

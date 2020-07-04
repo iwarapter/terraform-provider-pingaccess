@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessHTTPSListener(t *testing.T) {
@@ -57,8 +59,8 @@ func testAccCheckPingAccessHTTPSListenerExists(n string) resource.TestCheckFunc 
 			return fmt.Errorf("No listener ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).HttpsListeners
-		result, _, err := conn.GetHttpsListenerCommand(&pa.GetHttpsListenerCommandInput{
+		conn := testAccProvider.Meta().(paClient).HttpsListeners
+		result, _, err := conn.GetHttpsListenerCommand(&httpsListeners.GetHttpsListenerCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -76,10 +78,10 @@ func testAccCheckPingAccessHTTPSListenerExists(n string) resource.TestCheckFunc 
 
 func Test_resourcePingAccessHTTPSListenerReadData(t *testing.T) {
 	cases := []struct {
-		listener pa.HttpsListenerView
+		listener models.HttpsListenerView
 	}{
 		{
-			listener: pa.HttpsListenerView{
+			listener: models.HttpsListenerView{
 				Name:                      String("ADMIN"),
 				KeyPairId:                 Int(1),
 				UseServerCipherSuiteOrder: Bool(true),

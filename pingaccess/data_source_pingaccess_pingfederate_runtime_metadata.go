@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func dataSourcePingAccessPingFederateRuntimeMetadata() *schema.Resource {
@@ -89,63 +88,63 @@ func dataSourcePingAccessPingFederateRuntimeMetadataSchema() map[string]*schema.
 }
 
 func dataSourcePingAccessPingFederateRuntimeMetadataRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Pingfederate
+	svc := m.(paClient).Pingfederate
 	result, resp, err := svc.GetPingFederateMetadataCommand()
 	if err != nil {
 		return diag.Errorf("unable to read PingFederate Runtime Metadata: %s\n%v", err, resp)
 	}
 	var diags diag.Diagnostics
 	d.SetId("pingfederate_runtime_metadata")
-	setResourceDataStringWithDiagnostic(d, "authorization_endpoint", result.Authorization_endpoint, &diags)
-	setResourceDataStringWithDiagnostic(d, "backchannel_authentication_endpoint", result.Backchannel_authentication_endpoint, &diags)
-	if err := d.Set("claim_types_supported", result.Claim_types_supported); err != nil {
+	setResourceDataStringWithDiagnostic(d, "authorization_endpoint", result.AuthorizationEndpoint, &diags)
+	setResourceDataStringWithDiagnostic(d, "backchannel_authentication_endpoint", result.BackchannelAuthenticationEndpoint, &diags)
+	if err := d.Set("claim_types_supported", result.ClaimTypesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if err := d.Set("claims_parameter_supported", result.Claims_parameter_supported); err != nil {
+	if err := d.Set("claims_parameter_supported", result.ClaimsParameterSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if err := d.Set("claims_supported", result.Claims_supported); err != nil {
+	if err := d.Set("claims_supported", result.ClaimsSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if err := d.Set("code_challenge_methods_supported", result.Code_challenge_methods_supported); err != nil {
+	if err := d.Set("code_challenge_methods_supported", result.CodeChallengeMethodsSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	setResourceDataStringWithDiagnostic(d, "end_session_endpoint", result.End_session_endpoint, &diags)
-	if err := d.Set("grant_types_supported", result.Grant_types_supported); err != nil {
+	setResourceDataStringWithDiagnostic(d, "end_session_endpoint", result.EndSessionEndpoint, &diags)
+	if err := d.Set("grant_types_supported", result.GrantTypesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if err := d.Set("id_token_signing_alg_values_supported", result.Id_token_signing_alg_values_supported); err != nil {
+	if err := d.Set("id_token_signing_alg_values_supported", result.IdTokenSigningAlgValuesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	setResourceDataStringWithDiagnostic(d, "introspection_endpoint", result.Introspection_endpoint, &diags)
+	setResourceDataStringWithDiagnostic(d, "introspection_endpoint", result.IntrospectionEndpoint, &diags)
 	setResourceDataStringWithDiagnostic(d, "issuer", result.Issuer, &diags)
-	setResourceDataStringWithDiagnostic(d, "jwks_uri", result.Jwks_uri, &diags)
-	setResourceDataStringWithDiagnostic(d, "ping_end_session_endpoint", result.Ping_end_session_endpoint, &diags)
-	setResourceDataStringWithDiagnostic(d, "ping_revoked_sris_endpoint", result.Ping_revoked_sris_endpoint, &diags)
-	if err := d.Set("request_object_signing_alg_values_supported", result.Request_object_signing_alg_values_supported); err != nil {
+	setResourceDataStringWithDiagnostic(d, "jwks_uri", result.JwksUri, &diags)
+	setResourceDataStringWithDiagnostic(d, "ping_end_session_endpoint", result.PingEndSessionEndpoint, &diags)
+	setResourceDataStringWithDiagnostic(d, "ping_revoked_sris_endpoint", result.PingRevokedSrisEndpoint, &diags)
+	if err := d.Set("request_object_signing_alg_values_supported", result.RequestObjectSigningAlgValuesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	setResourceDataBoolWithDiagnostic(d, "request_parameter_supported", result.Request_parameter_supported, &diags)
-	setResourceDataBoolWithDiagnostic(d, "request_uri_parameter_supported", result.Request_uri_parameter_supported, &diags)
-	if err := d.Set("response_modes_supported", result.Response_modes_supported); err != nil {
+	setResourceDataBoolWithDiagnostic(d, "request_parameter_supported", result.RequestParameterSupported, &diags)
+	setResourceDataBoolWithDiagnostic(d, "request_uri_parameter_supported", result.RequestUriParameterSupported, &diags)
+	if err := d.Set("response_modes_supported", result.ResponseModesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if err := d.Set("response_types_supported", result.Response_types_supported); err != nil {
+	if err := d.Set("response_types_supported", result.ResponseTypesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	setResourceDataStringWithDiagnostic(d, "revocation_endpoint", result.Revocation_endpoint, &diags)
-	if err := d.Set("scopes_supported", result.Scopes_supported); err != nil {
+	setResourceDataStringWithDiagnostic(d, "revocation_endpoint", result.RevocationEndpoint, &diags)
+	if err := d.Set("scopes_supported", result.ScopesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	if err := d.Set("subject_types_supported", result.Subject_types_supported); err != nil {
+	if err := d.Set("subject_types_supported", result.SubjectTypesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	setResourceDataStringWithDiagnostic(d, "token_endpoint", result.Token_endpoint, &diags)
-	if err := d.Set("token_endpoint_auth_methods_supported", result.Token_endpoint_auth_methods_supported); err != nil {
+	setResourceDataStringWithDiagnostic(d, "token_endpoint", result.TokenEndpoint, &diags)
+	if err := d.Set("token_endpoint_auth_methods_supported", result.TokenEndpointAuthMethodsSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	setResourceDataStringWithDiagnostic(d, "userinfo_endpoint", result.Userinfo_endpoint, &diags)
-	if err := d.Set("userinfo_signing_alg_values_supported", result.Userinfo_signing_alg_values_supported); err != nil {
+	setResourceDataStringWithDiagnostic(d, "userinfo_endpoint", result.UserinfoEndpoint, &diags)
+	if err := d.Set("userinfo_signing_alg_values_supported", result.UserinfoSigningAlgValuesSupported); err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
 	return diags

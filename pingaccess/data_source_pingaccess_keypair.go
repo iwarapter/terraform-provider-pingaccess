@@ -4,9 +4,10 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func dataSourcePingAccessKeyPair() *schema.Resource {
@@ -30,8 +31,8 @@ func dataSourcePingAccessKeyPair() *schema.Resource {
 }
 
 func dataSourcePingAccessKeyPairRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).KeyPairs
-	input := &pa.GetKeyPairsCommandInput{
+	svc := m.(paClient).KeyPairs
+	input := &keyPairs.GetKeyPairsCommandInput{
 		Alias: d.Get("alias").(string),
 	}
 	result, _, err := svc.GetKeyPairsCommand(input)

@@ -4,10 +4,12 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessApplication() *schema.Resource {
@@ -133,8 +135,8 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessApplicationCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
-	input := &pa.AddApplicationCommandInput{
+	svc := m.(paClient).Applications
+	input := &applications.AddApplicationCommandInput{
 		Body: *resourcePingAccessApplicationReadData(d),
 	}
 	result, _, err := svc.AddApplicationCommand(input)
@@ -147,8 +149,8 @@ func resourcePingAccessApplicationCreate(_ context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
-	input := &pa.GetApplicationCommandInput{
+	svc := m.(paClient).Applications
+	input := &applications.GetApplicationCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetApplicationCommand(input)
@@ -159,8 +161,8 @@ func resourcePingAccessApplicationRead(_ context.Context, d *schema.ResourceData
 }
 
 func resourcePingAccessApplicationUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
-	input := pa.UpdateApplicationCommandInput{
+	svc := m.(paClient).Applications
+	input := applications.UpdateApplicationCommandInput{
 		Body: *resourcePingAccessApplicationReadData(d),
 		Id:   d.Id(),
 	}
@@ -172,9 +174,9 @@ func resourcePingAccessApplicationUpdate(_ context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessApplicationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
+	svc := m.(paClient).Applications
 
-	input := &pa.DeleteApplicationCommandInput{
+	input := &applications.DeleteApplicationCommandInput{
 		Id: d.Id(),
 	}
 
@@ -185,7 +187,7 @@ func resourcePingAccessApplicationDelete(_ context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.ApplicationView) diag.Diagnostics {
+func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.ApplicationView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataIntWithDiagnostic(d, "access_validator_id", rv.AccessValidatorId, &diags)
 	setResourceDataIntWithDiagnostic(d, "agent_id", rv.AgentId, &diags)
@@ -229,7 +231,7 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.Appl
 	return diags
 }
 
-func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.ApplicationView {
+func resourcePingAccessApplicationReadData(d *schema.ResourceData) *models.ApplicationView {
 	siteID, _ := strconv.Atoi(d.Get("site_id").(string))
 	virtualHostIds := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
 	var vhIds []*int
@@ -238,7 +240,7 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		vhIds = append(vhIds, &text)
 	}
 
-	application := &pa.ApplicationView{
+	application := &models.ApplicationView{
 		AgentId:           Int(d.Get("agent_id").(int)),
 		Name:              String(d.Get("name").(string)),
 		ApplicationType:   String(d.Get("application_type").(string)),

@@ -4,9 +4,11 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessCertificate() *schema.Resource {
@@ -77,14 +79,14 @@ func resourcePingAccessCertificateSchema() map[string]*schema.Schema {
 }
 
 func resourcePingAccessCertificateCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	input := pa.ImportTrustedCertInput{
-		Body: pa.X509FileImportDocView{
+	input := certificates.ImportTrustedCertInput{
+		Body: models.X509FileImportDocView{
 			Alias:    String(d.Get("alias").(string)),
 			FileData: String(d.Get("file_data").(string)),
 		},
 	}
 
-	svc := m.(*pa.Client).Certificates
+	svc := m.(paClient).Certificates
 
 	result, _, err := svc.ImportTrustedCert(&input)
 	if err != nil {
@@ -96,8 +98,8 @@ func resourcePingAccessCertificateCreate(_ context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessCertificateRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Certificates
-	input := &pa.GetTrustedCertInput{
+	svc := m.(paClient).Certificates
+	input := &certificates.GetTrustedCertInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetTrustedCert(input)
@@ -108,15 +110,15 @@ func resourcePingAccessCertificateRead(_ context.Context, d *schema.ResourceData
 }
 
 func resourcePingAccessCertificateUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	input := pa.UpdateTrustedCertInput{
-		Body: pa.X509FileImportDocView{
+	input := certificates.UpdateTrustedCertInput{
+		Body: models.X509FileImportDocView{
 			Alias:    String(d.Get("alias").(string)),
 			FileData: String(d.Get("file_data").(string)),
 		},
 		Id: d.Id(),
 	}
 
-	svc := m.(*pa.Client).Certificates
+	svc := m.(paClient).Certificates
 
 	result, _, err := svc.UpdateTrustedCert(&input)
 	if err != nil {
@@ -128,15 +130,15 @@ func resourcePingAccessCertificateUpdate(_ context.Context, d *schema.ResourceDa
 }
 
 func resourcePingAccessCertificateDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Certificates
-	_, err := svc.DeleteTrustedCertCommand(&pa.DeleteTrustedCertCommandInput{Id: d.Id()})
+	svc := m.(paClient).Certificates
+	_, err := svc.DeleteTrustedCertCommand(&certificates.DeleteTrustedCertCommandInput{Id: d.Id()})
 	if err != nil {
 		return diag.Errorf("unable to delete Certificate: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessCertificateReadResult(d *schema.ResourceData, rv *pa.TrustedCertView) diag.Diagnostics {
+func resourcePingAccessCertificateReadResult(d *schema.ResourceData, rv *models.TrustedCertView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "alias", rv.Alias, &diags)
 	setResourceDataIntWithDiagnostic(d, "expires", rv.Expires, &diags)

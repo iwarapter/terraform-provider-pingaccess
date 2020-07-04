@@ -5,9 +5,10 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/hsmProviders"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
@@ -76,8 +77,8 @@ func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No HsmProvider ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).HsmProviders
-		result, _, err := conn.GetHsmProviderCommand(&pa.GetHsmProviderCommandInput{
+		conn := testAccProvider.Meta().(paClient).HsmProviders
+		result, _, err := conn.GetHsmProviderCommand(&hsmProviders.GetHsmProviderCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -100,8 +101,8 @@ func testAccCheckPingAccessHsmProviderAttributes(n, partition string) resource.T
 			return fmt.Errorf("No HsmProvider ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).HsmProviders
-		result, _, err := conn.GetHsmProviderCommand(&pa.GetHsmProviderCommandInput{
+		conn := testAccProvider.Meta().(paClient).HsmProviders
+		result, _, err := conn.GetHsmProviderCommand(&hsmProviders.GetHsmProviderCommandInput{
 			Id: rs.Primary.ID,
 		})
 

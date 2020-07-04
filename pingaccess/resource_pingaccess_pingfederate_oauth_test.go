@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessPingFederateOAuth(t *testing.T) {
@@ -57,7 +58,7 @@ func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckF
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Pingfederate
+		conn := testAccProvider.Meta().(paClient).Pingfederate
 		result, _, err := conn.GetPingFederateAccessTokensCommand()
 
 		if err != nil {
@@ -74,10 +75,10 @@ func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckF
 
 func Test_resourcePingAccessPingFederateOAuthReadData(t *testing.T) {
 	cases := []struct {
-		PingFederateAccessTokenView pa.PingFederateAccessTokenView
+		PingFederateAccessTokenView models.PingFederateAccessTokenView
 	}{
 		{
-			PingFederateAccessTokenView: pa.PingFederateAccessTokenView{
+			PingFederateAccessTokenView: models.PingFederateAccessTokenView{
 				ClientId:               String("client_1"),
 				SubjectAttributeName:   String("san"),
 				AccessValidatorId:      Int(1),
@@ -86,7 +87,7 @@ func Test_resourcePingAccessPingFederateOAuthReadData(t *testing.T) {
 			},
 		},
 		{
-			PingFederateAccessTokenView: pa.PingFederateAccessTokenView{
+			PingFederateAccessTokenView: models.PingFederateAccessTokenView{
 				ClientId:               String("client_1"),
 				SubjectAttributeName:   String("san"),
 				AccessValidatorId:      Int(1),
@@ -95,7 +96,7 @@ func Test_resourcePingAccessPingFederateOAuthReadData(t *testing.T) {
 				SendAudience:           Bool(true),
 				TokenTimeToLiveSeconds: Int(30),
 				UseTokenIntrospection:  Bool(true),
-				ClientSecret: &pa.HiddenFieldView{
+				ClientSecret: &models.HiddenFieldView{
 					Value: String("password"),
 				},
 			},

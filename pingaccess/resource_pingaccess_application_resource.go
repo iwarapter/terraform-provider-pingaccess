@@ -6,9 +6,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func resourcePingAccessApplicationResource() *schema.Resource {
@@ -104,12 +106,12 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	svc := m.(*pa.Client).Applications
+	svc := m.(paClient).Applications
 	applicationID := d.Get("application_id").(string)
 
 	if d.Get("root_resource").(bool) {
 		//Root Resources are created automatically, if one exists we will import it instead of failing to create.
-		input := pa.GetApplicationResourcesCommandInput{
+		input := applications.GetApplicationResourcesCommandInput{
 			Id:   applicationID,
 			Name: "Root Resource",
 		}
@@ -123,7 +125,7 @@ func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.
 		return resourcePingAccessApplicationResourceUpdate(ctx, d, m)
 	}
 
-	input := pa.AddApplicationResourceCommandInput{
+	input := applications.AddApplicationResourceCommandInput{
 		Id:   applicationID,
 		Body: *resourcePingAccessApplicationResourceReadData(d),
 	}
@@ -138,8 +140,8 @@ func resourcePingAccessApplicationResourceCreate(ctx context.Context, d *schema.
 }
 
 func resourcePingAccessApplicationResourceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
-	input := &pa.GetApplicationResourceCommandInput{
+	svc := m.(paClient).Applications
+	input := &applications.GetApplicationResourceCommandInput{
 		ApplicationId: d.Get("application_id").(string),
 		ResourceId:    d.Id(),
 	}
@@ -153,8 +155,8 @@ func resourcePingAccessApplicationResourceRead(_ context.Context, d *schema.Reso
 }
 
 func resourcePingAccessApplicationResourceUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
-	input := pa.UpdateApplicationResourceCommandInput{
+	svc := m.(paClient).Applications
+	input := applications.UpdateApplicationResourceCommandInput{
 		ApplicationId: d.Get("application_id").(string),
 		ResourceId:    d.Id(),
 		Body:          *resourcePingAccessApplicationResourceReadData(d),
@@ -168,13 +170,13 @@ func resourcePingAccessApplicationResourceUpdate(_ context.Context, d *schema.Re
 }
 
 func resourcePingAccessApplicationResourceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Applications
+	svc := m.(paClient).Applications
 
 	if d.Get("root_resource").(bool) {
 		return nil
 	}
 
-	input := &pa.DeleteApplicationResourceCommandInput{
+	input := &applications.DeleteApplicationResourceCommandInput{
 		ResourceId:    d.Id(),
 		ApplicationId: d.Get("application_id").(string),
 	}
@@ -196,7 +198,7 @@ func resourcePingAccessApplicationResourceImport(_ context.Context, d *schema.Re
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *pa.ResourceView) diag.Diagnostics {
+func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv *models.ResourceView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataBoolWithDiagnostic(d, "anonymous", rv.Anonymous, &diags)
 	setResourceDataStringWithDiagnostic(d, "application_id", String(strconv.Itoa(*rv.ApplicationId)), &diags)
@@ -225,10 +227,10 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	return diags
 }
 
-func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.ResourceView {
+func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *models.ResourceView {
 	methods := expandStringList(d.Get("methods").(*schema.Set).List())
 
-	resource := &pa.ResourceView{
+	resource := &models.ResourceView{
 		Name:    String(d.Get("name").(string)),
 		Methods: &methods,
 	}
@@ -261,7 +263,7 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *pa.R
 		pathPatterns := v.(*schema.Set).List()
 		for _, raw := range pathPatterns {
 			l := raw.(map[string]interface{})
-			p := &pa.PathPatternView{
+			p := &models.PathPatternView{
 				Pattern: String(l["pattern"].(string)),
 				Type:    String(l["type"].(string)),
 			}

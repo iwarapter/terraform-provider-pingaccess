@@ -5,11 +5,12 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessOAuthServer(t *testing.T) {
@@ -73,7 +74,7 @@ func testAccCheckPingAccessOAuthServerExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Oauth
+		conn := testAccProvider.Meta().(paClient).Oauth
 		result, _, err := conn.GetAuthorizationServerCommand()
 
 		if err != nil {
@@ -90,17 +91,17 @@ func testAccCheckPingAccessOAuthServerExists(n string) resource.TestCheckFunc {
 
 func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 	cases := []struct {
-		OAuthServer pa.AuthorizationServerView
+		OAuthServer models.AuthorizationServerView
 	}{
 		{
-			OAuthServer: pa.AuthorizationServerView{
+			OAuthServer: models.AuthorizationServerView{
 				IntrospectionEndpoint:     String("/introspection"),
 				SubjectAttributeName:      String("alt"),
 				Targets:                   &[]*string{String("localhost")},
 				TrustedCertificateGroupId: Int(0),
-				ClientCredentials: &pa.OAuthClientCredentialsView{
+				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId: String("client"),
-					ClientSecret: &pa.HiddenFieldView{
+					ClientSecret: &models.HiddenFieldView{
 						Value: String("Secrets"),
 					},
 				},
@@ -109,14 +110,14 @@ func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 			},
 		},
 		{
-			OAuthServer: pa.AuthorizationServerView{
+			OAuthServer: models.AuthorizationServerView{
 				IntrospectionEndpoint:     String("/introspection"),
 				SubjectAttributeName:      String("alt"),
 				Targets:                   &[]*string{String("localhost")},
 				TrustedCertificateGroupId: Int(0),
-				ClientCredentials: &pa.OAuthClientCredentialsView{
+				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId:     String("client"),
-					ClientSecret: &pa.HiddenFieldView{},
+					ClientSecret: &models.HiddenFieldView{},
 				},
 				AuditLevel:             String("none"),
 				Secure:                 Bool(true),

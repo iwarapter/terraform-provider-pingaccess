@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func dataSourcePingAccessAcmeDefault() *schema.Resource {
@@ -25,7 +24,7 @@ func dataSourcePingAccessAcmeDefaultSchema() map[string]*schema.Schema {
 }
 
 func dataSourcePingAccessAcmeDefaultRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	svc := m.(*pa.Client).Acme
+	svc := m.(paClient).Acme
 	result, _, err := svc.GetDefaultAcmeServerCommand()
 	if err != nil {
 		return diag.Errorf("unable to read ACME Default: %s", err)

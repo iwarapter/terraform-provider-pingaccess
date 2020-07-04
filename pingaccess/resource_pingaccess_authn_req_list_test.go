@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/authnReqLists"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessAuthnReqList(t *testing.T) {
@@ -59,8 +61,8 @@ func testAccCheckPingAccessAuthnReqListExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No AuthnReqList ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).AuthnReqLists
-		result, _, err := conn.GetAuthnReqListCommand(&pa.GetAuthnReqListCommandInput{
+		conn := testAccProvider.Meta().(paClient).AuthnReqLists
+		result, _, err := conn.GetAuthnReqListCommand(&authnReqLists.GetAuthnReqListCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -78,10 +80,10 @@ func testAccCheckPingAccessAuthnReqListExists(n string) resource.TestCheckFunc {
 
 func Test_resourcePingAccessAuthnReqListReadData(t *testing.T) {
 	cases := []struct {
-		AuthnReqList pa.AuthnReqListView
+		AuthnReqList models.AuthnReqListView
 	}{
 		{
-			AuthnReqList: pa.AuthnReqListView{
+			AuthnReqList: models.AuthnReqListView{
 				Name: String("engine1"),
 				AuthnReqs: &[]*string{
 					String("foo"),

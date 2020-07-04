@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/rulesets"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessRuleSet(t *testing.T) {
@@ -84,8 +85,8 @@ func testAccCheckPingAccessRuleSetAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 
-		conn := testAccProvider.Meta().(*pa.Client).Rulesets
-		result, _, err := conn.GetRuleSetCommand(&pa.GetRuleSetCommandInput{
+		conn := testAccProvider.Meta().(paClient).Rulesets
+		result, _, err := conn.GetRuleSetCommand(&rulesets.GetRuleSetCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -112,8 +113,8 @@ func testAccCheckPingAccessRuleSetExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No RuleSet ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Rulesets
-		result, _, err := conn.GetRuleSetCommand(&pa.GetRuleSetCommandInput{
+		conn := testAccProvider.Meta().(paClient).Rulesets
+		result, _, err := conn.GetRuleSetCommand(&rulesets.GetRuleSetCommandInput{
 			Id: rs.Primary.ID,
 		})
 

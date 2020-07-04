@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessCertificate(t *testing.T) {
@@ -63,8 +64,8 @@ func testAccCheckPingAccessCertificateExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No Certificate ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Certificates
-		result, _, err := conn.GetTrustedCert(&pa.GetTrustedCertInput{
+		conn := testAccProvider.Meta().(paClient).Certificates
+		result, _, err := conn.GetTrustedCert(&certificates.GetTrustedCertInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -87,8 +88,8 @@ func testAccCheckPingAccessCertificateAttributes(n string) resource.TestCheckFun
 			return fmt.Errorf("No Certificate ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Certificates
-		result, _, err := conn.GetTrustedCert(&pa.GetTrustedCertInput{
+		conn := testAccProvider.Meta().(paClient).Certificates
+		result, _, err := conn.GetTrustedCert(&certificates.GetTrustedCertInput{
 			Id: rs.Primary.ID,
 		})
 

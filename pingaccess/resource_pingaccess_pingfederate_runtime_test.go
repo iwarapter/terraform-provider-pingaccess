@@ -6,12 +6,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
 )
 
 func TestAccPingAccessPingFederateRuntime(t *testing.T) {
@@ -118,7 +119,7 @@ func testAccCheckPingAccessPingFederateRuntimeExists(n string) resource.TestChec
 			return fmt.Errorf("not found: %s", n)
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Pingfederate
+		conn := testAccProvider.Meta().(paClient).Pingfederate
 		result, _, err := conn.GetPingFederateRuntimeCommand()
 
 		if err != nil {
@@ -140,7 +141,7 @@ func testAccCheckPingAccessPingFederateDeprecatedRuntimeExists(n string) resourc
 			return fmt.Errorf("not found: %s", n)
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Pingfederate
+		conn := testAccProvider.Meta().(paClient).Pingfederate
 		result, resp, err := conn.GetPingFederateCommand()
 
 		if err != nil {
@@ -161,10 +162,10 @@ func testAccCheckPingAccessPingFederateDeprecatedRuntimeExists(n string) resourc
 
 func Test_resourcePingAccessPingFederateRuntimeReadData(t *testing.T) {
 	cases := []struct {
-		PingFederateRuntime pa.PingFederateMetadataRuntimeView
+		PingFederateRuntime models.PingFederateMetadataRuntimeView
 	}{
 		{
-			PingFederateRuntime: pa.PingFederateMetadataRuntimeView{
+			PingFederateRuntime: models.PingFederateMetadataRuntimeView{
 				Issuer:                    String("localhost"),
 				SkipHostnameVerification:  Bool(true),
 				UseProxy:                  Bool(false),
@@ -173,7 +174,7 @@ func Test_resourcePingAccessPingFederateRuntimeReadData(t *testing.T) {
 			},
 		},
 		{
-			PingFederateRuntime: pa.PingFederateMetadataRuntimeView{
+			PingFederateRuntime: models.PingFederateMetadataRuntimeView{
 				Issuer:                    String("localhost"),
 				Description:               String("foo"),
 				SkipHostnameVerification:  Bool(true),
@@ -200,10 +201,10 @@ func Test_resourcePingAccessPingFederateRuntimeReadData(t *testing.T) {
 
 func Test_resourcePingAccessPingFederateDeprecatedRuntimeReadData(t *testing.T) {
 	cases := []struct {
-		PingFederateRuntime pa.PingFederateRuntimeView
+		PingFederateRuntime models.PingFederateRuntimeView
 	}{
 		{
-			PingFederateRuntime: pa.PingFederateRuntimeView{
+			PingFederateRuntime: models.PingFederateRuntimeView{
 				Host:                      String("localhost"),
 				Port:                      Int(9031),
 				SkipHostnameVerification:  Bool(true),
@@ -214,7 +215,7 @@ func Test_resourcePingAccessPingFederateDeprecatedRuntimeReadData(t *testing.T) 
 			},
 		},
 		{
-			PingFederateRuntime: pa.PingFederateRuntimeView{
+			PingFederateRuntime: models.PingFederateRuntimeView{
 				Host:                      String("localhost"),
 				Port:                      Int(9031),
 				AuditLevel:                String("ON"),

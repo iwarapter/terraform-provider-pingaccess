@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/iwarapter/pingaccess-sdk-go/services/version"
 	"log"
 	"math/rand"
 	"net"
@@ -20,7 +21,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
 	"github.com/ory/dockertest/v3"
 )
 
@@ -99,13 +100,14 @@ func TestMain(m *testing.M) {
 		pool.MaxWait = time.Minute * 2
 
 		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
-		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
+		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s/pa-admin-api/v3", paCont.GetPort("9000/tcp")))
 		log.Printf("Setting PingAccess admin API: %s", u.String())
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		client := pingaccess.NewClient("administrator", "2FederateM0re", u, "/pa-admin-api/v3", nil)
+		cfg := paCfg.NewConfig().WithUsername("administrator").WithPassword("2FederateM0re").WithEndpoint(u.String())
+		client := version.New(cfg)
 		if err = pool.Retry(func() error {
 			log.Println("Attempting to connect to PingAccess admin API....")
-			_, _, err = client.Version.VersionCommand()
+			_, _, err = client.VersionCommand()
 			return err
 		}); err != nil {
 			log.Fatalf("Could not connect to pingaccess: %s", err)
@@ -116,7 +118,7 @@ func TestMain(m *testing.M) {
 		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
 		log.Println("Connected to PingAccess admin API....")
 
-		version, _, err := client.Version.VersionCommand()
+		version, _, err := client.VersionCommand()
 		if err != nil {
 			log.Fatalf("Failed to retrieve version from server: %v", err)
 		}
