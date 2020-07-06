@@ -131,6 +131,7 @@ func hiddenField() *schema.Schema {
 				"encrypted_value": {
 					Type:     schema.TypeString,
 					Optional: true,
+					Computed: true,
 				},
 				"value": {
 					Type:      schema.TypeString,
@@ -159,9 +160,9 @@ func expandHiddenFieldView(in []interface{}) *models.HiddenFieldView {
 		if val, ok := l["value"]; ok {
 			hf.Value = String(val.(string))
 		}
-		// if val, ok := l["encrypted_value"]; ok {
-		// 	hf.EncryptedValue = String(val.(string))
-		// }
+		if val, ok := l["encrypted_value"]; ok {
+			hf.EncryptedValue = String(val.(string))
+		}
 	}
 	return hf
 }
@@ -172,9 +173,9 @@ func flattenHiddenFieldView(in *models.HiddenFieldView) []map[string]interface{}
 	if in.Value != nil {
 		s["value"] = *in.Value //TODO this is bad don't do this.
 	}
-	// if in.EncryptedValue != nil {
-	// s["encrypted_value"] = *in.EncryptedValue
-	// }
+	if in.EncryptedValue != nil {
+		s["encrypted_value"] = *in.EncryptedValue
+	}
 	m = append(m, s)
 	return m
 }

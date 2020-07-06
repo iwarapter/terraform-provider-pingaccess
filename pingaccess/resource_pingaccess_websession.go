@@ -2,7 +2,6 @@ package pingaccess
 
 import (
 	"context"
-
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/iwarapter/pingaccess-sdk-go/services/webSessions"
 
@@ -158,7 +157,7 @@ func resourcePingAccessWebSessionCreate(_ context.Context, d *schema.ResourceDat
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessWebSessionReadResult(d, result)
+	return resourcePingAccessWebSessionReadResult(d, result, m.(paClient).CanMaskPasswords())
 }
 
 func resourcePingAccessWebSessionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -170,7 +169,7 @@ func resourcePingAccessWebSessionRead(_ context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.Errorf("unable to read WebSession: %s", err)
 	}
-	return resourcePingAccessWebSessionReadResult(d, result)
+	return resourcePingAccessWebSessionReadResult(d, result, m.(paClient).CanMaskPasswords())
 }
 
 func resourcePingAccessWebSessionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -183,7 +182,7 @@ func resourcePingAccessWebSessionUpdate(_ context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.Errorf("unable to update WebSession: %s", err)
 	}
-	return resourcePingAccessWebSessionReadResult(d, result)
+	return resourcePingAccessWebSessionReadResult(d, result, false)
 }
 
 func resourcePingAccessWebSessionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -199,7 +198,7 @@ func resourcePingAccessWebSessionDelete(_ context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *models.WebSessionView) diag.Diagnostics {
+func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *models.WebSessionView, trackPasswords bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "audience", input.Audience, &diags)
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
@@ -228,11 +227,22 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *model
 		}
 	}
 	if input.ClientCredentials != nil {
-		//TODO we should look at encrypting the value
 		pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 		creds := flattenOAuthClientCredentialsView(input.ClientCredentials)
-		if ok {
+		if trackPasswords {
+			enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
 			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+			if err := d.Set("client_credentials", creds); err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+			if encOk && enc.(string) != "" && enc.(string) != *input.ClientCredentials.ClientSecret.EncryptedValue {
+				creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = ""
+			}
+		} else {
+			//legacy behaviour
+			if ok {
+				creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+			}
 		}
 		if err := d.Set("client_credentials", creds); err != nil {
 			diags = append(diags, diag.FromErr(err)...)

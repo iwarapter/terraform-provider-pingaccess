@@ -23,10 +23,6 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 					testAccCheckPingAccessHsmProviderExists(resourceName),
 					testAccCheckPingAccessHsmProviderAttributes(resourceName, "foo"),
 				),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				//TODO The pingaccess AWS CloudHsm can be created but not deleted without a working HSM,
-				// and the current TestStep is unable to plan/apply without attempting to destroy atm it seems.
 			},
 			{
 				Config:      testAccPingAccessHsmProviderConfigInvalidClassName(),
@@ -39,15 +35,15 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 func testAccPingAccessHsmProviderConfig(configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_hsm_provider" "acc_test_hsm" {
-		class_name = "com.pingidentity.pa.hsm.cloudhsm.plugin.AwsCloudHsmProvider"
-		name = "test"
-		configuration = <<EOF
-		{
-			"user": true,
-			"password": "sub",
-			"partition": "%s"
-		}
-		EOF
+	  class_name    = "com.pingidentity.pa.hsm.pkcs11.plugin.PKCS11HsmProvider"
+	  name          = "demo"
+	  configuration = <<EOF
+	  {
+		"slotId": "1234",
+		"library": "%s",
+		"password": "top_secret"
+	  }
+	  EOF
 	}`, configUpdate)
 }
 
@@ -94,7 +90,7 @@ func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckPingAccessHsmProviderAttributes(n, partition string) resource.TestCheckFunc {
+func testAccCheckPingAccessHsmProviderAttributes(n, library string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
@@ -111,12 +107,12 @@ func testAccCheckPingAccessHsmProviderAttributes(n, partition string) resource.T
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: HsmProvider response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("error: HsmProvider response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
-		resultMapping := result.Configuration["partition"].(string)
-		if resultMapping != partition {
-			return fmt.Errorf("Error: HsmProvider response (%s) didnt match state (%s)", resultMapping, partition)
+		resultMapping := result.Configuration["library"].(string)
+		if resultMapping != library {
+			return fmt.Errorf("error: HsmProvider response (%s) didnt match state (%s)", resultMapping, library)
 		}
 
 		return nil

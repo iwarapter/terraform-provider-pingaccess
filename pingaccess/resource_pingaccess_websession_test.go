@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccPingAccessWebSession(t *testing.T) {
+	resourceName := "pingaccess_websession.demo_session"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,13 +23,41 @@ func TestAccPingAccessWebSession(t *testing.T) {
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "password"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session"),
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "password"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
 			},
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session"),
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
+				),
+			},
+			{ // we change the password directly and check the provider detects it
+				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					testAccCheckPingAccessWebSessionCanTrackPasswordChanges(resourceName, true),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
 			},
 		},
@@ -63,11 +92,11 @@ func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
-			return fmt.Errorf("No websession ID is set")
+			return fmt.Errorf("no websession ID is set")
 		}
 
 		conn := testAccProvider.Meta().(paClient).WebSessions
@@ -76,11 +105,50 @@ func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error: WebSession (%s) not found", n)
+			return fmt.Errorf("error: WebSession (%s) not found", n)
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: WebSession response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("error: WebSession response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckPingAccessWebSessionCanTrackPasswordChanges(n string, changePassword bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
+			return fmt.Errorf("no websession ID is set")
+		}
+
+		conn := testAccProvider.Meta().(paClient).WebSessions
+		result, _, err := conn.GetWebSessionCommand(&webSessions.GetWebSessionCommandInput{
+			Id: rs.Primary.ID,
+		})
+
+		if err != nil {
+			return fmt.Errorf("unable to retrieve webSession %s", err)
+		}
+		if changePassword {
+			result.ClientCredentials.ClientSecret.Value = String("i have been changed")
+			updated, _, err := conn.UpdateWebSessionCommand(&webSessions.UpdateWebSessionCommandInput{
+				Body: *result,
+				Id:   rs.Primary.ID,
+			})
+
+			if err != nil {
+				return fmt.Errorf("failed to update webSession %s", err)
+			}
+
+			if *updated.ClientCredentials.ClientSecret.EncryptedValue == *result.ClientCredentials.ClientSecret.EncryptedValue {
+				return fmt.Errorf("the encryptedValue for webSession should of changed after an update")
+			}
 		}
 
 		return nil
@@ -155,7 +223,7 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 			resourceSchema := resourcePingAccessWebSessionSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
 
-			resourcePingAccessWebSessionReadResult(resourceLocalData, &tc.WebSession)
+			resourcePingAccessWebSessionReadResult(resourceLocalData, &tc.WebSession, false)
 			if got := *resourcePingAccessWebSessionReadData(resourceLocalData); !cmp.Equal(got, tc.WebSession) {
 				t.Errorf("resourcePingAccessWebSessionReadData() = %v", cmp.Diff(got, tc.WebSession))
 			}

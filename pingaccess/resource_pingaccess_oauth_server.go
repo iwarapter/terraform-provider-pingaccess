@@ -91,8 +91,7 @@ func resourcePingAccessOAuthServerRead(_ context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("unable to read OAuthServerSettings: %s", err)
 	}
-
-	return resourcePingAccessOAuthServerReadResult(d, result)
+	return resourcePingAccessOAuthServerReadResult(d, result, m.(paClient).CanMaskPasswords())
 }
 
 func resourcePingAccessOAuthServerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -106,7 +105,7 @@ func resourcePingAccessOAuthServerUpdate(_ context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId("oauth_server_settings")
-	return resourcePingAccessOAuthServerReadResult(d, result)
+	return resourcePingAccessOAuthServerReadResult(d, result, false)
 }
 
 func resourcePingAccessOAuthServerDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -118,7 +117,7 @@ func resourcePingAccessOAuthServerDelete(_ context.Context, _ *schema.ResourceDa
 	return nil
 }
 
-func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *models.AuthorizationServerView) diag.Diagnostics {
+func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *models.AuthorizationServerView, trackPasswords bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "audit_level", input.AuditLevel, &diags)
 	setResourceDataBoolWithDiagnostic(d, "cache_tokens", input.CacheTokens, &diags)
@@ -135,11 +134,22 @@ func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *mode
 		diags = append(diags, diag.FromErr(err)...)
 	}
 	if input.ClientCredentials != nil && input.ClientCredentials.ClientSecret != nil {
-		//TODO we should look at encrypting the value
 		pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 		creds := flattenOAuthClientCredentialsView(input.ClientCredentials)
-		if ok {
+		if trackPasswords {
+			enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
 			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+			if err := d.Set("client_credentials", creds); err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+			if encOk && enc.(string) != "" && enc.(string) != *input.ClientCredentials.ClientSecret.EncryptedValue {
+				creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = ""
+			}
+		} else {
+			//legacy behaviour
+			if ok {
+				creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+			}
 		}
 		if err := d.Set("client_credentials", creds); err != nil {
 			diags = append(diags, diag.FromErr(err)...)

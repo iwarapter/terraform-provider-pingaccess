@@ -92,7 +92,8 @@ func Test_resourcePingAccessPingFederateAdminReadData(t *testing.T) {
 		{
 			PingFederateAdmin: models.PingFederateAdminView{
 				AdminPassword: &models.HiddenFieldView{
-					Value: String("secret"),
+					Value:          String("secret"),
+					EncryptedValue: String("foo"),
 				},
 				AdminUsername:             String("admin"),
 				Host:                      String("localhost"),
@@ -104,7 +105,8 @@ func Test_resourcePingAccessPingFederateAdminReadData(t *testing.T) {
 		{
 			PingFederateAdmin: models.PingFederateAdminView{
 				AdminPassword: &models.HiddenFieldView{
-					Value: String("secret"),
+					Value:          String("secret"),
+					EncryptedValue: String("foo"),
 				},
 				AdminUsername:             String("admin"),
 				Host:                      String("localhost"),

@@ -2,6 +2,7 @@ package pingaccess
 
 import (
 	"fmt"
+	"github.com/iwarapter/pingaccess-sdk-go/services/oauth"
 	"regexp"
 	"testing"
 
@@ -14,6 +15,8 @@ import (
 )
 
 func TestAccPingAccessOAuthServer(t *testing.T) {
+	resourceName := "pingaccess_oauth_server.demo_pfr"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,19 +25,40 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 			{
 				Config: testAccPingAccessOAuthServerConfig("/introspect", "top"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
+					testAccCheckPingAccessOAuthServerExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
+					testAccCheckPingAccessOAuthServerExists(resourceName),
+				),
+			},
+			{ // we change the password directly and check the provider detects it
+				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessOAuthServerExists(resourceName),
+					testAccCheckPingAccessOAuthServerCanTrackPasswordChanges(resourceName, true),
+					resource.TestCheckResourceAttr(resourceName, "introspection_endpoint", "/introspect"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "secret"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
+
+				),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessOAuthServerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "introspection_endpoint", "/introspect"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "secret"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
 			},
 			{
 				Config: testAccPingAccessOAuthServerConfig("https://thing/introspect", "secret"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessOAuthServerExists("pingaccess_oauth_server.demo_pfr"),
+					testAccCheckPingAccessOAuthServerExists(resourceName),
 				),
 				ExpectError: regexp.MustCompile(`unable to update OAuthServerSettings: Save Failed:\nintrospectionEndpoint contains 1 validation failures:\n\tIntrospection endpoint must be a valid relative path`),
 			},
@@ -89,6 +113,41 @@ func testAccCheckPingAccessOAuthServerExists(n string) resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckPingAccessOAuthServerCanTrackPasswordChanges(n string, changePassword bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
+			return fmt.Errorf("no OAuth Server ID is set")
+		}
+
+		conn := testAccProvider.Meta().(paClient).Oauth
+		result, _, err := conn.GetAuthorizationServerCommand()
+
+		if err != nil {
+			return fmt.Errorf("unable to retrieve OAuth Server %s", err)
+		}
+		if changePassword {
+			result.ClientCredentials.ClientSecret.Value = String("i have been changed")
+			updated, _, err := conn.UpdateAuthorizationServerCommand(&oauth.UpdateAuthorizationServerCommandInput{
+				Body: *result,
+			})
+
+			if err != nil {
+				return fmt.Errorf("failed to update OAuth Server %s", err)
+			}
+
+			if *updated.ClientCredentials.ClientSecret.EncryptedValue == *result.ClientCredentials.ClientSecret.EncryptedValue {
+				return fmt.Errorf("the encryptedValue for OAuth Server should of changed after an update")
+			}
+		}
+		return nil
+	}
+}
+
 func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 	cases := []struct {
 		OAuthServer models.AuthorizationServerView
@@ -102,7 +161,8 @@ func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId: String("client"),
 					ClientSecret: &models.HiddenFieldView{
-						Value: String("Secrets"),
+						Value:          String("Secrets"),
+						EncryptedValue: String("foo"),
 					},
 				},
 				AuditLevel:             String("ON"),
@@ -134,13 +194,13 @@ func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 
 			resourceSchema := resourcePingAccessOAuthServerSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessOAuthServerReadResult(resourceLocalData, &tc.OAuthServer)
+			resourcePingAccessOAuthServerReadResult(resourceLocalData, &tc.OAuthServer, false)
 
 			if got := *resourcePingAccessOAuthServerReadData(resourceLocalData); !cmp.Equal(got, tc.OAuthServer) {
 				t.Errorf("resourcePingAccessOAuthServerReadData() = %v", cmp.Diff(got, tc.OAuthServer))
 			}
 
-			resourcePingAccessOAuthServerReadResult(resourceLocalData, &tc.OAuthServer)
+			resourcePingAccessOAuthServerReadResult(resourceLocalData, &tc.OAuthServer, false)
 		})
 	}
 }

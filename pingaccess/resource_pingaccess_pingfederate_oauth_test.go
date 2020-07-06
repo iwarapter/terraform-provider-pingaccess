@@ -97,7 +97,8 @@ func Test_resourcePingAccessPingFederateOAuthReadData(t *testing.T) {
 				TokenTimeToLiveSeconds: Int(30),
 				UseTokenIntrospection:  Bool(true),
 				ClientSecret: &models.HiddenFieldView{
-					Value: String("password"),
+					Value:          String("password"),
+					EncryptedValue: String("foo"),
 				},
 			},
 		},

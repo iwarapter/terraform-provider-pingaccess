@@ -78,6 +78,12 @@ func TestMain(m *testing.M) {
 
 		devOpsUser, devOpsUserExists := os.LookupEnv("PING_IDENTITY_DEVOPS_USER")
 		devOpsKey, devOpsKeyExists := os.LookupEnv("PING_IDENTITY_DEVOPS_KEY")
+		paVersion := ""
+		if value, ok := os.LookupEnv("PINGACCESS_VERSION"); ok {
+			paVersion = value
+		} else {
+			paVersion = "6.1.0-edge"
+		}
 
 		if devOpsKeyExists != true || devOpsUserExists != true {
 			log.Fatalf("Both PING_IDENTITY_DEVOPS_USER and PING_IDENTITY_DEVOPS_KEY environment variables must be set for acceptance tests.")
@@ -87,7 +93,7 @@ func TestMain(m *testing.M) {
 		paOpts := &dockertest.RunOptions{
 			Name:       fmt.Sprintf("pa-%s", randomID),
 			Repository: "pingidentity/pingaccess",
-			Tag:        "6.0.2-edge",
+			Tag:        paVersion,
 			//ExtraHosts: []string{"host.docker.internal:host-gateway"},
 			Env: []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
 		}

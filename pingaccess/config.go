@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 
 	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
 	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
@@ -178,4 +179,10 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 	client.apiVersion = *v.Version
 
 	return client, nil
+}
+
+// Checks whether we are running against PingAccess 6.1 or above and can track password changes
+func (c paClient) CanMaskPasswords() bool {
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	return re.MatchString(c.apiVersion)
 }
