@@ -37,6 +37,7 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		"application_id": {
 			Type:     schema.TypeString,
 			Required: true,
+			ForceNew: true,
 		},
 		"audit_level": {
 			Type:             schema.TypeString,
