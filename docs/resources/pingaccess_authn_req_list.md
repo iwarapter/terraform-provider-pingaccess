@@ -4,7 +4,7 @@ Provides a AuthN Req List.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/authn_req_list.tf!}
+{!../func-tests//authn_req_list.tf!}
 ```
 
 ## Argument Attributes

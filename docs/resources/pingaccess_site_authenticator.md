@@ -11,7 +11,7 @@ Provides a site authenticator.
 ## Example Usage
 
 ```terraform
-{!../pingaccess/test_cases/site_authenticator.tf!}
+{!../func-tests//site_authenticator.tf!}
 ```
 
 ## Argument Attributes

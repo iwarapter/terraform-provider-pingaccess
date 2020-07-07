@@ -1,22 +1,25 @@
 package pingaccess
 
 import (
-	"fmt"
-	"log"
+	"context"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessApplication() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessApplicationCreate,
-		Read:   resourcePingAccessApplicationRead,
-		Update: resourcePingAccessApplicationUpdate,
-		Delete: resourcePingAccessApplicationDelete,
+		CreateContext: resourcePingAccessApplicationCreate,
+		ReadContext:   resourcePingAccessApplicationRead,
+		UpdateContext: resourcePingAccessApplicationUpdate,
+		DeleteContext: resourcePingAccessApplicationDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessApplicationSchema(),
@@ -28,28 +31,38 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 		"access_validator_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"agent_id": {
 			Type:     schema.TypeInt,
-			Required: true,
+			Optional: true,
+			Default:  0,
 		},
 		"application_type": {
 			Type:     schema.TypeString,
 			Required: true,
 			ForceNew: true,
+			ValidateDiagFunc: func(value interface{}, path cty.Path) diag.Diagnostics {
+				v := value.(string)
+				if v != "Web" && v != "API" && v != "Dynamic" {
+					return diag.Errorf("must be either 'Web', 'API' or 'Dynamic' not %s", v)
+				}
+				return nil
+			},
 		},
 		"case_sensitive_path": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Default:  true,
+			Default:  false,
 		},
 		"context_root": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
 		"default_auth_type": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:       schema.TypeString,
+			Optional:   true,
+			Deprecated: "This field is no longer used and should be removed.",
 		},
 		"description": {
 			Type:     schema.TypeString,
@@ -122,161 +135,154 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessApplicationCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).Applications
-	input := &pa.AddApplicationCommandInput{
+func resourcePingAccessApplicationCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Applications
+	input := &applications.AddApplicationCommandInput{
 		Body: *resourcePingAccessApplicationReadData(d),
 	}
 	result, _, err := svc.AddApplicationCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error creating application: %s", err)
+		return diag.Errorf("unable to create Application: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessApplicationReadResult(d, &input.Body)
 }
 
-func resourcePingAccessApplicationRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).Applications
-	input := &pa.GetApplicationCommandInput{
+func resourcePingAccessApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Applications
+	input := &applications.GetApplicationCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetApplicationCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading application: %s", err)
+		return diag.Errorf("unable to read Application: %s", err)
 	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
 
-func resourcePingAccessApplicationUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).Applications
-	input := pa.UpdateApplicationCommandInput{
+func resourcePingAccessApplicationUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Applications
+	input := applications.UpdateApplicationCommandInput{
 		Body: *resourcePingAccessApplicationReadData(d),
 		Id:   d.Id(),
 	}
 	result, _, err := svc.UpdateApplicationCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating application: %s", err)
+		return diag.Errorf("unable to update Application: %s", err)
 	}
 	return resourcePingAccessApplicationReadResult(d, result)
 }
 
-func resourcePingAccessApplicationDelete(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[INFO] resourcePingAccessApplicationDelete")
-	svc := m.(*pa.Client).Applications
+func resourcePingAccessApplicationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Applications
 
-	input := &pa.DeleteApplicationCommandInput{
+	input := &applications.DeleteApplicationCommandInput{
 		Id: d.Id(),
 	}
 
-	log.Printf("[INFO] ResourceID: %s", d.Id())
-	log.Printf("[INFO] DeleteApplicationCommandInput: %s", input.Id)
 	_, _, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting virtualhost: %s", err)
+		return diag.Errorf("unable to delete Application: %s", err)
 	}
-	log.Println("[DEBUG] End - resourcePingAccessSiteDelete")
 	return nil
 }
 
-func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *pa.ApplicationView) (err error) {
-	setResourceDataInt(d, "access_validator_id", rv.AccessValidatorId)
-	setResourceDataInt(d, "agent_id", rv.AgentId)
-	setResourceDataString(d, "application_type", rv.ApplicationType)
-	setResourceDataBool(d, "case_sensitive_path", rv.CaseSensitivePath)
-	setResourceDataString(d, "context_root", rv.ContextRoot)
-	setResourceDataString(d, "default_auth_type", rv.DefaultAuthType)
-	setResourceDataString(d, "description", rv.Description)
-	setResourceDataString(d, "destination", rv.Destination)
-	setResourceDataBool(d, "enabled", rv.Enabled)
-	setResourceDataString(d, "name", rv.Name)
-	setResourceDataString(d, "realm", rv.Realm)
-	setResourceDataBool(d, "require_https", rv.RequireHTTPS)
+func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.ApplicationView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataIntWithDiagnostic(d, "access_validator_id", rv.AccessValidatorId, &diags)
+	setResourceDataIntWithDiagnostic(d, "agent_id", rv.AgentId, &diags)
+	setResourceDataStringWithDiagnostic(d, "application_type", rv.ApplicationType, &diags)
+	setResourceDataBoolWithDiagnostic(d, "case_sensitive_path", rv.CaseSensitivePath, &diags)
+	setResourceDataStringWithDiagnostic(d, "context_root", rv.ContextRoot, &diags)
+	setResourceDataStringWithDiagnostic(d, "description", rv.Description, &diags)
+	setResourceDataStringWithDiagnostic(d, "destination", rv.Destination, &diags)
+	setResourceDataBoolWithDiagnostic(d, "enabled", rv.Enabled, &diags)
+	setResourceDataStringWithDiagnostic(d, "name", rv.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "realm", rv.Realm, &diags)
+	setResourceDataBoolWithDiagnostic(d, "require_https", rv.RequireHTTPS, &diags)
 	siteID := strconv.Itoa(*rv.SiteId)
-	setResourceDataString(d, "site_id", &siteID)
-	setResourceDataBool(d, "spa_support_enabled", rv.SpaSupportEnabled)
+	setResourceDataStringWithDiagnostic(d, "site_id", &siteID, &diags)
+	setResourceDataBoolWithDiagnostic(d, "spa_support_enabled", rv.SpaSupportEnabled, &diags)
 
 	if rv.VirtualHostIds != nil {
-		vhs := []string{}
+		var vhs []string
 		for _, vh := range *rv.VirtualHostIds {
 			vhs = append(vhs, strconv.Itoa(*vh))
 		}
 		if err := d.Set("virtual_host_ids", vhs); err != nil {
-			return err
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 
 	if rv.WebSessionId != nil {
-		d.Set("web_session_id", strconv.Itoa(*rv.WebSessionId))
+		setResourceDataStringWithDiagnostic(d, "web_session_id", String(strconv.Itoa(*rv.WebSessionId)), &diags)
 	}
 
 	if rv.IdentityMappingIds != nil && (*rv.IdentityMappingIds["Web"] != 0 || *rv.IdentityMappingIds["API"] != 0) {
-		if err = d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
-			return err
+		if err := d.Set("identity_mapping_ids", flattenIdentityMappingIds(rv.IdentityMappingIds)); err != nil {
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 	if rv.Policy != nil && (len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0) {
 		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-			return err
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
-	return nil
+	return diags
 }
 
-func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.ApplicationView {
+func resourcePingAccessApplicationReadData(d *schema.ResourceData) *models.ApplicationView {
 	siteID, _ := strconv.Atoi(d.Get("site_id").(string))
 	virtualHostIds := expandStringList(d.Get("virtual_host_ids").(*schema.Set).List())
-	vhIds := []*int{}
+	var vhIds []*int
 	for _, i := range virtualHostIds {
 		text, _ := strconv.Atoi(*i)
 		vhIds = append(vhIds, &text)
 	}
 
-	application := &pa.ApplicationView{
+	application := &models.ApplicationView{
 		AgentId:           Int(d.Get("agent_id").(int)),
 		Name:              String(d.Get("name").(string)),
 		ApplicationType:   String(d.Get("application_type").(string)),
 		ContextRoot:       String(d.Get("context_root").(string)),
-		DefaultAuthType:   String(d.Get("default_auth_type").(string)),
 		SiteId:            Int(siteID),
 		SpaSupportEnabled: Bool(d.Get("spa_support_enabled").(bool)),
 		VirtualHostIds:    &vhIds,
+		CaseSensitivePath: Bool(d.Get("case_sensitive_path").(bool)),
+		AccessValidatorId: Int(d.Get("access_validator_id").(int)),
 	}
 
-	if _, ok := d.GetOkExists("access_validator_id"); ok {
-		application.AccessValidatorId = Int(d.Get("access_validator_id").(int))
+	if *application.ApplicationType != "Dynamic" {
+		application.DefaultAuthType = application.ApplicationType
 	}
 
-	if _, ok := d.GetOkExists("case_sensitive_path"); ok {
-		application.CaseSensitivePath = Bool(d.Get("case_sensitive_path").(bool))
-	}
-
-	if _, ok := d.GetOkExists("description"); ok {
+	if _, ok := d.GetOk("description"); ok {
 		application.Description = String(d.Get("description").(string))
 	}
 
-	if v, ok := d.GetOkExists("destination"); ok {
+	if v, ok := d.GetOk("destination"); ok {
 		application.Destination = String(v.(string))
 	}
 
-	if _, ok := d.GetOkExists("enabled"); ok {
+	if _, ok := d.GetOk("enabled"); ok {
 		application.Enabled = Bool(d.Get("enabled").(bool))
 	}
 
-	if _, ok := d.GetOkExists("realm"); ok {
+	if _, ok := d.GetOk("realm"); ok {
 		application.Realm = String(d.Get("realm").(string))
 	}
 
-	if _, ok := d.GetOkExists("require_https"); ok {
+	if _, ok := d.GetOk("require_https"); ok {
 		application.RequireHTTPS = Bool(d.Get("require_https").(bool))
 	}
 
-	if _, ok := d.GetOkExists("web_session_id"); ok {
+	if _, ok := d.GetOk("web_session_id"); ok {
 		webID, _ := strconv.Atoi(d.Get("web_session_id").(string))
 		application.WebSessionId = Int(webID)
 	}
 
-	if val, ok := d.GetOkExists("identity_mapping_ids"); ok {
+	if val, ok := d.GetOk("identity_mapping_ids"); ok {
 		if len(val.([]interface{})) > 0 {
 			application.IdentityMappingIds = make(map[string]*int)
 			idMapping := val.([]interface{})[0].(map[string]interface{})
@@ -291,7 +297,7 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *pa.Applicati
 		}
 	}
 
-	if val, ok := d.GetOkExists("policy"); ok {
+	if val, ok := d.GetOk("policy"); ok {
 		application.Policy = expandPolicy(val.([]interface{}))
 	}
 

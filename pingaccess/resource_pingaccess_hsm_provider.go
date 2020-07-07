@@ -1,24 +1,39 @@
 package pingaccess
 
 import (
-	"crypto/tls"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"net/http"
+
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/hsmProviders"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessHsmProvider() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessHsmProviderCreate,
-		Read:   resourcePingAccessHsmProviderRead,
-		Update: resourcePingAccessHsmProviderUpdate,
-		Delete: resourcePingAccessHsmProviderDelete,
+		CreateContext: resourcePingAccessHsmProviderCreate,
+		ReadContext:   resourcePingAccessHsmProviderRead,
+		UpdateContext: resourcePingAccessHsmProviderUpdate,
+		DeleteContext: resourcePingAccessHsmProviderDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessHsmProviderSchema(),
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			svc := m.(paClient).HsmProviders
+			desc, _, err := svc.GetHsmProviderDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve HsmProvider descriptors %s", err)
+			}
+			className := d.Get("class_name").(string)
+			if err := descriptorsHasClassName(className, desc); err != nil {
+				return err
+			}
+			return validateConfiguration(className, d, desc)
+		},
 	}
 }
 
@@ -33,68 +48,65 @@ func resourcePingAccessHsmProviderSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"configuration": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: suppressEquivalentJSONDiffs,
 		},
 	}
 }
 
-func resourcePingAccessHsmProviderCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HsmProviders
-	input := pingaccess.AddHsmProviderCommandInput{
+func resourcePingAccessHsmProviderCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HsmProviders
+	input := hsmProviders.AddHsmProviderCommandInput{
 		Body: *resourcePingAccessHsmProviderReadData(d),
 	}
 
 	result, _, err := svc.AddHsmProviderCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating HsmProvider: %s", err.Error())
+		return diag.Errorf("unable to create HsmProvider: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
-func resourcePingAccessHsmProviderRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HsmProviders
-	input := &pingaccess.GetHsmProviderCommandInput{
+func resourcePingAccessHsmProviderRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HsmProviders
+	input := &hsmProviders.GetHsmProviderCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetHsmProviderCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading HsmProvider: %s", err.Error())
+		return diag.Errorf("unable to read HsmProvider: %s", err)
 	}
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
-func resourcePingAccessHsmProviderUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HsmProviders
-	input := pingaccess.UpdateHsmProviderCommandInput{
+func resourcePingAccessHsmProviderUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HsmProviders
+	input := hsmProviders.UpdateHsmProviderCommandInput{
 		Body: *resourcePingAccessHsmProviderReadData(d),
 		Id:   d.Id(),
 	}
 	result, _, err := svc.UpdateHsmProviderCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating HsmProvider: %s", err.Error())
+		return diag.Errorf("unable to update HsmProvider: %s", err)
 	}
 	d.SetId(result.Id.String())
 	return resourcePingAccessHsmProviderReadResult(d, result, svc)
 }
 
-func resourcePingAccessHsmProviderDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HsmProviders
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-	_, err := svc.DeleteHsmProviderCommand(&pingaccess.DeleteHsmProviderCommandInput{Id: d.Id()})
+func resourcePingAccessHsmProviderDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HsmProviders
+	_, err := svc.DeleteHsmProviderCommand(&hsmProviders.DeleteHsmProviderCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting HsmProvider: %s", err.Error())
+		return diag.Errorf("unable to delete HsmProvider: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessHsmProviderReadResult(d *schema.ResourceData, input *pingaccess.HsmProviderView, svc *pingaccess.HsmProvidersService) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "class_name", input.ClassName)
-
+func resourcePingAccessHsmProviderReadResult(d *schema.ResourceData, input *models.HsmProviderView, svc hsmProviders.HsmProvidersAPI) diag.Diagnostics {
+	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
 
@@ -107,17 +119,17 @@ func resourcePingAccessHsmProviderReadResult(d *schema.ResourceData, input *ping
 
 	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
 
-	if err := d.Set("configuration", config); err != nil {
-		return err
-	}
-	return nil
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "class_name", input.ClassName, &diags)
+	setResourceDataStringWithDiagnostic(d, "configuration", &config, &diags)
+	return diags
 }
 
-func resourcePingAccessHsmProviderReadData(d *schema.ResourceData) *pingaccess.HsmProviderView {
+func resourcePingAccessHsmProviderReadData(d *schema.ResourceData) *models.HsmProviderView {
 	config := d.Get("configuration").(string)
 	var dat map[string]interface{}
 	_ = json.Unmarshal([]byte(config), &dat)
-	hsmProvider := &pingaccess.HsmProviderView{
+	hsmProvider := &models.HsmProviderView{
 		Name:          String(d.Get("name").(string)),
 		ClassName:     String(d.Get("class_name").(string)),
 		Configuration: dat,

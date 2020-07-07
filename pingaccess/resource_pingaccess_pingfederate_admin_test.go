@@ -2,29 +2,34 @@ package pingaccess
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"net/url"
+	"os"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestAccPingAccessPingFederateAdmin(t *testing.T) {
+	u, _ := url.Parse(os.Getenv("PINGFEDERATE_TEST_IP"))
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPingAccessPingFederateAdminDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessPingFederateAdminConfig("pf", true),
+				Config: testAccPingAccessPingFederateAdminConfig(u.Hostname(), u.Port(), "ON"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateAdminExists("pingaccess_pingfederate_admin.demo"),
 				),
 			},
 			{
-				Config: testAccPingAccessPingFederateAdminConfig("pf", true),
+				Config: testAccPingAccessPingFederateAdminConfig(u.Hostname(), u.Port(), "OFF"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateAdminExists("pingaccess_pingfederate_admin.demo"),
 				),
@@ -37,7 +42,7 @@ func testAccCheckPingAccessPingFederateAdminDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessPingFederateAdminConfig(issuer string, proxy bool) string {
+func testAccPingAccessPingFederateAdminConfig(host, port, configChange string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_pingfederate_admin" "demo" {
 		admin_username = "Administrator"
@@ -45,13 +50,13 @@ func testAccPingAccessPingFederateAdminConfig(issuer string, proxy bool) string 
 			value = "2FederateM0re"
 		}
 		base_path = "/path"
-		audit_level = "ON"
+		audit_level = "%s"
 		host = "%s"
-		port = 9031
-		secure = false
+		port = %s
+		secure = true
 		trusted_certificate_group_id = 2
-		use_proxy = %v
-	}`, issuer, proxy)
+		use_proxy = false
+	}`, configChange, host, port)
 }
 
 func testAccCheckPingAccessPingFederateAdminExists(n string) resource.TestCheckFunc {
@@ -65,7 +70,7 @@ func testAccCheckPingAccessPingFederateAdminExists(n string) resource.TestCheckF
 			return fmt.Errorf("No third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).PingFederate
+		conn := testAccProvider.Meta().(paClient).Pingfederate
 		result, _, err := conn.GetPingFederateAdminCommand()
 
 		if err != nil {
@@ -82,22 +87,26 @@ func testAccCheckPingAccessPingFederateAdminExists(n string) resource.TestCheckF
 
 func Test_resourcePingAccessPingFederateAdminReadData(t *testing.T) {
 	cases := []struct {
-		PingFederateAdmin pa.PingFederateAdminView
+		PingFederateAdmin models.PingFederateAdminView
 	}{
 		{
-			PingFederateAdmin: pa.PingFederateAdminView{
-				AdminPassword: &pa.HiddenFieldView{
-					Value: String("secret"),
+			PingFederateAdmin: models.PingFederateAdminView{
+				AdminPassword: &models.HiddenFieldView{
+					Value:          String("secret"),
+					EncryptedValue: String("foo"),
 				},
-				AdminUsername: String("admin"),
-				Host:          String("localhost"),
-				Port:          Int(9031),
+				AdminUsername:             String("admin"),
+				Host:                      String("localhost"),
+				Port:                      Int(9031),
+				AuditLevel:                String("ON"),
+				TrustedCertificateGroupId: Int(0),
 			},
 		},
 		{
-			PingFederateAdmin: pa.PingFederateAdminView{
-				AdminPassword: &pa.HiddenFieldView{
-					Value: String("secret"),
+			PingFederateAdmin: models.PingFederateAdminView{
+				AdminPassword: &models.HiddenFieldView{
+					Value:          String("secret"),
+					EncryptedValue: String("foo"),
 				},
 				AdminUsername:             String("admin"),
 				Host:                      String("localhost"),

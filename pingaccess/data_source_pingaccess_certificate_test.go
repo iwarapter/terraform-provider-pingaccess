@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessCertificateDataSource(t *testing.T) {
@@ -43,7 +43,7 @@ func TestAccPingAccessCertificateDataSource_NotFound(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccPingAccessCertificateDataSourceConfigNonExistent(),
-				ExpectError: regexp.MustCompile(`Unable to find certificate with alias junk: `),
+				ExpectError: regexp.MustCompile(` unable to find Certificate with alias 'junk' found '0' results`),
 			},
 		},
 	})

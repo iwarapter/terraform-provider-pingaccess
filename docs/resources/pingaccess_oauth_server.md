@@ -4,7 +4,7 @@ Provides an Authorization Server configuration.
 
 ### Example Usage
 ```terraform
-{!../pingaccess/test_cases/oauth_server.tf!}
+{!../func-tests//oauth_server.tf!}
 ```
 ### Argument Attributes
 The following arguments are supported:

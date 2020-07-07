@@ -7,18 +7,32 @@ Provides a keypair.
 
 ### Example Usage
 ```terraform
-{!../pingaccess/test_cases/keypair.tf!}
+{!../func-tests//keypair.tf!}
+
+{!../func-tests//keypair_generate.tf!}
 ```
 ### Argument Attributes
 The following arguments are supported:
 
 - [`alias`](#alias) - (required) The alias for the keypair.
+- [`hsm_provider_id`](#hsm_provider_id) - The HSM Provider ID.
+
+#### Importing KeyPair
 
 - [`file_data`](#file_data) - (required) The base64-encoded data of the keypair.
-
 - [`password`](#password) - The Password used to protect the PKCS#12 file.
 
-- [`hsm_provider_id`](#hsm_provider_id) - The HSM Provider ID.
+#### Generating KeyPair
+
+- [`city`](#city) - (Required) The city or other primary location (L) where the company operates.
+- [`common_name`](#common_name) - (Required) The common name (CN) identifying the certificate.
+- [`country`](#country) - (Required) The country (C) where the company is based, using two capital letters.
+- [`key_algorithm`](#key_algorithm) - (Required) The key algorithm to use to generate a key.
+- [`key_size`](#key_size) - (Required) The number of bits used in the key. Choices depend on selected key algorithm.
+- [`organization`](#organization) - (Required) The organization (O) or company name creating the certificate.
+- [`organization_unit`](#organization_unit) - (Required) The specific unit within the organization (OU).
+- [`state`](#state) - (Required) The state (ST) or other political unit encompassing the location.
+- [`valid_days`](#valid_days) - (Required) The number of days the certificate is valid.
 
 ### Attributes Reference
 

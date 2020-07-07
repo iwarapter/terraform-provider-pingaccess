@@ -4,7 +4,7 @@ Provides a engine listener.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/engine_listener.tf!}
+{!../func-tests//engine_listener.tf!}
 ```
 
 ## Argument Attributes

@@ -1,20 +1,23 @@
 package pingaccess
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/engineListeners"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessEngineListener() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessEngineListenerCreate,
-		Read:   resourcePingAccessEngineListenerRead,
-		Update: resourcePingAccessEngineListenerUpdate,
-		Delete: resourcePingAccessEngineListenerDelete,
+		CreateContext: resourcePingAccessEngineListenerCreate,
+		ReadContext:   resourcePingAccessEngineListenerRead,
+		UpdateContext: resourcePingAccessEngineListenerUpdate,
+		DeleteContext: resourcePingAccessEngineListenerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessEngineListenerSchema(),
@@ -23,91 +26,98 @@ func resourcePingAccessEngineListener() *schema.Resource {
 
 func resourcePingAccessEngineListenerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": &schema.Schema{
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"port": &schema.Schema{
+		"port": {
 			Type:     schema.TypeInt,
 			Required: true,
 		},
-		"secure": &schema.Schema{
+		"secure": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  true,
+		},
+		"trusted_certificate_group_id": {
+			Type:     schema.TypeInt,
+			Optional: true,
+			Default:  0,
 		},
 	}
 }
 
-func resourcePingAccessEngineListenerCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).EngineListeners
-	input := pingaccess.AddEngineListenerCommandInput{
+func resourcePingAccessEngineListenerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).EngineListeners
+	input := engineListeners.AddEngineListenerCommandInput{
 		Body: *resourcePingAccessEngineListenerReadData(d),
 	}
 
 	result, _, err := svc.AddEngineListenerCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating EngineListener: %s", err)
+		return diag.Errorf("unable to create EngineListener: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessEngineListenerReadResult(d, &input.Body)
 }
 
-func resourcePingAccessEngineListenerRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).EngineListeners
-	input := &pingaccess.GetEngineListenerCommandInput{
+func resourcePingAccessEngineListenerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).EngineListeners
+	input := &engineListeners.GetEngineListenerCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetEngineListenerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading EngineListener: %s", err)
+		return diag.Errorf("unable to read EngineListener: %s", err)
 	}
 	return resourcePingAccessEngineListenerReadResult(d, result)
 }
 
-func resourcePingAccessEngineListenerUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).EngineListeners
-	input := pingaccess.UpdateEngineListenerCommandInput{
+func resourcePingAccessEngineListenerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).EngineListeners
+	input := engineListeners.UpdateEngineListenerCommandInput{
 		Body: *resourcePingAccessEngineListenerReadData(d),
 		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateEngineListenerCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating EngineListener: %s", err.Error())
+		return diag.Errorf("unable to update EngineListener: %s", err)
 	}
 	return resourcePingAccessEngineListenerReadResult(d, result)
 }
 
-func resourcePingAccessEngineListenerDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).EngineListeners
-	input := &pingaccess.DeleteEngineListenerCommandInput{
+func resourcePingAccessEngineListenerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).EngineListeners
+	input := &engineListeners.DeleteEngineListenerCommandInput{
 		Id: d.Id(),
 	}
 
 	_, err := svc.DeleteEngineListenerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting EngineListener: %s", err)
+		return diag.Errorf("unable to delete EngineListener: %s", err)
+
 	}
 	return nil
 }
 
-func resourcePingAccessEngineListenerReadResult(d *schema.ResourceData, input *pingaccess.EngineListenerView) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataInt(d, "port", input.Port)
-	setResourceDataBool(d, "secure", input.Secure)
-	return nil
+func resourcePingAccessEngineListenerReadResult(d *schema.ResourceData, input *models.EngineListenerView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataIntWithDiagnostic(d, "port", input.Port, &diags)
+	setResourceDataBoolWithDiagnostic(d, "secure", input.Secure, &diags)
+	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
+	return diags
 }
 
-func resourcePingAccessEngineListenerReadData(d *schema.ResourceData) *pingaccess.EngineListenerView {
-	engine := &pingaccess.EngineListenerView{
+func resourcePingAccessEngineListenerReadData(d *schema.ResourceData) *models.EngineListenerView {
+	engine := &models.EngineListenerView{
 		Name: String(d.Get("name").(string)),
 		Port: Int(d.Get("port").(int)),
 	}
-
-	if v, ok := d.GetOkExists("secure"); ok {
-		engine.Secure = Bool(v.(bool))
-	}
+	engine.Secure = Bool(d.Get("secure").(bool))
+	engine.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
 
 	return engine
 }

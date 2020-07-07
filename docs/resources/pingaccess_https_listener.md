@@ -4,7 +4,7 @@ Provides a https listener.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/https_listener.tf!}
+{!../func-tests//https_listener.tf!}
 ```
 
 ## Argument Attributes

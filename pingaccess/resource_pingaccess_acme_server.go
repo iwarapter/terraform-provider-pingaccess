@@ -1,20 +1,22 @@
 package pingaccess
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessAcmeServer() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessAcmeServerCreate,
-		Read:   resourcePingAccessAcmeServerRead,
-		//Update: resourcePingAccessAcmeServerUpdate,
-		Delete: resourcePingAccessAcmeServerDelete,
+		CreateContext: resourcePingAccessAcmeServerCreate,
+		ReadContext:   resourcePingAccessAcmeServerRead,
+		DeleteContext: resourcePingAccessAcmeServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessAcmeServerSchema(),
@@ -37,58 +39,59 @@ func resourcePingAccessAcmeServerSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessAcmeServerCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Acme
-	input := pingaccess.AddAcmeServerCommandInput{
+func resourcePingAccessAcmeServerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Acme
+	input := acme.AddAcmeServerCommandInput{
 		Body: *resourcePingAccessAcmeServerReadData(d),
 	}
 
 	result, _, err := svc.AddAcmeServerCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating AcmeServer: %s", err)
+		return diag.Errorf("unable to create AcmeServer: %s", err)
 	}
-	d.SetId(result.Id.String())
+	d.SetId(*result.Id)
 	return resourcePingAccessAcmeServerReadResult(d, &input.Body)
 }
 
-func resourcePingAccessAcmeServerRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Acme
-	input := &pingaccess.GetAcmeServerCommandInput{
+func resourcePingAccessAcmeServerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Acme
+	input := &acme.GetAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 	result, _, err := svc.GetAcmeServerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading AcmeServer: %s", err)
+		return diag.Errorf("unable to read AcmeServer: %s", err)
 	}
 	return resourcePingAccessAcmeServerReadResult(d, result)
 }
 
-func resourcePingAccessAcmeServerDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Acme
-	input := &pingaccess.DeleteAcmeServerCommandInput{
+func resourcePingAccessAcmeServerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Acme
+	input := &acme.DeleteAcmeServerCommandInput{
 		AcmeServerId: d.Id(),
 	}
 
 	_, _, err := svc.DeleteAcmeServerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error deleting AcmeServer: %s", err)
+		return diag.Errorf("unable to delete AcmeServer: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *pingaccess.AcmeServerView) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "url", input.Url)
+func resourcePingAccessAcmeServerReadResult(d *schema.ResourceData, input *models.AcmeServerView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "url", input.Url, &diags)
 	if input.AcmeAccounts != nil && len(input.AcmeAccounts) > 0 {
 		if err := d.Set("acme_accounts", flattenLinkViewList(input.AcmeAccounts)); err != nil {
-			return err
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
-	return nil
+	return diags
 }
 
-func resourcePingAccessAcmeServerReadData(d *schema.ResourceData) *pingaccess.AcmeServerView {
-	return &pingaccess.AcmeServerView{
+func resourcePingAccessAcmeServerReadData(d *schema.ResourceData) *models.AcmeServerView {
+	return &models.AcmeServerView{
 		Name: String(d.Get("name").(string)),
 		Url:  String(d.Get("url").(string)),
 	}

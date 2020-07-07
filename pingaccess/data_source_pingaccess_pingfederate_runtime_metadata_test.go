@@ -1,9 +1,11 @@
 package pingaccess
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
@@ -26,7 +28,7 @@ func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "claims_parameter_supported"),
 					resource.TestCheckNoResourceAttr(resourceName, "claims_supported.0"),
 					resource.TestCheckNoResourceAttr(resourceName, "code_challenge_methods_supported.0"),
-					resource.TestCheckResourceAttr(resourceName, "end_session_endpoint", ""),
+					resource.TestCheckNoResourceAttr(resourceName, "end_session_endpoint"),
 					resource.TestCheckResourceAttrSet(resourceName, "grant_types_supported.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "id_token_signing_alg_values_supported.0"),
 					resource.TestCheckResourceAttrSet(resourceName, "introspection_endpoint"),
@@ -53,9 +55,9 @@ func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
 }
 
 func testAccPingAccessPingFederateRuntimeMetadataConfig() string {
-	return `data "pingaccess_pingfederate_runtime_metadata" "test" {}
+	return fmt.Sprintf(`data "pingaccess_pingfederate_runtime_metadata" "test" {}
 resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-	issuer = "https://pf:9031"
+	issuer = "%s"
 	trusted_certificate_group_id = 2
-}`
+}`, os.Getenv("PINGFEDERATE_TEST_IP"))
 }

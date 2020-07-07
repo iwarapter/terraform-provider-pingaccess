@@ -2,11 +2,13 @@ package pingaccess
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessAccessTokenValidator(t *testing.T) {
@@ -35,6 +37,10 @@ func TestAccPingAccessAccessTokenValidator(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"audience\":null,\"description\":null,\"issuer\":null,\"path\":\"/bar/foo\",\"subjectAttributeName\":\"foo\"}"),
 				),
 			},
+			{
+				Config:      testAccPingAccessAccessTokenValidatorConfigInvalidClassName(),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
+			},
 		},
 	})
 }
@@ -61,6 +67,24 @@ func testAccPingAccessAccessTokenValidatorConfig(configUpdate string) string {
 	}`, configUpdate)
 }
 
+func testAccPingAccessAccessTokenValidatorConfigInvalidClassName() string {
+	return `
+	resource "pingaccess_access_token_validator" "test" {
+		class_name = "com.pingidentity.pa.accesstokenvalidators.foo"
+		name = "foo"
+
+		configuration = <<EOF
+		{
+			"description": null,
+			"path": "/foo",
+			"subjectAttributeName": "foo",
+			"issuer": null,
+			"audience": null
+		}
+		EOF
+	}`
+}
+
 func testAccCheckPingAccessAccessTokenValidatorExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -72,8 +96,8 @@ func testAccCheckPingAccessAccessTokenValidatorExists(n string) resource.TestChe
 			return fmt.Errorf("No access_token_validator ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).AccessTokenValidators
-		result, _, err := conn.GetAccessTokenValidatorCommand(&pingaccess.GetAccessTokenValidatorCommandInput{
+		conn := testAccProvider.Meta().(paClient).AccessTokenValidators
+		result, _, err := conn.GetAccessTokenValidatorCommand(&accessTokenValidators.GetAccessTokenValidatorCommandInput{
 			Id: rs.Primary.ID,
 		})
 

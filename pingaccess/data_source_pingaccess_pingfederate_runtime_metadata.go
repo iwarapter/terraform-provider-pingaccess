@@ -1,16 +1,16 @@
 package pingaccess
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourcePingAccessPingFederateRuntimeMetadata() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourcePingAccessPingFederateRuntimeMetadataRead,
-		Schema: dataSourcePingAccessPingFederateRuntimeMetadataSchema(),
+		ReadContext: dataSourcePingAccessPingFederateRuntimeMetadataRead,
+		Schema:      dataSourcePingAccessPingFederateRuntimeMetadataSchema(),
 	}
 }
 
@@ -87,38 +87,65 @@ func dataSourcePingAccessPingFederateRuntimeMetadataSchema() map[string]*schema.
 	}
 }
 
-func dataSourcePingAccessPingFederateRuntimeMetadataRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).PingFederate
+func dataSourcePingAccessPingFederateRuntimeMetadataRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Pingfederate
 	result, resp, err := svc.GetPingFederateMetadataCommand()
 	if err != nil {
-		return fmt.Errorf("Error reading PingFederate Runtime Metadata: %s\n%v", err.Error(), resp)
+		return diag.Errorf("unable to read PingFederate Runtime Metadata: %s\n%v", err, resp)
 	}
+	var diags diag.Diagnostics
 	d.SetId("pingfederate_runtime_metadata")
-	d.Set("authorization_endpoint", result.Authorization_endpoint)
-	d.Set("backchannel_authentication_endpoint", result.Backchannel_authentication_endpoint)
-	d.Set("claim_types_supported", result.Claim_types_supported)
-	d.Set("claims_parameter_supported", result.Claims_parameter_supported)
-	d.Set("claims_supported", result.Claims_supported)
-	d.Set("code_challenge_methods_supported", result.Code_challenge_methods_supported)
-	d.Set("end_session_endpoint", result.End_session_endpoint)
-	d.Set("grant_types_supported", result.Grant_types_supported)
-	d.Set("id_token_signing_alg_values_supported", result.Id_token_signing_alg_values_supported)
-	d.Set("introspection_endpoint", result.Introspection_endpoint)
-	d.Set("issuer", result.Issuer)
-	d.Set("jwks_uri", result.Jwks_uri)
-	d.Set("ping_end_session_endpoint", result.Ping_end_session_endpoint)
-	d.Set("ping_revoked_sris_endpoint", result.Ping_revoked_sris_endpoint)
-	d.Set("request_object_signing_alg_values_supported", result.Request_object_signing_alg_values_supported)
-	d.Set("request_parameter_supported", result.Request_parameter_supported)
-	d.Set("request_uri_parameter_supported", result.Request_uri_parameter_supported)
-	d.Set("response_modes_supported", result.Response_modes_supported)
-	d.Set("response_types_supported", result.Response_types_supported)
-	d.Set("revocation_endpoint", result.Revocation_endpoint)
-	d.Set("scopes_supported", result.Scopes_supported)
-	d.Set("subject_types_supported", result.Subject_types_supported)
-	d.Set("token_endpoint", result.Token_endpoint)
-	d.Set("token_endpoint_auth_methods_supported", result.Token_endpoint_auth_methods_supported)
-	d.Set("userinfo_endpoint", result.Userinfo_endpoint)
-	d.Set("userinfo_signing_alg_values_supported", result.Userinfo_signing_alg_values_supported)
-	return nil
+	setResourceDataStringWithDiagnostic(d, "authorization_endpoint", result.AuthorizationEndpoint, &diags)
+	setResourceDataStringWithDiagnostic(d, "backchannel_authentication_endpoint", result.BackchannelAuthenticationEndpoint, &diags)
+	if err := d.Set("claim_types_supported", result.ClaimTypesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	if err := d.Set("claims_parameter_supported", result.ClaimsParameterSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	if err := d.Set("claims_supported", result.ClaimsSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	if err := d.Set("code_challenge_methods_supported", result.CodeChallengeMethodsSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	setResourceDataStringWithDiagnostic(d, "end_session_endpoint", result.EndSessionEndpoint, &diags)
+	if err := d.Set("grant_types_supported", result.GrantTypesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	if err := d.Set("id_token_signing_alg_values_supported", result.IdTokenSigningAlgValuesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	setResourceDataStringWithDiagnostic(d, "introspection_endpoint", result.IntrospectionEndpoint, &diags)
+	setResourceDataStringWithDiagnostic(d, "issuer", result.Issuer, &diags)
+	setResourceDataStringWithDiagnostic(d, "jwks_uri", result.JwksUri, &diags)
+	setResourceDataStringWithDiagnostic(d, "ping_end_session_endpoint", result.PingEndSessionEndpoint, &diags)
+	setResourceDataStringWithDiagnostic(d, "ping_revoked_sris_endpoint", result.PingRevokedSrisEndpoint, &diags)
+	if err := d.Set("request_object_signing_alg_values_supported", result.RequestObjectSigningAlgValuesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	setResourceDataBoolWithDiagnostic(d, "request_parameter_supported", result.RequestParameterSupported, &diags)
+	setResourceDataBoolWithDiagnostic(d, "request_uri_parameter_supported", result.RequestUriParameterSupported, &diags)
+	if err := d.Set("response_modes_supported", result.ResponseModesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	if err := d.Set("response_types_supported", result.ResponseTypesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	setResourceDataStringWithDiagnostic(d, "revocation_endpoint", result.RevocationEndpoint, &diags)
+	if err := d.Set("scopes_supported", result.ScopesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	if err := d.Set("subject_types_supported", result.SubjectTypesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	setResourceDataStringWithDiagnostic(d, "token_endpoint", result.TokenEndpoint, &diags)
+	if err := d.Set("token_endpoint_auth_methods_supported", result.TokenEndpointAuthMethodsSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	setResourceDataStringWithDiagnostic(d, "userinfo_endpoint", result.UserinfoEndpoint, &diags)
+	if err := d.Set("userinfo_signing_alg_values_supported", result.UserinfoSigningAlgValuesSupported); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	return diags
 }

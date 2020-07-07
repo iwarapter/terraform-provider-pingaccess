@@ -1,113 +1,139 @@
 package pingaccess
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tidwall/sjson"
-	"io/ioutil"
+	"github.com/iwarapter/pingaccess-sdk-go/services/version"
 	"log"
+	"math/rand"
+	"net"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
+	"github.com/ory/dockertest/v3"
 )
 
 func TestMain(m *testing.M) {
 	_, acceptanceTesting := os.LookupEnv("TF_ACC")
 	if acceptanceTesting {
+		pool, err := dockertest.NewPool("")
+		if err != nil {
+			log.Fatalf("Could not connect to docker: %s", err)
+		}
+		server := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			// Send response to be tested
+			rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+			rw.Write([]byte(`
+{
+  "issuer": "https://localhost:9031",
+  "authorization_endpoint": "https://localhost:9031/as/authorization.oauth2",
+  "token_endpoint": "https://localhost:9031/as/token.oauth2",
+  "revocation_endpoint": "https://localhost:9031/as/revoke_token.oauth2",
+  "userinfo_endpoint": "https://localhost:9031/idp/userinfo.openid",
+  "introspection_endpoint": "https://localhost:9031/as/introspect.oauth2",
+  "jwks_uri": "https://localhost:9031/pf/JWKS",
+  "registration_endpoint": "https://localhost:9031/as/clients.oauth2",
+  "ping_revoked_sris_endpoint": "https://localhost:9031/pf-ws/rest/sessionMgmt/revokedSris",
+  "ping_end_session_endpoint": "https://localhost:9031/idp/startSLO.ping",
+  "device_authorization_endpoint": "https://localhost:9031/as/device_authz.oauth2",
+  "scopes_supported": [ "address", "mail", "phone", "openid", "profile", "group1" ],
+  "response_types_supported": [ "code", "token", "id_token", "code token", "code id_token", "token id_token", "code token id_token" ],
+  "response_modes_supported": [ "fragment", "query", "form_post" ],
+  "grant_types_supported": [ "implicit", "authorization_code", "refresh_token", "password", "client_credentials", "urn:pingidentity.com:oauth2:grant_type:validate_bearer", "urn:ietf:params:oauth:grant-type:jwt-bearer", "urn:ietf:params:oauth:grant-type:saml2-bearer", "urn:ietf:params:oauth:grant-type:device_code", "urn:openid:params:grant-type:ciba" ],
+  "subject_types_supported": [ "public", "pairwise" ],
+  "id_token_signing_alg_values_supported": [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "token_endpoint_auth_methods_supported": [ "client_secret_basic", "client_secret_post", "private_key_jwt" ],
+  "token_endpoint_auth_signing_alg_values_supported":  [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "claim_types_supported": [ "normal" ],
+  "claims_parameter_supported": false,
+  "request_parameter_supported": true,
+  "request_uri_parameter_supported": false,
+  "request_object_signing_alg_values_supported": [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "id_token_encryption_alg_values_supported": [ "dir", "A128KW", "A192KW", "A256KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "RSA-OAEP" ],
+  "id_token_encryption_enc_values_supported": [ "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
+  "backchannel_authentication_endpoint": "https://localhost:9031/as/bc-auth.ciba",
+  "backchannel_token_delivery_modes_supported": [ "poll", "ping" ],
+  "backchannel_authentication_request_signing_alg_values_supported": [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+  "backchannel_user_code_parameter_supported": false
+}
+`))
+		}))
+		l, err := net.Listen("tcp", ":0")
+		server.Listener = l //for CI tests as host.docker.internal is window/macosx
+		server.StartTLS()
+		// Close the server when test finishes
+		defer server.Close()
 
 		devOpsUser, devOpsUserExists := os.LookupEnv("PING_IDENTITY_DEVOPS_USER")
 		devOpsKey, devOpsKeyExists := os.LookupEnv("PING_IDENTITY_DEVOPS_KEY")
+		paVersion := ""
+		if value, ok := os.LookupEnv("PINGACCESS_VERSION"); ok {
+			paVersion = value
+		} else {
+			paVersion = "6.1.0-edge"
+		}
 
 		if devOpsKeyExists != true || devOpsUserExists != true {
 			log.Fatalf("Both PING_IDENTITY_DEVOPS_USER and PING_IDENTITY_DEVOPS_KEY environment variables must be set for acceptance tests.")
 		}
 
-		ctx := context.Background()
-		networkName := "tf-pa-test-network"
-		gcr := testcontainers.GenericContainerRequest{
-			ContainerRequest: testcontainers.ContainerRequest{
-				FromDockerfile: testcontainers.FromDockerfile{
-					Context:    "../",
-					Dockerfile: "Dockerfile",
-				},
-				Networks:     []string{networkName},
-				ExposedPorts: []string{"9000/tcp"},
-				WaitingFor:   wait.ForLog("INFO: No file named /instance/data/data.json found, skipping import."),
-				Name:         "terraform-provider-pingaccess-test",
-				Env:          map[string]string{"PING_IDENTITY_ACCEPT_EULA": "YES", "PING_IDENTITY_DEVOPS_USER": devOpsUser, "PING_IDENTITY_DEVOPS_KEY": devOpsKey},
-			},
-			Started: true,
+		randomID := randomString(10)
+		paOpts := &dockertest.RunOptions{
+			Name:       fmt.Sprintf("pa-%s", randomID),
+			Repository: "pingidentity/pingaccess",
+			Tag:        paVersion,
+			//ExtraHosts: []string{"host.docker.internal:host-gateway"},
+			Env: []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
 		}
-		pfcr := testcontainers.GenericContainerRequest{
-			ContainerRequest: testcontainers.ContainerRequest{
-				Image:        "pingidentity/pingfederate:edge",
-				Networks:     []string{networkName},
-				ExposedPorts: []string{"9031/tcp", "9999/tcp"},
-				WaitingFor:   wait.ForLog("INFO  [org.eclipse.jetty.server.AbstractConnector] Started ServerConnector"),
-				Name:         "terraform-provider-pingaccess-test-pf",
-				Env: map[string]string{
-					"PING_IDENTITY_ACCEPT_EULA": "YES",
-					"PING_IDENTITY_DEVOPS_USER": devOpsUser,
-					"PING_IDENTITY_DEVOPS_KEY":  devOpsKey,
-					"SERVER_PROFILE_URL":        "https://github.com/pingidentity/pingidentity-server-profiles.git",
-					"SERVER_PROFILE_PATH":       "getting-started/pingfederate",
-				},
-				NetworkAliases: map[string][]string{
-					networkName: {
-						"pf",
-					},
-				},
-			},
-			Started: true,
-		}
-		provider, _ := gcr.ProviderType.GetProvider()
-		net, _ := provider.CreateNetwork(ctx, testcontainers.NetworkRequest{
-			Name:           networkName,
-			CheckDuplicate: true,
-		})
-
-		pfContainer, err := testcontainers.GenericContainer(ctx, pfcr)
-		paContainer, err := testcontainers.GenericContainer(ctx, gcr)
+		paCont, err := pool.RunWithOptions(paOpts)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Could not create pingaccess container: %s", err)
 		}
-		defer net.Remove(ctx)
-		defer paContainer.Terminate(ctx)
-		defer pfContainer.Terminate(ctx)
+		defer paCont.Close()
 
-		port, _ := paContainer.MappedPort(ctx, "9000")
-		url, _ := url.Parse(fmt.Sprintf("https://localhost:%s", port.Port()))
-		os.Setenv("PINGACCESS_BASEURL", url.String())
-		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
-		log.Printf("Setting PingAccess admin API: %s", url.String())
+		pool.MaxWait = time.Minute * 2
+
+		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s/pa-admin-api/v3", paCont.GetPort("9000/tcp")))
+		log.Printf("Setting PingAccess admin API: %s", u.String())
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		client := pingaccess.NewClient("Administrator", "2FederateM0re", url, "/pa-admin-api/v3", nil)
-		version, _, err := client.Version.VersionCommand()
+		cfg := paCfg.NewConfig().WithUsername("administrator").WithPassword("2FederateM0re").WithEndpoint(u.String())
+		client := version.New(cfg)
+		if err = pool.Retry(func() error {
+			log.Println("Attempting to connect to PingAccess admin API....")
+			_, _, err = client.VersionCommand()
+			return err
+		}); err != nil {
+			log.Fatalf("Could not connect to pingaccess: %s", err)
+		}
+		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
+		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
+		host, _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
+		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
+		log.Println("Connected to PingAccess admin API....")
+
+		version, _, err := client.VersionCommand()
 		if err != nil {
 			log.Fatalf("Failed to retrieve version from server: %v", err)
 		}
 		log.Printf("Connected to PingAccess version: %s", *version.Version)
-		pfPort, _ := pfContainer.MappedPort(ctx, "9999")
-		pfUrl, _ := url.Parse(fmt.Sprintf("https://localhost:%s", pfPort.Port()))
-		err = setupPF(pfUrl.String())
-		if err != nil {
-			log.Fatalf("Failed to setup PF server: %v", err)
-		}
-		log.Printf("Connected to PingFederate setup complete")
+
+		paCont.Expire(360)
 		code := m.Run()
-		log.Println("Tests complete shutting down container")
+		paCont.Close()
+		log.Printf("Tests complete shutting down container")
 
 		os.Exit(code)
 	} else {
@@ -115,87 +141,31 @@ func TestMain(m *testing.M) {
 	}
 }
 
-var testAccProviders map[string]terraform.ResourceProvider
+var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
-var testAccProviderFactories func(providers *[]*schema.Provider) map[string]terraform.ResourceProviderFactory
-var testAccTemplateProvider *schema.Provider
 
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
-	//testAccTemplateProvider = template.Provider().(*schema.Provider)
-	testAccProviders = map[string]terraform.ResourceProvider{
+	testAccProvider = Provider()
+	testAccProviders = map[string]*schema.Provider{
 		"pingaccess": testAccProvider,
-		"template":   testAccTemplateProvider,
 	}
-	testAccProviderFactories = func(providers *[]*schema.Provider) map[string]terraform.ResourceProviderFactory {
-		return map[string]terraform.ResourceProviderFactory{
-			"pingaccess": func() (terraform.ResourceProvider, error) {
-				p := Provider()
-				*providers = append(*providers, p.(*schema.Provider))
-				return p, nil
-			},
-		}
-	}
-}
-
-func setupPF(adminUrl string) error {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminUrl), nil)
-	if err != nil {
-		return err
-	}
-	req.SetBasicAuth("Administrator", "2FederateM0re")
-	req.Header.Add("X-Xsrf-Header", "pingfederate")
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New("Incorrect response code from admin: " + resp.Status)
-	}
-	bodyText, err := ioutil.ReadAll(resp.Body)
-	s := string(bodyText)
-	s, err = sjson.Set(s, "rolesAndProtocols.oauthRole.enableOpenIdConnect", true)
-	if err != nil {
-		return err
-	}
-	req, err = http.NewRequest("PUT", fmt.Sprintf("%s/pf-admin-api/v1/serverSettings", adminUrl), bytes.NewBuffer([]byte(s)))
-	req.SetBasicAuth("Administrator", "2FederateM0re")
-	req.Header.Add("X-Xsrf-Header", "pingfederate")
-	req.Header.Set("Content-Type", "application/json")
-	resp, err = client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return errors.New("Incorrect response code from admin: " + resp.Status)
-	}
-	return nil
 }
 
 func testAccPreCheck(t *testing.T) {
-	err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
+	err := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-// assert fails the test if the condition is false.
-func assert(tb testing.TB, condition bool, msg string, v ...interface{}) {
-	if !condition {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d: "+msg+"\033[39m\n\n", append([]interface{}{filepath.Base(file), line}, v...)...)
-		tb.FailNow()
+func randomString(length int) string {
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	charset := "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
 	}
-}
-
-// ok fails the test if an err is not nil.
-func ok(tb testing.TB, err error) {
-	if err != nil {
-		_, file, line, _ := runtime.Caller(1)
-		fmt.Printf("\033[31m%s:%d: unexpected error: %s\033[39m\n\n", filepath.Base(file), line, err.Error())
-		tb.FailNow()
-	}
+	return string(b)
 }
 
 // equals fails the test if exp is not equal to act.

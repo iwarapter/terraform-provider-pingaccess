@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessHTTPSListener(t *testing.T) {
@@ -55,20 +56,20 @@ func testAccCheckPingAccessHTTPSListenerExists(n string) resource.TestCheckFunc 
 		}
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
-			return fmt.Errorf("No HttpsListener ID is set")
+			return fmt.Errorf("No listener ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).HttpsListeners
-		result, _, err := conn.GetHttpsListenerCommand(&pingaccess.GetHttpsListenerCommandInput{
+		conn := testAccProvider.Meta().(paClient).HttpsListeners
+		result, _, err := conn.GetHttpsListenerCommand(&httpsListeners.GetHttpsListenerCommandInput{
 			Id: rs.Primary.ID,
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error: HttpsListener (%s) not found", n)
+			return fmt.Errorf("Error: listener (%s) not found", n)
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: HttpsListener response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("Error: listener response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -77,10 +78,10 @@ func testAccCheckPingAccessHTTPSListenerExists(n string) resource.TestCheckFunc 
 
 func Test_resourcePingAccessHTTPSListenerReadData(t *testing.T) {
 	cases := []struct {
-		HttpsListener pa.HttpsListenerView
+		listener models.HttpsListenerView
 	}{
 		{
-			HttpsListener: pa.HttpsListenerView{
+			listener: models.HttpsListenerView{
 				Name:                      String("ADMIN"),
 				KeyPairId:                 Int(1),
 				UseServerCipherSuiteOrder: Bool(true),
@@ -92,10 +93,10 @@ func Test_resourcePingAccessHTTPSListenerReadData(t *testing.T) {
 
 			resourceSchema := resourcePingAccessHTTPSListenerSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessHTTPSListenerReadResult(resourceLocalData, &tc.HttpsListener)
+			resourcePingAccessHTTPSListenerReadResult(resourceLocalData, &tc.listener)
 
-			if got := *resourcePingAccessHTTPSListenerReadData(resourceLocalData); !cmp.Equal(got, tc.HttpsListener) {
-				t.Errorf("resourcePingAccessHTTPSListenerReadData() = %v", cmp.Diff(got, tc.HttpsListener))
+			if got := *resourcePingAccessHTTPSListenerReadData(resourceLocalData); !cmp.Equal(got, tc.listener) {
+				t.Errorf("resourcePingAccessHTTPSListenerReadData() = %v", cmp.Diff(got, tc.listener))
 			}
 		})
 	}

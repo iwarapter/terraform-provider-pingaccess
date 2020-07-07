@@ -1,13 +1,15 @@
 package pingaccess
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 //Provider does stuff
 //
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": {
@@ -69,7 +71,7 @@ func Provider() terraform.ResourceProvider {
 			"pingaccess_oauth_server":                    resourcePingAccessOAuthServer(),
 			"pingaccess_http_config_request_host_source": resourcePingAccessHTTPConfigRequestHostSource(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
@@ -84,8 +86,9 @@ func init() {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	config := &Config{
+func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+
+	config := &cfg{
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),
 		BaseURL:  d.Get("base_url").(string),
@@ -103,37 +106,30 @@ func Bool(v bool) *bool { return &v }
 // to store v and returns a pointer to it.
 func Int(v int) *int { return &v }
 
-// Int64 is a helper routine that allocates a new int64 value
-// to store v and returns a pointer to it.
-func Int64(v int64) *int64 { return &v }
-
 // String is a helper routine that allocates a new string value
 // to store v and returns a pointer to it.
 func String(v string) *string { return &v }
 
-func setResourceDataString(d *schema.ResourceData, name string, data *string) error {
+func setResourceDataStringWithDiagnostic(d *schema.ResourceData, name string, data *string, diags *diag.Diagnostics) {
 	if data != nil {
 		if err := d.Set(name, *data); err != nil {
-			return err
+			*diags = append(*diags, diag.FromErr(err)...)
 		}
 	}
-	return nil
 }
 
-func setResourceDataInt(d *schema.ResourceData, name string, data *int) error {
+func setResourceDataIntWithDiagnostic(d *schema.ResourceData, name string, data *int, diags *diag.Diagnostics) {
 	if data != nil {
 		if err := d.Set(name, *data); err != nil {
-			return err
+			*diags = append(*diags, diag.FromErr(err)...)
 		}
 	}
-	return nil
 }
 
-func setResourceDataBool(d *schema.ResourceData, name string, data *bool) error {
+func setResourceDataBoolWithDiagnostic(d *schema.ResourceData, name string, data *bool, diags *diag.Diagnostics) {
 	if data != nil {
 		if err := d.Set(name, *data); err != nil {
-			return err
+			*diags = append(*diags, diag.FromErr(err)...)
 		}
 	}
-	return nil
 }

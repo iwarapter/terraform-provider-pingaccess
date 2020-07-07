@@ -4,7 +4,10 @@ Provides a acme server.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/acme_server.tf!}
+resource "pingaccess_acme_server" "test" {
+  name = "example"
+  url  = "https://acme-staging-v02.api.letsencrypt.org/directory"
+}
 ```
 
 ## Argument Attributes

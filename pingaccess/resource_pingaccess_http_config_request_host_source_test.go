@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessHTTPConfigRequestHostSource(t *testing.T) {
@@ -60,7 +60,7 @@ func testAccCheckPingAccessHTTPConfigRequestHostSourceExists(n string) resource.
 			return fmt.Errorf("No http config request host source response ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).HttpConfig
+		conn := testAccProvider.Meta().(paClient).HttpConfig
 		result, _, err := conn.GetHostSourceCommand()
 
 		if err != nil {
@@ -77,10 +77,10 @@ func testAccCheckPingAccessHTTPConfigRequestHostSourceExists(n string) resource.
 
 func Test_resourcePingAccessHTTPConfigRequestHostSourceReadData(t *testing.T) {
 	cases := []struct {
-		Resource pa.HostMultiValueSourceView
+		Resource models.HostMultiValueSourceView
 	}{
 		{
-			Resource: pa.HostMultiValueSourceView{
+			Resource: models.HostMultiValueSourceView{
 				HeaderNameList:    &[]*string{String("woot")},
 				ListValueLocation: String("FIRST"),
 			},

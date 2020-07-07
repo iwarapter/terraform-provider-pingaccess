@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessCertificate(t *testing.T) {
@@ -63,8 +64,8 @@ func testAccCheckPingAccessCertificateExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No Certificate ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Certificates
-		result, _, err := conn.GetTrustedCert(&pa.GetTrustedCertInput{
+		conn := testAccProvider.Meta().(paClient).Certificates
+		result, _, err := conn.GetTrustedCert(&certificates.GetTrustedCertInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -82,13 +83,13 @@ func testAccCheckPingAccessCertificateExists(n string) resource.TestCheckFunc {
 
 func testAccCheckPingAccessCertificateAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No Certificate ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).Certificates
-		result, _, err := conn.GetTrustedCert(&pa.GetTrustedCertInput{
+		conn := testAccProvider.Meta().(paClient).Certificates
+		result, _, err := conn.GetTrustedCert(&certificates.GetTrustedCertInput{
 			Id: rs.Primary.ID,
 		})
 

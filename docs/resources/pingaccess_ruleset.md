@@ -4,7 +4,7 @@ Provides a ruleset.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/ruleset.tf!}
+{!../func-tests//ruleset.tf!}
 ```
 
 ## Argument Attributes

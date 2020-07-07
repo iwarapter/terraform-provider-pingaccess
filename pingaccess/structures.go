@@ -4,14 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
+	"hash/crc32"
 	"log"
 	"strconv"
+	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func setOfString() *schema.Schema {
@@ -127,6 +131,7 @@ func hiddenField() *schema.Schema {
 				"encrypted_value": {
 					Type:     schema.TypeString,
 					Optional: true,
+					Computed: true,
 				},
 				"value": {
 					Type:      schema.TypeString,
@@ -145,8 +150,8 @@ func requiredHiddenField() *schema.Schema {
 	return sch
 }
 
-func expandHiddenFieldView(in []interface{}) *pa.HiddenFieldView {
-	hf := &pa.HiddenFieldView{}
+func expandHiddenFieldView(in []interface{}) *models.HiddenFieldView {
+	hf := &models.HiddenFieldView{}
 	for _, raw := range in {
 		if raw == nil {
 			return hf
@@ -155,28 +160,28 @@ func expandHiddenFieldView(in []interface{}) *pa.HiddenFieldView {
 		if val, ok := l["value"]; ok {
 			hf.Value = String(val.(string))
 		}
-		// if val, ok := l["encrypted_value"]; ok {
-		// 	hf.EncryptedValue = String(val.(string))
-		// }
+		if val, ok := l["encrypted_value"]; ok {
+			hf.EncryptedValue = String(val.(string))
+		}
 	}
 	return hf
 }
 
-func flattenHiddenFieldView(in *pa.HiddenFieldView) []map[string]interface{} {
+func flattenHiddenFieldView(in *models.HiddenFieldView) []map[string]interface{} {
 	m := make([]map[string]interface{}, 0, 1)
 	s := make(map[string]interface{})
 	if in.Value != nil {
 		s["value"] = *in.Value //TODO this is bad don't do this.
 	}
-	// if in.EncryptedValue != nil {
-	// s["encrypted_value"] = *in.EncryptedValue
-	// }
+	if in.EncryptedValue != nil {
+		s["encrypted_value"] = *in.EncryptedValue
+	}
 	m = append(m, s)
 	return m
 }
 
-func expandOAuthClientCredentialsView(in []interface{}) *pa.OAuthClientCredentialsView {
-	hf := &pa.OAuthClientCredentialsView{}
+func expandOAuthClientCredentialsView(in []interface{}) *models.OAuthClientCredentialsView {
+	hf := &models.OAuthClientCredentialsView{}
 	for _, raw := range in {
 		l := raw.(map[string]interface{})
 		if val, ok := l["client_id"]; ok {
@@ -189,7 +194,7 @@ func expandOAuthClientCredentialsView(in []interface{}) *pa.OAuthClientCredentia
 	return hf
 }
 
-func flattenOAuthClientCredentialsView(in *pa.OAuthClientCredentialsView) []map[string]interface{} {
+func flattenOAuthClientCredentialsView(in *models.OAuthClientCredentialsView) []map[string]interface{} {
 	m := make([]map[string]interface{}, 0, 1)
 	s := make(map[string]interface{})
 	if in.ClientId != nil {
@@ -211,17 +216,13 @@ func flattenIdentityMappingIds(in map[string]*int) []interface{} {
 	if in["API"] != nil {
 		m["api"] = strconv.Itoa(*in["API"])
 	}
-	log.Printf("FLATTENER: %v, %v", *in["API"], *in["Web"])
-	// if m["api"] == "0" && m["web"] == "0" {
-	// 	return []interface{}{}
-	// }
 	return []interface{}{m}
 }
 
-func expandPolicyItem(in []interface{}) []*pa.PolicyItem {
-	policies := []*pa.PolicyItem{}
+func expandPolicyItem(in []interface{}) []*models.PolicyItem {
+	var policies []*models.PolicyItem
 	for _, raw := range in {
-		policy := &pa.PolicyItem{}
+		policy := &models.PolicyItem{}
 		l := raw.(map[string]interface{})
 		if val, ok := l["id"]; ok {
 			policy.Id = json.Number(val.(string))
@@ -234,8 +235,8 @@ func expandPolicyItem(in []interface{}) []*pa.PolicyItem {
 	return policies
 }
 
-func flattenPolicyItem(in []*pa.PolicyItem) []interface{} {
-	m := []interface{}{}
+func flattenPolicyItem(in []*models.PolicyItem) []interface{} {
+	var m []interface{}
 	for _, v := range in {
 		s := make(map[string]interface{})
 		s["id"] = v.Id.String()
@@ -245,11 +246,11 @@ func flattenPolicyItem(in []*pa.PolicyItem) []interface{} {
 	return m
 }
 
-func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
-	ca := map[string]*[]*pa.PolicyItem{}
+func expandPolicy(in []interface{}) map[string]*[]*models.PolicyItem {
+	ca := map[string]*[]*models.PolicyItem{}
 
-	webPolicies := make([]*pa.PolicyItem, 0)
-	apiPolicies := make([]*pa.PolicyItem, 0)
+	webPolicies := make([]*models.PolicyItem, 0)
+	apiPolicies := make([]*models.PolicyItem, 0)
 	for _, raw := range in {
 		if raw != nil {
 			l := raw.(map[string]interface{})
@@ -268,9 +269,9 @@ func expandPolicy(in []interface{}) map[string]*[]*pa.PolicyItem {
 	return ca
 }
 
-func flattenPolicy(in map[string]*[]*pa.PolicyItem) []interface{} {
+func flattenPolicy(in map[string]*[]*models.PolicyItem) []interface{} {
 	// m := make([]map[string]interface{}, 0, 1)
-	m := []interface{}{}
+	var m []interface{}
 	s := make(map[string]interface{})
 	if val, ok := in["Web"]; ok { // && len(*in["Web"]) > 0 {
 		s["web"] = flattenPolicyItem(*val)
@@ -286,13 +287,11 @@ func flattenPolicy(in map[string]*[]*pa.PolicyItem) []interface{} {
 // Takes the result of flatmap.Expand for an array of strings
 // and returns a []string
 func expandStringList(configured []interface{}) []*string {
-	// log.Printf("[INFO] expandStringList %d", len(configured))
 	vs := make([]*string, 0, len(configured))
 	for _, v := range configured {
 		val := v.(string)
 		if val != "" {
 			vs = append(vs, &val)
-			// log.Printf("[DEBUG] Appending: %s", val)
 		}
 	}
 	return vs
@@ -312,8 +311,8 @@ func expandIntList(configured []interface{}) []*int {
 	return vs
 }
 
-func flattenChainCertificates(in []*pa.ChainCertificateView) *schema.Set {
-	m := []interface{}{}
+func flattenChainCertificates(in []*models.ChainCertificateView) *schema.Set {
+	var m []interface{}
 	for _, v := range in {
 		s := make(map[string]interface{})
 		s["alias"] = *v.Alias
@@ -339,10 +338,10 @@ func configFieldHash(v interface{}) int {
 	if d, ok := m["md5sum"]; ok && d.(string) != "" {
 		buf.WriteString(fmt.Sprintf("%s-", d.(string)))
 	}
-	return hashcode.String(buf.String())
+	return hashString(buf.String())
 }
 
-func flattenLinkViewList(in []*pa.LinkView) []interface{} {
+func flattenLinkViewList(in []*models.LinkView) []interface{} {
 	var m []interface{}
 	for _, v := range in {
 		m = append(m, flattenLinkView(v))
@@ -350,21 +349,7 @@ func flattenLinkViewList(in []*pa.LinkView) []interface{} {
 	return m
 }
 
-func expandLinkView(in []interface{}) *pa.LinkView {
-	ca := &pa.LinkView{}
-	for _, raw := range in {
-		l := raw.(map[string]interface{})
-		if val, ok := l["id"]; ok {
-			ca.Id = String(val.(string))
-		}
-		if val, ok := l["location"]; ok {
-			ca.Location = String(val.(string))
-		}
-	}
-	return ca
-}
-
-func flattenLinkView(in *pa.LinkView) map[string]interface{} {
+func flattenLinkView(in *models.LinkView) map[string]interface{} {
 	s := make(map[string]interface{})
 	if in.Id != nil {
 		s["id"] = *in.Id
@@ -381,7 +366,7 @@ func flattenLinkView(in *pa.LinkView) map[string]interface{} {
 // fields.
 //
 // TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
-func maskConfigFromRuleDescriptors(desc *pa.RuleDescriptorsView, input *string, originalConfig string, config string) string {
+func maskConfigFromRuleDescriptors(desc *models.RuleDescriptorsView, input *string, originalConfig string, config string) string {
 	for _, value := range desc.Items {
 		if *value.ClassName == *input {
 			config = maskConfigFromRuleDescriptor(value, String(""), originalConfig, config)
@@ -390,7 +375,7 @@ func maskConfigFromRuleDescriptors(desc *pa.RuleDescriptorsView, input *string, 
 	return config
 }
 
-func maskConfigFromRuleDescriptor(desc *pa.RuleDescriptorView, input *string, originalConfig string, config string) string {
+func maskConfigFromRuleDescriptor(desc *models.RuleDescriptorView, input *string, originalConfig string, config string) string {
 	for _, c := range desc.ConfigurationFields {
 		config = maskConfigFromConfigurationField(c, input, originalConfig, config)
 	}
@@ -403,7 +388,7 @@ func maskConfigFromRuleDescriptor(desc *pa.RuleDescriptorView, input *string, or
 // fields.
 //
 // TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
-func maskConfigFromDescriptors(desc *pa.DescriptorsView, input *string, originalConfig string, config string) string {
+func maskConfigFromDescriptors(desc *models.DescriptorsView, input *string, originalConfig string, config string) string {
 	for _, value := range desc.Items {
 		if *value.ClassName == *input {
 			config = maskConfigFromDescriptor(value, String(""), originalConfig, config)
@@ -412,14 +397,14 @@ func maskConfigFromDescriptors(desc *pa.DescriptorsView, input *string, original
 	return config
 }
 
-func maskConfigFromDescriptor(desc *pa.DescriptorView, input *string, originalConfig string, config string) string {
+func maskConfigFromDescriptor(desc *models.DescriptorView, input *string, originalConfig string, config string) string {
 	for _, c := range desc.ConfigurationFields {
 		config = maskConfigFromConfigurationField(c, input, originalConfig, config)
 	}
 	return config
 }
 
-func maskConfigFromConfigurationField(field *pa.ConfigurationField, input *string, originalConfig string, config string) string {
+func maskConfigFromConfigurationField(field *models.ConfigurationField, input *string, originalConfig string, config string) string {
 	if *field.Type == "CONCEALED" {
 		path := fmt.Sprintf("%s.value", *field.Name)
 		v := gjson.Get(originalConfig, path)
@@ -439,4 +424,135 @@ func maskConfigFromConfigurationField(field *pa.ConfigurationField, input *strin
 		}
 	}
 	return config
+}
+
+//Checks all the fields in the descriptor to ensure all required fields are set
+//
+func descriptorsHasClassName(className string, desc *models.DescriptorsView) error {
+	var classes []string
+	for _, value := range desc.Items {
+		classes = append(classes, *value.ClassName)
+		if *value.ClassName == className {
+			return nil
+		}
+	}
+	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
+}
+
+//Checks the class name specified exists in the DescriptorsView
+//
+func validateConfiguration(className string, d *schema.ResourceDiff, desc *models.DescriptorsView) error {
+	var diags diag.Diagnostics
+	conf := d.Get("configuration").(string)
+	if conf == "" {
+		log.Println("[INFO] configuration is in a potentially unknown state, gracefully skipping configuration validation")
+		return nil
+	}
+	for _, value := range desc.Items {
+		if *value.ClassName == className {
+			for _, f := range value.ConfigurationFields {
+				if *f.Required {
+					if v := gjson.Get(conf, *f.Name); !v.Exists() {
+						diags = append(diags, diag.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)...)
+					}
+				}
+			}
+		}
+	}
+	if diags.HasError() {
+		msgs := []string{
+			"configuration validation failed against the class descriptor definition",
+		}
+		for _, diagnostic := range diags {
+			msgs = append(msgs, diagnostic.Summary)
+		}
+		return fmt.Errorf(strings.Join(msgs, "\n"))
+	}
+	return nil
+}
+
+//Checks the class name specified exists in the RuleDescriptorsView
+//
+func ruleDescriptorsHasClassName(className string, desc *models.RuleDescriptorsView) error {
+	var classes []string
+	for _, value := range desc.Items {
+		classes = append(classes, *value.ClassName)
+		if *value.ClassName == className {
+			return nil
+		}
+	}
+	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
+}
+
+//Checks all the fields in the Rule descriptor to ensure all required fields are set
+//
+func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *models.RuleDescriptorsView) error {
+	var diags diag.Diagnostics
+	conf := d.Get("configuration").(string)
+	if conf == "" {
+		log.Println("[INFO] configuration is in a potentially unknown state, gracefully skipping configuration validation")
+		return nil
+	}
+	for _, value := range desc.Items {
+		if *value.ClassName == className {
+			for _, f := range value.ConfigurationFields {
+				if *f.Required {
+					if v := gjson.Get(conf, *f.Name); !v.Exists() {
+						diags = append(diags, diag.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)...)
+					}
+				}
+			}
+		}
+	}
+	if diags.HasError() {
+		msgs := []string{
+			"configuration validation failed against the class descriptor definition",
+		}
+		for _, diagnostic := range diags {
+			msgs = append(msgs, diagnostic.Summary)
+		}
+		return fmt.Errorf(strings.Join(msgs, "\n"))
+	}
+	return nil
+}
+
+// String hashes a string to a unique hashcode.
+//
+// crc32 returns a uint32, but for our use we need
+// and non negative integer. Here we cast to an integer
+// and invert it if the result is negative.
+func hashString(s string) int {
+	v := int(crc32.ChecksumIEEE([]byte(s)))
+	if v >= 0 {
+		return v
+	}
+	if -v >= 0 {
+		return -v
+	}
+	// v == MinInt
+	return 0
+}
+
+
+func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCredentialsView, trackPasswords bool, diags *diag.Diagnostics) {
+	pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
+	creds := flattenOAuthClientCredentialsView(input)
+	if trackPasswords {
+		enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
+		creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+		if err := d.Set("client_credentials", creds); err != nil {
+			*diags = append(*diags, diag.FromErr(err)...)
+		}
+		if encOk && enc.(string) != "" && enc.(string) != *input.ClientSecret.EncryptedValue {
+			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = ""
+		}
+	} else {
+		//legacy behaviour
+		if ok {
+			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+		}
+	}
+	if err := d.Set("client_credentials", creds); err != nil {
+		*diags = append(*diags, diag.FromErr(err)...)
+	}
 }

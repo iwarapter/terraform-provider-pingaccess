@@ -1,36 +1,18 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
-	"net/url"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/services/rulesets"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_ruleset", &resource.Sweeper{
-		Name: "pingaccess_ruleset",
-		F:    testSweepRuleSets,
-	})
-}
-
-func testSweepRuleSets(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pingaccess.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).Rulesets
-	result, _, _ := conn.GetRuleSetsCommand(&pingaccess.GetRuleSetsCommandInput{Filter: "acc_test_"})
-	for _, v := range result.Items {
-		conn.DeleteRuleSetCommand(&pingaccess.DeleteRuleSetCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessRuleSet(t *testing.T) {
+	resourceName := "pingaccess_ruleset.ruleset_one"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -39,23 +21,27 @@ func TestAccPingAccessRuleSet(t *testing.T) {
 			{
 				Config: testAccPingAccessRuleSetConfig("SuccessIfAllSucceed"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessRuleSetExists("pingaccess_ruleset.ruleset_one"),
-					testAccCheckPingAccessRuleSetAttributes("pingaccess_ruleset.ruleset_one"),
+					testAccCheckPingAccessRuleSetExists(resourceName),
+					testAccCheckPingAccessRuleSetAttributes(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf-acc-ruleset-one"),
+					resource.TestCheckResourceAttr(resourceName, "success_criteria", "SuccessIfAllSucceed"),
+					resource.TestCheckResourceAttr(resourceName, "element_type", "Rule"),
+					resource.TestCheckResourceAttrSet(resourceName, "policy.0"),
 				),
 			},
 			{
 				Config: testAccPingAccessRuleSetConfig("SuccessIfAnyOneSucceeds"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessRuleSetExists("pingaccess_ruleset.ruleset_one"),
-					testAccCheckPingAccessRuleSetAttributes("pingaccess_ruleset.ruleset_one"),
+					testAccCheckPingAccessRuleSetExists(resourceName),
+					testAccCheckPingAccessRuleSetAttributes(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf-acc-ruleset-one"),
+					resource.TestCheckResourceAttr(resourceName, "success_criteria", "SuccessIfAnyOneSucceeds"),
+					resource.TestCheckResourceAttr(resourceName, "element_type", "Rule"),
+					resource.TestCheckResourceAttrSet(resourceName, "policy.0"),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckPingAccessRuleSetDestroy(s *terraform.State) error {
-	return nil
 }
 
 func testAccPingAccessRuleSetConfig(configUpdate string) string {
@@ -97,10 +83,10 @@ func testAccPingAccessRuleSetConfig(configUpdate string) string {
 
 func testAccCheckPingAccessRuleSetAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Rulesets
-		result, _, err := conn.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
+		conn := testAccProvider.Meta().(paClient).Rulesets
+		result, _, err := conn.GetRuleSetCommand(&rulesets.GetRuleSetCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -127,8 +113,8 @@ func testAccCheckPingAccessRuleSetExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No RuleSet ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Rulesets
-		result, _, err := conn.GetRuleSetCommand(&pingaccess.GetRuleSetCommandInput{
+		conn := testAccProvider.Meta().(paClient).Rulesets
+		result, _, err := conn.GetRuleSetCommand(&rulesets.GetRuleSetCommandInput{
 			Id: rs.Primary.ID,
 		})
 

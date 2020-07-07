@@ -1,20 +1,23 @@
 package pingaccess
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessHTTPSListener() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessHTTPSListenerCreate,
-		Read:   resourcePingAccessHTTPSListenerRead,
-		Update: resourcePingAccessHTTPSListenerUpdate,
-		Delete: resourcePingAccessHTTPSListenerDelete,
+		CreateContext: resourcePingAccessHTTPSListenerCreate,
+		ReadContext:   resourcePingAccessHTTPSListenerRead,
+		UpdateContext: resourcePingAccessHTTPSListenerUpdate,
+		DeleteContext: resourcePingAccessHTTPSListenerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: resourcePingAccessHTTPSListenerSchema(),
@@ -23,81 +26,81 @@ func resourcePingAccessHTTPSListener() *schema.Resource {
 
 func resourcePingAccessHTTPSListenerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": &schema.Schema{
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validateHTTPListenerName,
-			ForceNew:     true,
+		"name": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validateHTTPListenerName,
+			ForceNew:         true,
 		},
-		"key_pair_id": &schema.Schema{
+		"key_pair_id": {
 			Type:     schema.TypeInt,
 			Required: true,
 		},
-		"use_server_cipher_suite_order": &schema.Schema{
+		"use_server_cipher_suite_order": {
 			Type:     schema.TypeBool,
 			Required: true,
 		},
 	}
 }
 
-func resourcePingAccessHTTPSListenerCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HttpsListeners
-	input := pingaccess.GetHttpsListenersCommandInput{}
+func resourcePingAccessHTTPSListenerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HttpsListeners
 
-	result, _, err := svc.GetHttpsListenersCommand(&input)
+	result, _, err := svc.GetHttpsListenersCommand(&httpsListeners.GetHttpsListenersCommandInput{})
 	if err != nil {
-		return fmt.Errorf("Error retrieving HttpsListener list: %s", err)
+		return diag.Errorf("unable to retrieving listener: %s", err)
 	}
 
 	name := d.Get("name").(string)
 	for _, listener := range result.Items {
 		if *listener.Name == name {
 			d.SetId(listener.Id.String())
-			return resourcePingAccessHTTPSListenerReadResult(d, listener)
+			return resourcePingAccessHTTPSListenerUpdate(ctx, d, m)
 		}
 	}
-	return fmt.Errorf("Error managing HttpsListener: %s", name)
+	return diag.Errorf("unable to manage listener: %s", err)
 }
 
-func resourcePingAccessHTTPSListenerRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HttpsListeners
-	input := &pingaccess.GetHttpsListenerCommandInput{
+func resourcePingAccessHTTPSListenerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HttpsListeners
+	input := &httpsListeners.GetHttpsListenerCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetHttpsListenerCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading HttpsListener: %s", err)
+		return diag.Errorf("unable to read listener: %s", err)
 	}
 	return resourcePingAccessHTTPSListenerReadResult(d, result)
 }
 
-func resourcePingAccessHTTPSListenerUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).HttpsListeners
-	input := pingaccess.UpdateHttpsListenerInput{
+func resourcePingAccessHTTPSListenerUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).HttpsListeners
+	input := httpsListeners.UpdateHttpsListenerInput{
 		Body: *resourcePingAccessHTTPSListenerReadData(d),
 		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateHttpsListener(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating HttpsListener: %s", err.Error())
+		return diag.Errorf("unable to update listener: %s", err)
 	}
 	return resourcePingAccessHTTPSListenerReadResult(d, result)
 }
 
-func resourcePingAccessHTTPSListenerDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessHTTPSListenerDelete(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	return nil
 }
 
-func resourcePingAccessHTTPSListenerReadResult(d *schema.ResourceData, input *pingaccess.HttpsListenerView) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataInt(d, "key_pair_id", input.KeyPairId)
-	setResourceDataBool(d, "use_server_cipher_suite_order", input.UseServerCipherSuiteOrder)
-	return nil
+func resourcePingAccessHTTPSListenerReadResult(d *schema.ResourceData, input *models.HttpsListenerView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataIntWithDiagnostic(d, "key_pair_id", input.KeyPairId, &diags)
+	setResourceDataBoolWithDiagnostic(d, "use_server_cipher_suite_order", input.UseServerCipherSuiteOrder, &diags)
+	return diags
 }
 
-func resourcePingAccessHTTPSListenerReadData(d *schema.ResourceData) *pingaccess.HttpsListenerView {
-	engine := &pingaccess.HttpsListenerView{
+func resourcePingAccessHTTPSListenerReadData(d *schema.ResourceData) *models.HttpsListenerView {
+	engine := &models.HttpsListenerView{
 		Name:                      String(d.Get("name").(string)),
 		KeyPairId:                 Int(d.Get("key_pair_id").(int)),
 		UseServerCipherSuiteOrder: Bool(d.Get("use_server_cipher_suite_order").(bool)),

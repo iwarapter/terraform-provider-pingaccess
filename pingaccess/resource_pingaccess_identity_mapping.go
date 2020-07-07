@@ -1,103 +1,119 @@
 package pingaccess
 
 import (
-	"crypto/tls"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/identityMappings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessIdentityMapping() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessIdentityMappingCreate,
-		Read:   resourcePingAccessIdentityMappingRead,
-		Update: resourcePingAccessIdentityMappingUpdate,
-		Delete: resourcePingAccessIdentityMappingDelete,
+		CreateContext: resourcePingAccessIdentityMappingCreate,
+		ReadContext:   resourcePingAccessIdentityMappingRead,
+		UpdateContext: resourcePingAccessIdentityMappingUpdate,
+		DeleteContext: resourcePingAccessIdentityMappingDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"class_name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"configuration": {
-				Type:             schema.TypeString,
-				Required:         true,
-				DiffSuppressFunc: suppressEquivalentJsonDiffs,
-			},
+		Schema: resourcePingAccessIdentityMappingSchema(),
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			svc := m.(paClient).IdentityMappings
+			desc, _, err := svc.GetIdentityMappingDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve IdentityMapping descriptors %s", err)
+			}
+			className := d.Get("class_name").(string)
+			if err := descriptorsHasClassName(className, desc); err != nil {
+				return err
+			}
+			return validateConfiguration(className, d, desc)
 		},
 	}
 }
 
-func resourcePingAccessIdentityMappingCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	input := pingaccess.AddIdentityMappingCommandInput{
+func resourcePingAccessIdentityMappingSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"class_name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"configuration": {
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: suppressEquivalentJSONDiffs,
+		},
+	}
+}
+
+func resourcePingAccessIdentityMappingCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).IdentityMappings
+	input := identityMappings.AddIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
 	}
 
 	result, _, err := svc.AddIdentityMappingCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating IdentityMapping: %s", err)
+		return diag.Errorf("unable to create IdentityMapping: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
-func resourcePingAccessIdentityMappingRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	input := &pingaccess.GetIdentityMappingCommandInput{
+func resourcePingAccessIdentityMappingRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).IdentityMappings
+	input := &identityMappings.GetIdentityMappingCommandInput{
 		Id: d.Id(),
 	}
 	result, _, err := svc.GetIdentityMappingCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading IdentityMapping: %s", err)
+
+		return diag.Errorf("unable to read IdentityMapping: %s", err)
 	}
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
-func resourcePingAccessIdentityMappingUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	input := pingaccess.UpdateIdentityMappingCommandInput{
+func resourcePingAccessIdentityMappingUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).IdentityMappings
+	input := identityMappings.UpdateIdentityMappingCommandInput{
 		Body: *resourcePingAccessIdentityMappingReadData(d),
 		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateIdentityMappingCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating IdentityMapping: %s", err)
+		return diag.Errorf("unable to update IdentityMapping: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
 }
 
-func resourcePingAccessIdentityMappingDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).IdentityMappings
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
+func resourcePingAccessIdentityMappingDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).IdentityMappings
 	log.Printf("[INFO] ResourceID: %s", d.Id())
-	_, err := svc.DeleteIdentityMappingCommand(&pingaccess.DeleteIdentityMappingCommandInput{Id: d.Id()})
+	_, err := svc.DeleteIdentityMappingCommand(&identityMappings.DeleteIdentityMappingCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting IdentityMapping: %s", err)
+		return diag.Errorf("unable to delete IdentityMapping: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *pingaccess.IdentityMappingView, svc *pingaccess.IdentityMappingsService) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "class_name", input.ClassName)
-
+func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *models.IdentityMappingView, svc identityMappings.IdentityMappingsAPI) diag.Diagnostics {
+	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
 
@@ -109,17 +125,17 @@ func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *
 	desc, _, _ := svc.GetIdentityMappingDescriptorsCommand()
 	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
 
-	if err := d.Set("configuration", config); err != nil {
-		return err
-	}
-	return nil
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "class_name", input.ClassName, &diags)
+	setResourceDataStringWithDiagnostic(d, "configuration", &config, &diags)
+	return diags
 }
 
-func resourcePingAccessIdentityMappingReadData(d *schema.ResourceData) *pingaccess.IdentityMappingView {
+func resourcePingAccessIdentityMappingReadData(d *schema.ResourceData) *models.IdentityMappingView {
 	config := d.Get("configuration").(string)
 	var dat map[string]interface{}
 	_ = json.Unmarshal([]byte(config), &dat)
-	idMapping := &pingaccess.IdentityMappingView{
+	idMapping := &models.IdentityMappingView{
 		Name:          String(d.Get("name").(string)),
 		ClassName:     String(d.Get("class_name").(string)),
 		Configuration: dat,

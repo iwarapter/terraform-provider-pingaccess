@@ -1,492 +1,404 @@
 package pingaccess
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 func Test_validateWebOrAPI(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "Web passes",
-			args: args{
-				value: "Web",
-				field: "default_auth_type_override",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "Web passes",
+			value:         "Web",
+			expectedDiags: nil,
 		},
 		{
-			name: "API passes",
-			args: args{
-				value: "API",
-				field: "default_auth_type_override",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "API passes",
+			value:         "API",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "default_auth_type_override",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'Web' or 'API' not %s", "default_auth_type_override", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'Web' or 'API' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateWebOrAPI(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateWebOrAPI() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateWebOrAPI(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateWebOrAPI() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateRuleOrRuleSet(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "Rule passes",
-			args: args{
-				value: "Rule",
-				field: "elementType",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "Rule passes",
+			value:         "Rule",
+			expectedDiags: nil,
 		},
 		{
-			name: "RuleSet passes",
-			args: args{
-				value: "RuleSet",
-				field: "elementType",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "RuleSet passes",
+			value:         "RuleSet",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "elementType",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'Rule' or 'RuleSet' not %s", "elementType", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'Rule' or 'RuleSet' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateRuleOrRuleSet(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateRuleOrRuleSet() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateRuleOrRuleSet(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateRuleOrRuleSet() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "SuccessIfAllSucceed passes",
-			args: args{
-				value: "SuccessIfAllSucceed",
-				field: "successCriteria",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "SuccessIfAllSucceed passes",
+			value:         "SuccessIfAllSucceed",
+			expectedDiags: nil,
 		},
 		{
-			name: "SuccessIfAnyOneSucceeds passes",
-			args: args{
-				value: "SuccessIfAnyOneSucceeds",
-				field: "successCriteria",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "SuccessIfAnyOneSucceeds passes",
+			value:         "SuccessIfAnyOneSucceeds",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "successCriteria",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'SuccessIfAllSucceed' or 'SuccessIfAnyOneSucceeds' not %s", "successCriteria", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'SuccessIfAllSucceed' or 'SuccessIfAnyOneSucceeds' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateAudience(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "Normal value passes",
-			args: args{
-				value: "normal",
-				field: "audience",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "Normal value passes",
+			value:         "normal",
+			expectedDiags: nil,
 		},
 		{
-			name: "Empty value failes",
-			args: args{
-				value: "",
-				field: "audience",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be between 1 and 32 characters not %s", "audience", "0")},
+			name:          "Empty value failes",
+			value:         "",
+			expectedDiags: diag.Errorf("must be between 1 and 32 characters not 0"),
 		},
 		{
-			name: "Very long value failes",
-			args: args{
-				value: "12345678901234567890123456789012",
-				field: "audience",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be between 1 and 32 characters not %s", "audience", "32")},
+			name:          "Very long value fails",
+			value:         "12345678901234567890123456789012",
+			expectedDiags: diag.Errorf("must be between 1 and 32 characters not 32"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateAudience(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateAudience() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateAudience(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateAudience() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateCookieType(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "Encrypted passes",
-			args: args{
-				value: "Encrypted",
-				field: "cookie_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "Encrypted passes",
+			value:         "Encrypted",
+			expectedDiags: nil,
 		},
 		{
-			name: "Signed passes",
-			args: args{
-				value: "Signed",
-				field: "cookie_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "Signed passes",
+			value:         "Signed",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "cookie_type",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'Encrypted' or 'Signed' not %s", "cookie_type", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'Encrypted' or 'Signed' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateCookieType(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateCookieType() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateCookieType(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateCookieType() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateOidcLoginType(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "Code passes",
-			args: args{
-				value: "Code",
-				field: "oidc_login_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "Code passes",
+			value:         "Code",
+			expectedDiags: nil,
 		},
 		{
-			name: "POST passes",
-			args: args{
-				value: "POST",
-				field: "oidc_login_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "POST passes",
+			value:         "POST",
+			expectedDiags: nil,
 		},
 		{
-			name: "x_post passes",
-			args: args{
-				value: "x_post",
-				field: "oidc_login_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "x_post passes",
+			value:         "x_post",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "oidc_login_type",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'Code', 'POST' or 'x_post' not %s", "oidc_login_type", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'Code', 'POST' or 'x_post' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateOidcLoginType(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateOidcLoginType() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateOidcLoginType(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateOidcLoginType() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateRequestPreservationType(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "None passes",
-			args: args{
-				value: "None",
-				field: "refresh_user_info_claims_interval",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "None passes",
+			value:         "None",
+			expectedDiags: nil,
 		},
 		{
-			name: "POST passes",
-			args: args{
-				value: "POST",
-				field: "refresh_user_info_claims_interval",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "POST passes",
+			value:         "POST",
+			expectedDiags: nil,
 		},
 		{
-			name: "All passes",
-			args: args{
-				value: "All",
-				field: "refresh_user_info_claims_interval",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "All passes",
+			value:         "All",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "refresh_user_info_claims_interval",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'None', 'POST' or 'All' not %s", "refresh_user_info_claims_interval", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'None', 'POST' or 'All' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateRequestPreservationType(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateRequestPreservationType() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateRequestPreservationType(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateRequestPreservationType() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateWebStorageType(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "SessionStorage passes",
-			args: args{
-				value: "SessionStorage",
-				field: "web_storage_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "SessionStorage passes",
+			value:         "SessionStorage",
+			expectedDiags: nil,
 		},
 		{
-			name: "LocalStorage passes",
-			args: args{
-				value: "LocalStorage",
-				field: "web_storage_type",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "LocalStorage passes",
+			value:         "LocalStorage",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "web_storage_type",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'SessionStorage' or 'LocalStorage' not %s", "web_storage_type", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'SessionStorage' or 'LocalStorage' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateWebStorageType(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateWebStorageType() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateWebStorageType(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateWebStorageType() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}
 }
 
 func Test_validateListLocationValue(t *testing.T) {
-	type args struct {
-		value interface{}
-		field string
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantWarns []string
-		wantErrs  []error
+		name          string
+		value         interface{}
+		expectedDiags diag.Diagnostics
 	}{
 		{
-			name: "FIRST passes",
-			args: args{
-				value: "FIRST",
-				field: "list_value_location",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "FIRST passes",
+			value:         "FIRST",
+			expectedDiags: nil,
 		},
 		{
-			name: "LAST passes",
-			args: args{
-				value: "LAST",
-				field: "list_value_location",
-			},
-			wantWarns: nil,
-			wantErrs:  nil,
+			name:          "LAST passes",
+			value:         "LAST",
+			expectedDiags: nil,
 		},
 		{
-			name: "junk does not pass",
-			args: args{
-				value: "other",
-				field: "list_value_location",
-			},
-			wantWarns: nil,
-			wantErrs:  []error{fmt.Errorf("%q must be either 'FIRST' or 'LAST' not %s", "list_value_location", "other")},
+			name:          "junk does not pass",
+			value:         "other",
+			expectedDiags: diag.Errorf("must be either 'FIRST' or 'LAST' not other"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotWarns, gotErrs := validateListLocationValue(tt.args.value, tt.args.field)
-			if !reflect.DeepEqual(gotWarns, tt.wantWarns) {
-				t.Errorf("validateListLocationValue() gotWarns = %v, want %v", gotWarns, tt.wantWarns)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			diags := validateListLocationValue(tc.value, cty.Path{})
+			if len(diags) != len(tc.expectedDiags) {
+				t.Fatalf("%s: wrong number of diags, expected %d, got %d", tc.name, len(tc.expectedDiags), len(diags))
 			}
-			if !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("validateListLocationValue() gotErrs = %v, want %v", gotErrs, tt.wantErrs)
+			for j := range diags {
+				if diags[j].Severity != tc.expectedDiags[j].Severity {
+					t.Fatalf("%s: expected severity %v, got %v", tc.name, tc.expectedDiags[j].Severity, diags[j].Severity)
+				}
+				if !diags[j].AttributePath.Equals(tc.expectedDiags[j].AttributePath) {
+					t.Fatalf("%s: attribute paths do not match expected: %v, got %v", tc.name, tc.expectedDiags[j].AttributePath, diags[j].AttributePath)
+				}
+				if diags[j].Summary != tc.expectedDiags[j].Summary {
+					t.Fatalf("%s: summary does not match expected: %v, got %v", tc.name, tc.expectedDiags[j].Summary, diags[j].Summary)
+				}
 			}
 		})
 	}

@@ -1,21 +1,23 @@
 package pingaccess
 
 import (
-	"fmt"
+	"context"
 
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessPingFederateAdmin() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessPingFederateAdminCreate,
-		Read:   resourcePingAccessPingFederateAdminRead,
-		Update: resourcePingAccessPingFederateAdminUpdate,
-		Delete: resourcePingAccessPingFederateAdminDelete,
+		CreateContext: resourcePingAccessPingFederateAdminCreate,
+		ReadContext:   resourcePingAccessPingFederateAdminRead,
+		UpdateContext: resourcePingAccessPingFederateAdminUpdate,
+		DeleteContext: resourcePingAccessPingFederateAdminDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessPingFederateAdminSchema(),
 	}
@@ -29,9 +31,10 @@ func resourcePingAccessPingFederateAdminSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"audit_level": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validateAuditLevel,
+			Type:             schema.TypeString,
+			Optional:         true,
+			ValidateDiagFunc: validateAuditLevel,
+			Default:          "ON",
 		},
 		"base_path": {
 			Type:     schema.TypeString,
@@ -52,114 +55,101 @@ func resourcePingAccessPingFederateAdminSchema() map[string]*schema.Schema {
 		"trusted_certificate_group_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"use_proxy": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Default:  false,
 		},
 	}
 }
 
-func resourcePingAccessPingFederateAdminCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePingAccessPingFederateAdminCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	d.SetId("pingfederate_admin_settings")
-	return resourcePingAccessPingFederateAdminUpdate(d, m)
+	return resourcePingAccessPingFederateAdminUpdate(ctx, d, m)
 }
 
-func resourcePingAccessPingFederateAdminRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).PingFederate
+func resourcePingAccessPingFederateAdminRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Pingfederate
 	result, _, err := svc.GetPingFederateAdminCommand()
 	if err != nil {
-		return fmt.Errorf("Error reading pingfederate Admin settings: %s", err)
+		return diag.Errorf("unable to read PingFederateAdmin: %s", err)
 	}
 
 	return resourcePingAccessPingFederateAdminReadResult(d, result)
 }
 
-func resourcePingAccessPingFederateAdminUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).PingFederate
-	input := pa.UpdatePingFederateAdminCommandInput{
+func resourcePingAccessPingFederateAdminUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Pingfederate
+	input := pingfederate.UpdatePingFederateAdminCommandInput{
 		Body: *resourcePingAccessPingFederateAdminReadData(d),
 	}
 	result, _, err := svc.UpdatePingFederateAdminCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating pingfederate Admin settings: %s", err)
+		return diag.Errorf("unable to update PingFederateAdmin: %s", err)
 	}
 
 	d.SetId("pingfederate_admin_settings")
 	return resourcePingAccessPingFederateAdminReadResult(d, result)
 }
 
-func resourcePingAccessPingFederateAdminDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pa.Client).PingFederate
+func resourcePingAccessPingFederateAdminDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Pingfederate
 	_, err := svc.DeletePingFederateCommand()
 	if err != nil {
-		return fmt.Errorf("Error resetting pingfederate Admin: %s", err)
+		return diag.Errorf("unable to reset PingFederateAdmin: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input *pa.PingFederateAdminView) error {
-	if err := setResourceDataString(d, "admin_username", input.AdminUsername); err != nil {
-		return err
-	}
-	if err := setResourceDataString(d, "audit_level", input.AuditLevel); err != nil {
-		return err
-	}
-	if err := setResourceDataString(d, "base_path", input.BasePath); err != nil {
-		return err
-	}
-	if err := setResourceDataString(d, "host", input.Host); err != nil {
-		return err
-	}
-	if err := setResourceDataInt(d, "port", input.Port); err != nil {
-		return err
-	}
-	if err := setResourceDataBool(d, "secure", input.Secure); err != nil {
-		return err
-	}
-	if err := setResourceDataInt(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId); err != nil {
-		return err
-	}
-	if err := setResourceDataBool(d, "use_proxy", input.UseProxy); err != nil {
-		return err
-	}
+func resourcePingAccessPingFederateAdminReadResult(d *schema.ResourceData, input *models.PingFederateAdminView) diag.Diagnostics {
+	var diags diag.Diagnostics
+	setResourceDataStringWithDiagnostic(d, "admin_username", input.AdminUsername, &diags)
+	setResourceDataStringWithDiagnostic(d, "audit_level", input.AuditLevel, &diags)
+	setResourceDataStringWithDiagnostic(d, "base_path", input.BasePath, &diags)
+	setResourceDataStringWithDiagnostic(d, "host", input.Host, &diags)
+	setResourceDataIntWithDiagnostic(d, "port", input.Port, &diags)
+	setResourceDataBoolWithDiagnostic(d, "secure", input.Secure, &diags)
+	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
+	setResourceDataBoolWithDiagnostic(d, "use_proxy", input.UseProxy, &diags)
 
 	if input.AdminPassword != nil {
-		pw, ok := d.GetOkExists("admin_password.0.value")
+		pw, ok := d.GetOk("admin_password.0.value")
 		creds := flattenHiddenFieldView(input.AdminPassword)
 		if ok {
 			creds[0]["value"] = pw
 		}
 		if err := d.Set("admin_password", creds); err != nil {
-			return err
+			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
 
 	return nil
 }
 
-func resourcePingAccessPingFederateAdminReadData(d *schema.ResourceData) *pa.PingFederateAdminView {
-	pfAdmin := &pa.PingFederateAdminView{
+func resourcePingAccessPingFederateAdminReadData(d *schema.ResourceData) *models.PingFederateAdminView {
+	pfAdmin := &models.PingFederateAdminView{
 		AdminUsername: String(d.Get("admin_username").(string)),
 		Host:          String(d.Get("host").(string)),
 		Port:          Int(d.Get("port").(int)),
 	}
-	if v, ok := d.GetOkExists("admin_password"); ok {
+	if v, ok := d.GetOk("admin_password"); ok {
 		pfAdmin.AdminPassword = expandHiddenFieldView(v.([]interface{}))
 	}
-	if v, ok := d.GetOkExists("audit_level"); ok {
+	if v, ok := d.GetOk("audit_level"); ok {
 		pfAdmin.AuditLevel = String(v.(string))
 	}
-	if v, ok := d.GetOkExists("base_path"); ok {
+	if v, ok := d.GetOk("base_path"); ok {
 		pfAdmin.BasePath = String(v.(string))
 	}
-	if v, ok := d.GetOkExists("secure"); ok {
+	if v, ok := d.GetOk("secure"); ok {
 		pfAdmin.Secure = Bool(v.(bool))
 	}
-	if v, ok := d.GetOkExists("trusted_certificate_group_id"); ok {
-		pfAdmin.TrustedCertificateGroupId = Int(v.(int))
-	}
-	if v, ok := d.GetOkExists("use_proxy"); ok {
+	//if v, ok := d.Get("trusted_certificate_group_id"); ok {
+	pfAdmin.TrustedCertificateGroupId = Int(d.Get("trusted_certificate_group_id").(int))
+	//}
+	if v, ok := d.GetOk("use_proxy"); ok {
 		pfAdmin.UseProxy = Bool(v.(bool))
 	}
 	return pfAdmin

@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/thirdPartyServices"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessThirdPartyService(t *testing.T) {
+	resourceName := "pingaccess_third_party_service.demo_tps"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -20,13 +24,33 @@ func TestAccPingAccessThirdPartyService(t *testing.T) {
 			{
 				Config: testAccPingAccessThirdPartyServiceConfig("demo service", "localhost:1234"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessThirdPartyServiceExists("pingaccess_third_party_service.demo_tps"),
+					testAccCheckPingAccessThirdPartyServiceExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "demo service"),
+					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "false"),
+					resource.TestCheckNoResourceAttr(resourceName, "expected_hostname"),
+					resource.TestCheckResourceAttr(resourceName, "availability_profile_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "load_balancing_strategy_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "use_proxy", "false"),
+					resource.TestCheckNoResourceAttr(resourceName, "host_value"),
 				),
 			},
 			{
 				Config: testAccPingAccessThirdPartyServiceConfig("demo service", "localhost:1235"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessThirdPartyServiceExists("pingaccess_third_party_service.demo_tps"),
+					testAccCheckPingAccessThirdPartyServiceExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "demo service"),
+					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
+					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "false"),
+					resource.TestCheckNoResourceAttr(resourceName, "expected_hostname"),
+					resource.TestCheckResourceAttr(resourceName, "availability_profile_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "load_balancing_strategy_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "use_proxy", "false"),
+					resource.TestCheckNoResourceAttr(resourceName, "host_value"),
 				),
 			},
 		},
@@ -55,20 +79,20 @@ func testAccCheckPingAccessThirdPartyServiceExists(n string) resource.TestCheckF
 		}
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
-			return fmt.Errorf("No third party service ID is set")
+			return fmt.Errorf("no third party service ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).ThirdPartyServices
-		result, _, err := conn.GetThirdPartyServiceCommand(&pa.GetThirdPartyServiceCommandInput{
+		conn := testAccProvider.Meta().(paClient).ThirdPartyServices
+		result, _, err := conn.GetThirdPartyServiceCommand(&thirdPartyServices.GetThirdPartyServiceCommandInput{
 			Id: rs.Primary.ID,
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error: ThirdPartyService (%s) not found", n)
+			return fmt.Errorf("error: ThirdPartyService (%s) not found", n)
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: ThirdPartyService response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("error: ThirdPartyService response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -77,10 +101,10 @@ func testAccCheckPingAccessThirdPartyServiceExists(n string) resource.TestCheckF
 
 func Test_resourcePingAccessThirdPartyServiceReadData(t *testing.T) {
 	cases := []struct {
-		ThirdPartyService pa.ThirdPartyServiceView
+		ThirdPartyService models.ThirdPartyServiceView
 	}{
 		{
-			ThirdPartyService: pa.ThirdPartyServiceView{
+			ThirdPartyService: models.ThirdPartyServiceView{
 				Name:                      String("localhost"),
 				Targets:                   &[]*string{String("localhost:1234")},
 				AvailabilityProfileId:     Int(1),
@@ -89,16 +113,19 @@ func Test_resourcePingAccessThirdPartyServiceReadData(t *testing.T) {
 				SkipHostnameVerification:  Bool(false),
 				TrustedCertificateGroupId: Int(0),
 				UseProxy:                  Bool(false),
+				LoadBalancingStrategyId:   Int(0),
+				ExpectedHostname:          nil,
+				HostValue:                 nil,
 			},
 		},
 		{
-			ThirdPartyService: pa.ThirdPartyServiceView{
+			ThirdPartyService: models.ThirdPartyServiceView{
 				Name:                      String("localhost"),
 				Targets:                   &[]*string{String("localhost:1234")},
 				AvailabilityProfileId:     Int(0),
 				ExpectedHostname:          String("localhost"),
 				HostValue:                 String("localhost"),
-				LoadBalancingStrategyId:   Int(0),
+				LoadBalancingStrategyId:   Int(1),
 				MaxConnections:            Int(10),
 				Secure:                    Bool(true),
 				SkipHostnameVerification:  Bool(true),

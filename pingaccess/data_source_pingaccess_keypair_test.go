@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessKeyPairDataSource(t *testing.T) {
@@ -37,7 +37,7 @@ func TestAccPingAccessKeyPairDataSource_NotFound(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccPingAccessKeyPairDataSourceConfigNonExistent(),
-				ExpectError: regexp.MustCompile(`Unable to find keypair with alias junk: `),
+				ExpectError: regexp.MustCompile(`unable to find KeyPair with alias 'junk' found '0' results`),
 			},
 		},
 	})

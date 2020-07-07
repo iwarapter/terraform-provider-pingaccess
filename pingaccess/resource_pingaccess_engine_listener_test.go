@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/engineListeners"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessEngineListener(t *testing.T) {
@@ -58,8 +59,8 @@ func testAccCheckPingAccessEngineListenerExists(n string) resource.TestCheckFunc
 			return fmt.Errorf("No EngineListener ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).EngineListeners
-		result, _, err := conn.GetEngineListenerCommand(&pingaccess.GetEngineListenerCommandInput{
+		conn := testAccProvider.Meta().(paClient).EngineListeners
+		result, _, err := conn.GetEngineListenerCommand(&engineListeners.GetEngineListenerCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -77,19 +78,22 @@ func testAccCheckPingAccessEngineListenerExists(n string) resource.TestCheckFunc
 
 func Test_resourcePingAccessEngineListenerReadData(t *testing.T) {
 	cases := []struct {
-		EngineListener pa.EngineListenerView
+		EngineListener models.EngineListenerView
 	}{
 		{
-			EngineListener: pa.EngineListenerView{
-				Name: String("engine1"),
-				Port: Int(9999),
+			EngineListener: models.EngineListenerView{
+				Name:                      String("engine1"),
+				Port:                      Int(9999),
+				Secure:                    Bool(true),
+				TrustedCertificateGroupId: Int(0),
 			},
 		},
 		{
-			EngineListener: pa.EngineListenerView{
-				Name:   String("engine2"),
-				Port:   Int(9999),
-				Secure: Bool(true),
+			EngineListener: models.EngineListenerView{
+				Name:                      String("engine2"),
+				Port:                      Int(9999),
+				Secure:                    Bool(false),
+				TrustedCertificateGroupId: Int(2),
 			},
 		},
 	}

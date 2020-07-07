@@ -2,20 +2,20 @@ package pingaccess
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessApplication(t *testing.T) {
-	var out pingaccess.ApplicationView
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -24,13 +24,13 @@ func TestAccPingAccessApplication(t *testing.T) {
 			{
 				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bar", "API"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test", 3, &out),
+					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test"),
 				),
 			},
 			{
 				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bart", "Web"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test", 6, &out),
+					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test"),
 				),
 			},
 		},
@@ -145,7 +145,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-		issuer = "https://pf:9031"
+		issuer = "%s"
 		trusted_certificate_group_id = 2
 	}
 
@@ -166,10 +166,10 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 			"phone"
 		]
 	}
-	`, name, context, appType, appType)
+	`, name, context, appType, appType, os.Getenv("PINGFEDERATE_TEST_IP"))
 }
 
-func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.ApplicationView) resource.TestCheckFunc {
+func testAccCheckPingAccessApplicationExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -183,8 +183,8 @@ func testAccCheckPingAccessApplicationExists(n string, c int64, out *pingaccess.
 			return fmt.Errorf("No application ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).Applications
-		result, _, err := conn.GetApplicationCommand(&pingaccess.GetApplicationCommandInput{
+		conn := testAccProvider.Meta().(paClient).Applications
+		result, _, err := conn.GetApplicationCommand(&applications.GetApplicationCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -222,12 +222,13 @@ func Test_flattenIdentityMappingIds(t *testing.T) {
 
 func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 	cases := []struct {
-		Application pa.ApplicationView
+		Application models.ApplicationView
 	}{
 		{
-			Application: pa.ApplicationView{
+			Application: models.ApplicationView{
 				Name:              String("engine1"),
 				ApplicationType:   String("API"),
+				AccessValidatorId: Int(0),
 				AgentId:           Int(0),
 				CaseSensitivePath: Bool(true),
 				ContextRoot:       String("/"),
@@ -235,7 +236,7 @@ func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 				SiteId:            Int(0),
 				SpaSupportEnabled: Bool(true),
 				VirtualHostIds:    &[]*int{Int(1)},
-				Policy: map[string]*[]*pa.PolicyItem{
+				Policy: map[string]*[]*models.PolicyItem{
 					"API": {
 						{
 							Id:   "1",

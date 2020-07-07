@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessKeyPair(t *testing.T) {
 	resourceName := "pingaccess_keypair.test"
+	resourceNameGen := "pingaccess_keypair.test_generate"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -35,10 +37,20 @@ func TestAccPingAccessKeyPair(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPingAccessKeyPairConfig(),
+				Config: testAccPingAccessKeyPairConfigGenerate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessKeyPairExists(resourceName),
-					testAccCheckPingAccessKeyPairAttributes(resourceName),
+					testAccCheckPingAccessKeyPairExists(resourceNameGen),
+					testAccCheckPingAccessKeyPairAttributes(resourceNameGen),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "md5sum"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "expires"),
+					resource.TestCheckResourceAttr(resourceNameGen, "issuer_dn", "CN=Test, OU=Test, O=Test, L=Test, ST=Test, C=GB"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "serial_number"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "sha1sum"),
+					resource.TestCheckResourceAttr(resourceNameGen, "signature_algorithm", "SHA256withRSA"),
+					resource.TestCheckResourceAttr(resourceNameGen, "status", "Valid"),
+					resource.TestCheckResourceAttr(resourceNameGen, "subject_dn", "CN=Test, OU=Test, O=Test, L=Test, ST=Test, C=GB"),
+					resource.TestCheckResourceAttr(resourceNameGen, "subject_cn", "Test"),
+					resource.TestCheckResourceAttrSet(resourceNameGen, "valid_from"),
 				),
 			},
 		},
@@ -58,6 +70,22 @@ func testAccPingAccessKeyPairConfig() string {
 	}`
 }
 
+func testAccPingAccessKeyPairConfigGenerate() string {
+	return `
+	resource "pingaccess_keypair" "test_generate" {
+		alias = "test2"
+		city = "Test"
+		common_name = "Test"
+		country = "GB"
+		key_algorithm = "RSA"
+		key_size = 2048
+		organization = "Test"
+		organization_unit = "Test"
+		state = "Test"
+		valid_days = 365
+	}`
+}
+
 func testAccCheckPingAccessKeyPairExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -69,8 +97,8 @@ func testAccCheckPingAccessKeyPairExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No KeyPair ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).KeyPairs
-		result, _, err := conn.GetKeyPairCommand(&pa.GetKeyPairCommandInput{
+		conn := testAccProvider.Meta().(paClient).KeyPairs
+		result, _, err := conn.GetKeyPairCommand(&keyPairs.GetKeyPairCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -88,13 +116,13 @@ func testAccCheckPingAccessKeyPairExists(n string) resource.TestCheckFunc {
 
 func testAccCheckPingAccessKeyPairAttributes(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No KeyPair ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).KeyPairs
-		result, _, err := conn.GetKeyPairCommand(&pa.GetKeyPairCommandInput{
+		conn := testAccProvider.Meta().(paClient).KeyPairs
+		result, _, err := conn.GetKeyPairCommand(&keyPairs.GetKeyPairCommandInput{
 			Id: rs.Primary.ID,
 		})
 

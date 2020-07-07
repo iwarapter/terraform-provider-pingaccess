@@ -1,40 +1,20 @@
 package pingaccess
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
-	"net/url"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/webSessions"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	pa "github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func init() {
-	resource.AddTestSweepers("pingaccess_websession", &resource.Sweeper{
-		Name: "pingaccess_websession",
-		F:    testSweepWebSession,
-	})
-}
-
-func testSweepWebSession(r string) error {
-	url, _ := url.Parse("https://localhost:9000")
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	conn := pa.NewClient("Administrator", "2Access2", url, "/pa-admin-api/v3", nil).WebSessions
-	result, _, _ := conn.GetWebSessionsCommand(&pa.GetWebSessionsCommandInput{Filter: "acc-test-"})
-	for _, v := range result.Items {
-		conn.DeleteWebSessionCommand(&pa.DeleteWebSessionCommandInput{Id: v.Id.String()})
-	}
-	return nil
-}
-
 func TestAccPingAccessWebSession(t *testing.T) {
-	var out pa.WebSessionView
-
+	resourceName := "pingaccess_websession.demo_session"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -43,13 +23,41 @@ func TestAccPingAccessWebSession(t *testing.T) {
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "password"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session", 3, &out),
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "password"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
 			},
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessWebSessionExists("pingaccess_websession.demo_session", 6, &out),
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
+				),
+			},
+			{ // we change the password directly and check the provider detects it
+				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					testAccCheckPingAccessWebSessionCanTrackPasswordChanges(resourceName, true),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
+					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
 			},
 		},
@@ -77,31 +85,70 @@ func testAccPingAccessWebSessionConfig(audience, password string) string {
 			"email",
 			"phone"
 		]
-	}`, name, password)
+	}`, audience, password)
 }
 
-func testAccCheckPingAccessWebSessionExists(n string, c int64, out *pa.WebSessionView) resource.TestCheckFunc {
+func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
-			return fmt.Errorf("No websession ID is set")
+			return fmt.Errorf("no websession ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pa.Client).WebSessions
-		result, _, err := conn.GetWebSessionCommand(&pa.GetWebSessionCommandInput{
+		conn := testAccProvider.Meta().(paClient).WebSessions
+		result, _, err := conn.GetWebSessionCommand(&webSessions.GetWebSessionCommandInput{
 			Id: rs.Primary.ID,
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error: WebSession (%s) not found", n)
+			return fmt.Errorf("error: WebSession (%s) not found", n)
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: WebSession response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("error: WebSession response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckPingAccessWebSessionCanTrackPasswordChanges(n string, changePassword bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
+			return fmt.Errorf("no websession ID is set")
+		}
+
+		conn := testAccProvider.Meta().(paClient).WebSessions
+		result, _, err := conn.GetWebSessionCommand(&webSessions.GetWebSessionCommandInput{
+			Id: rs.Primary.ID,
+		})
+
+		if err != nil {
+			return fmt.Errorf("unable to retrieve webSession %s", err)
+		}
+		if changePassword {
+			result.ClientCredentials.ClientSecret.Value = String("i have been changed")
+			updated, _, err := conn.UpdateWebSessionCommand(&webSessions.UpdateWebSessionCommandInput{
+				Body: *result,
+				Id:   rs.Primary.ID,
+			})
+
+			if err != nil {
+				return fmt.Errorf("failed to update webSession %s", err)
+			}
+
+			if *updated.ClientCredentials.ClientSecret.EncryptedValue == *result.ClientCredentials.ClientSecret.EncryptedValue {
+				return fmt.Errorf("the encryptedValue for webSession should of changed after an update")
+			}
 		}
 
 		return nil
@@ -110,24 +157,25 @@ func testAccCheckPingAccessWebSessionExists(n string, c int64, out *pa.WebSessio
 
 func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 	cases := []struct {
-		WebSession pa.WebSessionView
+		WebSession models.WebSessionView
 	}{
 		{
-			WebSession: pa.WebSessionView{
+			WebSession: models.WebSessionView{
 				Audience: String("localhost"),
 				Name:     String("localhost"),
-				ClientCredentials: &pa.OAuthClientCredentialsView{
+				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId:     String("client"),
-					ClientSecret: &pa.HiddenFieldView{},
+					ClientSecret: &models.HiddenFieldView{},
 				},
 				WebStorageType:                String("SessionStorage"),
 				CacheUserAttributes:           Bool(true),
 				CookieDomain:                  String("true"),
-				CookieType:                    String("true"),
+				CookieType:                    String("Signed"),
 				EnableRefreshUser:             Bool(true),
 				HttpOnlyCookie:                Bool(true),
 				IdleTimeoutInMinutes:          Int(0),
-				OidcLoginType:                 String("true"),
+				OidcLoginType:                 String("Code"),
+				PkceChallengeType:             String("OFF"),
 				PfsessionStateCacheInSeconds:  Int(0),
 				RefreshUserInfoClaimsInterval: Int(0),
 				RequestPreservationType:       String("true"),
@@ -141,24 +189,24 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 			},
 		},
 		{
-			WebSession: pa.WebSessionView{
+			WebSession: models.WebSessionView{
 				Audience: String("localhost"),
 				Name:     String("localhost"),
-				ClientCredentials: &pa.OAuthClientCredentialsView{
+				ClientCredentials: &models.OAuthClientCredentialsView{
 					ClientId:     String("client"),
-					ClientSecret: &pa.HiddenFieldView{},
+					ClientSecret: &models.HiddenFieldView{},
 				},
 				WebStorageType:                String("SessionStorage"),
 				CacheUserAttributes:           Bool(false),
-				CookieDomain:                  String(""),
-				CookieType:                    String(""),
+				CookieType:                    String("Encrypted"),
 				EnableRefreshUser:             Bool(false),
 				HttpOnlyCookie:                Bool(false),
 				IdleTimeoutInMinutes:          Int(1),
-				OidcLoginType:                 String(""),
+				OidcLoginType:                 String("POST"),
+				PkceChallengeType:             String("SHA256"),
 				PfsessionStateCacheInSeconds:  Int(1),
 				RefreshUserInfoClaimsInterval: Int(1),
-				RequestPreservationType:       String(""),
+				RequestPreservationType:       String("All"),
 				RequestProfile:                Bool(false),
 				SameSite:                      String("Disabled"),
 				Scopes:                        &[]*string{},
@@ -174,8 +222,8 @@ func Test_resourcePingAccessWebSessionReadData(t *testing.T) {
 
 			resourceSchema := resourcePingAccessWebSessionSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessWebSessionReadResult(resourceLocalData, &tc.WebSession)
 
+			resourcePingAccessWebSessionReadResult(resourceLocalData, &tc.WebSession, false)
 			if got := *resourcePingAccessWebSessionReadData(resourceLocalData); !cmp.Equal(got, tc.WebSession) {
 				t.Errorf("resourcePingAccessWebSessionReadData() = %v", cmp.Diff(got, tc.WebSession))
 			}

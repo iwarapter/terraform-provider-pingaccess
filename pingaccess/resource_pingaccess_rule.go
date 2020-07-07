@@ -1,113 +1,118 @@
 package pingaccess
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/services/rules"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePingAccessRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePingAccessRuleCreate,
-		Read:   resourcePingAccessRuleRead,
-		Update: resourcePingAccessRuleUpdate,
-		Delete: resourcePingAccessRuleDelete,
+		CreateContext: resourcePingAccessRuleCreate,
+		ReadContext:   resourcePingAccessRuleRead,
+		UpdateContext: resourcePingAccessRuleUpdate,
+		DeleteContext: resourcePingAccessRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"class_name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"supported_destinations": setOfString(),
-			"configuration": {
-				Type:             schema.TypeString,
-				Required:         true,
-				DiffSuppressFunc: suppressEquivalentJsonDiffs,
-			},
-			"ignrored_configuration_fields": { //TODO remove in future release
-				Type:       schema.TypeSet,
-				Optional:   true,
-				Deprecated: "This is no longer used to mask fields and will be removed in future versions.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
+		Schema: resourcePingAccessRuleSchema(),
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			svc := m.(paClient).Rules
+			desc, _, err := svc.GetRuleDescriptorsCommand()
+			if err != nil {
+				return fmt.Errorf("unable to retrieve Rule descriptors %s", err)
+			}
+			className := d.Get("class_name").(string)
+			if err := ruleDescriptorsHasClassName(className, desc); err != nil {
+				return err
+			}
+			return validateRulesConfiguration(className, d, desc)
 		},
-		CustomizeDiff: customdiff.ComputedIf("configuration", func(diff *schema.ResourceDiff, meta interface{}) bool {
-			return diff.HasChange("configuration")
-		}),
 	}
 }
 
-func resourcePingAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Rules
-	input := pingaccess.AddRuleCommandInput{
+func resourcePingAccessRuleSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"class_name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"supported_destinations": setOfString(),
+		"configuration": {
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: suppressEquivalentJSONDiffs,
+		},
+	}
+}
+
+func resourcePingAccessRuleCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Rules
+	input := rules.AddRuleCommandInput{
 		Body: *resourcePingAccessRuleReadData(d),
 	}
 
 	result, _, err := svc.AddRuleCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error creating rule: %s", err)
+		return diag.Errorf("unable to create Rule: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
-func resourcePingAccessRuleRead(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Rules
-	input := &pingaccess.GetRuleCommandInput{
+func resourcePingAccessRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Rules
+	input := &rules.GetRuleCommandInput{
 		Id: d.Id(),
 	}
 
 	result, _, err := svc.GetRuleCommand(input)
 	if err != nil {
-		return fmt.Errorf("Error reading rule: %s", err)
+		return diag.Errorf("unable to read Rule: %s", err)
 	}
 
 	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
-func resourcePingAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Rules
-	input := pingaccess.UpdateRuleCommandInput{
+func resourcePingAccessRuleUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Rules
+	input := rules.UpdateRuleCommandInput{
 		Body: *resourcePingAccessRuleReadData(d),
 		Id:   d.Id(),
 	}
 
 	result, _, err := svc.UpdateRuleCommand(&input)
 	if err != nil {
-		return fmt.Errorf("Error updating rule: %s", err)
+		return diag.Errorf("unable to update Rule: %s", err)
 	}
 
 	d.SetId(result.Id.String())
 	return resourcePingAccessRuleReadResult(d, result, svc)
 }
 
-func resourcePingAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
-	svc := m.(*pingaccess.Client).Rules
-	_, err := svc.DeleteRuleCommand(&pingaccess.DeleteRuleCommandInput{Id: d.Id()})
+func resourcePingAccessRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	svc := m.(paClient).Rules
+	_, err := svc.DeleteRuleCommand(&rules.DeleteRuleCommandInput{Id: d.Id()})
 	if err != nil {
-		return fmt.Errorf("Error deleting rule: %s", err)
+		return diag.Errorf("unable to delete Rule: %s", err)
 	}
 	return nil
 }
 
-func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *pingaccess.RuleView, svc *pingaccess.RulesService) error {
-	setResourceDataString(d, "name", input.Name)
-	setResourceDataString(d, "class_name", input.ClassName)
-	if err := d.Set("supported_destinations", input.SupportedDestinations); err != nil {
-		return err
-	}
+func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *models.RuleView, svc rules.RulesAPI) diag.Diagnostics {
+	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
 
@@ -119,18 +124,21 @@ func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *pingaccess.
 	desc, _, _ := svc.GetRuleDescriptorsCommand()
 	config = maskConfigFromRuleDescriptors(desc, input.ClassName, originalConfig, config)
 
-	if err := d.Set("configuration", config); err != nil {
-		return err
+	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
+	setResourceDataStringWithDiagnostic(d, "class_name", input.ClassName, &diags)
+	setResourceDataStringWithDiagnostic(d, "configuration", &config, &diags)
+	if err := d.Set("supported_destinations", input.SupportedDestinations); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
 	}
-	return nil
+	return diags
 }
 
-func resourcePingAccessRuleReadData(d *schema.ResourceData) *pingaccess.RuleView {
+func resourcePingAccessRuleReadData(d *schema.ResourceData) *models.RuleView {
 	config := d.Get("configuration").(string)
 	var dat map[string]interface{}
 	_ = json.Unmarshal([]byte(config), &dat)
 	supDests := expandStringList(d.Get("supported_destinations").(*schema.Set).List())
-	rule := &pingaccess.RuleView{
+	rule := &models.RuleView{
 		Name:                  String(d.Get("name").(string)),
 		ClassName:             String(d.Get("class_name").(string)),
 		Configuration:         dat,

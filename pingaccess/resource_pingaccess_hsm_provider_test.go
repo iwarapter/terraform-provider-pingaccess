@@ -2,50 +2,64 @@ package pingaccess
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess"
+	"github.com/iwarapter/pingaccess-sdk-go/services/hsmProviders"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
+	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessHsmProviderConfig("bar", "foo"),
+				Config: testAccPingAccessHsmProviderConfig("foo"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessHsmProviderExists("pingaccess_hsm_provider.acc_test_idm_bar"),
-					testAccCheckPingAccessHsmProviderAttributes("pingaccess_hsm_provider.acc_test_idm_bar", "foo"),
+					testAccCheckPingAccessHsmProviderExists(resourceName),
+					testAccCheckPingAccessHsmProviderAttributes(resourceName, "foo"),
 				),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-				//TODO The pingaccess AWS CloudHsm can be created but not deleted without a working HSM,
-				// and the current TestStep is unable to plan/apply without attempting to destroy atm it seems.
+			},
+			{
+				Config:      testAccPingAccessHsmProviderConfigInvalidClassName(),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.hsm.cloudhsm.plugin.foo' available classNames: com.pingidentity.pa.hsm.cloudhsm.plugin.AwsCloudHsmProvider`),
 			},
 		},
 	})
 }
 
-func testAccCheckPingAccessHsmProviderDestroy(s *terraform.State) error {
-	return nil
+func testAccPingAccessHsmProviderConfig(configUpdate string) string {
+	return fmt.Sprintf(`
+	resource "pingaccess_hsm_provider" "acc_test_hsm" {
+	  class_name    = "com.pingidentity.pa.hsm.pkcs11.plugin.PKCS11HsmProvider"
+	  name          = "demo"
+	  configuration = <<EOF
+	  {
+		"slotId": "1234",
+		"library": "%s",
+		"password": "top_secret"
+	  }
+	  EOF
+	}`, configUpdate)
 }
 
-func testAccPingAccessHsmProviderConfig(name, configUpdate string) string {
-	return fmt.Sprintf(`
-	resource "pingaccess_hsm_provider" "acc_test_idm_%s" {
-		class_name = "com.pingidentity.pa.hsm.cloudhsm.plugin.AwsCloudHsmProvider"
-		name = "%s"
+func testAccPingAccessHsmProviderConfigInvalidClassName() string {
+	return `
+	resource "pingaccess_hsm_provider" "acc_test_hsm" {
+		class_name = "com.pingidentity.pa.hsm.cloudhsm.plugin.foo"
+		name = "test"
 		configuration = <<EOF
 		{
 			"user": true,
 			"password": "sub",
-			"partition": "%s"
+			"partition": "test"
 		}
 		EOF
-	}`, name, name, configUpdate)
+	}`
 }
 
 func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {
@@ -59,8 +73,8 @@ func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No HsmProvider ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).HsmProviders
-		result, _, err := conn.GetHsmProviderCommand(&pingaccess.GetHsmProviderCommandInput{
+		conn := testAccProvider.Meta().(paClient).HsmProviders
+		result, _, err := conn.GetHsmProviderCommand(&hsmProviders.GetHsmProviderCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -76,15 +90,15 @@ func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckPingAccessHsmProviderAttributes(n, partition string) resource.TestCheckFunc {
+func testAccCheckPingAccessHsmProviderAttributes(n, library string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No HsmProvider ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*pingaccess.Client).HsmProviders
-		result, _, err := conn.GetHsmProviderCommand(&pingaccess.GetHsmProviderCommandInput{
+		conn := testAccProvider.Meta().(paClient).HsmProviders
+		result, _, err := conn.GetHsmProviderCommand(&hsmProviders.GetHsmProviderCommandInput{
 			Id: rs.Primary.ID,
 		})
 
@@ -93,12 +107,12 @@ func testAccCheckPingAccessHsmProviderAttributes(n, partition string) resource.T
 		}
 
 		if *result.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("Error: HsmProvider response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
+			return fmt.Errorf("error: HsmProvider response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
-		resultMapping := result.Configuration["partition"].(string)
-		if resultMapping != partition {
-			return fmt.Errorf("Error: HsmProvider response (%s) didnt match state (%s)", resultMapping, partition)
+		resultMapping := result.Configuration["library"].(string)
+		if resultMapping != library {
+			return fmt.Errorf("error: HsmProvider response (%s) didnt match state (%s)", resultMapping, library)
 		}
 
 		return nil

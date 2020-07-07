@@ -7,7 +7,7 @@ Provides HTTP request Host Source type resource.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/http_config_request_host_source.tf!}
+{!../func-tests//http_config_request_host_source.tf!}
 ```
 
 ## Argument Attributes

@@ -4,7 +4,7 @@ Provides a application.
 
 ## Example Usage
 ```terraform
-{!../pingaccess/test_cases/application.tf!}
+{!../func-tests//application.tf!}
 ```
 
 ## Argument Attributes

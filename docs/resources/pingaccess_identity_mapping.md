@@ -7,7 +7,7 @@ Provides a identity mapping.
 
 ### Example Usage
 ```terraform
-{!../pingaccess/test_cases/identity_mapping.tf!}
+{!../func-tests//identity_mapping.tf!}
 ```
 ### Argument Attributes
 The following arguments are supported:
