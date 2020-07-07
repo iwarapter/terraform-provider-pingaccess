@@ -31,6 +31,7 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 		"access_validator_id": {
 			Type:     schema.TypeInt,
 			Optional: true,
+			Default:  0,
 		},
 		"agent_id": {
 			Type:     schema.TypeInt,
@@ -52,7 +53,7 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 		"case_sensitive_path": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Default:  true,
+			Default:  false,
 		},
 		"context_root": {
 			Type:     schema.TypeString,
@@ -248,18 +249,12 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *models.Appli
 		SiteId:            Int(siteID),
 		SpaSupportEnabled: Bool(d.Get("spa_support_enabled").(bool)),
 		VirtualHostIds:    &vhIds,
+		CaseSensitivePath: Bool(d.Get("case_sensitive_path").(bool)),
+		AccessValidatorId: Int(d.Get("access_validator_id").(int)),
 	}
 
 	if *application.ApplicationType != "Dynamic" {
 		application.DefaultAuthType = application.ApplicationType
-	}
-
-	if _, ok := d.GetOk("access_validator_id"); ok {
-		application.AccessValidatorId = Int(d.Get("access_validator_id").(int))
-	}
-
-	if _, ok := d.GetOk("case_sensitive_path"); ok {
-		application.CaseSensitivePath = Bool(d.Get("case_sensitive_path").(bool))
 	}
 
 	if _, ok := d.GetOk("description"); ok {

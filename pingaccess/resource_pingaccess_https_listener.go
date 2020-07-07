@@ -43,11 +43,10 @@ func resourcePingAccessHTTPSListenerSchema() map[string]*schema.Schema {
 	}
 }
 
-func resourcePingAccessHTTPSListenerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessHTTPSListenerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).HttpsListeners
-	input := httpsListeners.GetHttpsListenersCommandInput{}
 
-	result, _, err := svc.GetHttpsListenersCommand(&input)
+	result, _, err := svc.GetHttpsListenersCommand(&httpsListeners.GetHttpsListenersCommandInput{})
 	if err != nil {
 		return diag.Errorf("unable to retrieving listener: %s", err)
 	}
@@ -56,7 +55,7 @@ func resourcePingAccessHTTPSListenerCreate(_ context.Context, d *schema.Resource
 	for _, listener := range result.Items {
 		if *listener.Name == name {
 			d.SetId(listener.Id.String())
-			return resourcePingAccessHTTPSListenerReadResult(d, listener)
+			return resourcePingAccessHTTPSListenerUpdate(ctx, d, m)
 		}
 	}
 	return diag.Errorf("unable to manage listener: %s", err)

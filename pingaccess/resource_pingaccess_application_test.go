@@ -228,6 +228,7 @@ func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 			Application: models.ApplicationView{
 				Name:              String("engine1"),
 				ApplicationType:   String("API"),
+				AccessValidatorId: Int(0),
 				AgentId:           Int(0),
 				CaseSensitivePath: Bool(true),
 				ContextRoot:       String("/"),

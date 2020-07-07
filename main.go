@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/-/pingfederate",
+		err := plugin.Debug(context.Background(), "registry.terraform.io/iwarapter/pingaccess",
 			&plugin.ServeOpts{
 				ProviderFunc: pingaccess.Provider,
 			})
