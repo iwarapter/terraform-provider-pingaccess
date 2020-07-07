@@ -532,3 +532,27 @@ func hashString(s string) int {
 	// v == MinInt
 	return 0
 }
+
+
+func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCredentialsView, trackPasswords bool, diags *diag.Diagnostics) {
+	pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
+	creds := flattenOAuthClientCredentialsView(input)
+	if trackPasswords {
+		enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
+		creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+		if err := d.Set("client_credentials", creds); err != nil {
+			*diags = append(*diags, diag.FromErr(err)...)
+		}
+		if encOk && enc.(string) != "" && enc.(string) != *input.ClientSecret.EncryptedValue {
+			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = ""
+		}
+	} else {
+		//legacy behaviour
+		if ok {
+			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
+		}
+	}
+	if err := d.Set("client_credentials", creds); err != nil {
+		*diags = append(*diags, diag.FromErr(err)...)
+	}
+}

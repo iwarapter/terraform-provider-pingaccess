@@ -134,26 +134,7 @@ func resourcePingAccessOAuthServerReadResult(d *schema.ResourceData, input *mode
 		diags = append(diags, diag.FromErr(err)...)
 	}
 	if input.ClientCredentials != nil && input.ClientCredentials.ClientSecret != nil {
-		pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
-		creds := flattenOAuthClientCredentialsView(input.ClientCredentials)
-		if trackPasswords {
-			enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
-			creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
-			if err := d.Set("client_credentials", creds); err != nil {
-				diags = append(diags, diag.FromErr(err)...)
-			}
-			if encOk && enc.(string) != "" && enc.(string) != *input.ClientCredentials.ClientSecret.EncryptedValue {
-				creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = ""
-			}
-		} else {
-			//legacy behaviour
-			if ok {
-				creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
-			}
-		}
-		if err := d.Set("client_credentials", creds); err != nil {
-			diags = append(diags, diag.FromErr(err)...)
-		}
+		setClientCredentials(d, input.ClientCredentials, trackPasswords, &diags)
 	}
 
 	return diags
