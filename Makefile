@@ -1,8 +1,9 @@
 # Makefile
-VERSION ?= 0.0.0
+VERSION ?= 0.0.1-ci
 NAME=terraform-provider-pingaccess_v${VERSION}
-PINGACCESS_VERSION=6.1.0-edge
+PINGACCESS_VERSION=6.1.3-edge
 BASE_DOCKER_TAG=pingidentity/pingaccess:${PINGACCESS_VERSION}
+OS_NAME := $(shell uname -s | tr A-Z a-z)
 
 pa-init:
 	@docker run --rm -d --hostname pingaccess --name pingaccess -e PING_IDENTITY_DEVOPS_KEY=$(PING_IDENTITY_DEVOPS_KEY) -e PING_IDENTITY_DEVOPS_USER=$(PING_IDENTITY_DEVOPS_USER) -e PING_IDENTITY_ACCEPT_EULA=YES --publish 9000:9000 ${BASE_DOCKER_TAG}
@@ -21,8 +22,9 @@ build:
 	@go build -mod=vendor -o ${NAME} -trimpath .
 
 deploy-local:
-	@mkdir -p ~/.terraform.d/plugins
-	@cp ${NAME} ~/.terraform.d/plugins/
+	@mkdir -p ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
+	@cp ${NAME} ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
+
 
 func-init:
 	@rm -rf func-tests/.terraform

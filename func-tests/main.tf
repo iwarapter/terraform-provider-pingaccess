@@ -1,5 +1,14 @@
+terraform {
+  required_providers {
+    pingaccess = {
+      source  = "iwarapter/pingaccess"
+      version = "0.0.1-ci" #for functional testing
+    }
+  }
+}
+
 provider "pingaccess" {
-  password = "2FederateM0re"
+  password = "2Access"
 }
 
 data "pingaccess_trusted_certificate_group" "trust_any" {

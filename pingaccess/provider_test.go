@@ -25,6 +25,8 @@ import (
 	"github.com/ory/dockertest/v3"
 )
 
+var conf *paCfg.Config
+
 func TestMain(m *testing.M) {
 	_, acceptanceTesting := os.LookupEnv("TF_ACC")
 	if acceptanceTesting {
@@ -82,7 +84,7 @@ func TestMain(m *testing.M) {
 		if value, ok := os.LookupEnv("PINGACCESS_VERSION"); ok {
 			paVersion = value
 		} else {
-			paVersion = "6.1.0-edge"
+			paVersion = "6.1.3-edge"
 		}
 
 		if devOpsKeyExists != true || devOpsUserExists != true {
@@ -109,8 +111,8 @@ func TestMain(m *testing.M) {
 		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s/pa-admin-api/v3", paCont.GetPort("9000/tcp")))
 		log.Printf("Setting PingAccess admin API: %s", u.String())
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		cfg := paCfg.NewConfig().WithUsername("administrator").WithPassword("2FederateM0re").WithEndpoint(u.String())
-		client := version.New(cfg)
+		conf = paCfg.NewConfig().WithUsername("administrator").WithPassword("2Access").WithEndpoint(u.String())
+		client := version.New(conf)
 		if err = pool.Retry(func() error {
 			log.Println("Attempting to connect to PingAccess admin API....")
 			_, _, err = client.VersionCommand()
@@ -119,7 +121,7 @@ func TestMain(m *testing.M) {
 			log.Fatalf("Could not connect to pingaccess: %s", err)
 		}
 		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
-		os.Setenv("PINGACCESS_PASSWORD", "2FederateM0re")
+		os.Setenv("PINGACCESS_PASSWORD", "2Access")
 		host, _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
 		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
 		log.Println("Connected to PingAccess admin API....")

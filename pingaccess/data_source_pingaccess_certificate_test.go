@@ -57,11 +57,15 @@ func testAccPingAccessCertificateDataSourceConfig(alias string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_certificate" "example" {
 		alias = "%s"
-		file_data = "${base64encode(file("test_cases/amazon_root_ca3.pem"))}"
+		file_data = base64encode(file("test_cases/amazon_root_ca3.pem"))
 	}
 
 	data "pingaccess_certificate" "test" {
-		alias = "${pingaccess_certificate.example.alias}"
+		alias = pingaccess_certificate.example.alias
+
+		depends_on = [
+			pingaccess_certificate.example
+		]
 	}`, alias)
 }
 

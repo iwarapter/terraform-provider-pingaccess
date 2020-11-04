@@ -15,7 +15,7 @@ Requirements
 ------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.12+
-- [Go](https://golang.org/doc/install) 1.12 (to build the provider plugin)
+- [Go](https://golang.org/doc/install) 1.14 (to build the provider plugin)
 - [Docker](https://www.docker.com/products/docker-desktop) latest
 
 Developing the Provider
@@ -50,10 +50,9 @@ The provider is current tested against the following versions of PingAccess
 
 | PingAccess | Status |
 |------------|--------|
-| 5.2.3 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
 | 5.3.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
 | 6.0.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
-| 6.1.0 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+| 6.1.3 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
 
 Testing the Provider
 ---------------------------
