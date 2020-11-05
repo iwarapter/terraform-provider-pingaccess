@@ -1,10 +1,19 @@
-#Resource: pingaccess_ruleset
+# Resource: pingaccess_ruleset
 
 Provides a ruleset.
 
 ## Example Usage
-```terraform
-{!../func-tests//ruleset.tf!}
+```hcl
+resource "pingaccess_ruleset" "demo_ruleset" {
+  name             = "demo_ruleset"
+  success_criteria = "SuccessIfAllSucceed"
+  element_type     = "Rule"
+
+  policy = [
+    pingaccess_rule.demo_1.id,
+    pingaccess_rule.demo_2.id,
+  ]
+}
 ```
 
 ## Argument Attributes
@@ -29,6 +38,6 @@ In addition to all arguments above, the following attributes are exported:
 
 PingAccess ruleset can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import pingaccess_ruleset.demo_ruleset 123
 ```

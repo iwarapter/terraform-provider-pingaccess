@@ -1,10 +1,14 @@
-#Resource: pingaccess_https_listener
+# Resource: pingaccess_https_listener
 
 Provides a https listener.
 
 ## Example Usage
-```terraform
-{!../func-tests//https_listener.tf!}
+```hcl
+resource "pingaccess_https_listener" "demo" {
+  name                          = "ADMIN"
+  key_pair_id                   = 1
+  use_server_cipher_suite_order = true
+}
 ```
 
 ## Argument Attributes

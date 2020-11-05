@@ -1,10 +1,14 @@
-#Resource: pingaccess_engine_listener
+# Resource: pingaccess_engine_listener
 
 Provides a engine listener.
 
 ## Example Usage
-```terraform
-{!../func-tests//engine_listener.tf!}
+```hcl
+resource "pingaccess_engine_listener" "demo" {
+  name   = "engine-1"
+  port   = 443
+  secure = true
+}
 ```
 
 ## Argument Attributes

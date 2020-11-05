@@ -1,13 +1,37 @@
-#Resource: pingaccess_rule
+# Resource: pingaccess_rule
 
 Provides a rule.
 
-!!! tip
-    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
 
 ## Example Usage
-```terraform
-{!../func-tests//rule.tf!}
+```hcl
+resource "pingaccess_rule" "demo_rule" {
+  class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+  name       = "demo_rule"
+
+  supported_destinations = [
+    "Site",
+    "Agent",
+  ]
+
+  configuration = <<EOF
+  {
+    "cidrNotation": "127.0.0.1/32",
+    "negate": false,
+    "overrideIpSource": false,
+    "headers": [],
+    "headerValueLocation": "LAST",
+    "fallbackToLastHopIp": true,
+    "errorResponseCode": 404,
+    "errorResponseStatusMsg": "Forbidden",
+    "errorResponseTemplateFile": "policy.error.page.template.html",
+    "errorResponseContentType": "text/html;charset=UTF-8",
+    "rejectionHandler": null,
+    "rejectionHandlingEnabled": false
+  }
+  EOF
+}
 ```
 
 ## Argument Attributes
@@ -32,6 +56,6 @@ In addition to all arguments above, the following attributes are exported:
 
 PingAccess rule can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import pingaccess_rule.demo_rule 123
 ```

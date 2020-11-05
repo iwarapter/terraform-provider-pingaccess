@@ -1,17 +1,27 @@
-#Resource: pingaccess_site_authenticator
+# Resource: pingaccess_site_authenticator
 
 Provides a site authenticator.
 
-!!! warning
-    This resource will store any credentials in the backend state file, please ensure you use an appropriate backend with the relevant encryption/access controls etc for this.
+~> This resource will store any credentials in the backend state file, please ensure you use an appropriate backend with the relevant encryption/access controls etc for this.
 
-!!! tip
-    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
 
 ## Example Usage
 
-```terraform
-{!../func-tests//site_authenticator.tf!}
+```hcl
+resource "pingaccess_site_authenticator" "demo_site_authenticator" {
+  name       = "demo-site-authenticator"
+  class_name = "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"
+
+  configuration = <<EOF
+    {
+      "username": "cheese",
+      "password": {
+        "value": "top_5ecr37"
+      }
+    }
+    EOF
+}
 ```
 
 ## Argument Attributes
@@ -34,6 +44,6 @@ In addition to all arguments above, the following attributes are exported:
 
 PingAccess site authenticator can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import pingaccess_site_authenticator.demo_site_authenticator 123
 ```

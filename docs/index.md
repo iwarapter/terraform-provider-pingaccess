@@ -2,9 +2,8 @@ The PingAccess provider is used to interact with the many resources supported by
 
 Use the navigation to the left to read about the available resources.
 
-
-### Example Usage
-```terraform
+## Example Usage
+```hcl
 # Configure the PingAccess Provider
 provider "pingaccess" {
   username = "Administrator"
@@ -19,7 +18,7 @@ resource "pingaccess_site" "site" {
 }
 ```
 
-### Authentication
+## Authentication
 
 The PingAccess provider offers a flexible means of providing credentials for authentication. The following methods are supported, in this order, and explained below:
 

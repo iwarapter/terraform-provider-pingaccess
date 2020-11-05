@@ -1,10 +1,16 @@
-#Resource: pingaccess_third_party_service
+# Resource: pingaccess_third_party_service
 
 Provides a third party service.
 
 ## Example Usage
-```terraform
-{!../func-tests//third_party_service.tf!}
+```hcl
+resource "pingaccess_third_party_service" "demo_third_party_service" {
+  name = "demo"
+
+  targets = [
+    "server.domain:1234",
+  ]
+}
 ```
 
 ## Argument Attributes
@@ -43,6 +49,6 @@ In addition to all arguments above, the following attributes are exported:
 
 PingAccess third party service can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import pingaccess_third_party_service.demo_third_party_service 123
 ```

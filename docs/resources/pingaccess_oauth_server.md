@@ -1,12 +1,30 @@
-#Resource: pingaccess_oauth_server
+# Resource: pingaccess_oauth_server
 
 Provides an Authorization Server configuration.
 
-### Example Usage
-```terraform
-{!../func-tests//oauth_server.tf!}
+->  This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource will reset the Authorization Server configuration to default values
+
+## Example Usage
+```hcl
+resource "pingaccess_oauth_server" "demo_oauth_server" {
+  targets                      = ["localhost:9031"]
+  subject_attribute_name       = "san"
+  trusted_certificate_group_id = 1
+  introspection_endpoint       = "/introspect"
+
+  client_credentials {
+    client_id = "oauth"
+
+    client_secret {
+      value = "top_secret"
+    }
+  }
+
+  secure = true
+}
 ```
-### Argument Attributes
+
+## Argument Attributes
 The following arguments are supported:
 
 - [`audit_level`](#audit_level) - Enable to record requests to third-party OAuth 2.0 Authorization Server to the audit store.
@@ -34,6 +52,6 @@ The following arguments are supported:
 - [`use_proxy`](#use_proxy) - True if a proxy should be used for HTTP or HTTPS requests.
 
 
-### Attributes Reference
+## Attributes Reference
 
 No additional attributes are provided.

@@ -1,19 +1,19 @@
-#Data Source: pingaccess_trusted_certificate_group
+# Data Source: pingaccess_trusted_certificate_group
 
 Use this data source to get the ID of a trusted certificate group in Ping Access, you can reference it by name without having to hard code the IDs as input.
 
-### Example Usage
-```terraform
+## Example Usage
+```hcl
 data "pingaccess_trusted_certificate_group" "trust_any" {
   name = "Trust Any"
 }
 ```
-### Argument Attributes
+## Argument Attributes
 The following arguments are supported:
 
 - [`name`](#name) - (required) The name for the trusted certificate group.
 
-### Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 

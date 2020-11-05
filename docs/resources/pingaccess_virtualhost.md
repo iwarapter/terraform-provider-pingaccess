@@ -1,9 +1,9 @@
-#Resource: pingaccess_virtualhost
+# Resource: pingaccess_virtualhost
 
 Provides a virtualhost.
 
 ## Example Usage
-```terraform
+```hcl
 resource "pingaccess_virtualhost" "demo_virtualhost" {
   host = "localhost"
   port = 1234

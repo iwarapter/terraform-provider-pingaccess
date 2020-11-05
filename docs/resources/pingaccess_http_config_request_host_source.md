@@ -1,13 +1,18 @@
-#Resource: pingaccess_http_config_request_host_source
+# Resource: pingaccess_http_config_request_host_source
 
 Provides HTTP request Host Source type resource.
 
-!!! warning
-    This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource will resets the HTTP request Host Source type to default values
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource will resets the HTTP request Host Source type to default values
 
 ## Example Usage
-```terraform
-{!../func-tests//http_config_request_host_source.tf!}
+```hcl
+resource "pingaccess_http_config_request_host_source" "test" {
+  header_name_list = [
+    "Host",
+    "X-Forwarded-Host"
+  ]
+  list_value_location = "LAST"
+}
 ```
 
 ## Argument Attributes
@@ -18,6 +23,6 @@ The following arguments are supported:
 
 - [`list_value_location`](#list_value_location) - The location in a matching header value list to use as the source. Either FIRST or LAST.
 
-### Attributes Reference
+## Attributes Reference
 
 No additional attributes are provided.

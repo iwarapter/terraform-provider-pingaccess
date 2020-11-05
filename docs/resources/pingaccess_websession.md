@@ -1,13 +1,30 @@
-#Resource: pingaccess_websession
+# Resource: pingaccess_websession
 
 Provides a web session.
 
-!!! tip
-    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `client_credentials.client_secret` block.
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `client_credentials.client_secret` block.
 
 ## Example Usage
-```terraform
-{!../func-tests//websession.tf!}
+```hcl
+resource "pingaccess_websession" "demo_session" {
+  name     = "demo-session"
+  audience = "example"
+
+  client_credentials {
+    client_id = "websession"
+
+    client_secret {
+      value = "changeme"
+    }
+  }
+
+  scopes = [
+    "profile",
+    "address",
+    "email",
+    "phone",
+  ]
+}
 ```
 
 ## Argument Attributes

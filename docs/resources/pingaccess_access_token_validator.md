@@ -1,13 +1,25 @@
-#Resource: pingaccess_access_token_validator
+# Resource: pingaccess_access_token_validator
 
 Provides a access token validator.
 
-!!! tip
-    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
 
 ## Example Usage
-```terraform
-{!../func-tests//access_token_validator.tf!}
+```hcl
+resource "pingaccess_access_token_validator" "example" {
+  class_name = "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"
+  name       = "demo"
+
+  configuration = <<EOF
+	{
+		"description": null,
+		"path": "/bar",
+		"subjectAttributeName": "demo",
+		"issuer": null,
+		"audience": null
+	}
+	EOF
+}
 ```
 
 ## Argument Attributes

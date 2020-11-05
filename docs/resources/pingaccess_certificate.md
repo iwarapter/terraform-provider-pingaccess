@@ -1,19 +1,23 @@
-#Resource: pingaccess_ceritficate
+# Resource: pingaccess_ceritficate
 
 Provides a ceritficate.
 
-### Example Usage
-```terraform
-{!../func-tests//certificate.tf!}
+## Example Usage
+```hcl
+resource "pingaccess_certificate" "demo_certificate" {
+  alias     = "demo"
+  file_data = base64encode(file("amazon_root_ca1.pem"))
+}
 ```
-### Argument Attributes
+
+## Argument Attributes
 The following arguments are supported:
 
 - [`alias`](#alias) - (required) The alias for the certificate.
 
 - [`file_data`](#file_data) - (required) The base64-encoded data of the certificate.
 
-### Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
