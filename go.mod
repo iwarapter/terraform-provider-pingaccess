@@ -12,7 +12,7 @@ require (
 	github.com/ory/dockertest/v3 v3.6.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.5.0 // indirect
-	github.com/tidwall/gjson v1.3.2
+	github.com/tidwall/gjson v1.6.3
 	github.com/tidwall/sjson v1.0.4
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
