@@ -315,7 +315,7 @@ type ExportKeyPairCertInput struct {
 //GenerateCsrCommand - Generate a Certificate Signing Request for a Key Pair
 //RequestType: GET
 //Input: input *GenerateCsrCommandInput
-func (s *KeyPairsService) GenerateCsrCommand(input *GenerateCsrCommandInput) (resp *http.Response, err error) {
+func (s *KeyPairsService) GenerateCsrCommand(input *GenerateCsrCommandInput) (output *string, resp *http.Response, err error) {
 	path := "/keyPairs/{id}/csr"
 	path = strings.Replace(path, "{id}", input.Id, -1)
 
@@ -325,13 +325,13 @@ func (s *KeyPairsService) GenerateCsrCommand(input *GenerateCsrCommandInput) (re
 		HTTPPath:    path,
 		QueryParams: map[string]string{},
 	}
-
-	req := s.newRequest(op, nil, nil)
+	output = pingaccess.String("")
+	req := s.newRequest(op, nil, output)
 
 	if req.Send() == nil {
-		return req.HTTPResponse, nil
+		return output, req.HTTPResponse, nil
 	}
-	return req.HTTPResponse, req.Error
+	return nil, req.HTTPResponse, req.Error
 }
 
 // GenerateCsrCommandInput - Inputs for GenerateCsrCommand
