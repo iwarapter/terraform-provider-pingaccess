@@ -354,7 +354,7 @@ github.com/tidwall/gjson
 github.com/tidwall/match
 # github.com/tidwall/pretty v1.0.2
 github.com/tidwall/pretty
-# github.com/tidwall/sjson v1.0.4
+# github.com/tidwall/sjson v1.1.2
 ## explicit
 github.com/tidwall/sjson
 # github.com/ulikunitz/xz v0.5.8
