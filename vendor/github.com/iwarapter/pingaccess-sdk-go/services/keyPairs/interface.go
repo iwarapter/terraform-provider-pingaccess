@@ -17,7 +17,7 @@ type KeyPairsAPI interface {
 	PatchKeyPairCommand(input *PatchKeyPairCommandInput) (output *models.KeyPairView, resp *http.Response, err error)
 	UpdateKeyPairCommand(input *UpdateKeyPairCommandInput) (output *models.KeyPairView, resp *http.Response, err error)
 	ExportKeyPairCert(input *ExportKeyPairCertInput) (resp *http.Response, err error)
-	GenerateCsrCommand(input *GenerateCsrCommandInput) (resp *http.Response, err error)
+	GenerateCsrCommand(input *GenerateCsrCommandInput) (output *string, resp *http.Response, err error)
 	ImportCSRResponseCommand(input *ImportCSRResponseCommandInput) (output *models.KeyPairView, resp *http.Response, err error)
 	ExportKeyPair(input *ExportKeyPairInput) (resp *http.Response, err error)
 	DeleteChainCertificateCommand(input *DeleteChainCertificateCommandInput) (resp *http.Response, err error)

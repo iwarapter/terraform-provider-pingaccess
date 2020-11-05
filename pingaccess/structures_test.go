@@ -110,3 +110,28 @@ func Test_expandPolicy(t *testing.T) {
 	api := *(expandPolicyItem)["API"]
 	equals(t, "1334", api[0].Id.String())
 }
+
+func Test_maskConfigFromConfigurationField(t *testing.T) {
+	tests := []struct {
+		name string
+		field *models.ConfigurationField
+		config string
+		originalConfig string
+		want string
+	}{
+		{
+			name:           "we can mask a password",
+			field:          &models.ConfigurationField{Name: String("password"), Type: String("CONCEALED")},
+			config:         "{\"library\":\"foo\",\"password\":{\"encryptedValue\":\"OBF:JWE:eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiVGhNT3FrdTZ0cHZjdFNEaCJ9..tyXmXFR76lYnHrfwLkiLPw.sFqoXnRjyVllwKv80rHTbQ.4vuVPhY_l5KXA-w_bZbrcQ\"},\"slotId\":\"1234\"}",
+			originalConfig: "\t  {\n\t\t\"slotId\": \"1234\",\n\t\t\"library\": \"foo\",\n\t\t\"password\": \"top_secret\"\n\t  }\n",
+			want:           "{\"library\":\"foo\",\"password\":\"top_secret\",\"slotId\":\"1234\"}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := maskConfigFromConfigurationField(tt.field, String(""), tt.originalConfig, tt.config); got != tt.want {
+				t.Errorf("maskConfigFromConfigurationField() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
