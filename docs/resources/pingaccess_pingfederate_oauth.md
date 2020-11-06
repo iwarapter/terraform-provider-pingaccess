@@ -1,13 +1,24 @@
-#Resource: pingaccess_pingfederate_oauth
+# Resource: pingaccess_pingfederate_oauth
 
 Configured the PingFederate OAuth.
 
-!!! warning
-    This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource resets the PingAccess OAuth Client configuration to default values
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource resets the PingAccess OAuth Client configuration to default values
 
 ## Example Usage
-```terraform
-{!../func-tests//pingfederate_oauth.tf!}
+```hcl
+resource "pingaccess_pingfederate_oauth" "demo" {
+  access_validator_id    = 1
+  cache_tokens           = true
+  subject_attribute_name = "san"
+  name                   = "PingFederate"
+  client_id              = "oauth"
+  client_secret {
+    value = "top_secret"
+  }
+  send_audience              = true
+  token_time_to_live_seconds = 300
+  use_token_introspection    = true
+}
 ```
 
 ## Argument Attributes
@@ -24,6 +35,6 @@ The following arguments are supported:
 - [`token_time_to_live_seconds`](#token_time_to_live_seconds) - (Optional) Defines the number of seconds to cache the access token. -1 means no limit. This value should be less than the PingFederate Token Lifetime.
 - [`use_token_introspection`](#use_token_introspection) - (Optional) Specify if token introspection is enabled.
 
-### Attributes Reference
+## Attributes Reference
 
 No additional attributes are provided.

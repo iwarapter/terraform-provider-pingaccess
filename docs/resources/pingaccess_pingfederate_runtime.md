@@ -1,12 +1,11 @@
-#Resource: pingaccess_pingfederate_runtime
+# Resource: pingaccess_pingfederate_runtime
 
 Configured the PingFederate runtime.
 
-!!! warning
-    This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource resets the PingFederate configuration
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource resets the PingFederate configuration
 
 ## Example Usage
-```terraform
+```hcl
 resource "pingaccess_pingfederate_runtime" "demo" {
   description                  = "foo"
   issuer                       = "https://localhost:9031"
@@ -29,6 +28,6 @@ The following arguments are supported:
 - [`use_proxy`](#use_proxy) - Set to true if a proxy should be used for HTTP or HTTPS requests.
 - [`use_slo`](#use_slo) - Set to true if OIDC single log out should be used on the /pa/oidc/logout on the engines.
 
-### Attributes Reference
+## Attributes Reference
 
 No additional attributes are provided.

@@ -1,19 +1,19 @@
-#Data Source: pingaccess_keypair
+# Data Source: pingaccess_keypair
 
 Use this data source to get the ID of a keypair in Ping Access, you can reference it by alias without having to hard code the IDs as input.
 
-### Example Usage
-```terraform
+## Example Usage
+```hcl
 data "pingaccess_keypair" "demo_keypair" {
   alias = "amazon_root_ca1"
 }
 ```
-### Argument Attributes
+## Argument Attributes
 The following arguments are supported:
 
 - [`alias`](#alias) - (required) The alias for the keypair.
 
-### Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 

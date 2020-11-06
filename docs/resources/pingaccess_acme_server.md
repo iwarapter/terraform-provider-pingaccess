@@ -1,10 +1,10 @@
-#Resource: pingaccess_acme_server
+# Resource: pingaccess_acme_server
 
 Provides a acme server.
 
 ## Example Usage
-```terraform
-resource "pingaccess_acme_server" "test" {
+```hcl
+resource "pingaccess_acme_server" "example" {
   name = "example"
   url  = "https://acme-staging-v02.api.letsencrypt.org/directory"
 }

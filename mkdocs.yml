@@ -8,11 +8,11 @@ nav:
   - Home:
     - PingAccess Provider: index.md
     - Data Sources:
-      - pingaccess_acme_default: data_sources/pingaccess_acme_default.md
-      - pingaccess_certificate: data_sources/pingaccess_certificate.md
-      - pingaccess_keypair: data_sources/pingaccess_keypair.md
-      - pingaccess_pingfederate_runtime_metadata: data_sources/pingaccess_pingfederate_runtime_metadata.md
-      - pingaccess_trusted_certificate_group: data_sources/pingaccess_trusted_certificate_group.md
+      - pingaccess_acme_default: data-sources/pingaccess_acme_default.md
+      - pingaccess_certificate: data-sources/pingaccess_certificate.md
+      - pingaccess_keypair: data-sources/pingaccess_keypair.md
+      - pingaccess_pingfederate_runtime_metadata: data-sources/pingaccess_pingfederate_runtime_metadata.md
+      - pingaccess_trusted_certificate_group: data-sources/pingaccess_trusted_certificate_group.md
     - Supported Resources:
       - pingaccess_access_token_validator: resources/pingaccess_access_token_validator.md
       - pingaccess_acme_server: resources/pingaccess_acme_server.md

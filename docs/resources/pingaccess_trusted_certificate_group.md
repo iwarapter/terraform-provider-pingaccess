@@ -1,10 +1,14 @@
-#Resource: pingaccess_trusted_certificate_group
+# Resource: pingaccess_trusted_certificate_group
 
 Provides a trusted certificate group.
 
 ## Example Usage
-```terraform
-{!../func-tests//trusted_certificate_group.tf!}
+```hcl
+resource "pingaccess_trusted_certificate_group" "demo_certificate_group" {
+  name                        = "demo_certificate_group"
+  use_java_trust_store        = true
+  skip_certificate_date_check = false
+}
 ```
 
 ## Argument Attributes
@@ -34,6 +38,6 @@ In addition to all arguments above, the following attributes are exported:
 
 PingAccess trusted certificate group can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import pingaccess_trusted_certificate_group.demo_trusted_certificate_group 123
 ```

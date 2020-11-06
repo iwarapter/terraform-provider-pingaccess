@@ -1,28 +1,49 @@
-#Resource: pingaccess_keypair
+# Resource: pingaccess_keypair
 
 Provides a keypair.
 
-!!! tip
-    The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of the sensitive `password` attribute.
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of the sensitive `password` attribute.
 
-### Example Usage
-```terraform
-{!../func-tests//keypair.tf!}
+## Example Usage
 
-{!../func-tests//keypair_generate.tf!}
+### Generating a Keypair
+```hcl
+resource "pingaccess_keypair" "demo_generate" {
+  alias             = "demo2"
+  city              = "London"
+  common_name       = "Example"
+  country           = "GB"
+  key_algorithm     = "RSA"
+  key_size          = 2048
+  organization      = "Test"
+  organization_unit = "Development"
+  state             = "London"
+  valid_days        = 365
+}
 ```
-### Argument Attributes
+
+### Importing a Keypair
+
+```hcl
+resource "pingaccess_keypair" "demo_keypair" {
+  alias     = "demo"
+  file_data = filebase64("provider.p12")
+  password  = "password"
+}
+```
+
+## Argument Attributes
 The following arguments are supported:
 
 - [`alias`](#alias) - (required) The alias for the keypair.
 - [`hsm_provider_id`](#hsm_provider_id) - The HSM Provider ID.
 
-#### Importing KeyPair
+### Importing KeyPair
 
 - [`file_data`](#file_data) - (required) The base64-encoded data of the keypair.
 - [`password`](#password) - The Password used to protect the PKCS#12 file.
 
-#### Generating KeyPair
+### Generating KeyPair
 
 - [`city`](#city) - (Required) The city or other primary location (L) where the company operates.
 - [`common_name`](#common_name) - (Required) The common name (CN) identifying the certificate.
@@ -34,7 +55,7 @@ The following arguments are supported:
 - [`state`](#state) - (Required) The state (ST) or other political unit encompassing the location.
 - [`valid_days`](#valid_days) - (Required) The number of days the certificate is valid.
 
-### Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
@@ -78,7 +99,7 @@ In addition to all arguments above, the following attributes are exported:
 
 - [`valid_from`](#valid_from) - The date at which the keypair is valid from as the number of milliseconds since January 1, 1970, 00:00:00 GMT.
 
-### Import
+## Import
 
 PingAccess keypairs can be imported using the id, e.g.
 

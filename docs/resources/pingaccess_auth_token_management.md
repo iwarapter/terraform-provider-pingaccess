@@ -1,13 +1,17 @@
-#Resource: pingaccess_auth_token_management
+# Resource: pingaccess_auth_token_management
 
 Provides a auth token management.
 
-!!! warning
-    This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource will resets the Auth Token Management configuration to default values
+->  This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource will resets the Auth Token Management configuration to default values
 
 ## Example Usage
-```terraform
-{!../func-tests//auth_token_management.tf!}
+```hcl
+resource "pingaccess_auth_token_management" "demo" {
+  key_roll_enabled         = true
+  key_roll_period_in_hours = 24
+  issuer                   = "PingAccessAuthToken"
+  signing_algorithm        = "P-256"
+}
 ```
 
 ## Argument Attributes
@@ -22,6 +26,6 @@ The following arguments are supported:
 
 - [`signing_algorithm`](#signing_algorithm) - The signing algorithm used when creating signed auth tokens.
 
-### Attributes Reference
+## Attributes Reference
 
 No additional attributes are provided.

@@ -1,13 +1,24 @@
-#Resource: pingaccess_pingfederate_admin
+# Resource: pingaccess_pingfederate_admin
 
 Configured the PingFederate OAuth.
 
-!!! warning
-    This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource resets the PingFederate Admin configuration to default values
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Destroying the resource resets the PingFederate Admin configuration to default values
 
 ## Example Usage
-```terraform
-{!../func-tests//pingfederate_admin.tf!}
+```hcl
+resource "pingaccess_pingfederate_admin" "demo" {
+  admin_username = "oauth"
+  admin_password {
+    value = "top_secret"
+  }
+  audit_level                  = "ON"
+  base_path                    = "/path"
+  host                         = "localhost"
+  port                         = 9031
+  secure                       = true
+  trusted_certificate_group_id = 2
+  use_proxy                    = true
+}
 ```
 
 ## Argument Attributes
@@ -24,6 +35,6 @@ The following arguments are supported:
 - [`trusted_certificate_group_id`](#trusted_certificate_group_id) - (Optional) The group of certificates to use when authenticating to PingFederate Administrative API.
 - [`use_proxy`](#use_proxy) - (Optional) True if a proxy should be used for HTTP or HTTPS requests.
 
-### Attributes Reference
+## Attributes Reference
 
 No additional attributes are provided.

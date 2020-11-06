@@ -1,15 +1,15 @@
-#Data Source: pingaccess_pingfederate_runtime_metadata
+# Data Source: pingaccess_pingfederate_runtime_metadata
 
 Use this data source to get the PingFederate Runtime metadata.
 
-### Example Usage
-```terraform
+## Example Usage
+```hcl
 data "pingaccess_pingfederate_runtime_metadata" "meta" {}
 ```
-### Argument Attributes
+## Argument Attributes
 This data source requires no attributes to be set.
 
-### Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 

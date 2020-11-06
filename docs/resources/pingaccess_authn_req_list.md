@@ -1,10 +1,16 @@
-#Resource: pingaccess_authn_req_list
+# Resource: pingaccess_authn_req_list
 
 Provides a AuthN Req List.
 
 ## Example Usage
-```terraform
-{!../func-tests//authn_req_list.tf!}
+```hcl
+resource "pingaccess_authn_req_list" "demo" {
+  name = "demo"
+  authn_reqs = [
+    "one",
+    "two",
+  ]
+}
 ```
 
 ## Argument Attributes

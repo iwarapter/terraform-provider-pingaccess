@@ -1,10 +1,13 @@
-#Resource: pingaccess_site
+# Resource: pingaccess_site
 
 Provides a site.
 
 ## Example Usage
-```terraform
-{!../func-tests//site.tf!}
+```hcl
+resource "pingaccess_site" "demo" {
+  name    = "demo-site"
+  targets = ["localhost:1234"]
+}
 ```
 
 ## Argument Attributes
@@ -51,6 +54,6 @@ In addition to all arguments above, the following attributes are exported:
 
 PingAccess sites can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import pingaccess_site.demo_site 123
 ```
