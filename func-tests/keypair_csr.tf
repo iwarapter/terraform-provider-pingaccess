@@ -4,9 +4,10 @@ data "pingaccess_keypair_csr" "csr" {
 }
 
 resource "pingaccess_keypair_csr" "test" {
-  keypair_id         = pingaccess_keypair.demo_generate.id
-  file_data          = base64encode(tls_locally_signed_cert.example.cert_pem)
-  chain_certificates = [base64encode(tls_self_signed_cert.example.cert_pem)]
+  keypair_id                   = pingaccess_keypair.demo_generate.id
+  file_data                    = base64encode(tls_locally_signed_cert.example.cert_pem)
+  chain_certificates           = [base64encode(tls_self_signed_cert.example.cert_pem)]
+  trusted_certificate_group_id = data.pingaccess_trusted_certificate_group.trust_any.id
 }
 
 resource "tls_private_key" "example" {

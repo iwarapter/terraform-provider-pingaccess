@@ -25,9 +25,10 @@ data "pingaccess_keypair_csr" "csr" {
 }
 
 resource "pingaccess_keypair_csr" "test" {
-  keypair_id         = pingaccess_keypair.demo_generate.id
-  file_data          = base64encode(tls_locally_signed_cert.example.cert_pem)
-  chain_certificates = [base64encode(tls_self_signed_cert.example.cert_pem)]
+  keypair_id                   = pingaccess_keypair.demo_generate.id
+  file_data                    = base64encode(tls_locally_signed_cert.example.cert_pem)
+  chain_certificates           = [base64encode(tls_self_signed_cert.example.cert_pem)]
+  trusted_certificate_group_id = data.pingaccess_trusted_certificate_group.trust_any.id
 }
 
 resource "tls_private_key" "example" {
@@ -75,6 +76,7 @@ The following arguments are supported:
 - [`keypair_id`](#keypair_id) - (required) The Id for the key pair.
 - [`file_data`](#file_data) - (required) The base64-encoded data of the keypair.
 - [`chain_certificates`](#chain_certificates) - A list of base64-encoded certificates to add to the key pair certificate chain.
+- [`trusted_certificate_group_id`](#trusted_certificate_group_id) - The ID of the trusted certificate group associated with the CSR response.
 
 ## Attributes Reference
 

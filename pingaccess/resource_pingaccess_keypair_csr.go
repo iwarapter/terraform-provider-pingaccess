@@ -36,6 +36,11 @@ func resourcePingAccessKeyPairCsrSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Required: true,
 		},
+		"trusted_certificate_group_id": {
+			Type:     schema.TypeInt,
+			Optional: true,
+			Default:  0,
+		},
 		"chain_certificates": {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -50,7 +55,7 @@ func resourcePingAccessKeyPairCsrCreate(_ context.Context, d *schema.ResourceDat
 	svc := m.(paClient).KeyPairs
 	input := keyPairs.ImportCSRResponseCommandInput{
 		Body: *resourcePingAccessKeyPairCsrReadData(d),
-		Id: d.Get("keypair_id").(string),
+		Id:   d.Get("keypair_id").(string),
 	}
 
 	result, _, err := svc.ImportCSRResponseCommand(&input)
@@ -70,7 +75,7 @@ func resourcePingAccessKeyPairCsrUpdate(_ context.Context, d *schema.ResourceDat
 	svc := m.(paClient).KeyPairs
 	input := keyPairs.ImportCSRResponseCommandInput{
 		Body: *resourcePingAccessKeyPairCsrReadData(d),
-		Id: d.Get("keypair_id").(string),
+		Id:   d.Get("keypair_id").(string),
 	}
 
 	_, _, err := svc.ImportCSRResponseCommand(&input)
@@ -93,6 +98,9 @@ func resourcePingAccessKeyPairCsrReadData(d *schema.ResourceData) *models.CSRRes
 	if v, ok := d.GetOk("chain_certificates"); ok {
 		certs := expandStringList(v.([]interface{}))
 		csr.ChainCertificates = &certs
+	}
+	if v, ok := d.GetOk("trusted_certificate_group_id"); ok {
+		csr.TrustedCertGroupId = Int(v.(int))
 	}
 
 	return &csr
