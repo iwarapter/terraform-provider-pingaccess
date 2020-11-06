@@ -28,7 +28,7 @@ func TestAccPingAccessKeyPairCsr(t *testing.T) {
 		Subject: pkix.Name{
 			Organization: []string{"Ping Identity"},
 			Country:      []string{"US"},
-			CommonName: "localhost",
+			CommonName:   "localhost",
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0),
@@ -87,7 +87,7 @@ func TestAccPingAccessKeyPairCsr(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessKeyPairCsrDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessKeyPairCsrConfig(signedCert),
+				Config: testAccPingAccessKeyPairCsrConfig(signedCert, caBuf.String()),
 				//Check: resource.ComposeTestCheckFunc(),
 			},
 		},
@@ -98,11 +98,12 @@ func testAccCheckPingAccessKeyPairCsrDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessKeyPairCsrConfig(signedCert string) string {
+func testAccPingAccessKeyPairCsrConfig(signedCert, chain string) string {
 	return fmt.Sprintf(`
 resource "pingaccess_keypair_csr" "test" {
   keypair_id = "1"
   file_data = "%s"
+  chain_certificates = ["%s"]
 }
-`, base64.StdEncoding.EncodeToString([]byte(signedCert)))
+`, base64.StdEncoding.EncodeToString([]byte(signedCert)), base64.StdEncoding.EncodeToString([]byte(chain)))
 }
