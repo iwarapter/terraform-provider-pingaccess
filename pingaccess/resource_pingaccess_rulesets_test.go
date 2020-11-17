@@ -40,6 +40,11 @@ func TestAccPingAccessRuleSet(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "policy.0"),
 				),
 			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccPingAccessTrustedCertificateGroups(t *testing.T) {
+	resourceName := "pingaccess_trusted_certificate_group.demo_tcg"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,14 +23,19 @@ func TestAccPingAccessTrustedCertificateGroups(t *testing.T) {
 			{
 				Config: testAccPingAccessTrustedCertificateGroupsConfig("demo service", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessTrustedCertificateGroupsExists("pingaccess_trusted_certificate_group.demo_tcg"),
+					testAccCheckPingAccessTrustedCertificateGroupsExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessTrustedCertificateGroupsConfig("demo service", "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessTrustedCertificateGroupsExists("pingaccess_trusted_certificate_group.demo_tcg"),
+					testAccCheckPingAccessTrustedCertificateGroupsExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

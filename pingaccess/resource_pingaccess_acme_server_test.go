@@ -14,6 +14,8 @@ import (
 )
 
 func TestAccPingAccessAcmeServer(t *testing.T) {
+	resourceName := "pingaccess_acme_server.acc_test"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,15 +24,20 @@ func TestAccPingAccessAcmeServer(t *testing.T) {
 			{
 				Config: testAccPingAccessAcmeServerConfig("https://host.docker.internal:14000/dir"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessAcmeServerExists("pingaccess_acme_server.acc_test"),
+					testAccCheckPingAccessAcmeServerExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessAcmeServerConfig("https://host.docker.internal:14000/dir2"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessAcmeServerExists("pingaccess_acme_server.acc_test"),
+					testAccCheckPingAccessAcmeServerExists(resourceName),
 				),
 				//ExpectNonEmptyPlan: true,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -16,6 +16,8 @@ import (
 )
 
 func TestAccPingAccessApplication(t *testing.T) {
+	resourceName := "pingaccess_application.acc_test"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -24,14 +26,19 @@ func TestAccPingAccessApplication(t *testing.T) {
 			{
 				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bar", "API"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test"),
+					testAccCheckPingAccessApplicationExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessApplicationConfig("acc_test_bar", "/bart", "Web"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationExists("pingaccess_application.acc_test"),
+					testAccCheckPingAccessApplicationExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -65,7 +72,6 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 		agent_id						= 0
 		name								= "%s"
 		context_root				= "%s"
-		default_auth_type		= "Web"
 		destination					= "Site"
 		site_id							= "${pingaccess_site.acc_test_site.id}"
 		spa_support_enabled = false

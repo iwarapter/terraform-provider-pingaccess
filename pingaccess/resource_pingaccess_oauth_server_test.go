@@ -56,6 +56,12 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"},
+			},
+			{
 				Config: testAccPingAccessOAuthServerConfig("https://thing/introspect", "secret"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessOAuthServerExists(resourceName),

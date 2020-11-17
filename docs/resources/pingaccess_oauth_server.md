@@ -55,3 +55,13 @@ The following arguments are supported:
 ## Attributes Reference
 
 No additional attributes are provided.
+
+## Import
+
+-> The resource ID is fixed as `oauth_server_settings` because this is a singleton resource.
+
+Authorization Server can be imported using the id, e.g.
+
+```bash
+$ terraform import pingaccess_oauth_server.example auth_token_management
+```

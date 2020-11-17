@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccPingAccessHTTPSListener(t *testing.T) {
+	resourceName := "pingaccess_https_listener.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,14 +23,19 @@ func TestAccPingAccessHTTPSListener(t *testing.T) {
 			{
 				Config: testAccPingAccessHTTPSListenerConfig(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessHTTPSListenerExists("pingaccess_https_listener.acc_test"),
+					testAccCheckPingAccessHTTPSListenerExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessHTTPSListenerConfig(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessHTTPSListenerExists("pingaccess_https_listener.acc_test"),
+					testAccCheckPingAccessHTTPSListenerExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -17,6 +17,8 @@ import (
 
 func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 	u, _ := url.Parse(os.Getenv("PINGFEDERATE_TEST_IP"))
+	resourceName := "pingaccess_pingfederate_admin.demo"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -25,14 +27,20 @@ func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 			{
 				Config: testAccPingAccessPingFederateAdminConfig(u.Hostname(), u.Port(), "ON"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessPingFederateAdminExists("pingaccess_pingfederate_admin.demo"),
+					testAccCheckPingAccessPingFederateAdminExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessPingFederateAdminConfig(u.Hostname(), u.Port(), "OFF"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessPingFederateAdminExists("pingaccess_pingfederate_admin.demo"),
+					testAccCheckPingAccessPingFederateAdminExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"admin_password.0.value"}, //we cant verify passwords
 			},
 		},
 	})

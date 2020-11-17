@@ -78,5 +78,5 @@ In addition to all arguments above, the following attributes are exported:
 PingAccess applications can be imported using the id, e.g.
 
 ```bash
-$ terraform import pingaccess_application .demo_application  123
+$ terraform import pingaccess_application.demo_application 123
 ```

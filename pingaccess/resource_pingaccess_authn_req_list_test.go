@@ -14,6 +14,8 @@ import (
 )
 
 func TestAccPingAccessAuthnReqList(t *testing.T) {
+	resourceName := "pingaccess_authn_req_list.acc_test"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,14 +24,19 @@ func TestAccPingAccessAuthnReqList(t *testing.T) {
 			{
 				Config: testAccPingAccessAuthnReqListConfig("foo", "bar"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessAuthnReqListExists("pingaccess_authn_req_list.acc_test"),
+					testAccCheckPingAccessAuthnReqListExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessAuthnReqListConfig("bar", "foo"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessAuthnReqListExists("pingaccess_authn_req_list.acc_test"),
+					testAccCheckPingAccessAuthnReqListExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

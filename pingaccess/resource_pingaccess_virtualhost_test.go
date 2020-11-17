@@ -33,6 +33,11 @@ func TestAccPingAccessVirtualHost(t *testing.T) {
 					testAccCheckPingAccessVirtualHostExists(resourceName),
 				),
 			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -38,6 +38,11 @@ func TestAccPingAccessAccessTokenValidator(t *testing.T) {
 				),
 			},
 			{
+				ResourceName: resourceName,
+				ImportState: true,
+				ImportStateVerify: true,
+			},
+			{
 				Config:      testAccPingAccessAccessTokenValidatorConfigInvalidClassName(),
 				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
 			},

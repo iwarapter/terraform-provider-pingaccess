@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccPingAccessCertificate(t *testing.T) {
+	resourceName := "pingaccess_certificate.test"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -19,16 +21,21 @@ func TestAccPingAccessCertificate(t *testing.T) {
 			{
 				Config: testAccPingAccessCertificateConfig("bar"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessCertificateExists("pingaccess_certificate.test"),
-					testAccCheckPingAccessCertificateAttributes("pingaccess_certificate.test"),
+					testAccCheckPingAccessCertificateExists(resourceName),
+					testAccCheckPingAccessCertificateAttributes(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessCertificateConfig("foo"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessCertificateExists("pingaccess_certificate.test"),
-					testAccCheckPingAccessCertificateAttributes("pingaccess_certificate.test"),
+					testAccCheckPingAccessCertificateExists(resourceName),
+					testAccCheckPingAccessCertificateAttributes(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -49,7 +56,7 @@ func testAccPingAccessCertificateConfig(name string) string {
 
 	resource "pingaccess_certificate" "test" {
 		alias = "%s"
-		file_data = "${base64encode(file("test_cases/amazon_root_ca1.pem"))}"
+		file_data = base64encode(chomp(file("test_cases/amazon_root_ca1.pem")))
 	}`, name)
 }
 

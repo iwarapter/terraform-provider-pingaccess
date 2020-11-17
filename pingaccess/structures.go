@@ -284,6 +284,19 @@ func flattenPolicy(in map[string]*[]*models.PolicyItem) []interface{} {
 	// return //[]interface{}{s}
 }
 
+
+func flattenPathPatternView(in []*models.PathPatternView) []interface{} {
+	var m []interface{}
+	for _, v := range in {
+		s := make(map[string]interface{})
+		s["pattern"] = v.Pattern
+		s["type"] = v.Type
+		m = append(m, s)
+	}
+	return m
+}
+
+
 // Takes the result of flatmap.Expand for an array of strings
 // and returns a []string
 func expandStringList(configured []interface{}) []*string {

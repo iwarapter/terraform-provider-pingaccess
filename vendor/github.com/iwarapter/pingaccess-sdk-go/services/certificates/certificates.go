@@ -197,7 +197,7 @@ type UpdateTrustedCertInput struct {
 //ExportTrustedCert - Export a Certificate
 //RequestType: GET
 //Input: input *ExportTrustedCertInput
-func (s *CertificatesService) ExportTrustedCert(input *ExportTrustedCertInput) (resp *http.Response, err error) {
+func (s *CertificatesService) ExportTrustedCert(input *ExportTrustedCertInput) (output *string, resp *http.Response, err error) {
 	path := "/certificates/{id}/file"
 	path = strings.Replace(path, "{id}", input.Id, -1)
 
@@ -207,13 +207,13 @@ func (s *CertificatesService) ExportTrustedCert(input *ExportTrustedCertInput) (
 		HTTPPath:    path,
 		QueryParams: map[string]string{},
 	}
-
-	req := s.newRequest(op, nil, nil)
+	output = pingaccess.String("")
+	req := s.newRequest(op, nil, output)
 
 	if req.Send() == nil {
-		return req.HTTPResponse, nil
+		return output, req.HTTPResponse, nil
 	}
-	return req.HTTPResponse, req.Error
+	return nil, req.HTTPResponse, req.Error
 }
 
 // ExportTrustedCertInput - Inputs for ExportTrustedCert

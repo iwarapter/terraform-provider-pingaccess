@@ -14,6 +14,8 @@ import (
 )
 
 func TestAccPingAccessPingFederateOAuth(t *testing.T) {
+	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,14 +24,19 @@ func TestAccPingAccessPingFederateOAuth(t *testing.T) {
 			{
 				Config: testAccPingAccessPingFederateOAuthConfig("my_client", "san"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessPingFederateOAuthExists("pingaccess_pingfederate_oauth.demo_pfo"),
+					testAccCheckPingAccessPingFederateOAuthExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessPingFederateOAuthConfig("my_client", "sany"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessPingFederateOAuthExists("pingaccess_pingfederate_oauth.demo_pfo"),
+					testAccCheckPingAccessPingFederateOAuthExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

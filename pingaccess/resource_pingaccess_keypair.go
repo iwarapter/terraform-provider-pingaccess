@@ -2,7 +2,14 @@ package pingaccess
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
+	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
@@ -18,7 +25,7 @@ func resourcePingAccessKeyPair() *schema.Resource {
 		UpdateContext: resourcePingAccessKeyPairUpdate,
 		DeleteContext: resourcePingAccessKeyPairDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourcePingAccessKeyPairImport,
 		},
 
 		Schema: resourcePingAccessKeyPairSchema(),
@@ -259,6 +266,69 @@ func resourcePingAccessKeyPairDelete(_ context.Context, d *schema.ResourceData, 
 	return nil
 }
 
+func resourcePingAccessKeyPairImport(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	svc := m.(paClient).KeyPairs
+	input := keyPairs.GetKeyPairCommandInput{
+		Id: d.Id(),
+	}
+	result, _, err := svc.GetKeyPairCommand(&input)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve read keypair for import %s", err)
+	}
+	certInput := keyPairs.ExportKeyPairCertInput{
+		Id: d.Id(),
+	}
+	certResult, _, err := svc.ExportKeyPairCert(&certInput)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve read keypair cert for import %s", err)
+	}
+	p, _ := pem.Decode([]byte(*certResult))
+	cert, err := x509.ParseCertificate(p.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve parse keypair cert for import %s", err)
+	}
+
+	diags := resourcePingAccessKeyPairReadResult(d, result)
+	//import based on upload
+	//TODO unable to properly support upload style imports - https://discuss.hashicorp.com/t/importer-functions-reading-file-config/17624/2
+
+	//import based on generate
+	if m, err := extractMatch("CN=([^,]+)", *result.SubjectDn); err == nil {
+		setResourceDataStringWithDiagnostic(d, "common_name", String(m), &diags)
+	}
+	if m, err := extractMatch("OU=([^,]+)", *result.SubjectDn); err == nil {
+		setResourceDataStringWithDiagnostic(d, "organization_unit", String(m), &diags)
+	}
+	if m, err := extractMatch("O=([^,]+)", *result.SubjectDn); err == nil {
+		setResourceDataStringWithDiagnostic(d, "organization", String(m), &diags)
+	}
+	if m, err := extractMatch("L=([^,]+)", *result.SubjectDn); err == nil {
+		setResourceDataStringWithDiagnostic(d, "city", String(m), &diags)
+	}
+	if m, err := extractMatch("ST=([^,]+)", *result.SubjectDn); err == nil {
+		setResourceDataStringWithDiagnostic(d, "state", String(m), &diags)
+	}
+	if m, err := extractMatch("C=([^,]+)", *result.SubjectDn); err == nil {
+		setResourceDataStringWithDiagnostic(d, "country", String(m), &diags)
+	}
+	from := time.Unix(int64(*result.ValidFrom/1000), 0)  //time.Parse(time.RFC3339, *result.ValidFrom)
+	expires := time.Unix(int64(*result.Expires/1000), 0) //, _ := time.Parse(time.RFC3339, *result.Expires)
+	setResourceDataIntWithDiagnostic(d, "valid_days", Int(int(expires.Sub(from).Hours()/24)), &diags)
+	setResourceDataStringWithDiagnostic(d, "key_algorithm", String(cert.PublicKeyAlgorithm.String()), &diags)
+	switch pubKey := cert.PublicKey.(type) {
+	case *rsa.PublicKey:
+		setResourceDataIntWithDiagnostic(d, "key_size", Int(pubKey.N.BitLen()), &diags)
+	case *ecdsa.PublicKey:
+		setResourceDataIntWithDiagnostic(d, "key_size", Int(pubKey.Curve.Params().BitSize), &diags)
+	default:
+		return nil, fmt.Errorf("unable to parse certificate keysize, unsupported public key")
+	}
+	if diags.HasError() {
+		return nil, fmt.Errorf("unable to import  %s", err)
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourcePingAccessKeyPairReadResult(d *schema.ResourceData, rv *models.KeyPairView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataStringWithDiagnostic(d, "alias", rv.Alias, &diags)
@@ -281,4 +351,13 @@ func resourcePingAccessKeyPairReadResult(d *schema.ResourceData, rv *models.KeyP
 	setResourceDataStringWithDiagnostic(d, "subject_cn", rv.SubjectCn, &diags)
 	setResourceDataIntWithDiagnostic(d, "valid_from", rv.ValidFrom, &diags)
 	return diags
+}
+
+func extractMatch(re, source string) (string, error) {
+	reg := regexp.MustCompile(re)
+	matches := reg.FindStringSubmatch(source)
+	if len(matches) == 2 {
+		return matches[1], nil
+	}
+	return "", fmt.Errorf("unable to find match, matches: %v", matches)
 }

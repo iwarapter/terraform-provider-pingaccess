@@ -2,10 +2,13 @@ package pingaccess
 
 import (
 	"crypto/tls"
+	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
+	"syscall"
 
 	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
 	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
@@ -115,9 +118,18 @@ type paClient struct {
 
 // Client configures and returns a fully initialized PAClient
 func (c *cfg) Client() (interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	/* #nosec */
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	u, _ := url.Parse(c.BaseURL)
+	u, err := url.ParseRequestURI(c.BaseURL)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Invalid URL",
+			Detail:   fmt.Sprintf("Unable to parse base_url for client: %s", err),
+		})
+		return nil, diags
+	}
 
 	cfg := paCfg.NewConfig().WithEndpoint(u.String() + c.Context).WithUsername(c.Username).WithPassword(c.Password)
 
@@ -174,8 +186,14 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 
 	v, _, err := client.Version.VersionCommand()
 	if err != nil {
-		return nil, diag.Errorf("unable to retrieve version %s", err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Connection Error",
+			Detail:   fmt.Sprintf("Unable to connect to PingAccess: %s", checkErr(err)),
+		})
+		return nil, diags
 	}
+
 	client.apiVersion = *v.Version
 
 	return client, nil
@@ -185,4 +203,26 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 func (c paClient) CanMaskPasswords() bool {
 	re := regexp.MustCompile(`^(6\.[1-9])`)
 	return re.MatchString(c.apiVersion)
+}
+
+func checkErr(err error) string {
+	if netError, ok := err.(net.Error); ok && netError.Timeout() {
+		return "Timeout"
+	}
+
+	switch t := err.(type) {
+	case *net.OpError:
+		if t.Op == "dial" {
+			return "Unknown host/port"
+		} else if t.Op == "read" {
+			return "Connection refused"
+		}
+	case *url.Error:
+		return checkErr(t.Err)
+	case syscall.Errno:
+		if t == syscall.ECONNREFUSED {
+			return "Connection refused"
+		}
+	}
+	return err.Error()
 }

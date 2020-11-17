@@ -36,6 +36,7 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 		type = "Rule"
 		id = "${pingaccess_rule.acc_test_resource_rule.id}"
 	}`
+	resourceName := "pingaccess_application_resource.app_res_test_resource"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -45,16 +46,28 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 			{
 				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bar", policy1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource"),
-					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bar"),
+					testAccCheckPingAccessApplicationResourceExists(resourceName),
+					testAccCheckPingAccessApplicationResourceAttributes(resourceName, "bart", "/bar"),
 				),
 			},
 			{
 				Config: testAccPingAccessApplicationResourceConfig("acc_test_bart", "/bart", policy2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessApplicationResourceExists("pingaccess_application_resource.app_res_test_resource"),
-					testAccCheckPingAccessApplicationResourceAttributes("pingaccess_application_resource.app_res_test_resource", "bart", "/bart"),
+					testAccCheckPingAccessApplicationResourceExists(resourceName),
+					testAccCheckPingAccessApplicationResourceAttributes(resourceName, "bart", "/bart"),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: func(d *terraform.State) (string, error) {
+					rs, ok := d.RootModule().Resources[resourceName]
+					if !ok {
+						return "", fmt.Errorf("unable to find resource %s", resourceName)
+					}
+					return fmt.Sprintf("%s/%s", rs.Primary.Attributes["application_id"], rs.Primary.ID), nil
+				},
 			},
 		},
 	})
@@ -84,14 +97,14 @@ func testAccPingAccessApplicationResourceConfig(name string, context string, pol
 
 	resource "pingaccess_application" "app_res_test" {
 		access_validator_id = 0
-		application_type 		= "Web"
-		agent_id						= 0
-		name								= "%s"
-		context_root				= "/bar"
-		default_auth_type		= "Web"
-		destination					= "Site"
-		site_id							= "${pingaccess_site.app_res_test_site.id}"
-		virtual_host_ids		= ["${pingaccess_virtualhost.app_res_test_virtualhost.id}"]
+		application_type 	= "Web"
+		agent_id			= 0
+		name				= "%s"
+		context_root		= "/bar"
+		default_auth_type	= "Web"
+		destination			= "Site"
+		site_id				= pingaccess_site.app_res_test_site.id
+		virtual_host_ids	= [pingaccess_virtualhost.app_res_test_virtualhost.id]
 
 		identity_mapping_ids {
 			web = 0
@@ -108,26 +121,26 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
   path_patterns {
     pattern = "/as/token.oauth2"
     type    = "WILDCARD"
-	}
+  }
 
-	path_patterns {
+  path_patterns {
     pattern = "%s"
     type    = "WILDCARD"
   }
 
   path_prefixes = [
-		"/as/token.oauth2",
-		"%s"
+	"/as/token.oauth2",
+	"%s"
   ]
   audit_level = "OFF"
   anonymous = false
   enabled = true
   root_resource = false
-	application_id = "${pingaccess_application.app_res_test.id}"
+  application_id = pingaccess_application.app_res_test.id
 
-	policy {
-		%s
-	}
+  policy {
+	%s
+  }
 }
 
 resource "pingaccess_application_resource" "app_res_test_root_resource" {
@@ -140,13 +153,18 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
 		"/*"
   ]
 
-	policy {}
+  path_patterns {
+    pattern = "/*"
+    type    = "WILDCARD"
+  }
+
+  policy {}
 
   audit_level = "ON"
   anonymous = false
   enabled = true
   root_resource = true
-  application_id = "${pingaccess_application.app_res_test.id}"
+  application_id = pingaccess_application.app_res_test.id
 }
 
 resource "pingaccess_rule" "acc_test_resource_rule" {

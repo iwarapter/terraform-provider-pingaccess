@@ -105,7 +105,7 @@ func TestMain(m *testing.M) {
 		}
 		defer paCont.Close()
 
-		pool.MaxWait = time.Minute * 2
+		pool.MaxWait = time.Minute * 3
 
 		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s/pa-admin-api/v3", paCont.GetPort("9000/tcp")))

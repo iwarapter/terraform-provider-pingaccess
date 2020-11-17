@@ -53,6 +53,11 @@ func TestAccPingAccessThirdPartyService(t *testing.T) {
 					resource.TestCheckNoResourceAttr(resourceName, "host_value"),
 				),
 			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

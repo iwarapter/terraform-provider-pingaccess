@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccPingAccessAuthTokenManagement(t *testing.T) {
+	resourceName := "pingaccess_auth_token_management.demo"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -21,14 +22,19 @@ func TestAccPingAccessAuthTokenManagement(t *testing.T) {
 			{
 				Config: testAccPingAccessAuthTokenManagementConfig("PingAccessAuthToken"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessAuthTokenManagementExists("pingaccess_auth_token_management.demo"),
+					testAccCheckPingAccessAuthTokenManagementExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessAuthTokenManagementConfig("PingAccessAuthToken2"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessAuthTokenManagementExists("pingaccess_auth_token_management.demo"),
+					testAccCheckPingAccessAuthTokenManagementExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

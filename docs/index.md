@@ -1,8 +1,35 @@
+# PingAccess Provider
+
 The PingAccess provider is used to interact with the many resources supported by the PingAccess admin API. The provider needs to be configured with the proper credentials before it can be used.
 
 Use the navigation to the left to read about the available resources.
 
 ## Example Usage
+Terraform 0.13 and later:
+```hcl
+# Configure the PingAccess Provider
+terraform {
+  required_providers {
+    pingaccess = {
+      source = "iwarapter/pingaccess"
+      version = "0.5.0"
+    }
+  }
+}
+
+provider "pingaccess" {
+  username = "Administrator"
+  password = "2Access"
+  base_url = "https://localhost:9000"
+  context  = "/pa-admin-api/v3"
+}
+
+# Create a site
+resource "pingaccess_site" "site" {
+  # ...
+}
+```
+Terraform 0.12 and earlier:
 ```hcl
 # Configure the PingAccess Provider
 provider "pingaccess" {
@@ -54,3 +81,22 @@ $ export PINGACCESS_CONTEXT="/pa-admin-api/v3"
 $ export PINGACCESS_BASEURL="https://myadmin.server:9000"
 $ terraform plan
 ```
+
+
+## Argument Reference
+
+In addition to [generic `provider` arguments](https://www.terraform.io/docs/configuration/providers.html)
+(e.g. `alias` and `version`), the following arguments are supported in the PingAccess
+ `provider` block:
+
+* `username` - (Required) This is the PingAccess administrative username. It must be provided, but
+  it can also be sourced from the `PINGACCESS_USERNAME` environment variable.
+
+* `password` - (Required) This is the PingAccess administrative password. It must be provided, but
+  it can also be sourced from the `PINGACCESS_PASSWORD` environment variable.
+
+* `base_url` - (Required) This is the PingAccess base url (protocol:server:port). It must be provided, but
+  it can also be sourced from the `PINGACCESS_BASEURL` environment variable.
+
+* `context` - (Optional) This is the PingAccess context path for the admin API, defaults to `/pf-admin-api/v1`
+and can be sourced from the `PINGACCESS_CONTEXT` environment variable.

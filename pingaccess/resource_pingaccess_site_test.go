@@ -60,6 +60,11 @@ func TestAccPingAccessSite(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_target_host_header", "false"),
 				),
 			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
