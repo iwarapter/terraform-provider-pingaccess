@@ -101,8 +101,10 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
+-> This is currently only supported for generated KeyPairs.
+
 PingAccess keypairs can be imported using the id, e.g.
 
 ```bash
-$ terraform import pingaccess_keypair.demo_keypair 123
+$ terraform import pingaccess_keypair.example 123
 ```

@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccPingAccessEngineListener(t *testing.T) {
+	resourceName := "pingaccess_engine_listener.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,14 +23,19 @@ func TestAccPingAccessEngineListener(t *testing.T) {
 			{
 				Config: testAccPingAccessEngineListenerConfig("cheese", true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessEngineListenerExists("pingaccess_engine_listener.acc_test"),
+					testAccCheckPingAccessEngineListenerExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessEngineListenerConfig("cheese", false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessEngineListenerExists("pingaccess_engine_listener.acc_test"),
+					testAccCheckPingAccessEngineListenerExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

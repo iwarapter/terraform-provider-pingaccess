@@ -53,6 +53,11 @@ func TestAccPingAccessKeyPair(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceNameGen, "valid_from"),
 				),
 			},
+			{
+				ResourceName:      resourceNameGen,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

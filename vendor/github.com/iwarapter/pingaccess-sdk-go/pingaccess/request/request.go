@@ -206,14 +206,24 @@ func (r *Request) CheckResponse() {
 	}
 	r.Data = nil
 	errorResponse := PingAccessError{}
-	data, err := ioutil.ReadAll(r.HTTPResponse.Body)
-	if err == nil && data != nil {
-		err = json.Unmarshal(data, &errorResponse)
-		if err != nil {
-			r.Error = fmt.Errorf("unable to parse error response: %s", string(data))
-			return
+	switch r.HTTPResponse.StatusCode {
+	case http.StatusUnauthorized:
+		r.Error = fmt.Errorf("unauthorized")
+		return
+	case http.StatusForbidden:
+		r.Error = fmt.Errorf("forbidden")
+		return
+	default:
+		data, err := ioutil.ReadAll(r.HTTPResponse.Body)
+		if err == nil && data != nil {
+			err = json.Unmarshal(data, &errorResponse)
+			if err != nil {
+				r.Error = fmt.Errorf("unable to parse error response: %s", string(data))
+				return
+			}
 		}
 	}
+
 	r.Error = &errorResponse
 }
 

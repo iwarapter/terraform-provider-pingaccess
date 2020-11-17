@@ -29,3 +29,13 @@ The following arguments are supported:
 ## Attributes Reference
 
 No additional attributes are provided.
+
+## Import
+
+-> The resource ID is fixed as `auth_token_management` because this is a singleton resource.
+
+Auth Token Management can be imported using the id, e.g.
+
+```bash
+$ terraform import pingaccess_auth_token_management.demo auth_token_management
+```

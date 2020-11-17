@@ -12,5 +12,5 @@ type CertificatesAPI interface {
 	DeleteTrustedCertCommand(input *DeleteTrustedCertCommandInput) (resp *http.Response, err error)
 	GetTrustedCert(input *GetTrustedCertInput) (output *models.TrustedCertView, resp *http.Response, err error)
 	UpdateTrustedCert(input *UpdateTrustedCertInput) (output *models.TrustedCertView, resp *http.Response, err error)
-	ExportTrustedCert(input *ExportTrustedCertInput) (resp *http.Response, err error)
+	ExportTrustedCert(input *ExportTrustedCertInput) (output *string, resp *http.Response, err error)
 }

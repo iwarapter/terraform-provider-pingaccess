@@ -49,6 +49,12 @@ func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"configuration"}, //we cant verify passwords
+			},
+			{
 				Config:      testAccPingAccessSiteAuthenticatorConfigInvalidClassName(),
 				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.siteauthenticators.foo' available classNames: com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator, com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator, com.pingidentity.pa.siteauthenticators.TokenMediatorSiteAuthenticator`),
 			},

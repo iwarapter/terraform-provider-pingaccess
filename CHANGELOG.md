@@ -1,4 +1,28 @@
-## 0.4.0 Unreleased
+## 0.6.0 (Unreleased)
+
+NOTES:
+
+* This release is built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+
+BUG FIXES:
+
+* Add configuration validation for the provider block for any initial connection issues.
+* Fix issues with importing resources, additional test cases and documentation.
+* `resource/application_resource`: Fix issue with `path_patterns` attribute.
+
+## 0.5.0 (November 6, 2020)
+
+NOTES:
+
+* This release is built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+* This is the first version available on the Terraform Registry https://registry.terraform.io/providers/iwarapter/pingaccess/latest
+
+FEATURES:
+
+* **New Data Source:** `pingaccess_keypair_csr`
+* **New Resource:** `pingaccess_keypair_csr`
+
+## 0.4.0 (April 20, 2020)
 
 NOTES:
 

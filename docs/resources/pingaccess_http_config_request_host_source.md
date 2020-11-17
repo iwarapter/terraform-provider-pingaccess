@@ -26,3 +26,11 @@ The following arguments are supported:
 ## Attributes Reference
 
 No additional attributes are provided.
+
+## Import
+
+PingAccess HTTP request Host Source resources can be imported using the id, e.g.
+
+```bash
+$ terraform import pingaccess_http_config_request_host_source.example 123
+```

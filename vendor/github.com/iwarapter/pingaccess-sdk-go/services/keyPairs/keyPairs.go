@@ -288,7 +288,7 @@ type UpdateKeyPairCommandInput struct {
 //ExportKeyPairCert - Export only the Certificate from a Key Pair
 //RequestType: GET
 //Input: input *ExportKeyPairCertInput
-func (s *KeyPairsService) ExportKeyPairCert(input *ExportKeyPairCertInput) (resp *http.Response, err error) {
+func (s *KeyPairsService) ExportKeyPairCert(input *ExportKeyPairCertInput) (output *string, resp *http.Response, err error) {
 	path := "/keyPairs/{id}/certificate"
 	path = strings.Replace(path, "{id}", input.Id, -1)
 
@@ -298,13 +298,13 @@ func (s *KeyPairsService) ExportKeyPairCert(input *ExportKeyPairCertInput) (resp
 		HTTPPath:    path,
 		QueryParams: map[string]string{},
 	}
-
-	req := s.newRequest(op, nil, nil)
+	output = pingaccess.String("")
+	req := s.newRequest(op, nil, output)
 
 	if req.Send() == nil {
-		return req.HTTPResponse, nil
+		return output, req.HTTPResponse, nil
 	}
-	return req.HTTPResponse, req.Error
+	return nil, req.HTTPResponse, req.Error
 }
 
 // ExportKeyPairCertInput - Inputs for ExportKeyPairCert

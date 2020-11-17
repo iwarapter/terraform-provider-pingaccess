@@ -30,6 +30,11 @@ func TestAccPingAccessRule(t *testing.T) {
 					testAccCheckPingAccessRuleExists(resourceName),
 				),
 			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

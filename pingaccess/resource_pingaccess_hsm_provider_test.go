@@ -25,6 +25,12 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"configuration"}, //we cant verify passwords
+			},
+			{
 				Config:      testAccPingAccessHsmProviderConfigInvalidClassName(),
 				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.hsm.cloudhsm.plugin.foo' available classNames: com.pingidentity.pa.hsm.cloudhsm.plugin.AwsCloudHsmProvider`),
 			},

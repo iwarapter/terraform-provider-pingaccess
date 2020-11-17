@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccPingAccessHTTPConfigRequestHostSource(t *testing.T) {
+	resourceName := "pingaccess_http_config_request_host_source.http_config_request_host_source"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -21,14 +22,19 @@ func TestAccPingAccessHTTPConfigRequestHostSource(t *testing.T) {
 			{
 				Config: testAccPingAccessHTTPConfigRequestHostSourceConfig("X-Forwarded-Host", "FIRST"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessHTTPConfigRequestHostSourceExists("pingaccess_http_config_request_host_source.http_config_request_host_source"),
+					testAccCheckPingAccessHTTPConfigRequestHostSourceExists(resourceName),
 				),
 			},
 			{
 				Config: testAccPingAccessHTTPConfigRequestHostSourceConfig("MagicHostHeader", "LAST"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPingAccessHTTPConfigRequestHostSourceExists("pingaccess_http_config_request_host_source.http_config_request_host_source"),
+					testAccCheckPingAccessHTTPConfigRequestHostSourceExists(resourceName),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -60,6 +60,12 @@ func TestAccPingAccessWebSession(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
 			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"}, //we cant verify passwords
+			},
 		},
 	})
 }

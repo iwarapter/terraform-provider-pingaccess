@@ -2,7 +2,10 @@ package pingaccess
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
@@ -18,9 +21,8 @@ func resourcePingAccessCertificate() *schema.Resource {
 		UpdateContext: resourcePingAccessCertificateUpdate,
 		DeleteContext: resourcePingAccessCertificateDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourcePingAccessCertificateImport,
 		},
-
 		Schema: resourcePingAccessCertificateSchema(),
 	}
 }
@@ -136,6 +138,31 @@ func resourcePingAccessCertificateDelete(_ context.Context, d *schema.ResourceDa
 		return diag.Errorf("unable to delete Certificate: %s", err)
 	}
 	return nil
+}
+
+func resourcePingAccessCertificateImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	diags := resourcePingAccessCertificateRead(ctx, d, m)
+	if diags.HasError() {
+		msg := []string{}
+		for _, diagnostic := range diags {
+			msg = append(msg, diagnostic.Summary)
+		}
+		return nil, fmt.Errorf("unable to retrieve certifcate information:\n%s", strings.Join(msg, "\n"))
+	}
+
+	svc := m.(paClient).Certificates
+	input := certificates.ExportTrustedCertInput{
+		Id: d.Id(),
+	}
+	result, _, err := svc.ExportTrustedCert(&input)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve certifcate file data %s", err)
+	}
+	trimmed := strings.Replace(*result, "\r\n", "\n", -1)
+	encoded := base64.StdEncoding.EncodeToString([]byte(trimmed))
+	setResourceDataStringWithDiagnostic(d, "file_data", String(encoded), &diags)
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourcePingAccessCertificateReadResult(d *schema.ResourceData, rv *models.TrustedCertView) diag.Diagnostics {

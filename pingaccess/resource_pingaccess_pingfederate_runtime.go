@@ -2,7 +2,7 @@ package pingaccess
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
 
@@ -17,7 +17,7 @@ func resourcePingAccessPingFederateRuntime() *schema.Resource {
 		UpdateContext: resourcePingAccessPingFederateRuntimeUpdate,
 		DeleteContext: resourcePingAccessPingFederateRuntimeDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourcePingAccessPingFederateRuntimeImport,
 		},
 		Schema: resourcePingAccessPingFederateRuntimeSchema(),
 	}
@@ -201,6 +201,39 @@ func resourcePingAccessPingFederateRuntimeDelete(_ context.Context, d *schema.Re
 		return diag.Errorf("unable to reset deprecated PingFederateRuntime: %s", err)
 	}
 	return nil
+}
+
+func resourcePingAccessPingFederateRuntimeImport(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	svc := m.(paClient).Pingfederate
+	result, _, err := svc.GetPingFederateCommand()
+	if err != nil {
+		return nil, fmt.Errorf("unable to read deprecated PingFederateRuntime: %s", err)
+	}
+	if result.Host != nil && *result.Host != "" {
+		diags := resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d, result)
+		//set defaults for state
+		setResourceDataStringWithDiagnostic(d, "description", String(""), &diags)
+		setResourceDataStringWithDiagnostic(d, "issuer", String(""), &diags)
+		setResourceDataStringWithDiagnostic(d, "sts_token_exchange_endpoint", String(""), &diags)
+		if diags.HasError() {
+			return nil, fmt.Errorf("unable to store deprecated PingFederateRuntime in state: %s", err)
+		}
+	} else {
+		runtime, _, err := svc.GetPingFederateRuntimeCommand()
+		if err != nil {
+			return nil, fmt.Errorf("unable to read PingFederateRuntime: %s", err)
+		}
+		diags := resourcePingAccessPingFederateRuntimeReadResult(d, runtime)
+		//set defaults for state
+		setResourceDataStringWithDiagnostic(d, "audit_level", String("ON"), &diags)
+		setResourceDataBoolWithDiagnostic(d, "back_channel_secure", Bool(false), &diags)
+		setResourceDataBoolWithDiagnostic(d, "secure", Bool(false), &diags)
+		if diags.HasError() {
+			return nil, fmt.Errorf("unable to store PingFederateRuntime in state: %s", err)
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourcePingAccessPingFederateRuntimeReadResult(d *schema.ResourceData, input *models.PingFederateMetadataRuntimeView) diag.Diagnostics {

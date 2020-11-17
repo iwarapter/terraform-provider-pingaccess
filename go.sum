@@ -242,8 +242,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/imdario/mergo v0.3.9 h1:UauaLniWCFHWd+Jp9oCEkTBj8VO/9DKg3PV3VCNMDIg=
 github.com/imdario/mergo v0.3.9/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
-github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201104174633-29fc5fc0a81c h1:avfEKZf2xbZ54eBW62IR0F9D6o3IYLeKH6N6sZ3BV+U=
-github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201104174633-29fc5fc0a81c/go.mod h1:ll8wM67ZyNn1yP1fgEz7uRi3ELrG9oRza1NX2+kB5Qc=
+github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201117172106-3133cd85d1ae h1:uqZZ+jYkzjTsa9WI4xSj8p+YHXfdpeVlFFsNbyRENpA=
+github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201117172106-3133cd85d1ae/go.mod h1:ll8wM67ZyNn1yP1fgEz7uRi3ELrG9oRza1NX2+kB5Qc=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=

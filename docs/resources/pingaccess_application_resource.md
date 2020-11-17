@@ -83,8 +83,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-PingAccess applications can be imported using the id, e.g.
+PingAccess application resources can be imported using the application/resource id, e.g.
 
 ```bash
-$ terraform import pingaccess_application.demo_application 123
+$ terraform import pingaccess_application_resource.demo 1/5
 ```

@@ -217,6 +217,11 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
+	if rv.PathPatterns != nil {
+		if err := d.Set("path_patterns", flattenPathPatternView(rv.PathPatterns)); err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
+	}
 	setResourceDataBoolWithDiagnostic(d, "root_resource", rv.RootResource, &diags)
 	setResourceDataBoolWithDiagnostic(d, "unprotected", rv.Unprotected, &diags)
 

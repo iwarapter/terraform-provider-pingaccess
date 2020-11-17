@@ -49,6 +49,11 @@ func TestAccPingAccessPingFederateRuntime(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccPingAccessPingFederateDeprecatedRuntimeConfig(u.Hostname(), u.Port(), "ON"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateDeprecatedRuntimeExists(resourceName),
@@ -77,6 +82,11 @@ func TestAccPingAccessPingFederateRuntime(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "port", u.Port()),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

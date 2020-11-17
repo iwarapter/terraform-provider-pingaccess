@@ -1,6 +1,6 @@
 # Resource: pingaccess_identity_mapping
 
-Provides a identity mapping.
+Provides an identity mapping.
 
 -> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the `configuration` block.
 
@@ -38,6 +38,7 @@ In addition to all arguments above, the following attributes are exported:
 - [`id`](#id) - The identity mapping's ID.
 
 ### Import
+
 PingAccess identity mapping can be imported using the id, e.g.
 
 ```bash
