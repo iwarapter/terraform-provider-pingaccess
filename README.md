@@ -1,7 +1,7 @@
 PingAccess Terraform Provider
 ==================
 
-- Website: https://iwarapter.github.io/terraform-provider-pingaccess/
+- Website: https://registry.terraform.io/providers/iwarapter/pingaccess/latest
 - [![Gitter](https://badges.gitter.im/iwarapter/terraform-provider-pingaccess.svg)](https://gitter.im/iwarapter/terraform-provider-pingaccess?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
   [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=github.com.iwarapter.terraform-provider-pingaccess&metric=coverage)](https://sonarcloud.io/dashboard?id=github.com.iwarapter.terraform-provider-pingaccess)
   [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=github.com.iwarapter.terraform-provider-pingaccess&metric=alert_status)](https://sonarcloud.io/dashboard?id=github.com.iwarapter.terraform-provider-pingaccess)
@@ -44,7 +44,8 @@ $ terraform-provider-pingaccess
 Using the Provider
 ----------------------
 
-To use a released provider in your Terraform environment, download the latest version from https://github.com/iwarapter/terraform-provider-pingaccess/releases and follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
+Please see the terraform registry docs for detailed usage documentation:
+https://registry.terraform.io/providers/iwarapter/pingaccess/latest/docs
 
 The provider is current tested against the following versions of PingAccess
 
