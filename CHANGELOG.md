@@ -1,4 +1,15 @@
-## 0.6.0 (Unreleased)
+## 0.7.0 (Unreleased)
+
+NOTES:
+
+* This release has been built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+
+FEATURES:
+
+* **New Resource:** `pingaccess_availability_profile`
+* **New Resource:** `pingaccess_load_balancing_strategy`
+
+## 0.6.0 (November 17, 2020)
 
 NOTES:
 
