@@ -17,7 +17,7 @@ func TestAccPingAccessEngineListener(t *testing.T) {
 	resourceName := "pingaccess_engine_listener.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessEngineListenerDestroy,
 		Steps: []resource.TestStep{
 			{

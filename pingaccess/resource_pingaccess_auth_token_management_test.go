@@ -16,7 +16,7 @@ func TestAccPingAccessAuthTokenManagement(t *testing.T) {
 	resourceName := "pingaccess_auth_token_management.demo"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessAuthTokenManagementDestroy,
 		Steps: []resource.TestStep{
 			{

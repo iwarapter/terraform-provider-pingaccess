@@ -40,7 +40,7 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessApplicationResourceDestroy,
 		Steps: []resource.TestStep{
 			{

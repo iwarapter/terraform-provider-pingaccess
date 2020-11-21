@@ -13,7 +13,7 @@ func TestAccPingAccessTrustedCertificateGroupsDataSource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessTrustedCertificateGroupsDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -32,7 +32,7 @@ func TestAccPingAccessTrustedCertificateGroupsDataSource(t *testing.T) {
 func TestAccPingAccessTrustedCertificateGroupsDataSource_NotFound(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessTrustedCertificateGroupsDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{

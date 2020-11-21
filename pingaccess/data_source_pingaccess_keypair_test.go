@@ -13,7 +13,7 @@ func TestAccPingAccessKeyPairDataSource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessKeyPairDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -32,7 +32,7 @@ func TestAccPingAccessKeyPairDataSource(t *testing.T) {
 func TestAccPingAccessKeyPairDataSource_NotFound(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessKeyPairDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{

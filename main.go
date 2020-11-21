@@ -2,29 +2,23 @@ package main
 
 import (
 	"context"
-	"flag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	tf5server "github.com/hashicorp/terraform-plugin-go/tfprotov5/server"
+	tfmux "github.com/hashicorp/terraform-plugin-mux"
 	"github.com/iwarapter/terraform-provider-pingaccess/pingaccess"
 	"log"
+	"os"
 )
 
 func main() {
-	var debugMode bool
-
-	flag.BoolVar(&debugMode, "debuggable", false, "set to true to run the provider with support for debuggers like delve")
-	flag.Parse()
-
-	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/iwarapter/pingaccess",
-			&plugin.ServeOpts{
-				ProviderFunc: pingaccess.Provider,
-			})
-		if err != nil {
-			log.Println(err.Error())
-		}
-	} else {
-		plugin.Serve(&plugin.ServeOpts{
-			ProviderFunc: pingaccess.Provider})
+	ctx := context.Background()
+	sdkv2 := pingaccess.Provider().GRPCProvider
+	factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2)
+	if err != nil {
+		log.Println(err.Error())
+		os.Exit(1)
 	}
-
+	tf5server.Serve("registry.terraform.io/iwarapter/pingaccess", func() tfprotov5.ProviderServer {
+		return factory.Server()
+	})
 }

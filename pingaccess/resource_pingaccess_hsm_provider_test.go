@@ -15,7 +15,7 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPingAccessHsmProviderConfig("foo"),

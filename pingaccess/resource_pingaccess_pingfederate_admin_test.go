@@ -21,7 +21,7 @@ func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessPingFederateAdminDestroy,
 		Steps: []resource.TestStep{
 			{

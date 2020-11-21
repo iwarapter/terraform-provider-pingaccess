@@ -11,7 +11,7 @@ func TestAccPingAccessAcmeDefaultDataSource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: `data "pingaccess_acme_default" "test" {}`,

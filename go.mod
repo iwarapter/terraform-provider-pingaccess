@@ -7,6 +7,8 @@ require (
 	github.com/google/go-cmp v0.5.3
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+	github.com/hashicorp/terraform-plugin-go v0.2.0
+	github.com/hashicorp/terraform-plugin-mux v0.1.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.2.0
 	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201117172106-3133cd85d1ae
 	github.com/ory/dockertest/v3 v3.6.0

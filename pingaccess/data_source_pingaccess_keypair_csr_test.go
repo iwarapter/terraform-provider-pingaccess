@@ -13,7 +13,7 @@ func TestAccPingAccessKeyPairCsrDataSource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessKeyPairCsrDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -29,7 +29,7 @@ func TestAccPingAccessKeyPairCsrDataSource(t *testing.T) {
 func TestAccPingAccessKeyPairCsrDataSource_NotFound(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessKeyPairCsrDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{

@@ -13,7 +13,7 @@ func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				//We run two steps so the first enables the PF runtime, the second the DS can then query it.

@@ -17,7 +17,7 @@ func TestAccPingAccessWebSession(t *testing.T) {
 	resourceName := "pingaccess_websession.demo_session"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessWebSessionDestroy,
 		Steps: []resource.TestStep{
 			{

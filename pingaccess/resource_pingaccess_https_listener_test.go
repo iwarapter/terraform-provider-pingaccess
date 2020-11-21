@@ -17,7 +17,7 @@ func TestAccPingAccessHTTPSListener(t *testing.T) {
 	resourceName := "pingaccess_https_listener.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessHTTPSListenerDestroy,
 		Steps: []resource.TestStep{
 			{

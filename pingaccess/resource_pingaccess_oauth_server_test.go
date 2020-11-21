@@ -19,7 +19,7 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessOAuthServerDestroy,
 		Steps: []resource.TestStep{
 			{

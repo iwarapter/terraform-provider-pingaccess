@@ -18,7 +18,7 @@ func TestAccPingAccessThirdPartyService(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessThirdPartyServiceDestroy,
 		Steps: []resource.TestStep{
 			{

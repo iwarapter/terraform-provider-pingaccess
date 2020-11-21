@@ -4,6 +4,9 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	tfmux "github.com/hashicorp/terraform-plugin-mux"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iwarapter/pingaccess-sdk-go/services/version"
 	"log"
 	"math/rand"
@@ -19,8 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
 	"github.com/ory/dockertest/v3"
 )
@@ -143,21 +144,25 @@ func TestMain(m *testing.M) {
 	}
 }
 
-var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
+var testAccProviders map[string]func() (tfprotov5.ProviderServer, error)
 
 func init() {
 	testAccProvider = Provider()
-	testAccProviders = map[string]*schema.Provider{
-		"pingaccess": testAccProvider,
+	testAccProviders = map[string]func() (tfprotov5.ProviderServer, error){
+		"pingaccess": func() (tfprotov5.ProviderServer, error) {
+			ctx := context.Background()
+			sdkv2 := testAccProvider.GRPCProvider
+			factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2)
+			if err != nil {
+				return nil, err
+			}
+			return factory.Server(), nil
+		},
 	}
 }
 
 func testAccPreCheck(t *testing.T) {
-	err := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 func randomString(length int) string {

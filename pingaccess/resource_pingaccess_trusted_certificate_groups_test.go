@@ -17,7 +17,7 @@ func TestAccPingAccessTrustedCertificateGroups(t *testing.T) {
 	resourceName := "pingaccess_trusted_certificate_group.demo_tcg"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy: testAccCheckPingAccessTrustedCertificateGroupsDestroy,
 		Steps: []resource.TestStep{
 			{
