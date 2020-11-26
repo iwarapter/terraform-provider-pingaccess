@@ -44,7 +44,6 @@ func Provider() *schema.Provider {
 			"pingaccess_keypair":                       dataSourcePingAccessKeyPair(),
 			"pingaccess_keypair_csr":                   dataSourcePingAccessKeyPairCsr(),
 			"pingaccess_pingfederate_runtime_metadata": dataSourcePingAccessPingFederateRuntimeMetadata(),
-			//"pingaccess_trusted_certificate_group":     dataSourcePingAccessTrustedCertificateGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"pingaccess_access_token_validator":          resourcePingAccessAccessTokenValidator(),

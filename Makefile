@@ -8,6 +8,12 @@ OS_NAME := $(shell uname -s | tr A-Z a-z)
 pa-init:
 	@docker run --rm -d --hostname pingaccess --name pingaccess -e PING_IDENTITY_DEVOPS_KEY=$(PING_IDENTITY_DEVOPS_KEY) -e PING_IDENTITY_DEVOPS_USER=$(PING_IDENTITY_DEVOPS_USER) -e PING_IDENTITY_ACCEPT_EULA=YES --publish 9000:9000 ${BASE_DOCKER_TAG}
 
+checks:
+	@go fmt ./...
+	@staticcheck ./...
+	@gosec ./...
+	@goimports -w internal
+
 test:
 	@rm -f pingaccess/terraform.log
 	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out && go tool cover -func=coverage.out

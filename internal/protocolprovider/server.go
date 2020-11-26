@@ -225,5 +225,6 @@ func Server() tfprotov5.ProviderServer {
 		dataSourceRouter: map[string]tfprotov5.DataSourceServer{
 			"pingaccess_trusted_certificate_group": dataPingAccessTrustedCertificateGroups{},
 		},
+		resourceRouter: map[string]tfprotov5.DataSourceServer{},
 	}
 }

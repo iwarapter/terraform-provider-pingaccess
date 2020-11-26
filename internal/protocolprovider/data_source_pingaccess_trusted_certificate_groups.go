@@ -246,7 +246,7 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
 				Summary:  "Unexpected configuration format",
-				Detail:   fmt.Sprintf("name field not known??"),
+				Detail:   "name field not known??",
 			},
 		},
 	}, nil
