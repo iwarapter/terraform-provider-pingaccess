@@ -9,8 +9,7 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.3.0
 	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201117172106-3133cd85d1ae
-	github.com/ory/dockertest/v3 v3.6.0
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/ory/dockertest/v3 v3.6.2
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/tidwall/gjson v1.6.4
 	github.com/tidwall/sjson v1.1.2
