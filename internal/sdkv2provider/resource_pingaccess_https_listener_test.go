@@ -24,12 +24,18 @@ func TestAccPingAccessHTTPSListener(t *testing.T) {
 				Config: testAccPingAccessHTTPSListenerConfig(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessHTTPSListenerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "ADMIN"),
+					resource.TestCheckResourceAttr(resourceName, "key_pair_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "use_server_cipher_suite_order", "true"),
 				),
 			},
 			{
 				Config: testAccPingAccessHTTPSListenerConfig(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessHTTPSListenerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "ADMIN"),
+					resource.TestCheckResourceAttr(resourceName, "key_pair_id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "use_server_cipher_suite_order", "false"),
 				),
 			},
 			{
@@ -47,11 +53,11 @@ func testAccCheckPingAccessHTTPSListenerDestroy(s *terraform.State) error {
 
 func testAccPingAccessHTTPSListenerConfig(cipher bool) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_https_listener" "acc_test" {
-	   name   									     = "ADMIN"
-		 key_pair_id 									 = 1
-		 use_server_cipher_suite_order = %t
-	}`, cipher)
+resource "pingaccess_https_listener" "acc_test" {
+	name   						  = "ADMIN"
+	key_pair_id 				  = 1
+	use_server_cipher_suite_order = %t
+}`, cipher)
 }
 
 func testAccCheckPingAccessHTTPSListenerExists(n string) resource.TestCheckFunc {

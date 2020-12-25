@@ -11,6 +11,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("hsm_provider", &resource.Sweeper{
+		Name: "hsm_provider",
+		F: func(r string) error {
+			//svc := hsmProviders.New(conf)
+			//results, _, err := svc.GetHsmProvidersCommand(&hsmProviders.GetHsmProvidersCommandInput{Filter: "acctest_"})
+			//if err != nil {
+			//	return fmt.Errorf("unable to list hsm providers to sweep %s", err)
+			//}
+			//for _, item := range results.Items {
+			//	_, err = svc.DeleteHsmProviderCommand(&hsmProviders.DeleteHsmProviderCommandInput{Id: item.Id.String()})
+			//	if err != nil {
+			//		return fmt.Errorf("unable to sweep engine listeners %s because %s", item.Id.String(), err)
+			//	}
+			//}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessHsmProvider(t *testing.T) {
 	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
 	resource.ParallelTest(t, resource.TestCase{
@@ -22,6 +42,9 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessHsmProviderExists(resourceName),
 					testAccCheckPingAccessHsmProviderAttributes(resourceName, "foo"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.hsm.pkcs11.plugin.PKCS11HsmProvider"),
+					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"library\":\"foo\",\"password\":\"top_secret\",\"slotId\":\"1234\"}"),
 				),
 			},
 			{
@@ -42,7 +65,7 @@ func testAccPingAccessHsmProviderConfig(configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_hsm_provider" "acc_test_hsm" {
 	  class_name    = "com.pingidentity.pa.hsm.pkcs11.plugin.PKCS11HsmProvider"
-	  name          = "demo"
+	  name          = "acctest_demo"
 	  configuration = <<EOF
 	  {
 		"slotId": "1234",

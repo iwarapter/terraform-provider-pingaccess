@@ -2,44 +2,31 @@ package sdkv2provider
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"log"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	tfmux "github.com/hashicorp/terraform-plugin-mux"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/services/version"
-
 	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
-	"github.com/ory/dockertest/v3"
 )
 
 var conf *paCfg.Config
 
 func TestMain(m *testing.M) {
-	_, acceptanceTesting := os.LookupEnv("TF_ACC")
-	if acceptanceTesting {
-		pool, err := dockertest.NewPool("")
-		if err != nil {
-			log.Fatalf("Could not connect to docker: %s", err)
-		}
-		server := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			// Send response to be tested
-			rw.Header().Set("Content-Type", "application/json;charset=utf-8")
-			rw.Write([]byte(`
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Send response to be tested
+		rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+		rw.Write([]byte(`
 {
   "issuer": "https://localhost:9031",
   "authorization_endpoint": "https://localhost:9031/as/authorization.oauth2",
@@ -73,76 +60,18 @@ func TestMain(m *testing.M) {
   "backchannel_user_code_parameter_supported": false
 }
 `))
-		}))
-		l, err := net.Listen("tcp", ":0")
-		server.Listener = l //for CI tests as host.docker.internal is window/macosx
-		server.StartTLS()
-		// Close the server when test finishes
-		defer server.Close()
+	}))
+	l, _ := net.Listen("tcp", ":0")
+	server.Listener = l //for CI tests as host.docker.internal is window/macosx
+	server.StartTLS()
+	// Close the server when test finishes
+	defer server.Close()
 
-		devOpsUser, devOpsUserExists := os.LookupEnv("PING_IDENTITY_DEVOPS_USER")
-		devOpsKey, devOpsKeyExists := os.LookupEnv("PING_IDENTITY_DEVOPS_KEY")
-		paVersion := ""
-		if value, ok := os.LookupEnv("PINGACCESS_VERSION"); ok {
-			paVersion = value
-		} else {
-			paVersion = "6.1.3-edge"
-		}
+	host, _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
+	os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
 
-		if devOpsKeyExists != true || devOpsUserExists != true {
-			log.Fatalf("Both PING_IDENTITY_DEVOPS_USER and PING_IDENTITY_DEVOPS_KEY environment variables must be set for acceptance tests.")
-		}
-
-		randomID := randomString(10)
-		paOpts := &dockertest.RunOptions{
-			Name:       fmt.Sprintf("pa-%s", randomID),
-			Repository: "pingidentity/pingaccess",
-			Tag:        paVersion,
-			//ExtraHosts: []string{"host.docker.internal:host-gateway"},
-			Env: []string{"PING_IDENTITY_ACCEPT_EULA=YES", fmt.Sprintf("PING_IDENTITY_DEVOPS_USER=%s", devOpsUser), fmt.Sprintf("PING_IDENTITY_DEVOPS_KEY=%s", devOpsKey)},
-		}
-		paCont, err := pool.RunWithOptions(paOpts)
-		if err != nil {
-			log.Fatalf("Could not create pingaccess container: %s", err)
-		}
-		defer paCont.Close()
-
-		pool.MaxWait = time.Minute * 3
-
-		// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
-		u, _ := url.Parse(fmt.Sprintf("https://localhost:%s/pa-admin-api/v3", paCont.GetPort("9000/tcp")))
-		log.Printf("Setting PingAccess admin API: %s", u.String())
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		conf = paCfg.NewConfig().WithUsername("administrator").WithPassword("2Access").WithEndpoint(u.String())
-		client := version.New(conf)
-		if err = pool.Retry(func() error {
-			log.Println("Attempting to connect to PingAccess admin API....")
-			_, _, err = client.VersionCommand()
-			return err
-		}); err != nil {
-			log.Fatalf("Could not connect to pingaccess: %s", err)
-		}
-		os.Setenv("PINGACCESS_BASEURL", fmt.Sprintf("https://localhost:%s", paCont.GetPort("9000/tcp")))
-		os.Setenv("PINGACCESS_PASSWORD", "2Access")
-		host, _ := os.Hostname() //for CI tests as host.docker.internal is window/macosx
-		os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
-		log.Println("Connected to PingAccess admin API....")
-
-		version, _, err := client.VersionCommand()
-		if err != nil {
-			log.Fatalf("Failed to retrieve version from server: %v", err)
-		}
-		log.Printf("Connected to PingAccess version: %s", *version.Version)
-
-		paCont.Expire(360)
-		code := m.Run()
-		paCont.Close()
-		log.Printf("Tests complete shutting down container")
-
-		os.Exit(code)
-	} else {
-		m.Run()
-	}
+	conf = paCfg.NewConfig().WithUsername("administrator").WithPassword("2Access").WithEndpoint("https://localhost:9000/pa-admin-api/v3")
+	resource.TestMain(m)
 }
 
 var testAccProvider *schema.Provider
@@ -164,16 +93,6 @@ func init() {
 }
 
 func testAccPreCheck(t *testing.T) {
-}
-
-func randomString(length int) string {
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	charset := "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
 }
 
 // equals fails the test if exp is not equal to act.

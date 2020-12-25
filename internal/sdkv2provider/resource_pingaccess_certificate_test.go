@@ -2,6 +2,7 @@ package sdkv2provider
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
@@ -9,6 +10,27 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+func init() {
+	resource.AddTestSweepers("certificate", &resource.Sweeper{
+		Name:         "certificate",
+		Dependencies: []string{"keypairs"},
+		F: func(r string) error {
+			svc := certificates.New(conf)
+			results, _, err := svc.GetTrustedCerts(&certificates.GetTrustedCertsInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list certificates to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteTrustedCertCommand(&certificates.DeleteTrustedCertCommandInput{Id: strconv.Itoa(*item.Id)})
+				if err != nil {
+					return fmt.Errorf("unable to sweep certificates %d because %s", *item.Id, err)
+				}
+			}
+			return nil
+		},
+	})
+}
 
 func TestAccPingAccessCertificate(t *testing.T) {
 	resourceName := "pingaccess_certificate.test"
@@ -55,7 +77,7 @@ func testAccPingAccessCertificateConfig(name string) string {
 	}
 
 	resource "pingaccess_certificate" "test" {
-		alias = "%s"
+		alias = "acctest_%s"
 		file_data = base64encode(chomp(file("test_cases/amazon_root_ca1.pem")))
 	}`, name)
 }

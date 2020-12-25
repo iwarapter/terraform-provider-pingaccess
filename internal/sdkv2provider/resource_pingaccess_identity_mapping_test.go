@@ -18,6 +18,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("identity_mapping", &resource.Sweeper{
+		Name: "identity_mapping",
+		F: func(r string) error {
+			svc := identityMappings.New(conf)
+			results, _, err := svc.GetIdentityMappingsCommand(&identityMappings.GetIdentityMappingsCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list identity mappings to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteIdentityMappingCommand(&identityMappings.DeleteIdentityMappingCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep identity mappings %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessIdentityMapping(t *testing.T) {
 	resourceName := "pingaccess_identity_mapping.acc_test_idm"
 
@@ -31,7 +51,7 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessIdentityMappingExists(resourceName),
 					testAccCheckPingAccessIdentityMappingAttributes(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"),
 					resource.TestCheckResourceAttrSet(resourceName, "configuration"),
 				),
@@ -41,7 +61,7 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessIdentityMappingExists(resourceName),
 					testAccCheckPingAccessIdentityMappingAttributes(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"),
 					resource.TestCheckResourceAttrSet(resourceName, "configuration"),
 				),
@@ -64,7 +84,7 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessIdentityMappingExists(resourceName),
 					testAccCheckPingAccessIdentityMappingAttributes(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "interpolated"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_interpolated"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"),
 					resource.TestCheckResourceAttrSet(resourceName, "configuration"),
 				),
@@ -81,7 +101,7 @@ func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_identity_mapping" "acc_test_idm" {
 		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
-		name = "%s"
+		name = "acctest_%s"
 		configuration = <<EOF
 		{
 			"attributeHeaderMappings": [
@@ -130,7 +150,7 @@ func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
 	return `
 	resource "pingaccess_identity_mapping" "acc_test_idm" {
 		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
-		name = "interpolated"
+		name = "acctest_interpolated"
 		configuration = <<EOF
 		{
 			"attributeHeaderMappings": [

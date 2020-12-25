@@ -13,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("authn_req_list", &resource.Sweeper{
+		Name: "authn_req_list",
+		F: func(r string) error {
+			svc := authnReqLists.New(conf)
+			results, _, err := svc.GetAuthnReqListsCommand(&authnReqLists.GetAuthnReqListsCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list authnReqLists to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteAuthnReqListCommand(&authnReqLists.DeleteAuthnReqListCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep authnReqLists %s because %s", item.Id, err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessAuthnReqList(t *testing.T) {
 	resourceName := "pingaccess_authn_req_list.acc_test"
 
@@ -25,12 +45,18 @@ func TestAccPingAccessAuthnReqList(t *testing.T) {
 				Config: testAccPingAccessAuthnReqListConfig("foo", "bar"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAuthnReqListExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
+					resource.TestCheckResourceAttr(resourceName, "authn_reqs.0", "foo"),
+					resource.TestCheckResourceAttr(resourceName, "authn_reqs.1", "bar"),
 				),
 			},
 			{
 				Config: testAccPingAccessAuthnReqListConfig("bar", "foo"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAuthnReqListExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
+					resource.TestCheckResourceAttr(resourceName, "authn_reqs.0", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "authn_reqs.1", "foo"),
 				),
 			},
 			{
@@ -49,7 +75,7 @@ func testAccCheckPingAccessAuthnReqListDestroy(s *terraform.State) error {
 func testAccPingAccessAuthnReqListConfig(req1, req2 string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_authn_req_list" "acc_test" {
-	   name   = "foo"
+	   name   = "acctest_foo"
 	   authn_reqs = [
 			 "%s",
 			 "%s",

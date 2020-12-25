@@ -15,6 +15,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("sites", &resource.Sweeper{
+		Name: "sites",
+		F: func(r string) error {
+			svc := sites.New(conf)
+			results, _, err := svc.GetSitesCommand(&sites.GetSitesCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list sites to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteSiteCommand(&sites.DeleteSiteCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep site %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessSite(t *testing.T) {
 	resourceName := "pingaccess_site.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
@@ -23,7 +43,7 @@ func TestAccPingAccessSite(t *testing.T) {
 		CheckDestroy:             testAccCheckPingAccessSiteDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"localhost:1234"}),
+				Config: testAccPingAccessSiteConfig("acctest_bar", []string{"localhost:1234"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test"),
 					resource.TestCheckResourceAttr(resourceName, "availability_profile_id", "1"),
@@ -31,7 +51,7 @@ func TestAccPingAccessSite(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "load_balancing_strategy_id", "0"),
 					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
 					resource.TestCheckResourceAttr(resourceName, "max_web_socket_connections", "-1"),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
 					resource.TestCheckResourceAttr(resourceName, "send_pa_cookie", "true"),
 					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "false"),
@@ -42,7 +62,7 @@ func TestAccPingAccessSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPingAccessSiteConfig("acc_test_bar", []string{"localhost:1235"}),
+				Config: testAccPingAccessSiteConfig("acctest_foo", []string{"localhost:1235"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteExists("pingaccess_site.acc_test"),
 					resource.TestCheckResourceAttr(resourceName, "availability_profile_id", "1"),
@@ -50,7 +70,7 @@ func TestAccPingAccessSite(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "load_balancing_strategy_id", "0"),
 					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
 					resource.TestCheckResourceAttr(resourceName, "max_web_socket_connections", "-1"),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
 					resource.TestCheckResourceAttr(resourceName, "send_pa_cookie", "true"),
 					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "false"),

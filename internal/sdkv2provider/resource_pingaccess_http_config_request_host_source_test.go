@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccPingAccessHTTPConfigRequestHostSource(t *testing.T) {
-	resourceName := "pingaccess_http_config_request_host_source.http_config_request_host_source"
+	resourceName := "pingaccess_http_config_request_host_source.demo"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
@@ -23,12 +23,18 @@ func TestAccPingAccessHTTPConfigRequestHostSource(t *testing.T) {
 				Config: testAccPingAccessHTTPConfigRequestHostSourceConfig("X-Forwarded-Host", "FIRST"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessHTTPConfigRequestHostSourceExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "header_name_list.0", "Host"),
+					resource.TestCheckResourceAttr(resourceName, "header_name_list.1", "X-Forwarded-Host"),
+					resource.TestCheckResourceAttr(resourceName, "list_value_location", "FIRST"),
 				),
 			},
 			{
 				Config: testAccPingAccessHTTPConfigRequestHostSourceConfig("MagicHostHeader", "LAST"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessHTTPConfigRequestHostSourceExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "header_name_list.0", "Host"),
+					resource.TestCheckResourceAttr(resourceName, "header_name_list.1", "MagicHostHeader"),
+					resource.TestCheckResourceAttr(resourceName, "list_value_location", "LAST"),
 				),
 			},
 			{
@@ -46,7 +52,7 @@ func testAccCheckPingAccessHTTPConfigRequestHostSourceDestroy(s *terraform.State
 
 func testAccPingAccessHTTPConfigRequestHostSourceConfig(header, location string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_http_config_request_host_source" "http_config_request_host_source" {
+	resource "pingaccess_http_config_request_host_source" "demo" {
 		header_name_list = [
 			"Host",
 			"%s"

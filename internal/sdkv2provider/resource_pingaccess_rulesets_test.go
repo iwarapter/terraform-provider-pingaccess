@@ -10,6 +10,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("rulesets", &resource.Sweeper{
+		Name: "rulesets",
+		F: func(r string) error {
+			svc := rulesets.New(conf)
+			results, _, err := svc.GetRuleSetsCommand(&rulesets.GetRuleSetsCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list rulesets to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteRuleSetCommand(&rulesets.DeleteRuleSetCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep ruleset %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessRuleSet(t *testing.T) {
 	resourceName := "pingaccess_ruleset.ruleset_one"
 
@@ -23,7 +43,7 @@ func TestAccPingAccessRuleSet(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessRuleSetExists(resourceName),
 					testAccCheckPingAccessRuleSetAttributes(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf-acc-ruleset-one"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_ruleset-one"),
 					resource.TestCheckResourceAttr(resourceName, "success_criteria", "SuccessIfAllSucceed"),
 					resource.TestCheckResourceAttr(resourceName, "element_type", "Rule"),
 					resource.TestCheckResourceAttrSet(resourceName, "policy.0"),
@@ -34,7 +54,7 @@ func TestAccPingAccessRuleSet(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessRuleSetExists(resourceName),
 					testAccCheckPingAccessRuleSetAttributes(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf-acc-ruleset-one"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_ruleset-one"),
 					resource.TestCheckResourceAttr(resourceName, "success_criteria", "SuccessIfAnyOneSucceeds"),
 					resource.TestCheckResourceAttr(resourceName, "element_type", "Rule"),
 					resource.TestCheckResourceAttrSet(resourceName, "policy.0"),
@@ -52,17 +72,15 @@ func TestAccPingAccessRuleSet(t *testing.T) {
 func testAccPingAccessRuleSetConfig(configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_ruleset" "ruleset_one" {
-		name             = "tf-acc-ruleset-one"
+		name             = "acctest_ruleset-one"
 		success_criteria = "%s"
 		element_type     = "Rule"
-		policy = [
-			"${pingaccess_rule.ruleset_rule_one.id}"
-		]
+		policy = [pingaccess_rule.ruleset_rule_one.id]
 	}
 
 	resource "pingaccess_rule" "ruleset_rule_one" {
 		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "tf-acc-ruleset-rule-one"
+		name = "acctest_ruleset-rule-one"
 		supported_destinations = [
 			"Site",
 			"Agent"

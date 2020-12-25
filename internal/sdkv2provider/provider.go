@@ -46,7 +46,6 @@ func Provider() *schema.Provider {
 			"pingaccess_pingfederate_runtime_metadata": dataSourcePingAccessPingFederateRuntimeMetadata(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"pingaccess_access_token_validator":          resourcePingAccessAccessTokenValidator(),
 			"pingaccess_acme_server":                     resourcePingAccessAcmeServer(),
 			"pingaccess_auth_token_management":           resourcePingAccessAuthTokenManagement(),
 			"pingaccess_authn_req_list":                  resourcePingAccessAuthnReqList(),

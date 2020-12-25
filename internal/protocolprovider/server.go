@@ -14,7 +14,7 @@ type provider struct {
 	resourceSchemas    map[string]*tfprotov5.Schema
 	dataSourceSchemas  map[string]*tfprotov5.Schema
 
-	resourceRouter   map[string]tfprotov5.DataSourceServer
+	resourceRouter   map[string]tfprotov5.ResourceServer
 	dataSourceRouter map[string]tfprotov5.DataSourceServer
 
 	client *paClient
@@ -225,6 +225,23 @@ func Server() tfprotov5.ProviderServer {
 		dataSourceRouter: map[string]tfprotov5.DataSourceServer{
 			"pingaccess_trusted_certificate_group": dataPingAccessTrustedCertificateGroups{},
 		},
-		resourceRouter: map[string]tfprotov5.DataSourceServer{},
+		resourceSchemas: map[string]*tfprotov5.Schema{
+			"pingaccess_access_token_validator": resourcePingAccessAccessTokenValidator{}.schema(),
+		},
+		resourceRouter: map[string]tfprotov5.ResourceServer{
+			"pingaccess_access_token_validator": resourcePingAccessAccessTokenValidator{},
+		},
 	}
 }
+
+// Bool is a helper routine that allocates a new bool value
+// to store v and returns a pointer to it.
+func Bool(v bool) *bool { return &v }
+
+// Int is a helper routine that allocates a new int value
+// to store v and returns a pointer to it.
+func Int(v int) *int { return &v }
+
+// String is a helper routine that allocates a new string value
+// to store v and returns a pointer to it.
+func String(v string) *string { return &v }

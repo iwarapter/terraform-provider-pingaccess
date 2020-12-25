@@ -13,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("third_party_service", &resource.Sweeper{
+		Name: "third_party_service",
+		F: func(r string) error {
+			svc := thirdPartyServices.New(conf)
+			results, _, err := svc.GetThirdPartyServicesCommand(&thirdPartyServices.GetThirdPartyServicesCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list third_party_services to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteThirdPartyServiceCommand(&thirdPartyServices.DeleteThirdPartyServiceCommandInput{Id: *item.Id})
+				if err != nil {
+					return fmt.Errorf("unable to sweep third_party_service %s because %s", *item.Id, err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessThirdPartyService(t *testing.T) {
 	resourceName := "pingaccess_third_party_service.demo_tps"
 
@@ -22,10 +42,10 @@ func TestAccPingAccessThirdPartyService(t *testing.T) {
 		CheckDestroy:             testAccCheckPingAccessThirdPartyServiceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessThirdPartyServiceConfig("demo service", "localhost:1234"),
+				Config: testAccPingAccessThirdPartyServiceConfig("acctest_service", "localhost:1234"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessThirdPartyServiceExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "demo service"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_service"),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
 					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
 					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),
@@ -38,10 +58,10 @@ func TestAccPingAccessThirdPartyService(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccPingAccessThirdPartyServiceConfig("demo service", "localhost:1235"),
+				Config: testAccPingAccessThirdPartyServiceConfig("acctest_service", "localhost:1235"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessThirdPartyServiceExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "demo service"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_service"),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
 					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
 					resource.TestCheckResourceAttr(resourceName, "max_connections", "-1"),

@@ -14,15 +14,24 @@ checks:
 	@gosec ./...
 	@goimports -w internal
 
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	go test ./... -v -sweep=all -timeout 60m
+
+test-proto:
+	@TF_ACC=1 go test -mod=vendor ./internal/protocolprovider -v -trimpath
+
+test-sdkv2:
+	@TF_ACC=1 go test -mod=vendor ./internal/sdkv2provider -v -trimpath
+
 test:
-	@rm -f pingaccess/terraform.log
-	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out && go tool cover -func=coverage.out
+	@TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out && go tool cover -func=coverage.out
 
 unit-test:
 	@go test -mod=vendor ./... -v -trimpath
 
 test-and-report:
-	@TF_LOG=TRACE TF_LOG_PATH=./terraform.log TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json | tee report.json
+	@TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json | tee report.json
 
 build:
 	@go build -mod=vendor -o ${NAME} -trimpath .
@@ -30,7 +39,6 @@ build:
 deploy-local:
 	@mkdir -p ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
 	@cp ${NAME} ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
-
 
 func-init:
 	@rm -rf func-tests/.terraform

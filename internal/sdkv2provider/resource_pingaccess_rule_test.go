@@ -10,6 +10,27 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("rules", &resource.Sweeper{
+		Name:         "rules",
+		Dependencies: []string{"rulesets"},
+		F: func(r string) error {
+			svc := rules.New(conf)
+			results, _, err := svc.GetRulesCommand(&rules.GetRulesCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list rules to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteRuleCommand(&rules.DeleteRuleCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep rules %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessRule(t *testing.T) {
 	resourceName := "pingaccess_rule.acc_test_rule"
 
@@ -22,12 +43,20 @@ func TestAccPingAccessRule(t *testing.T) {
 				Config: testAccPingAccessRuleConfig("404"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessRuleExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_test"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.policy.CIDRPolicyInterceptor"),
+					resource.TestCheckResourceAttr(resourceName, "supported_destinations.0", "Agent"),
+					resource.TestCheckResourceAttr(resourceName, "supported_destinations.1", "Site"),
 				),
 			},
 			{
 				Config: testAccPingAccessRuleConfig("403"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessRuleExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_test"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.policy.CIDRPolicyInterceptor"),
+					resource.TestCheckResourceAttr(resourceName, "supported_destinations.0", "Agent"),
+					resource.TestCheckResourceAttr(resourceName, "supported_destinations.1", "Site"),
 				),
 			},
 			{
@@ -47,7 +76,7 @@ func testAccPingAccessRuleConfig(configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_rule" "acc_test_rule" {
 		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "test"
+		name = "acctest_test"
 		supported_destinations = [
 			"Site",
 			"Agent"
@@ -71,7 +100,7 @@ func testAccPingAccessRuleConfig(configUpdate string) string {
 	}
 
 	resource "pingaccess_virtualhost" "unknown_value" {
-	   host                         = "rule-config-dynamic-config"
+	   host                         = "acctest-rule-config-dynamic-config"
 	   port                         = 1111
 	   agent_resource_cache_ttl     = 900
 	   key_pair_id                  = 0

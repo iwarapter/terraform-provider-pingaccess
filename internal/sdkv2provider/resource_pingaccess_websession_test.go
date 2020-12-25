@@ -13,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("websessions", &resource.Sweeper{
+		Name: "websessions",
+		F: func(r string) error {
+			svc := webSessions.New(conf)
+			results, _, err := svc.GetWebSessionsCommand(&webSessions.GetWebSessionsCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list websessions to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteWebSessionCommand(&webSessions.DeleteWebSessionCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep websession %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessWebSession(t *testing.T) {
 	resourceName := "pingaccess_websession.demo_session"
 	resource.ParallelTest(t, resource.TestCase{
@@ -25,7 +45,7 @@ func TestAccPingAccessWebSession(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessWebSessionExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo-session"),
 					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "password"),
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
@@ -35,7 +55,7 @@ func TestAccPingAccessWebSession(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessWebSessionExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo-session"),
 					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
@@ -46,7 +66,7 @@ func TestAccPingAccessWebSession(t *testing.T) {
 					testAccCheckPingAccessWebSessionExists(resourceName),
 					testAccCheckPingAccessWebSessionCanTrackPasswordChanges(resourceName, true),
 					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc-test-demo-session"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo-session"),
 					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
@@ -77,7 +97,7 @@ func testAccCheckPingAccessWebSessionDestroy(s *terraform.State) error {
 func testAccPingAccessWebSessionConfig(audience, password string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_websession" "demo_session" {
-		name = "acc-test-demo-session"
+		name = "acctest_demo-session"
 		audience = "%s"
 		client_credentials {
 			client_id = "websession"

@@ -11,6 +11,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("availability_profile", &resource.Sweeper{
+		Name: "availability_profile",
+		F: func(r string) error {
+			svc := highAvailability.New(conf)
+			results, _, err := svc.GetAvailabilityProfilesCommand(&highAvailability.GetAvailabilityProfilesCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list availability profiles to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteAvailabilityProfileCommand(&highAvailability.DeleteAvailabilityProfileCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep availability profile %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessAvailabilityProfile(t *testing.T) {
 	resourceName := "pingaccess_availability_profile.test"
 
@@ -23,7 +43,7 @@ func TestAccPingAccessAvailabilityProfile(t *testing.T) {
 				Config: testAccPingAccessAvailabilityProfileConfig("10000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAvailabilityProfileExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "foo"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.ha.availability.ondemand.OnDemandAvailabilityPlugin"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"connectTimeout\":10000,\"failedRetryTimeout\":60,\"failureHttpStatusCodes\":[],\"maxRetries\":2,\"pooledConnectionTimeout\":-1,\"readTimeout\":-1,\"retryDelay\":250}"),
 				),
@@ -32,7 +52,7 @@ func TestAccPingAccessAvailabilityProfile(t *testing.T) {
 				Config: testAccPingAccessAvailabilityProfileConfig("5000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAvailabilityProfileExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "foo"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.ha.availability.ondemand.OnDemandAvailabilityPlugin"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"connectTimeout\":5000,\"failedRetryTimeout\":60,\"failureHttpStatusCodes\":[],\"maxRetries\":2,\"pooledConnectionTimeout\":-1,\"readTimeout\":-1,\"retryDelay\":250}"),
 				),
@@ -58,7 +78,7 @@ func testAccPingAccessAvailabilityProfileConfig(configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_availability_profile" "test" {
 		class_name = "com.pingidentity.pa.ha.availability.ondemand.OnDemandAvailabilityPlugin"
-		name = "foo"
+		name = "acctest_foo"
 
 		configuration = <<EOF
 		{

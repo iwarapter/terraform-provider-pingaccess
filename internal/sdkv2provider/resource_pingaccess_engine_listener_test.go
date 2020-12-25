@@ -13,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("engine_listener", &resource.Sweeper{
+		Name: "engine_listener",
+		F: func(r string) error {
+			svc := engineListeners.New(conf)
+			results, _, err := svc.GetEngineListenersCommand(&engineListeners.GetEngineListenersCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list engine listeners to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteEngineListenerCommand(&engineListeners.DeleteEngineListenerCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep engine listeners %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessEngineListener(t *testing.T) {
 	resourceName := "pingaccess_engine_listener.acc_test"
 	resource.ParallelTest(t, resource.TestCase{
@@ -48,7 +68,7 @@ func testAccCheckPingAccessEngineListenerDestroy(s *terraform.State) error {
 func testAccPingAccessEngineListenerConfig(host string, secure bool) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_engine_listener" "acc_test" {
-	   name   = "engine-%s"
+	   name   = "acctest_engine-%s"
 	   port   = 443
 	   secure	= %t
 	}`, host, secure)

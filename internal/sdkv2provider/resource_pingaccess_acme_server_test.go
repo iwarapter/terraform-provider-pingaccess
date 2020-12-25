@@ -13,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("acme_server", &resource.Sweeper{
+		Name: "acme_server",
+		F: func(r string) error {
+			svc := acme.New(conf)
+			results, _, err := svc.GetAcmeServersCommand(&acme.GetAcmeServersCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list acme servers to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, _, err = svc.DeleteAcmeServerCommand(&acme.DeleteAcmeServerCommandInput{AcmeServerId: *item.Id})
+				if err != nil {
+					return fmt.Errorf("unable to sweep acme server %s because %s", *item.Id, err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessAcmeServer(t *testing.T) {
 	resourceName := "pingaccess_acme_server.acc_test"
 
@@ -25,14 +45,17 @@ func TestAccPingAccessAcmeServer(t *testing.T) {
 				Config: testAccPingAccessAcmeServerConfig("https://host.docker.internal:14000/dir"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAcmeServerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
+					resource.TestCheckResourceAttr(resourceName, "url", "https://host.docker.internal:14000/dir"),
 				),
 			},
 			{
 				Config: testAccPingAccessAcmeServerConfig("https://host.docker.internal:14000/dir2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAcmeServerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
+					resource.TestCheckResourceAttr(resourceName, "url", "https://host.docker.internal:14000/dir2"),
 				),
-				//ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:      resourceName,
@@ -50,7 +73,7 @@ func testAccCheckPingAccessAcmeServerDestroy(s *terraform.State) error {
 func testAccPingAccessAcmeServerConfig(url string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_acme_server" "acc_test" {
-	   	name 				= "foo"
+	   	name 				= "acctest_foo"
 	   	url 				= "%s"
 	}`, url)
 }

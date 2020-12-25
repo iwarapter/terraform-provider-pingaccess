@@ -13,6 +13,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("virtualhosts", &resource.Sweeper{
+		Name: "virtualhosts",
+		F: func(r string) error {
+			svc := virtualhosts.New(conf)
+			results, _, err := svc.GetVirtualHostsCommand(&virtualhosts.GetVirtualHostsCommandInput{Filter: "acctest-"})
+			if err != nil {
+				return fmt.Errorf("unable to list virtualhosts to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteVirtualHostCommand(&virtualhosts.DeleteVirtualHostCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep virtualhost %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessVirtualHost(t *testing.T) {
 	resourceName := "pingaccess_virtualhost.acc_test"
 
@@ -25,12 +45,22 @@ func TestAccPingAccessVirtualHost(t *testing.T) {
 				Config: testAccPingAccessVirtualHostConfig("cheese", 3000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessVirtualHostExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "host", "acctest-cheese"),
+					resource.TestCheckResourceAttr(resourceName, "port", "3000"),
+					resource.TestCheckResourceAttr(resourceName, "agent_resource_cache_ttl", "900"),
+					resource.TestCheckResourceAttr(resourceName, "key_pair_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
 				),
 			},
 			{
 				Config: testAccPingAccessVirtualHostConfig("cheese", 3001),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessVirtualHostExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "host", "acctest-cheese"),
+					resource.TestCheckResourceAttr(resourceName, "port", "3001"),
+					resource.TestCheckResourceAttr(resourceName, "agent_resource_cache_ttl", "900"),
+					resource.TestCheckResourceAttr(resourceName, "key_pair_id", "0"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "0"),
 				),
 			},
 			{
@@ -49,7 +79,7 @@ func testAccCheckPingAccessVirtualHostDestroy(s *terraform.State) error {
 func testAccPingAccessVirtualHostConfig(host string, port int) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_virtualhost" "acc_test" {
-	   host                         = "tf-acc-test-%s"
+	   host                         = "acctest-%s"
 	   port                         = %d
 	   agent_resource_cache_ttl     = 900
 	   key_pair_id                  = 0

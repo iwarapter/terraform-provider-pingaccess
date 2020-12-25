@@ -16,6 +16,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("site_authenticator", &resource.Sweeper{
+		Name: "site_authenticator",
+		F: func(r string) error {
+			svc := siteAuthenticators.New(conf)
+			results, _, err := svc.GetSiteAuthenticatorsCommand(&siteAuthenticators.GetSiteAuthenticatorsCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list site_authenticators to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteSiteAuthenticatorCommand(&siteAuthenticators.DeleteSiteAuthenticatorCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep site_authenticator %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 	resourceName := "pingaccess_site_authenticator.acc_test"
 
@@ -25,25 +45,25 @@ func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 		CheckDestroy:             testAccCheckPingAccessSiteAuthenticatorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessSiteAuthenticatorConfig("acc_test_bar", "bar"),
+				Config: testAccPingAccessSiteAuthenticatorConfig("acctest_bar", "bar"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteAuthenticatorExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"password\":{\"value\":\"bar\"},\"username\":\"cheese\"}"),
-					resource.TestCheckResourceAttr(resourceName+"_two", "name", "another"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "name", "acctest_another"),
 					resource.TestCheckResourceAttr(resourceName+"_two", "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
 					resource.TestCheckResourceAttr(resourceName+"_two", "configuration", "{\"password\":\"bar\",\"username\":\"cheese\"}"),
 				),
 			},
 			{
-				Config: testAccPingAccessSiteAuthenticatorConfig("acc_test_bar", "foo"),
+				Config: testAccPingAccessSiteAuthenticatorConfig("acctest_bar", "foo"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessSiteAuthenticatorExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "acc_test_bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"password\":{\"value\":\"foo\"},\"username\":\"cheese\"}"),
-					resource.TestCheckResourceAttr(resourceName+"_two", "name", "another"),
+					resource.TestCheckResourceAttr(resourceName+"_two", "name", "acctest_another"),
 					resource.TestCheckResourceAttr(resourceName+"_two", "class_name", "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"),
 					resource.TestCheckResourceAttr(resourceName+"_two", "configuration", "{\"password\":\"foo\",\"username\":\"cheese\"}"),
 				),
@@ -82,7 +102,7 @@ func testAccPingAccessSiteAuthenticatorConfig(name, password string) string {
 	}
 
 	resource "pingaccess_site_authenticator" "acc_test_two" {
-		name          = "another"
+		name          = "acctest_another"
 		class_name		= "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"
 		configuration = <<EOF
 		{

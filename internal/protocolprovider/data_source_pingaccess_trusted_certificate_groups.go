@@ -81,40 +81,10 @@ func (d dataPingAccessTrustedCertificateGroups) schema() *tfprotov5.Schema {
 }
 
 func (d dataPingAccessTrustedCertificateGroups) ValidateDataSourceConfig(ctx context.Context, req *tfprotov5.ValidateDataSourceConfigRequest) (*tfprotov5.ValidateDataSourceConfigResponse, error) {
-	val, err := req.Config.Unmarshal(d.trustedCertGroupType())
-	if err != nil {
+	_, diags := dynamicValueToTftypesValues(req.Config, d.trustedCertGroupType())
+	if len(diags) > 0 {
 		return &tfprotov5.ValidateDataSourceConfigResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
-		}, nil
-	}
-	if !val.Is(d.trustedCertGroupType()) {
-		return &tfprotov5.ValidateDataSourceConfigResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.",
-				},
-			},
-		}, nil
-	}
-	values := map[string]tftypes.Value{}
-	err = val.As(&values)
-	if err != nil {
-		return &tfprotov5.ValidateDataSourceConfigResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
+			Diagnostics: diags,
 		}, nil
 	}
 
@@ -122,45 +92,15 @@ func (d dataPingAccessTrustedCertificateGroups) ValidateDataSourceConfig(ctx con
 }
 
 func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Context, req *tfprotov5.ReadDataSourceRequest) (*tfprotov5.ReadDataSourceResponse, error) {
-	val, err := req.Config.Unmarshal(d.trustedCertGroupType())
-	if err != nil {
+	values, diags := dynamicValueToTftypesValues(req.Config, d.trustedCertGroupType())
+	if len(diags) > 0 {
 		return &tfprotov5.ReadDataSourceResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
+			Diagnostics: diags,
 		}, nil
 	}
-	if !val.Is(d.trustedCertGroupType()) {
-		return &tfprotov5.ReadDataSourceResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.",
-				},
-			},
-		}, nil
-	}
-	values := map[string]tftypes.Value{}
-	err = val.As(&values)
-	if err != nil {
-		return &tfprotov5.ReadDataSourceResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
-		}, nil
-	}
-	if values["name"].IsKnown() {
+	if values["name"].IsKnown() && !values["name"].IsNull() {
 		var name string
-		err = values["name"].As(&name)
+		err := values["name"].As(&name)
 		if err != nil {
 			return &tfprotov5.ReadDataSourceResponse{
 				Diagnostics: []*tfprotov5.Diagnostic{
@@ -231,12 +171,6 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 				},
 			}, nil
 		}
-		//setResourceDataBoolWithDiagnostic(d, "ignore_all_certificate_errors", input.IgnoreAllCertificateErrors, &diags)
-		//setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
-		//setResourceDataBoolWithDiagnostic(d, "", input.SkipCertificateDateCheck, &diags)
-		//setResourceDataBoolWithDiagnostic(d, "", input.SystemGroup, &diags)
-		//setResourceDataBoolWithDiagnostic(d, "use_java_trust_store", input.UseJavaTrustStore, &diags)
-
 		return &tfprotov5.ReadDataSourceResponse{
 			State: &state,
 		}, nil
@@ -251,55 +185,3 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 		},
 	}, nil
 }
-
-//
-//func dataSourcePingAccessTrustedCertificateGroupsSchema() map[string]*schema.Schema {
-//	return map[string]*schema.Schema{
-//		"cert_ids": {
-//			Type:     schema.TypeList,
-//			Computed: true,
-//			Elem: &schema.Schema{
-//				Type: schema.TypeString,
-//			},
-//		},
-//		"ignore_all_certificate_errors": {
-//			Type:     schema.TypeBool,
-//			Computed: true,
-//		},
-//		"name": {
-//			Type:     schema.TypeString,
-//			Required: true,
-//		},
-//		"skip_certificate_date_check": {
-//			Type:     schema.TypeBool,
-//			Computed: true,
-//		},
-//		"system_group": {
-//			Type:     schema.TypeBool,
-//			Computed: true,
-//		},
-//		"use_java_trust_store": {
-//			Type:     schema.TypeBool,
-//			Computed: true,
-//		},
-//	}
-//}
-//
-//func dataSourcePingAccessTrustedCertificateGroupsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-//	svc := m.(paClient).TrustedCertificateGroups
-//	input := &trustedCertificateGroups.GetTrustedCertificateGroupsCommandInput{
-//		Name: d.Get("name").(string),
-//	}
-//	result, _, err := svc.GetTrustedCertificateGroupsCommand(input)
-//	if err != nil {
-//		return diag.Errorf("unable to read TrustedCertificateGroup: %s", err)
-//	}
-//	if result == nil {
-//		return diag.Errorf("unable to find TrustedCertificateGroup with the name '%s', result was nil", d.Get("name").(string))
-//	}
-//	if len(result.Items) != 1 {
-//		return diag.Errorf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", d.Get("name").(string), len(result.Items))
-//	}
-//	d.SetId(result.Items[0].Id.String())
-//	return resourcePingAccessTrustedCertificateGroupsReadResult(d, result.Items[0])
-//}

@@ -11,6 +11,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func init() {
+	resource.AddTestSweepers("load_balancing_strategy", &resource.Sweeper{
+		Name: "load_balancing_strategy",
+		F: func(r string) error {
+			svc := highAvailability.New(conf)
+			results, _, err := svc.GetLoadBalancingStrategiesCommand(&highAvailability.GetLoadBalancingStrategiesCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list load_balancing_strategy to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteLoadBalancingStrategyCommand(&highAvailability.DeleteLoadBalancingStrategyCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep load_balancing_strategy %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
+
 func TestAccPingAccessLoadBalancingStrategy(t *testing.T) {
 	resourceName := "pingaccess_load_balancing_strategy.test"
 
@@ -23,7 +43,7 @@ func TestAccPingAccessLoadBalancingStrategy(t *testing.T) {
 				Config: testAccPingAccessLoadBalancingStrategyConfig("foo"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessLoadBalancingStrategyExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "example"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_example"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"fallbackToFirstAvailableHost\":false,\"headerName\":\"foo\"}"),
 				),
@@ -32,7 +52,7 @@ func TestAccPingAccessLoadBalancingStrategy(t *testing.T) {
 				Config: testAccPingAccessLoadBalancingStrategyConfig("bar"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessLoadBalancingStrategyExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "example"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_example"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\"fallbackToFirstAvailableHost\":false,\"headerName\":\"bar\"}"),
 				),
@@ -57,7 +77,7 @@ func testAccCheckPingAccessLoadBalancingStrategyDestroy(s *terraform.State) erro
 func testAccPingAccessLoadBalancingStrategyConfig(configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_load_balancing_strategy" "test" {
-		name = "example"
+		name = "acctest_example"
 		class_name = "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"
 		configuration = <<EOF
 		{

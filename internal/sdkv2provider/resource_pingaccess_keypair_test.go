@@ -2,6 +2,7 @@ package sdkv2provider
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
@@ -9,6 +10,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+func init() {
+	resource.AddTestSweepers("keypairs", &resource.Sweeper{
+		Name: "keypairs",
+		F: func(r string) error {
+			svc := keyPairs.New(conf)
+			results, _, err := svc.GetKeyPairsCommand(&keyPairs.GetKeyPairsCommandInput{Filter: "acctest_"})
+			if err != nil {
+				return fmt.Errorf("unable to list keypairs to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteKeyPairCommand(&keyPairs.DeleteKeyPairCommandInput{Id: strconv.Itoa(*item.Id)})
+				if err != nil {
+					return fmt.Errorf("unable to sweep keypair %s because %s", strconv.Itoa(*item.Id), err)
+				}
+			}
+			return nil
+		},
+	})
+}
 
 func TestAccPingAccessKeyPair(t *testing.T) {
 	resourceName := "pingaccess_keypair.test"
@@ -69,7 +90,7 @@ func testAccCheckPingAccessKeyPairDestroy(s *terraform.State) error {
 func testAccPingAccessKeyPairConfig() string {
 	return `
 	resource "pingaccess_keypair" "test" {
-		alias = "test"
+		alias = "acctest_test"
 		file_data = filebase64("test_cases/provider.p12")
 		password = "password"
 	}`
@@ -78,7 +99,7 @@ func testAccPingAccessKeyPairConfig() string {
 func testAccPingAccessKeyPairConfigGenerate() string {
 	return `
 	resource "pingaccess_keypair" "test_generate" {
-		alias = "test2"
+		alias = "acctest_test2"
 		city = "Test"
 		common_name = "Test"
 		country = "GB"

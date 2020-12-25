@@ -8,14 +8,6 @@ cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
 # cloud.google.com/go/storage v1.10.0
 cloud.google.com/go/storage
-# github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
-github.com/Azure/go-ansiterm
-github.com/Azure/go-ansiterm/winterm
-# github.com/Microsoft/go-winio v0.4.14
-github.com/Microsoft/go-winio
-github.com/Microsoft/go-winio/pkg/guid
-# github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5
-github.com/Nvveen/Gotty
 # github.com/agext/levenshtein v1.2.2
 github.com/agext/levenshtein
 # github.com/apparentlymart/go-textseg v1.0.0
@@ -60,17 +52,10 @@ github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 github.com/bgentry/go-netrc/netrc
-# github.com/cenkalti/backoff/v3 v3.0.0
-github.com/cenkalti/backoff/v3
 # github.com/containerd/continuity v0.0.0-20200228182428-0f16d7a0959c
 ## explicit
-github.com/containerd/continuity/pathdriver
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/docker/go-connections v0.4.0
-github.com/docker/go-connections/nat
-# github.com/docker/go-units v0.4.0
-github.com/docker/go-units
 # github.com/emirpasic/gods v1.12.0
 github.com/emirpasic/gods/containers
 github.com/emirpasic/gods/lists
@@ -294,7 +279,7 @@ github.com/jstemmer/go-junit-report/parser
 # github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd
 github.com/kevinburke/ssh_config
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
-github.com/konsorten/go-windows-terminal-sequences
+## explicit
 # github.com/mitchellh/copystructure v1.0.0
 github.com/mitchellh/copystructure
 # github.com/mitchellh/go-homedir v1.1.0
@@ -309,40 +294,8 @@ github.com/mitchellh/mapstructure
 github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
-# github.com/opencontainers/go-digest v1.0.0-rc1
-github.com/opencontainers/go-digest
-# github.com/opencontainers/image-spec v1.0.1
-github.com/opencontainers/image-spec/specs-go
-github.com/opencontainers/image-spec/specs-go/v1
 # github.com/opencontainers/runc v1.0.0-rc9
-github.com/opencontainers/runc/libcontainer/user
-# github.com/ory/dockertest/v3 v3.6.0
 ## explicit
-github.com/ory/dockertest/v3
-github.com/ory/dockertest/v3/docker
-github.com/ory/dockertest/v3/docker/opts
-github.com/ory/dockertest/v3/docker/pkg/archive
-github.com/ory/dockertest/v3/docker/pkg/fileutils
-github.com/ory/dockertest/v3/docker/pkg/homedir
-github.com/ory/dockertest/v3/docker/pkg/idtools
-github.com/ory/dockertest/v3/docker/pkg/ioutils
-github.com/ory/dockertest/v3/docker/pkg/jsonmessage
-github.com/ory/dockertest/v3/docker/pkg/longpath
-github.com/ory/dockertest/v3/docker/pkg/mount
-github.com/ory/dockertest/v3/docker/pkg/pools
-github.com/ory/dockertest/v3/docker/pkg/stdcopy
-github.com/ory/dockertest/v3/docker/pkg/system
-github.com/ory/dockertest/v3/docker/pkg/term
-github.com/ory/dockertest/v3/docker/pkg/term/windows
-github.com/ory/dockertest/v3/docker/types
-github.com/ory/dockertest/v3/docker/types/blkiodev
-github.com/ory/dockertest/v3/docker/types/container
-github.com/ory/dockertest/v3/docker/types/filters
-github.com/ory/dockertest/v3/docker/types/mount
-github.com/ory/dockertest/v3/docker/types/network
-github.com/ory/dockertest/v3/docker/types/registry
-github.com/ory/dockertest/v3/docker/types/strslice
-github.com/ory/dockertest/v3/docker/types/versions
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -350,7 +303,6 @@ github.com/pkg/errors
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/sirupsen/logrus v1.5.0
 ## explicit
-github.com/sirupsen/logrus
 # github.com/tidwall/gjson v1.6.3
 ## explicit
 github.com/tidwall/gjson
