@@ -224,12 +224,31 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.
 			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
-	if rv.Policy != nil && (len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0) {
-		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-			diags = append(diags, diag.FromErr(err)...)
+	if rv.Policy != nil {
+		if len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0 || policyStateHasData(d) {
+			if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 	}
 	return diags
+}
+
+//https://github.com/hashicorp/terraform-plugin-sdk/issues/142
+//because we cannot set the default for the policies, there was an original check to not write policy state
+//if the default response was returned from the api (web and api with empty arrays), however this left an edge case
+//where config and state could have rules but a manual removal of all rules would not be saved. This helper method checks
+//to see if the current config/state has values that should be zero'd out.
+func policyStateHasData(d *schema.ResourceData) bool {
+	if v, ok := d.GetOk("policy"); ok {
+		pol := expandPolicy(v.([]interface{}))
+		for _, items := range pol {
+			if items != nil && len(*items) > 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func resourcePingAccessApplicationReadData(d *schema.ResourceData) *models.ApplicationView {
