@@ -242,6 +242,9 @@ github.com/mitchellh/go-wordwrap
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
+# github.com/moby/term v0.0.0-20200915141129-7f0af18e79f2
+github.com/moby/term
+github.com/moby/term/windows
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
 # github.com/opencontainers/go-digest v1.0.0-rc1
@@ -251,7 +254,7 @@ github.com/opencontainers/image-spec/specs-go
 github.com/opencontainers/image-spec/specs-go/v1
 # github.com/opencontainers/runc v1.0.0-rc9
 github.com/opencontainers/runc/libcontainer/user
-# github.com/ory/dockertest/v3 v3.6.0
+# github.com/ory/dockertest/v3 v3.6.3
 ## explicit
 github.com/ory/dockertest/v3
 github.com/ory/dockertest/v3/docker
@@ -267,8 +270,6 @@ github.com/ory/dockertest/v3/docker/pkg/mount
 github.com/ory/dockertest/v3/docker/pkg/pools
 github.com/ory/dockertest/v3/docker/pkg/stdcopy
 github.com/ory/dockertest/v3/docker/pkg/system
-github.com/ory/dockertest/v3/docker/pkg/term
-github.com/ory/dockertest/v3/docker/pkg/term/windows
 github.com/ory/dockertest/v3/docker/types
 github.com/ory/dockertest/v3/docker/types/blkiodev
 github.com/ory/dockertest/v3/docker/types/container
@@ -279,7 +280,6 @@ github.com/ory/dockertest/v3/docker/types/registry
 github.com/ory/dockertest/v3/docker/types/strslice
 github.com/ory/dockertest/v3/docker/types/versions
 # github.com/pkg/errors v0.9.1
-## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
@@ -361,7 +361,7 @@ golang.org/x/oauth2/google
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20200523222454-059865788121
+# golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
