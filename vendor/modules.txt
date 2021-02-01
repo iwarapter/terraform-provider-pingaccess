@@ -289,7 +289,7 @@ github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
-# github.com/tidwall/gjson v1.6.7
+# github.com/tidwall/gjson v1.6.8
 ## explicit
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.3
