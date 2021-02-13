@@ -2,6 +2,7 @@ package sdkv2provider
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"reflect"
 	"testing"
@@ -271,4 +272,47 @@ func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_issue48(t *testing.T) {
+	app := &models.ApplicationView{
+		Name:              String("engine1"),
+		ApplicationType:   String("API"),
+		AccessValidatorId: Int(0),
+		AgentId:           Int(0),
+		CaseSensitivePath: Bool(true),
+		ContextRoot:       String("/"),
+		DefaultAuthType:   String("API"),
+		SiteId:            Int(0),
+		SpaSupportEnabled: Bool(true),
+		VirtualHostIds:    &[]*int{Int(1)},
+		Policy: map[string]*[]*models.PolicyItem{
+			"API": {
+				{
+					Id:   "1",
+					Type: String("Rule"),
+				},
+				{
+					Id:   "2",
+					Type: String("Rule"),
+				},
+			},
+			"Web": {},
+		},
+		WebSessionId: Int(0),
+	}
+
+	resourceSchema := resourcePingAccessApplicationSchema()
+	resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
+	resourcePingAccessApplicationReadResult(resourceLocalData, app)
+
+	exp := resourcePingAccessApplicationReadData(resourceLocalData)
+	assert.Equal(t, exp, app)
+
+	app.Policy["API"] = &[]*models.PolicyItem{}
+	assert.NotEqual(t, exp, app) //make sure they are now different
+	//when we read it should now become equal
+	resourcePingAccessApplicationReadResult(resourceLocalData, app)
+	exp = resourcePingAccessApplicationReadData(resourceLocalData)
+	assert.Equal(t, exp, app)
 }
