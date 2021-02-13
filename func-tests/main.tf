@@ -2,7 +2,8 @@ terraform {
   required_providers {
     pingaccess = {
       source  = "iwarapter/pingaccess"
-      version = "0.0.1-ci" #for functional testing
+      version = "0.0.1-ci"
+      #for functional testing
     }
   }
 }
@@ -10,6 +11,15 @@ terraform {
 provider "pingaccess" {
   password = "2Access"
 }
+
+
+locals {
+  isPA5_3 = length(regexall("5.[3]", var.pa_version)) > 0
+  isPA6   = length(regexall("6.", var.pa_version)) > 0
+  isPA6_1 = length(regexall("6.[1]", var.pa_version)) > 0
+  isPA6_2 = length(regexall("6.[2]", var.pa_version)) > 0
+}
+
 
 data "pingaccess_trusted_certificate_group" "trust_any" {
   name = "Trust Any"
@@ -66,13 +76,13 @@ resource "pingaccess_rule" "demo_2" {
 }
 
 resource "pingaccess_acme_server" "acc_test" {
-  count = var.pa6 ? 1 : 0
+  count = local.isPA6 ? 1 : 0
   name  = "foo"
   url   = "https://host.docker.internal:14000/dir"
 }
 
 resource "pingaccess_pingfederate_runtime" "pa6_demo" {
-  count                        = var.pa6 ? 1 : 0
+  count                        = local.isPA6 ? 1 : 0
   description                  = "demo"
   issuer                       = "https://pingfederate:9031"
   sts_token_exchange_endpoint  = "https://foo/bar"
@@ -83,7 +93,7 @@ resource "pingaccess_pingfederate_runtime" "pa6_demo" {
 }
 
 resource "pingaccess_pingfederate_runtime" "pa5_demo" {
-  count                        = var.pa6 ? 0 : 1
+  count                        = local.isPA6 ? 0 : 1
   host                         = "pingfederate"
   port                         = 9031
   skip_hostname_verification   = true

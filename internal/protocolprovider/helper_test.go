@@ -1,11 +1,12 @@
 package protocol
 
 import (
+	"math/big"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"math/big"
-	"testing"
 )
 
 func Test_marshalDynamicPseudoTypes(t *testing.T) {

@@ -2,10 +2,11 @@ package sdkv2provider
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
