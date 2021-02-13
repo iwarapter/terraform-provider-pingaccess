@@ -14,7 +14,7 @@ import (
 func init() {
 	resource.AddTestSweepers("certificate", &resource.Sweeper{
 		Name:         "certificate",
-		Dependencies: []string{"keypairs"},
+		Dependencies: []string{"keypairs", "trusted_certificate_group"},
 		F: func(r string) error {
 			svc := certificates.New(conf)
 			results, _, err := svc.GetTrustedCerts(&certificates.GetTrustedCertsInput{Filter: "acctest_"})
@@ -70,7 +70,7 @@ func testAccCheckPingAccessCertificateDestroy(s *terraform.State) error {
 func testAccPingAccessCertificateConfig(name string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_trusted_certificate_group" "test" {
-		name = "test_tcg"
+		name = "acctest_tcg"
 		cert_ids = [
 			pingaccess_certificate.test.id
 		]

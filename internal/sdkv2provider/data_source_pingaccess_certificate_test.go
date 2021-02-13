@@ -18,7 +18,7 @@ func TestAccPingAccessCertificateDataSource(t *testing.T) {
 		CheckDestroy:             testAccCheckPingAccessCertificateDataSourceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessCertificateDataSourceConfig("foobar"),
+				Config: testAccPingAccessCertificateDataSourceConfig("acctest_foobar"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "md5sum", "a0d4ef0bf7b5d849952aecf5c4fc8187"),
 					resource.TestCheckResourceAttr(resourceName, "expires", "2221603200000"),

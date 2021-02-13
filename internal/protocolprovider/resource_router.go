@@ -51,8 +51,9 @@ func (p *provider) ReadResource(ctx context.Context, req *tfprotov5.ReadResource
 func (p *provider) PlanResourceChange(ctx context.Context, req *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
-		res := &resourcePingAccessAccessTokenValidator{
-			client: nil,
+		res := &resourcePingAccessAccessTokenValidator{}
+		if p.client != nil {
+			res.client = p.client.AccessTokenValidators
 		}
 		return res.PlanResourceChange(ctx, req)
 

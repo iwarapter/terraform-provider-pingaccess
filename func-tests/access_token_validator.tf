@@ -1,4 +1,4 @@
-resource "pingaccess_access_token_validator" "demo_access_token_validator" {
+resource "pingaccess_access_token_validator" "demo_one" {
   class_name = "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"
   name       = "demo"
 
@@ -11,4 +11,14 @@ resource "pingaccess_access_token_validator" "demo_access_token_validator" {
 		"audience": null
 	}
 	EOF
+}
+
+resource "pingaccess_access_token_validator" "demo_two" {
+  class_name = "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"
+  name       = "demo_two"
+
+  configuration = {
+    "path"                 = "/bar"
+    "subjectAttributeName" = "demo"
+  }
 }

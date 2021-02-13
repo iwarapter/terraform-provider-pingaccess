@@ -16,3 +16,4 @@ site/
 internal/sdkv2provider/test_cases/ca/*
 build/
 tmp/
+/func-tests/.terraform.lock.hcl

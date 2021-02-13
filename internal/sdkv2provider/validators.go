@@ -87,8 +87,8 @@ func validateListLocationValue(value interface{}, _ cty.Path) diag.Diagnostics {
 
 func validateHTTPListenerName(value interface{}, _ cty.Path) diag.Diagnostics {
 	v := value.(string)
-	if v != "ADMIN" && v != "AGENT" && v != "ENGINE" {
-		return diag.Errorf("must be either 'ADMIN', 'AGENT' or 'ENGINE' not %s", v)
+	if v != "ADMIN" && v != "AGENT" && v != "ENGINE" && v != "CONFIG QUERY" {
+		return diag.Errorf("must be either 'ADMIN', 'AGENT' or 'ENGINE' or 'CONFIG QUERY' not %s", v)
 	}
 	return nil
 }

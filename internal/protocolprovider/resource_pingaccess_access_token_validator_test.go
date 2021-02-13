@@ -2,6 +2,7 @@ package protocol
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
@@ -44,21 +45,37 @@ func TestAccPingAccessAccessTokenValidator(t *testing.T) {
 		CheckDestroy: testAccCheckPingAccessAccessTokenValidatorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessAccessTokenValidatorConfig("/bar"),
+				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_foo", `<<EOF
+{
+   "description": null,
+   "path": "/bar",
+   "subjectAttributeName": "demo",
+   "issuer": null,
+   "audience": null
+}
+EOF`),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAccessTokenValidatorExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"),
-					//resource.TestCheckResourceAttr(resourceName, "configuration", "{\"audience\":null,\"description\":null,\"issuer\":null,\"path\":\"/bar\",\"subjectAttributeName\":\"foo\"}"),
+					resource.TestCheckResourceAttr(resourceName, "configuration", "{\n   \"description\": null,\n   \"path\": \"/bar\",\n   \"subjectAttributeName\": \"demo\",\n   \"issuer\": null,\n   \"audience\": null\n}\n"),
 				),
 			},
 			{
-				Config: testAccPingAccessAccessTokenValidatorConfig("/bar/foo"),
+				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_foo", `<<EOF
+{
+   "description": null,
+   "path": "/foo/bar",
+   "subjectAttributeName": "demo",
+   "issuer": null,
+   "audience": null
+}
+EOF`),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessAccessTokenValidatorExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", "acctest_foo"),
 					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"),
-					resource.TestCheckResourceAttr(resourceName, "configuration", "\t\t{\n\t\t\t\"description\": null,\n\t\t\t\"path\": \"/bar/foo\",\n\t\t\t\"subjectAttributeName\": \"foo\",\n\t\t\t\"issuer\": null,\n\t\t\t\"audience\": null\n\t\t}\n"),
+					resource.TestCheckResourceAttr(resourceName, "configuration", "{\n   \"description\": null,\n   \"path\": \"/foo/bar\",\n   \"subjectAttributeName\": \"demo\",\n   \"issuer\": null,\n   \"audience\": null\n}\n"),
 				),
 			},
 			{
@@ -66,10 +83,77 @@ func TestAccPingAccessAccessTokenValidator(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			//{
-			//	Config:      testAccPingAccessAccessTokenValidatorConfigInvalidClassName(),
-			//	ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
-			//},
+			{
+				Config: testAccPingAccessAccessTokenValidatorConfigInvalidClassName(`<<EOF
+		{
+			"description": null,
+			"path": "/foo",
+			"subjectAttributeName": "foo",
+			"issuer": null,
+			"audience": null
+		}
+		EOF`),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
+			},
+		},
+	})
+}
+
+func TestAccPingAccessAccessTokenValidatorWithDynamicPsuedoType(t *testing.T) {
+	resourceName := "pingaccess_access_token_validator.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
+			"pingaccess": func() (tfprotov5.ProviderServer, error) {
+				return Server(), nil
+			},
+		},
+		CheckDestroy: testAccCheckPingAccessAccessTokenValidatorDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_bar", `{
+			"path" = "/bar/foo"
+			"subjectAttributeName" = "foo"
+		}`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessAccessTokenValidatorExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"),
+					resource.TestCheckResourceAttr(resourceName, "configuration.subjectAttributeName", "foo"),
+					resource.TestCheckResourceAttr(resourceName, "configuration.path", "/bar/foo"),
+				),
+			},
+			{
+				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_bar", `{
+			"path" = "/foo/bar"
+			"subjectAttributeName" = "foo"
+		}`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessAccessTokenValidatorExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_bar"),
+					resource.TestCheckResourceAttr(resourceName, "class_name", "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"),
+					resource.TestCheckResourceAttr(resourceName, "configuration.subjectAttributeName", "foo"),
+					resource.TestCheckResourceAttr(resourceName, "configuration.path", "/foo/bar"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_bar", `{
+			"subjectAttributeName" = "foo"
+		}`),
+				ExpectError: regexp.MustCompile(`the field 'path' is required for the class_name 'com.pingidentity.pa.accesstokenvalidators.JwksEndpoint'`),
+			},
+			{
+				Config: testAccPingAccessAccessTokenValidatorConfigInvalidClassName(`{
+			"path" = "/foo"
+			"subjectAttributeName" = "foo"
+		}`),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
+			},
 		},
 	})
 }
@@ -78,42 +162,25 @@ func testAccCheckPingAccessAccessTokenValidatorDestroy(s *terraform.State) error
 	return nil
 }
 
-func testAccPingAccessAccessTokenValidatorConfig(configUpdate string) string {
+func testAccPingAccessAccessTokenValidatorConfig(name, configUpdate string) string {
 	return fmt.Sprintf(`
 	resource "pingaccess_access_token_validator" "test" {
 		class_name = "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint"
-		name = "acctest_foo"
+		name = "%s"
 
-		configuration = <<EOF
-		{
-			"description": null,
-			"path": "%s",
-			"subjectAttributeName": "foo",
-			"issuer": null,
-			"audience": null
-		}
-		EOF
+		configuration = %s
 	}
-`, configUpdate)
+`, name, configUpdate)
 }
 
-//func testAccPingAccessAccessTokenValidatorConfigInvalidClassName() string {
-//	return `
-//	resource "pingaccess_access_token_validator" "test" {
-//		class_name = "com.pingidentity.pa.accesstokenvalidators.foo"
-//		name = "acctest_foo"
-//
-//		configuration = <<EOF
-//		{
-//			"description": null,
-//			"path": "/foo",
-//			"subjectAttributeName": "foo",
-//			"issuer": null,
-//			"audience": null
-//		}
-//		EOF
-//	}`
-//}
+func testAccPingAccessAccessTokenValidatorConfigInvalidClassName(configUpdate string) string {
+	return fmt.Sprintf(`
+	resource "pingaccess_access_token_validator" "test" {
+		class_name = "com.pingidentity.pa.accesstokenvalidators.foo"
+		name = "acctest_foo"
+		configuration = %s
+	}`, configUpdate)
+}
 
 func testAccCheckPingAccessAccessTokenValidatorExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {

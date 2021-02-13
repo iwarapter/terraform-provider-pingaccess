@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
@@ -28,7 +30,7 @@ func (r resourcePingAccessAccessTokenValidator) accessTokenValidatorTypes() map[
 		"id":            tftypes.String,
 		"name":          tftypes.String,
 		"class_name":    tftypes.String,
-		"configuration": tftypes.String,
+		"configuration": tftypes.DynamicPseudoType,
 	}
 }
 
@@ -54,7 +56,7 @@ func (r resourcePingAccessAccessTokenValidator) schema() *tfprotov5.Schema {
 				},
 				{
 					Name:     "configuration",
-					Type:     tftypes.String,
+					Type:     tftypes.DynamicPseudoType,
 					Required: true,
 				},
 			},
@@ -161,35 +163,31 @@ func (r resourcePingAccessAccessTokenValidator) ReadResource(_ context.Context, 
 	}
 	result, _, err := r.client.GetAccessTokenValidatorCommand(input)
 	if err != nil {
-		return &tfprotov5.ReadResourceResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   fmt.Sprintf("unable to find AccessTokenValidator with the id '%s', result was nil", id),
-				},
-			},
-		}, nil
+		return readResourceChangeError(fmt.Errorf("unable to find AccessTokenValidator with the id '%s', result was nil", id)), nil
 	}
 	if result == nil {
-		return &tfprotov5.ReadResourceResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   fmt.Sprintf("unable to find AccessTokenValidator with the id '%s', result was nil", id),
-				},
-			},
-		}, nil
+		return readResourceChangeError(fmt.Errorf("unable to find AccessTokenValidator with the id '%s', result was nil", id)), nil
 	}
-	b, _ := json.Marshal(result.Configuration)
+	var configuration asgotypes.GoPrimitive
+	_ = values["configuration"].As(&configuration)
+	var v tftypes.Value
+	if _, ok := configuration.Value.(string); ok {
+		b, _ := json.Marshal(result.Configuration)
+		if suppressEquivalentJSONDiffs(configuration.Value.(string), string(b)) {
+			v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
+		} else {
+			v = tftypes.NewValue(tftypes.String, string(b))
+		}
+	} else {
+		_, v, _ = marshal(result.Configuration)
+	}
 	state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
 		AttributeTypes: r.accessTokenValidatorTypes(),
 	}, map[string]tftypes.Value{
 		"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
 		"name":          tftypes.NewValue(tftypes.String, result.Name),
 		"class_name":    tftypes.NewValue(tftypes.String, result.ClassName),
-		"configuration": tftypes.NewValue(tftypes.String, string(b)),
+		"configuration": v,
 	}))
 	if err != nil {
 		return &tfprotov5.ReadResourceResponse{
@@ -233,23 +231,37 @@ func (r resourcePingAccessAccessTokenValidator) PlanResourceChange(_ context.Con
 			PlannedState: req.ProposedNewState,
 		}, nil
 	}
-	var name, className, proposedConf, priorConf, ob string
-	proposedValues["name"].As(&name)
-	proposedValues["class_name"].As(&className)
+	var name, className string
+	var proposedConf, priorConf, configuration asgotypes.GoPrimitive
+	_ = proposedValues["name"].As(&name)
+	_ = proposedValues["class_name"].As(&className)
 	_ = proposedValues["configuration"].As(&proposedConf)
 	_ = priorValues["configuration"].As(&priorConf)
 
 	var id interface{}
 	if proposedValues["id"].IsKnown() && !proposedValues["id"].IsNull() {
 		var str string
-		proposedValues["id"].As(&str)
+		_ = proposedValues["id"].As(&str)
 		id = str
 	} else {
 		id = tftypes.UnknownValue
 	}
-	ob = priorConf
-	if !suppressEquivalentJSONDiffs(priorConf, proposedConf) {
-		ob = proposedConf
+	configuration = proposedConf
+	var v tftypes.Value
+	if _, ok := configuration.Value.(string); ok {
+		v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
+	} else {
+		_, v, _ = marshal(configuration.Value)
+	}
+	desc, _, err := r.client.GetAccessTokenValidatorDescriptorsCommand()
+	if err != nil {
+		return planResourceChangeValidationError(fmt.Errorf("unable to retrieve AccessTokenValidator descriptors %s", err)), nil
+	}
+	if err := descriptorsHasClassName(className, desc); err != nil {
+		return planResourceChangeValidationError(err), nil
+	}
+	if err := validateConfiguration(className, configuration, desc); err != nil {
+		return planResourceChangeValidationError(err), nil
 	}
 
 	state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
@@ -258,7 +270,7 @@ func (r resourcePingAccessAccessTokenValidator) PlanResourceChange(_ context.Con
 		"id":            tftypes.NewValue(tftypes.String, id),
 		"name":          tftypes.NewValue(tftypes.String, name),
 		"class_name":    tftypes.NewValue(tftypes.String, className),
-		"configuration": tftypes.NewValue(tftypes.String, ob),
+		"configuration": v,
 	}))
 	if err != nil {
 		return planResourceChangeError(err), nil
@@ -287,7 +299,7 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
-			var name, className, configuration string
+			var name, className string
 			err = values["name"].As(&name)
 			if err != nil {
 				return applyResourceChangeError(err), nil
@@ -296,12 +308,17 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
+			var configuration asgotypes.GoPrimitive
 			err = values["configuration"].As(&configuration)
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
 			var dat map[string]interface{}
-			_ = json.Unmarshal([]byte(configuration), &dat)
+			if _, ok := configuration.Value.(string); ok {
+				_ = json.Unmarshal([]byte(configuration.Value.(string)), &dat)
+			} else {
+				dat = configuration.Value.(map[string]interface{})
+			}
 			input := &accessTokenValidators.AddAccessTokenValidatorCommandInput{
 				Body: models.AccessTokenValidatorView{
 					ClassName:     String(className),
@@ -321,19 +338,26 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 					},
 				}, nil
 			}
-			b, _ := json.Marshal(result.Configuration)
-
-			ob := string(b)
-			if suppressEquivalentJSONDiffs(configuration, ob) {
-				ob = configuration
+			//configuration.Value = result.Configuration
+			var v tftypes.Value
+			if _, ok := configuration.Value.(string); ok {
+				b, _ := json.Marshal(result.Configuration)
+				if suppressEquivalentJSONDiffs(configuration.Value.(string), string(b)) {
+					v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
+				} else {
+					v = tftypes.NewValue(tftypes.String, string(b))
+				}
+			} else {
+				_, v, _ = marshal(result.Configuration)
 			}
+
 			state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
 				AttributeTypes: r.accessTokenValidatorTypes(),
 			}, map[string]tftypes.Value{
 				"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
 				"name":          tftypes.NewValue(tftypes.String, result.Name),
 				"class_name":    tftypes.NewValue(tftypes.String, result.ClassName),
-				"configuration": tftypes.NewValue(tftypes.String, ob),
+				"configuration": v,
 			}))
 			if err != nil {
 				return &tfprotov5.ApplyResourceChangeResponse{
@@ -388,7 +412,7 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
-			var id, name, className, configuration string
+			var id, name, className string
 			err = values["id"].As(&id)
 			if err != nil {
 				return applyResourceChangeError(err), nil
@@ -401,12 +425,17 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
+			var configuration asgotypes.GoPrimitive
 			err = values["configuration"].As(&configuration)
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
 			var dat map[string]interface{}
-			_ = json.Unmarshal([]byte(configuration), &dat)
+			if _, ok := configuration.Value.(string); ok {
+				_ = json.Unmarshal([]byte(configuration.Value.(string)), &dat)
+			} else {
+				dat = configuration.Value.(map[string]interface{})
+			}
 			input := &accessTokenValidators.UpdateAccessTokenValidatorCommandInput{
 				Id: id,
 				Body: models.AccessTokenValidatorView{
@@ -427,11 +456,16 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 					},
 				}, nil
 			}
-			b, _ := json.Marshal(result.Configuration)
-
-			ob := string(b)
-			if suppressEquivalentJSONDiffs(configuration, string(b)) {
-				ob = configuration
+			var v tftypes.Value
+			if _, ok := configuration.Value.(string); ok {
+				b, _ := json.Marshal(result.Configuration)
+				if suppressEquivalentJSONDiffs(configuration.Value.(string), string(b)) {
+					v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
+				} else {
+					v = tftypes.NewValue(tftypes.String, string(b))
+				}
+			} else {
+				_, v, _ = marshal(result.Configuration)
 			}
 			state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
 				AttributeTypes: r.accessTokenValidatorTypes(),
@@ -439,7 +473,7 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 				"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
 				"name":          tftypes.NewValue(tftypes.String, result.Name),
 				"class_name":    tftypes.NewValue(tftypes.String, result.ClassName),
-				"configuration": tftypes.NewValue(tftypes.String, ob),
+				"configuration": v,
 			}))
 			if err != nil {
 				return &tfprotov5.ApplyResourceChangeResponse{
