@@ -17,22 +17,18 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const unexpectedConfigurationFormat = "Unexpected configuration format"
+
 func dynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tftypes.Type) (map[string]tftypes.Value, []*tfprotov5.Diagnostic) {
 	val, err := conf.Unmarshal(types)
 	if err != nil {
-		return nil, []*tfprotov5.Diagnostic{
-			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
-				Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-			},
-		}
+		return nil, []*tfprotov5.Diagnostic{schemaDataSourceMistmatchDiagnostic(err)}
 	}
 	if !val.Is(types) {
 		return nil, []*tfprotov5.Diagnostic{
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
+				Summary:  unexpectedConfigurationFormat,
 				Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.",
 			},
 		}
@@ -40,13 +36,7 @@ func dynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tftypes.Typ
 	values := map[string]tftypes.Value{}
 	err = val.As(&values)
 	if err != nil {
-		return nil, []*tfprotov5.Diagnostic{
-			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
-				Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-			},
-		}
+		return nil, []*tfprotov5.Diagnostic{schemaDataSourceMistmatchDiagnostic(err)}
 	}
 	return values, nil
 }
@@ -54,19 +44,13 @@ func dynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tftypes.Typ
 func resourceDynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tftypes.Type) (map[string]tftypes.Value, []*tfprotov5.Diagnostic) {
 	val, err := conf.Unmarshal(types)
 	if err != nil {
-		return nil, []*tfprotov5.Diagnostic{
-			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
-				Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-			},
-		}
+		return nil, []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}
 	}
 	if !val.Is(types) {
 		return nil, []*tfprotov5.Diagnostic{
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
+				Summary:  unexpectedConfigurationFormat,
 				Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.",
 			},
 		}
@@ -74,13 +58,7 @@ func resourceDynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tft
 	values := map[string]tftypes.Value{}
 	err = val.As(&values)
 	if err != nil {
-		return nil, []*tfprotov5.Diagnostic{
-			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
-				Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-			},
-		}
+		return nil, []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}
 	}
 	return values, nil
 }
@@ -88,22 +66,14 @@ func resourceDynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tft
 func valuesFromTypeConfigRequest(req *tfprotov5.ValidateResourceTypeConfigRequest, typ tftypes.Type) (*tfprotov5.ValidateResourceTypeConfigResponse, map[string]tftypes.Value) {
 	val, err := req.Config.Unmarshal(typ)
 	if err != nil {
-		return &tfprotov5.ValidateResourceTypeConfigResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
-		}, nil
+		return &tfprotov5.ValidateResourceTypeConfigResponse{Diagnostics: []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}}, nil
 	}
 	if !val.Is(typ) {
 		return &tfprotov5.ValidateResourceTypeConfigResponse{
 			Diagnostics: []*tfprotov5.Diagnostic{
 				{
 					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
+					Summary:  unexpectedConfigurationFormat,
 					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.",
 				},
 			},
@@ -112,15 +82,7 @@ func valuesFromTypeConfigRequest(req *tfprotov5.ValidateResourceTypeConfigReques
 	values := map[string]tftypes.Value{}
 	err = val.As(&values)
 	if err != nil {
-		return &tfprotov5.ValidateResourceTypeConfigResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected configuration format",
-					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
-		}, nil
+		return &tfprotov5.ValidateResourceTypeConfigResponse{Diagnostics: []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}}, nil
 	}
 	return nil, values
 }
@@ -130,7 +92,7 @@ func readResourceChangeError(err error) *tfprotov5.ReadResourceResponse {
 		Diagnostics: []*tfprotov5.Diagnostic{
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
+				Summary:  unexpectedConfigurationFormat,
 				Detail:   err.Error(),
 			},
 		},
@@ -138,27 +100,11 @@ func readResourceChangeError(err error) *tfprotov5.ReadResourceResponse {
 }
 
 func planResourceChangeError(err error) *tfprotov5.PlanResourceChangeResponse {
-	return &tfprotov5.PlanResourceChangeResponse{
-		Diagnostics: []*tfprotov5.Diagnostic{
-			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
-				Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-			},
-		},
-	}
+	return &tfprotov5.PlanResourceChangeResponse{Diagnostics: []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}}
 }
 
 func applyResourceChangeError(err error) *tfprotov5.ApplyResourceChangeResponse {
-	return &tfprotov5.ApplyResourceChangeResponse{
-		Diagnostics: []*tfprotov5.Diagnostic{
-			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
-				Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-			},
-		},
-	}
+	return &tfprotov5.ApplyResourceChangeResponse{Diagnostics: []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}}
 }
 
 func importResourceError(detail string) *tfprotov5.ImportResourceStateResponse {
@@ -170,6 +116,30 @@ func importResourceError(detail string) *tfprotov5.ImportResourceStateResponse {
 				Detail:   detail,
 			},
 		},
+	}
+}
+
+func schemaResourceMistmatchDiagnostic(err error) *tfprotov5.Diagnostic {
+	return &tfprotov5.Diagnostic{
+		Severity: tfprotov5.DiagnosticSeverityError,
+		Summary:  unexpectedConfigurationFormat,
+		Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+	}
+}
+
+func schemaDataSourceMistmatchDiagnostic(err error) *tfprotov5.Diagnostic {
+	return &tfprotov5.Diagnostic{
+		Severity: tfprotov5.DiagnosticSeverityError,
+		Summary:  unexpectedConfigurationFormat,
+		Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+	}
+}
+
+func stateEncodingDiagnostic(err error) *tfprotov5.Diagnostic {
+	return &tfprotov5.Diagnostic{
+		Severity: tfprotov5.DiagnosticSeverityError,
+		Summary:  "Error encoding state",
+		Detail:   fmt.Sprintf("Error encoding state: %s", err.Error()),
 	}
 }
 
@@ -329,26 +299,7 @@ func descriptorsHasClassName(className string, desc *models.DescriptorsView) *tf
 //
 func validateConfiguration(className string, configuration asgotypes.GoPrimitive, desc *models.DescriptorsView) []*tfprotov5.Diagnostic {
 	var diags []*tfprotov5.Diagnostic
-
-	if v, ok := configuration.Value.(map[string]interface{}); ok {
-		for s := range v {
-			if v[s] == nil {
-				diags = append(diags,
-					&tfprotov5.Diagnostic{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Configuration Validation Failure",
-						Detail:   fmt.Sprintf("configuration fields cannot be null, remove '%s' or set a non-null value", s),
-						Attribute: &tftypes.AttributePath{
-							Steps: []tftypes.AttributePathStep{
-								tftypes.AttributeName("configuration"),
-								tftypes.ElementKeyString(s),
-							},
-						},
-					})
-			}
-		}
-	}
-
+	diags = append(diags, validateNoNullConfigurationAttributes(configuration)...)
 	var conf string
 	if str, ok := configuration.Value.(string); ok {
 		conf = str
@@ -395,6 +346,29 @@ func validateConfiguration(className string, configuration asgotypes.GoPrimitive
 						})
 					}
 				}
+			}
+		}
+	}
+	return diags
+}
+
+func validateNoNullConfigurationAttributes(configuration asgotypes.GoPrimitive) []*tfprotov5.Diagnostic {
+	var diags []*tfprotov5.Diagnostic
+	if v, ok := configuration.Value.(map[string]interface{}); ok {
+		for s := range v {
+			if v[s] == nil {
+				diags = append(diags,
+					&tfprotov5.Diagnostic{
+						Severity: tfprotov5.DiagnosticSeverityError,
+						Summary:  "Configuration Validation Failure",
+						Detail:   fmt.Sprintf("configuration fields cannot be null, remove '%s' or set a non-null value", s),
+						Attribute: &tftypes.AttributePath{
+							Steps: []tftypes.AttributePathStep{
+								tftypes.AttributeName("configuration"),
+								tftypes.ElementKeyString(s),
+							},
+						},
+					})
 			}
 		}
 	}

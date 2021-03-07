@@ -1,4 +1,4 @@
-on:  [push]
+on:  [push, pull_request]
 name: e2e
 jobs:
   e2e:
@@ -72,3 +72,7 @@ jobs:
           TF_VAR_pa_version: ${{ matrix.pingaccess-version }}
         run: terraform plan -detailed-exitcode
         working-directory: func-tests
+
+      - name: Container logs
+        if: ${{ failure() }}
+        run: docker logs `docker ps --filter expose=9000 -q`

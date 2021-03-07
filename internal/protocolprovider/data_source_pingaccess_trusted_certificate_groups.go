@@ -106,7 +106,7 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 				Diagnostics: []*tfprotov5.Diagnostic{
 					{
 						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected configuration format",
+						Summary:  unexpectedConfigurationFormat,
 						Detail:   "The data source got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
 					},
 				},
@@ -121,7 +121,7 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 				Diagnostics: []*tfprotov5.Diagnostic{
 					{
 						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected configuration format",
+						Summary:  unexpectedConfigurationFormat,
 						Detail:   fmt.Sprintf("unable to find TrustedCertificateGroup with the name '%s', result was nil", name),
 					},
 				},
@@ -132,7 +132,7 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 				Diagnostics: []*tfprotov5.Diagnostic{
 					{
 						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected configuration format",
+						Summary:  unexpectedConfigurationFormat,
 						Detail:   fmt.Sprintf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", name, len(result.Items)),
 					},
 				},
@@ -143,7 +143,7 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 				Diagnostics: []*tfprotov5.Diagnostic{
 					{
 						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected configuration format",
+						Summary:  unexpectedConfigurationFormat,
 						Detail:   fmt.Sprintf("unable to find TrustedCertificateGroup with the name '%s' found '%d' results", name, len(result.Items)),
 					},
 				},
@@ -179,7 +179,7 @@ func (d dataPingAccessTrustedCertificateGroups) ReadDataSource(ctx context.Conte
 		Diagnostics: []*tfprotov5.Diagnostic{
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  "Unexpected configuration format",
+				Summary:  unexpectedConfigurationFormat,
 				Detail:   "name field not known??",
 			},
 		},

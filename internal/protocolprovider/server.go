@@ -52,103 +52,55 @@ func (p *provider) ConfigureProvider(_ context.Context, req *tfprotov5.Configure
 	}
 	val, err := req.Config.Unmarshal(configType)
 	if err != nil {
-		return &tfprotov5.ConfigureProviderResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected provider configuration",
-					Detail:   "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
-		}, nil
+		return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err, nil)}}, nil
 	}
 	values := map[string]tftypes.Value{}
 	err = val.As(&values)
 	if err != nil {
-		return &tfprotov5.ConfigureProviderResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  "Unexpected provider configuration",
-					Detail:   "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
-				},
-			},
-		}, nil
+		return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err, nil)}}, nil
 	}
 	if values["username"].IsKnown() && !values["username"].IsNull() {
 		err = values["username"].As(&c.Username)
 		if err != nil {
-			return &tfprotov5.ConfigureProviderResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected provider configuration",
-						Detail:   "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
-						Attribute: &tftypes.AttributePath{
-							Steps: []tftypes.AttributePathStep{
-								tftypes.AttributeName("username"),
-							},
-						},
+			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
+				&tftypes.AttributePath{
+					Steps: []tftypes.AttributePathStep{
+						tftypes.AttributeName("username"),
 					},
-				},
-			}, nil
+				})}}, nil
 		}
 	}
 	if values["password"].IsKnown() && !values["password"].IsNull() {
 		err = values["password"].As(&c.Password)
 		if err != nil {
-			return &tfprotov5.ConfigureProviderResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected provider configuration",
-						Detail:   "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
-						Attribute: &tftypes.AttributePath{
-							Steps: []tftypes.AttributePathStep{
-								tftypes.AttributeName("password"),
-							},
-						},
+			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
+				&tftypes.AttributePath{
+					Steps: []tftypes.AttributePathStep{
+						tftypes.AttributeName("password"),
 					},
-				},
-			}, nil
+				})}}, nil
 		}
 	}
 	if values["context"].IsKnown() && !values["context"].IsNull() {
 		err = values["context"].As(&c.Context)
 		if err != nil {
-			return &tfprotov5.ConfigureProviderResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected provider configuration",
-						Detail:   "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
-						Attribute: &tftypes.AttributePath{
-							Steps: []tftypes.AttributePathStep{
-								tftypes.AttributeName("context"),
-							},
-						},
+			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
+				&tftypes.AttributePath{
+					Steps: []tftypes.AttributePathStep{
+						tftypes.AttributeName("context"),
 					},
-				},
-			}, nil
+				})}}, nil
 		}
 	}
 	if values["base_url"].IsKnown() && !values["base_url"].IsNull() {
 		err = values["base_url"].As(&c.BaseURL)
 		if err != nil {
-			return &tfprotov5.ConfigureProviderResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Unexpected provider configuration",
-						Detail:   "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
-						Attribute: &tftypes.AttributePath{
-							Steps: []tftypes.AttributePathStep{
-								tftypes.AttributeName("base_url"),
-							},
-						},
+			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
+				&tftypes.AttributePath{
+					Steps: []tftypes.AttributePathStep{
+						tftypes.AttributeName("base_url"),
 					},
-				},
-			}, nil
+				})}}, nil
 		}
 	}
 	if v := os.Getenv("PINGACCESS_USERNAME"); v != "" {
@@ -247,3 +199,12 @@ func Int(v int) *int { return &v }
 // String is a helper routine that allocates a new string value
 // to store v and returns a pointer to it.
 func String(v string) *string { return &v }
+
+func unexpectedProviderConfigDiagnostic(err error, path *tftypes.AttributePath) *tfprotov5.Diagnostic {
+	return &tfprotov5.Diagnostic{
+		Severity:  tfprotov5.DiagnosticSeverityError,
+		Summary:   "Unexpected provider configuration",
+		Detail:    "The provider got a configuration that did not match it's schema. This may indicate an error in the provider.\n\nError: " + err.Error(),
+		Attribute: path,
+	}
+}

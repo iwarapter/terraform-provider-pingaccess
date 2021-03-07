@@ -35,8 +35,10 @@ func (p *provider) ValidateResourceTypeConfig(ctx context.Context, req *tfprotov
 func (p *provider) UpgradeResourceState(ctx context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
-		res := &resourcePingAccessAccessTokenValidator{
-			client: nil,
+		res := &resourcePingAccessAccessTokenValidator{}
+		if p.client != nil {
+			res.client = p.client.AccessTokenValidators
+			res.descriptors = p.client.AccessTokenValidatorsDescriptors
 		}
 		return res.UpgradeResourceState(ctx, req)
 	case "pingaccess_site_authenticator":
@@ -53,8 +55,10 @@ func (p *provider) UpgradeResourceState(ctx context.Context, req *tfprotov5.Upgr
 func (p *provider) ReadResource(ctx context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
-		res := &resourcePingAccessAccessTokenValidator{
-			client: p.client.AccessTokenValidators,
+		res := &resourcePingAccessAccessTokenValidator{}
+		if p.client != nil {
+			res.client = p.client.AccessTokenValidators
+			res.descriptors = p.client.AccessTokenValidatorsDescriptors
 		}
 		return res.ReadResource(ctx, req)
 	case "pingaccess_site_authenticator":
@@ -74,6 +78,7 @@ func (p *provider) PlanResourceChange(ctx context.Context, req *tfprotov5.PlanRe
 		res := &resourcePingAccessAccessTokenValidator{}
 		if p.client != nil {
 			res.client = p.client.AccessTokenValidators
+			res.descriptors = p.client.AccessTokenValidatorsDescriptors
 		}
 		return res.PlanResourceChange(ctx, req)
 	case "pingaccess_site_authenticator":
@@ -90,8 +95,10 @@ func (p *provider) PlanResourceChange(ctx context.Context, req *tfprotov5.PlanRe
 func (p *provider) ApplyResourceChange(ctx context.Context, req *tfprotov5.ApplyResourceChangeRequest) (*tfprotov5.ApplyResourceChangeResponse, error) {
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
-		res := &resourcePingAccessAccessTokenValidator{
-			client: p.client.AccessTokenValidators,
+		res := &resourcePingAccessAccessTokenValidator{}
+		if p.client != nil {
+			res.client = p.client.AccessTokenValidators
+			res.descriptors = p.client.AccessTokenValidatorsDescriptors
 		}
 		return res.ApplyResourceChange(ctx, req)
 	case "pingaccess_site_authenticator":
@@ -108,8 +115,10 @@ func (p *provider) ApplyResourceChange(ctx context.Context, req *tfprotov5.Apply
 func (p *provider) ImportResourceState(ctx context.Context, req *tfprotov5.ImportResourceStateRequest) (*tfprotov5.ImportResourceStateResponse, error) {
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
-		res := &resourcePingAccessAccessTokenValidator{
-			client: p.client.AccessTokenValidators,
+		res := &resourcePingAccessAccessTokenValidator{}
+		if p.client != nil {
+			res.client = p.client.AccessTokenValidators
+			res.descriptors = p.client.AccessTokenValidatorsDescriptors
 		}
 		return res.ImportResourceState(ctx, req)
 	case "pingaccess_site_authenticator":
