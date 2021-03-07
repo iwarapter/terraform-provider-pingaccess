@@ -399,9 +399,9 @@ func maskConfigFromRuleDescriptor(desc *models.RuleDescriptorView, input *string
 // fields.
 //
 // TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
-func maskConfigFromDescriptors(desc *models.DescriptorsView, input *string, originalConfig string, config string) string {
+func maskConfigFromDescriptors(desc *models.DescriptorsView, className *string, originalConfig string, config string) string {
 	for _, value := range desc.Items {
-		if *value.ClassName == *input {
+		if *value.ClassName == *className {
 			config = maskConfigFromDescriptor(value, String(""), originalConfig, config)
 		}
 	}

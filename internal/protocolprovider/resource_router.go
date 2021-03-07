@@ -15,11 +15,19 @@ func (e errUnsupportedResource) Error() string {
 func (p *provider) ValidateResourceTypeConfig(ctx context.Context, req *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
-		res := &resourcePingAccessAccessTokenValidator{
-			client: nil,
+		res := &resourcePingAccessAccessTokenValidator{}
+		if p.client != nil {
+			res.client = p.client.AccessTokenValidators
+			res.descriptors = p.client.AccessTokenValidatorsDescriptors
 		}
 		return res.ValidateResourceTypeConfig(ctx, req)
-
+	case "pingaccess_site_authenticator":
+		res := &resourcePingAccessSiteAuthenticator{}
+		if p.client != nil {
+			res.client = p.client.SiteAuthenticators
+			res.descriptors = p.client.SiteAuthenticatorsDescriptors
+		}
+		return res.ValidateResourceTypeConfig(ctx, req)
 	}
 	return nil, errUnsupportedResource(req.TypeName)
 }
@@ -31,7 +39,13 @@ func (p *provider) UpgradeResourceState(ctx context.Context, req *tfprotov5.Upgr
 			client: nil,
 		}
 		return res.UpgradeResourceState(ctx, req)
-
+	case "pingaccess_site_authenticator":
+		res := &resourcePingAccessSiteAuthenticator{}
+		if p.client != nil {
+			res.client = p.client.SiteAuthenticators
+			res.descriptors = p.client.SiteAuthenticatorsDescriptors
+		}
+		return res.UpgradeResourceState(ctx, req)
 	}
 	return nil, errUnsupportedResource(req.TypeName)
 }
@@ -43,7 +57,13 @@ func (p *provider) ReadResource(ctx context.Context, req *tfprotov5.ReadResource
 			client: p.client.AccessTokenValidators,
 		}
 		return res.ReadResource(ctx, req)
-
+	case "pingaccess_site_authenticator":
+		res := &resourcePingAccessSiteAuthenticator{}
+		if p.client != nil {
+			res.client = p.client.SiteAuthenticators
+			res.descriptors = p.client.SiteAuthenticatorsDescriptors
+		}
+		return res.ReadResource(ctx, req)
 	}
 	return nil, errUnsupportedResource(req.TypeName)
 }
@@ -56,7 +76,13 @@ func (p *provider) PlanResourceChange(ctx context.Context, req *tfprotov5.PlanRe
 			res.client = p.client.AccessTokenValidators
 		}
 		return res.PlanResourceChange(ctx, req)
-
+	case "pingaccess_site_authenticator":
+		res := &resourcePingAccessSiteAuthenticator{}
+		if p.client != nil {
+			res.client = p.client.SiteAuthenticators
+			res.descriptors = p.client.SiteAuthenticatorsDescriptors
+		}
+		return res.PlanResourceChange(ctx, req)
 	}
 	return nil, errUnsupportedResource(req.TypeName)
 }
@@ -68,7 +94,13 @@ func (p *provider) ApplyResourceChange(ctx context.Context, req *tfprotov5.Apply
 			client: p.client.AccessTokenValidators,
 		}
 		return res.ApplyResourceChange(ctx, req)
-
+	case "pingaccess_site_authenticator":
+		res := &resourcePingAccessSiteAuthenticator{}
+		if p.client != nil {
+			res.client = p.client.SiteAuthenticators
+			res.descriptors = p.client.SiteAuthenticatorsDescriptors
+		}
+		return res.ApplyResourceChange(ctx, req)
 	}
 	return nil, errUnsupportedResource(req.TypeName)
 }
@@ -77,10 +109,16 @@ func (p *provider) ImportResourceState(ctx context.Context, req *tfprotov5.Impor
 	switch req.TypeName {
 	case "pingaccess_access_token_validator":
 		res := &resourcePingAccessAccessTokenValidator{
-			client: nil,
+			client: p.client.AccessTokenValidators,
 		}
 		return res.ImportResourceState(ctx, req)
-
+	case "pingaccess_site_authenticator":
+		res := &resourcePingAccessSiteAuthenticator{}
+		if p.client != nil {
+			res.client = p.client.SiteAuthenticators
+			res.descriptors = p.client.SiteAuthenticatorsDescriptors
+		}
+		return res.ImportResourceState(ctx, req)
 	}
 	return nil, errUnsupportedResource(req.TypeName)
 }

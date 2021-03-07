@@ -7,12 +7,12 @@ import (
 	tf5server "github.com/hashicorp/terraform-plugin-go/tfprotov5/server"
 	tfmux "github.com/hashicorp/terraform-plugin-mux"
 	protocol "github.com/iwarapter/terraform-provider-pingaccess/internal/protocolprovider"
-	sdkv2 "github.com/iwarapter/terraform-provider-pingaccess/internal/sdkv2provider"
+	"github.com/iwarapter/terraform-provider-pingaccess/internal/sdkv2provider"
 )
 
 func main() {
 	ctx := context.Background()
-	sdkv2 := sdkv2.Provider().GRPCProvider
+	sdkv2 := sdkv2provider.Provider().GRPCProvider
 	factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2, protocol.Server)
 	if err != nil {
 		panic(err)

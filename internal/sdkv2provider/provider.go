@@ -65,7 +65,6 @@ func Provider() *schema.Provider {
 			"pingaccess_application":                     resourcePingAccessApplication(),
 			"pingaccess_application_resource":            resourcePingAccessApplicationResource(),
 			"pingaccess_websession":                      resourcePingAccessWebSession(),
-			"pingaccess_site_authenticator":              resourcePingAccessSiteAuthenticator(),
 			"pingaccess_third_party_service":             resourcePingAccessThirdPartyService(),
 			"pingaccess_trusted_certificate_group":       resourcePingAccessTrustedCertificateGroups(),
 			"pingaccess_pingfederate_admin":              resourcePingAccessPingFederateAdmin(),

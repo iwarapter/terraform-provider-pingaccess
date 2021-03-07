@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"syscall"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
 	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
@@ -68,50 +70,52 @@ type cfg struct {
 }
 
 type paClient struct {
-	AccessTokenValidators      accessTokenValidators.AccessTokenValidatorsAPI
-	Acme                       acme.AcmeAPI
-	AdminConfig                adminConfig.AdminConfigAPI
-	AdminSessionInfo           adminSessionInfo.AdminSessionInfoAPI
-	Agents                     agents.AgentsAPI
-	Applications               applications.ApplicationsAPI
-	Auth                       auth.AuthAPI
-	AuthTokenManagement        authTokenManagement.AuthTokenManagementAPI
-	AuthnReqLists              authnReqLists.AuthnReqListsAPI
-	Backup                     backup.BackupAPI
-	Certificates               certificates.CertificatesAPI
-	Config                     config.ConfigAPI
-	EngineListeners            engineListeners.EngineListenersAPI
-	Engines                    engines.EnginesAPI
-	GlobalUnprotectedResources globalUnprotectedResources.GlobalUnprotectedResourcesAPI
-	HighAvailability           highAvailability.HighAvailabilityAPI
-	HsmProviders               hsmProviders.HsmProvidersAPI
-	HttpConfig                 httpConfig.HttpConfigAPI
-	HttpsListeners             httpsListeners.HttpsListenersAPI
-	IdentityMappings           identityMappings.IdentityMappingsAPI
-	KeyPairs                   keyPairs.KeyPairsAPI
-	License                    license.LicenseAPI
-	Oauth                      oauth.OauthAPI
-	OauthKeyManagement         oauthKeyManagement.OauthKeyManagementAPI
-	Oidc                       oidc.OidcAPI
-	Pingfederate               pingfederate.PingfederateAPI
-	Pingone                    pingone.PingoneAPI
-	Proxies                    proxies.ProxiesAPI
-	Redirects                  redirects.RedirectsAPI
-	RejectionHandlers          rejectionHandlers.RejectionHandlersAPI
-	Rules                      rules.RulesAPI
-	Rulesets                   rulesets.RulesetsAPI
-	SharedSecrets              sharedSecrets.SharedSecretsAPI
-	SiteAuthenticators         siteAuthenticators.SiteAuthenticatorsAPI
-	Sites                      sites.SitesAPI
-	ThirdPartyServices         thirdPartyServices.ThirdPartyServicesAPI
-	TokenProvider              tokenProvider.TokenProviderAPI
-	TrustedCertificateGroups   trustedCertificateGroups.TrustedCertificateGroupsAPI
-	UnknownResources           unknownResources.UnknownResourcesAPI
-	Users                      users.UsersAPI
-	Version                    version.VersionAPI
-	Virtualhosts               virtualhosts.VirtualhostsAPI
-	WebSessionManagement       webSessionManagement.WebSessionManagementAPI
-	WebSessions                webSessions.WebSessionsAPI
+	AccessTokenValidators            accessTokenValidators.AccessTokenValidatorsAPI
+	AccessTokenValidatorsDescriptors *models.DescriptorsView
+	Acme                             acme.AcmeAPI
+	AdminConfig                      adminConfig.AdminConfigAPI
+	AdminSessionInfo                 adminSessionInfo.AdminSessionInfoAPI
+	Agents                           agents.AgentsAPI
+	Applications                     applications.ApplicationsAPI
+	Auth                             auth.AuthAPI
+	AuthTokenManagement              authTokenManagement.AuthTokenManagementAPI
+	AuthnReqLists                    authnReqLists.AuthnReqListsAPI
+	Backup                           backup.BackupAPI
+	Certificates                     certificates.CertificatesAPI
+	Config                           config.ConfigAPI
+	EngineListeners                  engineListeners.EngineListenersAPI
+	Engines                          engines.EnginesAPI
+	GlobalUnprotectedResources       globalUnprotectedResources.GlobalUnprotectedResourcesAPI
+	HighAvailability                 highAvailability.HighAvailabilityAPI
+	HsmProviders                     hsmProviders.HsmProvidersAPI
+	HttpConfig                       httpConfig.HttpConfigAPI
+	HttpsListeners                   httpsListeners.HttpsListenersAPI
+	IdentityMappings                 identityMappings.IdentityMappingsAPI
+	KeyPairs                         keyPairs.KeyPairsAPI
+	License                          license.LicenseAPI
+	Oauth                            oauth.OauthAPI
+	OauthKeyManagement               oauthKeyManagement.OauthKeyManagementAPI
+	Oidc                             oidc.OidcAPI
+	Pingfederate                     pingfederate.PingfederateAPI
+	Pingone                          pingone.PingoneAPI
+	Proxies                          proxies.ProxiesAPI
+	Redirects                        redirects.RedirectsAPI
+	RejectionHandlers                rejectionHandlers.RejectionHandlersAPI
+	Rules                            rules.RulesAPI
+	Rulesets                         rulesets.RulesetsAPI
+	SharedSecrets                    sharedSecrets.SharedSecretsAPI
+	SiteAuthenticators               siteAuthenticators.SiteAuthenticatorsAPI
+	SiteAuthenticatorsDescriptors    *models.DescriptorsView
+	Sites                            sites.SitesAPI
+	ThirdPartyServices               thirdPartyServices.ThirdPartyServicesAPI
+	TokenProvider                    tokenProvider.TokenProviderAPI
+	TrustedCertificateGroups         trustedCertificateGroups.TrustedCertificateGroupsAPI
+	UnknownResources                 unknownResources.UnknownResourcesAPI
+	Users                            users.UsersAPI
+	Version                          version.VersionAPI
+	Virtualhosts                     virtualhosts.VirtualhostsAPI
+	WebSessionManagement             webSessionManagement.WebSessionManagementAPI
+	WebSessions                      webSessions.WebSessionsAPI
 
 	apiVersion string
 }
@@ -190,8 +194,23 @@ func (c *cfg) Client() (*paClient, *tfprotov5.Diagnostic) {
 			Detail:   fmt.Sprintf("Unable to connect to PingAccess: %s", checkErr(err)),
 		}
 	}
-
 	client.apiVersion = *v.Version
+	client.AccessTokenValidatorsDescriptors, _, err = client.AccessTokenValidators.GetAccessTokenValidatorDescriptorsCommand()
+	if err != nil {
+		return nil, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Setup Error",
+			Detail:   fmt.Sprintf("Unable to retrieve AccessTokenValidatorsDescriptors: %s", err.Error()),
+		}
+	}
+	client.SiteAuthenticatorsDescriptors, _, err = client.SiteAuthenticators.GetSiteAuthenticatorDescriptorsCommand()
+	if err != nil {
+		return nil, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Setup Error",
+			Detail:   fmt.Sprintf("Unable to retrieve SiteAuthenticatorsDescriptors: %s", err.Error()),
+		}
+	}
 
 	return &client, nil
 }

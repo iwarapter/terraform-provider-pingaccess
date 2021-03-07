@@ -8,10 +8,11 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/tidwall/sjson"
+
 	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/tidwall/gjson"
 )
@@ -84,12 +85,53 @@ func resourceDynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tft
 	return values, nil
 }
 
-func planResourceChangeValidationError(err error) *tfprotov5.PlanResourceChangeResponse {
+func valuesFromTypeConfigRequest(req *tfprotov5.ValidateResourceTypeConfigRequest, typ tftypes.Type) (*tfprotov5.ValidateResourceTypeConfigResponse, map[string]tftypes.Value) {
+	val, err := req.Config.Unmarshal(typ)
+	if err != nil {
+		return &tfprotov5.ValidateResourceTypeConfigResponse{
+			Diagnostics: []*tfprotov5.Diagnostic{
+				{
+					Severity: tfprotov5.DiagnosticSeverityError,
+					Summary:  "Unexpected configuration format",
+					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+				},
+			},
+		}, nil
+	}
+	if !val.Is(typ) {
+		return &tfprotov5.ValidateResourceTypeConfigResponse{
+			Diagnostics: []*tfprotov5.Diagnostic{
+				{
+					Severity: tfprotov5.DiagnosticSeverityError,
+					Summary:  "Unexpected configuration format",
+					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.",
+				},
+			},
+		}, nil
+	}
+	values := map[string]tftypes.Value{}
+	err = val.As(&values)
+	if err != nil {
+		return &tfprotov5.ValidateResourceTypeConfigResponse{
+			Diagnostics: []*tfprotov5.Diagnostic{
+				{
+					Severity: tfprotov5.DiagnosticSeverityError,
+					Summary:  "Unexpected configuration format",
+					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+				},
+			},
+		}, nil
+	}
+	return nil, values
+}
+
+func planResourceChangeValidationError(err error, attribute *tftypes.AttributePath) *tfprotov5.PlanResourceChangeResponse {
 	return &tfprotov5.PlanResourceChangeResponse{
 		Diagnostics: []*tfprotov5.Diagnostic{
 			{
-				Severity: tfprotov5.DiagnosticSeverityError,
-				Summary:  err.Error(),
+				Severity:  tfprotov5.DiagnosticSeverityError,
+				Summary:   err.Error(),
+				Attribute: attribute,
 			},
 		},
 	}
@@ -126,6 +168,18 @@ func applyResourceChangeError(err error) *tfprotov5.ApplyResourceChangeResponse 
 				Severity: tfprotov5.DiagnosticSeverityError,
 				Summary:  "Unexpected configuration format",
 				Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+			},
+		},
+	}
+}
+
+func importResourceError(detail string) *tfprotov5.ImportResourceStateResponse {
+	return &tfprotov5.ImportResourceStateResponse{
+		Diagnostics: []*tfprotov5.Diagnostic{
+			{
+				Severity: tfprotov5.DiagnosticSeverityError,
+				Summary:  "Error importing resource",
+				Detail:   detail,
 			},
 		},
 	}
@@ -263,7 +317,7 @@ func marshalTuple(i interface{}) (tftypes.Type, tftypes.Value, error) {
 
 //Checks all the fields in the descriptor to ensure all required fields are set
 //
-func descriptorsHasClassName(className string, desc *models.DescriptorsView) error {
+func descriptorsHasClassName(className string, desc *models.DescriptorsView) *tfprotov5.Diagnostic {
 	var classes []string
 	for _, value := range desc.Items {
 		classes = append(classes, *value.ClassName)
@@ -271,13 +325,42 @@ func descriptorsHasClassName(className string, desc *models.DescriptorsView) err
 			return nil
 		}
 	}
-	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
+	return &tfprotov5.Diagnostic{
+		Severity: tfprotov5.DiagnosticSeverityError,
+		Summary:  "Class Name Validation Failure",
+		Detail:   fmt.Sprintf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", ")),
+		Attribute: &tftypes.AttributePath{
+			Steps: []tftypes.AttributePathStep{
+				tftypes.AttributeName("class_name"),
+			},
+		},
+	}
 }
 
 //Checks the class name specified exists in the DescriptorsView
 //
-func validateConfiguration(className string, configuration asgotypes.GoPrimitive, desc *models.DescriptorsView) error {
-	var diags diag.Diagnostics
+func validateConfiguration(className string, configuration asgotypes.GoPrimitive, desc *models.DescriptorsView) []*tfprotov5.Diagnostic {
+	var diags []*tfprotov5.Diagnostic
+
+	if v, ok := configuration.Value.(map[string]interface{}); ok {
+		for s := range v {
+			if v[s] == nil {
+				diags = append(diags,
+					&tfprotov5.Diagnostic{
+						Severity: tfprotov5.DiagnosticSeverityError,
+						Summary:  "Configuration Validation Failure",
+						Detail:   fmt.Sprintf("configuration fields cannot be null, remove '%s' or set a non-null value", s),
+						Attribute: &tftypes.AttributePath{
+							Steps: []tftypes.AttributePathStep{
+								tftypes.AttributeName("configuration"),
+								tftypes.ElementKeyString(s),
+							},
+						},
+					})
+			}
+		}
+	}
+
 	var conf string
 	if str, ok := configuration.Value.(string); ok {
 		conf = str
@@ -293,21 +376,124 @@ func validateConfiguration(className string, configuration asgotypes.GoPrimitive
 		if *value.ClassName == className {
 			for _, f := range value.ConfigurationFields {
 				if *f.Required {
-					if v := gjson.Get(conf, *f.Name); !v.Exists() {
-						diags = append(diags, diag.Errorf("the field '%s' is required for the class_name '%s'", *f.Name, className)...)
+					v := gjson.Get(conf, *f.Name)
+					if !v.Exists() {
+						diags = append(diags, &tfprotov5.Diagnostic{
+							Severity: tfprotov5.DiagnosticSeverityError,
+							Summary:  "Configuration Validation Failure",
+							Detail:   fmt.Sprintf("the field '%s' is required for the class_name '%s'", *f.Name, className),
+							Attribute: &tftypes.AttributePath{
+								Steps: []tftypes.AttributePathStep{
+									tftypes.AttributeName("configuration"),
+								},
+							},
+						})
+					}
+					if !v.IsObject() && v.Str == "" {
+						steps := []tftypes.AttributePathStep{
+							tftypes.AttributeName("configuration"),
+						}
+						if _, ok := configuration.Value.(string); !ok {
+							steps = append(steps, tftypes.ElementKeyString(*f.Name))
+						}
+
+						diags = append(diags, &tfprotov5.Diagnostic{
+							Severity: tfprotov5.DiagnosticSeverityError,
+							Summary:  "Configuration Validation Failure",
+							Detail:   fmt.Sprintf("the field '%s' is required for the class_name '%s'", *f.Name, className),
+							Attribute: &tftypes.AttributePath{
+								Steps: steps,
+							},
+						})
 					}
 				}
 			}
 		}
 	}
-	if diags.HasError() {
-		msgs := []string{
-			"configuration validation failed against the class descriptor definition",
+	return diags
+}
+
+// Searches a given set of descriptors for a matching className, when found it will check all fields types for
+// a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by
+// current API and set the value back to the original defined. For COMPOSITE fields we then iterate recursively on its
+// fields.
+//
+// TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
+func maskConfigFromDescriptorsAsMap(desc *models.DescriptorsView, className string, input, config map[string]interface{}) string {
+	in, _ := json.Marshal(input)
+	orig, _ := json.Marshal(config)
+	var newConf string
+	for _, value := range desc.Items {
+		if *value.ClassName == className {
+			newConf = maskConfigFromDescriptor(value, String(""), string(orig), string(in))
 		}
-		for _, diagnostic := range diags {
-			msgs = append(msgs, diagnostic.Summary)
-		}
-		return fmt.Errorf(strings.Join(msgs, "\n"))
 	}
-	return nil
+	return newConf
+}
+
+// Searches a given set of descriptors for a matching className, when found it will check all fields types for
+// a CONCEALED flag or COMPOSITE if CONCEALED, we massage the configuration to to remove the encryptedValue returned by
+// current API and set the value back to the original defined. For COMPOSITE fields we then iterate recursively on its
+// fields.
+//
+// TODO This has a drawback that we cannot detect drift in CONCEALED fields due to the way the PingAccess API works.
+func maskConfigFromDescriptors(desc *models.DescriptorsView, className string, input, config string) string {
+	//var conf string
+	//if input.Is(tftypes.String) {
+	//	input.As(&conf)
+	//} else {
+	//	var configuration asgotypes.GoPrimitive
+	//	input.As(&configuration)
+	//	b, _ := json.Marshal(configuration.Value)
+	//	conf = string(b)
+	//}
+	//var originalConfig string
+	//if config.Is(tftypes.String) {
+	//	config.As(&originalConfig)
+	//} else {
+	//	var configuration asgotypes.GoPrimitive
+	//	config.As(&configuration)
+	//	b, _ := json.Marshal(configuration.Value)
+	//	originalConfig = string(b)
+	//}
+	var newConf string
+	for _, value := range desc.Items {
+		if *value.ClassName == className {
+			newConf = maskConfigFromDescriptor(value, String(""), config, input)
+		}
+	}
+	return newConf
+	//if input.Is(tftypes.String) {
+	//	return tftypes.NewValue(tftypes.String, newConf)
+	//}
+	//return tftypes.Value{}
+}
+
+func maskConfigFromDescriptor(desc *models.DescriptorView, input *string, originalConfig string, config string) string {
+	for _, c := range desc.ConfigurationFields {
+		config = maskConfigFromConfigurationField(c, input, originalConfig, config)
+	}
+	return config
+}
+
+func maskConfigFromConfigurationField(field *models.ConfigurationField, input *string, originalConfig string, config string) string {
+	if *field.Type == "CONCEALED" {
+		path := fmt.Sprintf("%s.value", *field.Name)
+		v := gjson.Get(originalConfig, path)
+		if v.Exists() {
+			config, _ = sjson.Set(config, path, v.String())
+		} else if v = gjson.Get(originalConfig, *field.Name); v.Exists() {
+			config, _ = sjson.Set(config, *field.Name, v.String())
+		}
+		config, _ = sjson.Delete(config, fmt.Sprintf("%s.encryptedValue", *field.Name))
+	} else if *field.Type == "COMPOSITE" {
+		for _, value := range field.Fields {
+			newInput := String(fmt.Sprintf("%s.%s", *input, *value.Name))
+			if *input == "" {
+				newInput = value.Name
+			}
+			config = maskConfigFromConfigurationField(value, newInput, originalConfig, config)
+		}
+	}
+	return config
 }

@@ -48,6 +48,7 @@ func-init:
 	@rm -rf func-tests/.terraform
 	@rm -rf func-tests/crash.log
 	@rm -rf func-tests/run.log
+	@rm -rf func-tests/.terraform.lock.hcl
 	@cd func-tests && terraform init
 
 func-plan:
@@ -58,5 +59,9 @@ func-apply:
 
 func-destroy:
 	@cd func-tests && terraform destroy -auto-approve
+
+func-validate:
+	@cd func-tests &&  TF_LOG=TRACE TF_LOG_PATH=./terraform.log terraform validate
+
 
 .PHONY: test build deploy-local

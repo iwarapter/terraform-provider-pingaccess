@@ -61,7 +61,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_virtualhost" "acc_test_virtualhost" {
-		host                         = "acc-test-localhost"
+		host                         = "acctest-localhost"
 		port                         = 4001
 		agent_resource_cache_ttl     = 900
 		key_pair_id                  = 0
@@ -106,7 +106,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 
 	resource "pingaccess_identity_mapping" "idm_foo" {
 		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
-		name       = "Foo"
+		name       = "acctest_foo"
 
 		configuration = <<EOF
 		{
@@ -124,7 +124,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 
 	resource "pingaccess_rule" "acc_test_app_rule" {
 		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "acc_test_app_rule"
+		name = "acctest_app_rule"
 		supported_destinations = [
 			"Site",
 			"Agent"
@@ -159,7 +159,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 
 	resource "pingaccess_websession" "my_session" {
 		depends_on = [pingaccess_pingfederate_runtime.app_demo_pfr, pingaccess_pingfederate_oauth.app_demo_pfo]
-		name = "my-test-session"
+		name = "acctest_session"
 		audience = "all"
 		client_credentials {
 			client_id = "websession"

@@ -227,9 +227,11 @@ func Server() tfprotov5.ProviderServer {
 		},
 		resourceSchemas: map[string]*tfprotov5.Schema{
 			"pingaccess_access_token_validator": resourcePingAccessAccessTokenValidator{}.schema(),
+			"pingaccess_site_authenticator":     resourcePingAccessSiteAuthenticator{}.schema(),
 		},
 		resourceRouter: map[string]tfprotov5.ResourceServer{
 			"pingaccess_access_token_validator": resourcePingAccessAccessTokenValidator{},
+			"pingaccess_site_authenticator":     resourcePingAccessSiteAuthenticator{},
 		},
 	}
 }

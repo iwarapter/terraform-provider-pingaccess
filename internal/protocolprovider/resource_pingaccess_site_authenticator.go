@@ -1,32 +1,30 @@
 package protocol
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
+	"github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators"
 )
 
-type resourcePingAccessAccessTokenValidator struct {
-	client      accessTokenValidators.AccessTokenValidatorsAPI
+type resourcePingAccessSiteAuthenticator struct {
+	client      siteAuthenticators.SiteAuthenticatorsAPI
 	descriptors *models.DescriptorsView
 }
 
-func (r resourcePingAccessAccessTokenValidator) accessTokenValidatorType() tftypes.Type {
+func (r resourcePingAccessSiteAuthenticator) siteAuthenticatorType() tftypes.Type {
 	return tftypes.Object{
-		AttributeTypes: r.accessTokenValidatorTypes(),
+		AttributeTypes: r.siteAuthenticatorTypes(),
 	}
 }
 
-func (r resourcePingAccessAccessTokenValidator) accessTokenValidatorTypes() map[string]tftypes.Type {
+func (r resourcePingAccessSiteAuthenticator) siteAuthenticatorTypes() map[string]tftypes.Type {
 	return map[string]tftypes.Type{
 		"id":            tftypes.String,
 		"name":          tftypes.String,
@@ -35,7 +33,7 @@ func (r resourcePingAccessAccessTokenValidator) accessTokenValidatorTypes() map[
 	}
 }
 
-func (r resourcePingAccessAccessTokenValidator) schema() *tfprotov5.Schema {
+func (r resourcePingAccessSiteAuthenticator) schema() *tfprotov5.Schema {
 	return &tfprotov5.Schema{
 		Version: 1,
 		Block: &tfprotov5.SchemaBlock{
@@ -65,8 +63,8 @@ func (r resourcePingAccessAccessTokenValidator) schema() *tfprotov5.Schema {
 	}
 }
 
-func (r resourcePingAccessAccessTokenValidator) ValidateResourceTypeConfig(_ context.Context, req *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
-	resp, values := valuesFromTypeConfigRequest(req, r.accessTokenValidatorType())
+func (r resourcePingAccessSiteAuthenticator) ValidateResourceTypeConfig(_ context.Context, req *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
+	resp, values := valuesFromTypeConfigRequest(req, r.siteAuthenticatorType())
 	if resp != nil {
 		return resp, nil
 	}
@@ -89,10 +87,10 @@ func (r resourcePingAccessAccessTokenValidator) ValidateResourceTypeConfig(_ con
 	return &tfprotov5.ValidateResourceTypeConfigResponse{}, nil
 }
 
-func (r resourcePingAccessAccessTokenValidator) UpgradeResourceState(_ context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
+func (r resourcePingAccessSiteAuthenticator) UpgradeResourceState(_ context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
 	switch req.Version {
 	case 1:
-		val, err := req.RawState.Unmarshal(r.accessTokenValidatorType())
+		val, err := req.RawState.Unmarshal(r.siteAuthenticatorType())
 		if err != nil {
 			return &tfprotov5.UpgradeResourceStateResponse{
 				Diagnostics: []*tfprotov5.Diagnostic{
@@ -104,7 +102,7 @@ func (r resourcePingAccessAccessTokenValidator) UpgradeResourceState(_ context.C
 				},
 			}, nil
 		}
-		dv, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), val)
+		dv, err := tfprotov5.NewDynamicValue(r.siteAuthenticatorType(), val)
 		if err != nil {
 			return &tfprotov5.UpgradeResourceStateResponse{
 				Diagnostics: []*tfprotov5.Diagnostic{
@@ -132,8 +130,8 @@ func (r resourcePingAccessAccessTokenValidator) UpgradeResourceState(_ context.C
 	}
 }
 
-func (r resourcePingAccessAccessTokenValidator) ReadResource(_ context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
-	values, diags := resourceDynamicValueToTftypesValues(req.CurrentState, r.accessTokenValidatorType())
+func (r resourcePingAccessSiteAuthenticator) ReadResource(_ context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
+	values, diags := resourceDynamicValueToTftypesValues(req.CurrentState, r.siteAuthenticatorType())
 	if len(diags) > 0 {
 		return &tfprotov5.ReadResourceResponse{
 			Diagnostics: diags,
@@ -142,31 +140,37 @@ func (r resourcePingAccessAccessTokenValidator) ReadResource(_ context.Context, 
 	var id string
 	_ = values["id"].As(&id)
 
-	input := &accessTokenValidators.GetAccessTokenValidatorCommandInput{
+	input := &siteAuthenticators.GetSiteAuthenticatorCommandInput{
 		Id: id,
 	}
-	result, _, err := r.client.GetAccessTokenValidatorCommand(input)
+	result, _, err := r.client.GetSiteAuthenticatorCommand(input)
 	if err != nil {
-		return readResourceChangeError(fmt.Errorf("unable to find AccessTokenValidator with the id '%s', result was nil", id)), nil
+		return readResourceChangeError(fmt.Errorf("unable to find SiteAuthenticator with the id '%s', result was nil", id)), nil
 	}
 	if result == nil {
-		return readResourceChangeError(fmt.Errorf("unable to find AccessTokenValidator with the id '%s', result was nil", id)), nil
+		return readResourceChangeError(fmt.Errorf("unable to find SiteAuthenticator with the id '%s', result was nil", id)), nil
 	}
+	var className string
+	_ = values["class_name"].As(&className)
 	var configuration asgotypes.GoPrimitive
 	_ = values["configuration"].As(&configuration)
 	var v tftypes.Value
 	if _, ok := configuration.Value.(string); ok {
 		b, _ := json.Marshal(result.Configuration)
-		if suppressEquivalentJSONDiffs(configuration.Value.(string), string(b)) {
+		str := maskConfigFromDescriptors(r.descriptors, className, string(b), configuration.Value.(string))
+		if suppressEquivalentJSONDiffs(configuration.Value.(string), str) {
 			v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
 		} else {
-			v = tftypes.NewValue(tftypes.String, string(b))
+			v = tftypes.NewValue(tftypes.String, str)
 		}
 	} else {
-		_, v, _ = marshal(result.Configuration)
+		var dat map[string]interface{}
+		s := maskConfigFromDescriptorsAsMap(r.descriptors, className, result.Configuration, configuration.Value.(map[string]interface{}))
+		_ = json.Unmarshal([]byte(s), &dat)
+		_, v, _ = marshal(dat)
 	}
-	state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
-		AttributeTypes: r.accessTokenValidatorTypes(),
+	state, err := tfprotov5.NewDynamicValue(r.siteAuthenticatorType(), tftypes.NewValue(tftypes.Object{
+		AttributeTypes: r.siteAuthenticatorTypes(),
 	}, map[string]tftypes.Value{
 		"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
 		"name":          tftypes.NewValue(tftypes.String, result.Name),
@@ -189,8 +193,8 @@ func (r resourcePingAccessAccessTokenValidator) ReadResource(_ context.Context, 
 	}, nil
 }
 
-func (r resourcePingAccessAccessTokenValidator) PlanResourceChange(_ context.Context, req *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
-	proposed, err := req.ProposedNewState.Unmarshal(r.accessTokenValidatorType())
+func (r resourcePingAccessSiteAuthenticator) PlanResourceChange(_ context.Context, req *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
+	proposed, err := req.ProposedNewState.Unmarshal(r.siteAuthenticatorType())
 	if err != nil {
 		return planResourceChangeError(err), nil
 	}
@@ -199,7 +203,7 @@ func (r resourcePingAccessAccessTokenValidator) PlanResourceChange(_ context.Con
 	if err != nil {
 		return planResourceChangeError(err), nil
 	}
-	prior, err := req.PriorState.Unmarshal(r.accessTokenValidatorType())
+	prior, err := req.PriorState.Unmarshal(r.siteAuthenticatorType())
 	if err != nil {
 		return planResourceChangeError(err), nil
 	}
@@ -237,9 +241,8 @@ func (r resourcePingAccessAccessTokenValidator) PlanResourceChange(_ context.Con
 	} else {
 		_, v, _ = marshal(configuration.Value)
 	}
-
-	state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
-		AttributeTypes: r.accessTokenValidatorTypes(),
+	state, err := tfprotov5.NewDynamicValue(r.siteAuthenticatorType(), tftypes.NewValue(tftypes.Object{
+		AttributeTypes: r.siteAuthenticatorTypes(),
 	}, map[string]tftypes.Value{
 		"id":            tftypes.NewValue(tftypes.String, id),
 		"name":          tftypes.NewValue(tftypes.String, name),
@@ -255,12 +258,12 @@ func (r resourcePingAccessAccessTokenValidator) PlanResourceChange(_ context.Con
 	}, nil
 }
 
-func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Context, req *tfprotov5.ApplyResourceChangeRequest) (*tfprotov5.ApplyResourceChangeResponse, error) {
-	planned, err := req.PlannedState.Unmarshal(r.accessTokenValidatorType())
+func (r resourcePingAccessSiteAuthenticator) ApplyResourceChange(_ context.Context, req *tfprotov5.ApplyResourceChangeRequest) (*tfprotov5.ApplyResourceChangeResponse, error) {
+	planned, err := req.PlannedState.Unmarshal(r.siteAuthenticatorType())
 	if err != nil {
 		return applyResourceChangeError(err), nil
 	}
-	prior, err := req.PriorState.Unmarshal(r.accessTokenValidatorType())
+	prior, err := req.PriorState.Unmarshal(r.siteAuthenticatorType())
 	if err != nil {
 		return applyResourceChangeError(err), nil
 	}
@@ -293,40 +296,43 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			} else {
 				dat = configuration.Value.(map[string]interface{})
 			}
-			input := &accessTokenValidators.AddAccessTokenValidatorCommandInput{
-				Body: models.AccessTokenValidatorView{
+			input := &siteAuthenticators.AddSiteAuthenticatorCommandInput{
+				Body: models.SiteAuthenticatorView{
 					ClassName:     String(className),
 					Configuration: dat,
 					Name:          String(name),
 				},
 			}
-			result, _, err := r.client.AddAccessTokenValidatorCommand(input)
+			result, _, err := r.client.AddSiteAuthenticatorCommand(input)
 			if err != nil {
 				return &tfprotov5.ApplyResourceChangeResponse{
 					Diagnostics: []*tfprotov5.Diagnostic{
 						{
 							Severity: tfprotov5.DiagnosticSeverityError,
 							Summary:  "Unexpected configuration format",
-							Detail:   fmt.Sprintf("unable to create AccessTokenValidator: %s", err),
+							Detail:   fmt.Sprintf("unable to create SiteAuthenticator: %s", err),
 						},
 					},
 				}, nil
 			}
-			//configuration.Value = result.Configuration
 			var v tftypes.Value
 			if _, ok := configuration.Value.(string); ok {
 				b, _ := json.Marshal(result.Configuration)
-				if suppressEquivalentJSONDiffs(configuration.Value.(string), string(b)) {
+				str := maskConfigFromDescriptors(r.descriptors, className, string(b), configuration.Value.(string))
+				if suppressEquivalentJSONDiffs(configuration.Value.(string), str) {
 					v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
 				} else {
-					v = tftypes.NewValue(tftypes.String, string(b))
+					v = tftypes.NewValue(tftypes.String, str)
 				}
 			} else {
-				_, v, _ = marshal(result.Configuration)
+				var dat map[string]interface{}
+				s := maskConfigFromDescriptorsAsMap(r.descriptors, className, result.Configuration, configuration.Value.(map[string]interface{}))
+				_ = json.Unmarshal([]byte(s), &dat)
+				_, v, _ = marshal(dat)
 			}
 
-			state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
-				AttributeTypes: r.accessTokenValidatorTypes(),
+			state, err := tfprotov5.NewDynamicValue(r.siteAuthenticatorType(), tftypes.NewValue(tftypes.Object{
+				AttributeTypes: r.siteAuthenticatorTypes(),
 			}, map[string]tftypes.Value{
 				"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
 				"name":          tftypes.NewValue(tftypes.String, result.Name),
@@ -360,17 +366,17 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			if err != nil {
 				return applyResourceChangeError(err), nil
 			}
-			input := &accessTokenValidators.DeleteAccessTokenValidatorCommandInput{
+			input := &siteAuthenticators.DeleteSiteAuthenticatorCommandInput{
 				Id: id,
 			}
-			_, err := r.client.DeleteAccessTokenValidatorCommand(input)
+			_, err := r.client.DeleteSiteAuthenticatorCommand(input)
 			if err != nil {
 				return &tfprotov5.ApplyResourceChangeResponse{
 					Diagnostics: []*tfprotov5.Diagnostic{
 						{
 							Severity: tfprotov5.DiagnosticSeverityError,
 							Summary:  "Unexpected configuration format",
-							Detail:   fmt.Sprintf("unable to delete AccessTokenValidator: %s", err),
+							Detail:   fmt.Sprintf("unable to delete SiteAuthenticator: %s", err),
 						},
 					},
 				}, nil
@@ -410,22 +416,22 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			} else {
 				dat = configuration.Value.(map[string]interface{})
 			}
-			input := &accessTokenValidators.UpdateAccessTokenValidatorCommandInput{
+			input := &siteAuthenticators.UpdateSiteAuthenticatorCommandInput{
 				Id: id,
-				Body: models.AccessTokenValidatorView{
+				Body: models.SiteAuthenticatorView{
 					ClassName:     String(className),
 					Configuration: dat,
 					Name:          String(name),
 				},
 			}
-			result, _, err := r.client.UpdateAccessTokenValidatorCommand(input)
+			result, _, err := r.client.UpdateSiteAuthenticatorCommand(input)
 			if err != nil {
 				return &tfprotov5.ApplyResourceChangeResponse{
 					Diagnostics: []*tfprotov5.Diagnostic{
 						{
 							Severity: tfprotov5.DiagnosticSeverityError,
 							Summary:  "Unexpected configuration format",
-							Detail:   fmt.Sprintf("unable to create AccessTokenValidator: %s", err),
+							Detail:   fmt.Sprintf("unable to create SiteAuthenticator: %s", err),
 						},
 					},
 				}, nil
@@ -433,16 +439,21 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 			var v tftypes.Value
 			if _, ok := configuration.Value.(string); ok {
 				b, _ := json.Marshal(result.Configuration)
-				if suppressEquivalentJSONDiffs(configuration.Value.(string), string(b)) {
+				str := maskConfigFromDescriptors(r.descriptors, className, string(b), configuration.Value.(string))
+				if suppressEquivalentJSONDiffs(configuration.Value.(string), str) {
 					v = tftypes.NewValue(tftypes.String, configuration.Value.(string))
 				} else {
-					v = tftypes.NewValue(tftypes.String, string(b))
+					v = tftypes.NewValue(tftypes.String, str)
 				}
 			} else {
-				_, v, _ = marshal(result.Configuration)
+				var dat map[string]interface{}
+				s := maskConfigFromDescriptorsAsMap(r.descriptors, className, result.Configuration, configuration.Value.(map[string]interface{}))
+				_ = json.Unmarshal([]byte(s), &dat)
+				_, v, _ = marshal(dat)
 			}
-			state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
-				AttributeTypes: r.accessTokenValidatorTypes(),
+
+			state, err := tfprotov5.NewDynamicValue(r.siteAuthenticatorType(), tftypes.NewValue(tftypes.Object{
+				AttributeTypes: r.siteAuthenticatorTypes(),
 			}, map[string]tftypes.Value{
 				"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
 				"name":          tftypes.NewValue(tftypes.String, result.Name),
@@ -468,55 +479,6 @@ func (r resourcePingAccessAccessTokenValidator) ApplyResourceChange(_ context.Co
 	return nil, nil
 }
 
-func (r resourcePingAccessAccessTokenValidator) ImportResourceState(_ context.Context, req *tfprotov5.ImportResourceStateRequest) (*tfprotov5.ImportResourceStateResponse, error) {
-	result, _, err := r.client.GetAccessTokenValidatorCommand(&accessTokenValidators.GetAccessTokenValidatorCommandInput{Id: req.ID})
-	if err != nil {
-		return importResourceError(fmt.Sprintf("The provider was unable to retrieve the access token validator with ID: '%s'.\n\nError:\n%s", req.ID, err.Error())), nil
-	}
-	var v tftypes.Value
-	_, v, _ = marshal(result.Configuration)
-	state, err := tfprotov5.NewDynamicValue(r.accessTokenValidatorType(), tftypes.NewValue(tftypes.Object{
-		AttributeTypes: r.accessTokenValidatorTypes(),
-	}, map[string]tftypes.Value{
-		"id":            tftypes.NewValue(tftypes.String, result.Id.String()),
-		"name":          tftypes.NewValue(tftypes.String, result.Name),
-		"class_name":    tftypes.NewValue(tftypes.String, result.ClassName),
-		"configuration": v,
-	}))
-	return &tfprotov5.ImportResourceStateResponse{
-		ImportedResources: []*tfprotov5.ImportedResource{
-			{
-				TypeName: req.TypeName,
-				State:    &state,
-			},
-		},
-	}, nil
-}
-
-func suppressEquivalentJSONDiffs(old, new string) bool {
-	ob := bytes.NewBufferString("")
-	if err := json.Compact(ob, []byte(old)); err != nil {
-		return false
-	}
-
-	nb := bytes.NewBufferString("")
-	if err := json.Compact(nb, []byte(new)); err != nil {
-		return false
-	}
-
-	return jsonBytesEqual(ob.Bytes(), nb.Bytes())
-}
-
-func jsonBytesEqual(b1, b2 []byte) bool {
-	var o1 interface{}
-	if err := json.Unmarshal(b1, &o1); err != nil {
-		return false
-	}
-
-	var o2 interface{}
-	if err := json.Unmarshal(b2, &o2); err != nil {
-		return false
-	}
-
-	return reflect.DeepEqual(o1, o2)
+func (r resourcePingAccessSiteAuthenticator) ImportResourceState(_ context.Context, req *tfprotov5.ImportResourceStateRequest) (*tfprotov5.ImportResourceStateResponse, error) {
+	return &tfprotov5.ImportResourceStateResponse{}, nil
 }

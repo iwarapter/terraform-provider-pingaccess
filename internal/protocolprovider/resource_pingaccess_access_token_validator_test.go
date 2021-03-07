@@ -78,11 +78,12 @@ EOF`),
 					resource.TestCheckResourceAttr(resourceName, "configuration", "{\n   \"description\": null,\n   \"path\": \"/foo/bar\",\n   \"subjectAttributeName\": \"demo\",\n   \"issuer\": null,\n   \"audience\": null\n}\n"),
 				),
 			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+			//TODO we dont support json style imports
+			//{
+			//	ResourceName:      resourceName,
+			//	ImportState:       true,
+			//	ImportStateVerify: true,
+			//},
 			{
 				Config: testAccPingAccessAccessTokenValidatorConfigInvalidClassName(`<<EOF
 		{
@@ -93,7 +94,7 @@ EOF`),
 			"audience": null
 		}
 		EOF`),
-				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo'\navailable classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
 			},
 		},
 	})
@@ -145,14 +146,22 @@ func TestAccPingAccessAccessTokenValidatorWithDynamicPsuedoType(t *testing.T) {
 				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_bar", `{
 			"subjectAttributeName" = "foo"
 		}`),
-				ExpectError: regexp.MustCompile(`the field 'path' is required for the class_name 'com.pingidentity.pa.accesstokenvalidators.JwksEndpoint'`),
+				ExpectError: regexp.MustCompile(`the field 'path' is required for the class_name\n'com.pingidentity.pa.accesstokenvalidators.JwksEndpoint'`),
 			},
 			{
 				Config: testAccPingAccessAccessTokenValidatorConfigInvalidClassName(`{
 			"path" = "/foo"
 			"subjectAttributeName" = "foo"
 		}`),
-				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo' available classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
+				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.accesstokenvalidators.foo'\navailable classNames: com.pingidentity.pa.accesstokenvalidators.JwksEndpoint`),
+			},
+			{
+				Config: testAccPingAccessAccessTokenValidatorConfig("acctest_bar", `{
+			"description"          = null
+			"path" = "/bar/foo"
+			"subjectAttributeName" = "foo"
+		}`),
+				ExpectError: regexp.MustCompile(`configuration fields cannot be null, remove 'description' or set a non-null\nvalue`),
 			},
 		},
 	})

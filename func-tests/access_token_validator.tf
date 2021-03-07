@@ -3,14 +3,14 @@ resource "pingaccess_access_token_validator" "demo_one" {
   name       = "demo"
 
   configuration = <<EOF
-	{
-		"description": null,
-		"path": "/bar",
-		"subjectAttributeName": "demo",
-		"issuer": null,
-		"audience": null
-	}
-	EOF
+  {
+    "description": null,
+    "path": "/bar",
+    "subjectAttributeName": "demo",
+    "issuer": null,
+    "audience": null
+  }
+  EOF
 }
 
 resource "pingaccess_access_token_validator" "demo_two" {

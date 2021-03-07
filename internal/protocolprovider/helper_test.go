@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -118,6 +120,39 @@ func Test_marshalDynamicPseudoTypes(t *testing.T) {
 			_, v, err := marshal(testCase.input)
 			require.Nil(t, err)
 			assert.Equal(t, testCase.tfval, v)
+		})
+	}
+}
+
+func Test_maskConfigFromDescriptors(t *testing.T) {
+	type testCase struct {
+		descriptors             *models.DescriptorsView
+		input, config, expected string
+	}
+	cases := map[string]testCase{
+		"password is preserved": {
+			descriptors: &models.DescriptorsView{
+				Items: []*models.DescriptorView{
+					{
+						ClassName: String("something"),
+						ConfigurationFields: []*models.ConfigurationField{
+							{
+								Name: String("password"),
+								Type: String("CONCEALED"),
+							},
+						},
+						Label: nil,
+						Type:  nil,
+					}}},
+			input:    "{\"password\":{\"encryptedValue\":\"OBF:JWE:eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiQTJxVXBQRjc3bjJqRFNhRiJ9..sdvO4RzS3fbVEUPSK9mNvQ.R6q-ulIt-npaAotMBImmvQ.8Xw9sLg5qgN6xPQ_Bfvxng\"},\"username\":\"cheese\"}",
+			config:   "{\"password\":{\"value\":\"secret\"},\"username\":\"cheese\"}",
+			expected: "{\"password\":{\"value\":\"secret\"},\"username\":\"cheese\"}",
+		},
+	}
+	for name, testCase := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, testCase.expected, maskConfigFromDescriptors(testCase.descriptors, "something", testCase.input, testCase.config))
 		})
 	}
 }
