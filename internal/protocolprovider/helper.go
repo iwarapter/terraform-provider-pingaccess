@@ -125,18 +125,6 @@ func valuesFromTypeConfigRequest(req *tfprotov5.ValidateResourceTypeConfigReques
 	return nil, values
 }
 
-func planResourceChangeValidationError(err error, attribute *tftypes.AttributePath) *tfprotov5.PlanResourceChangeResponse {
-	return &tfprotov5.PlanResourceChangeResponse{
-		Diagnostics: []*tfprotov5.Diagnostic{
-			{
-				Severity:  tfprotov5.DiagnosticSeverityError,
-				Summary:   err.Error(),
-				Attribute: attribute,
-			},
-		},
-	}
-}
-
 func readResourceChangeError(err error) *tfprotov5.ReadResourceResponse {
 	return &tfprotov5.ReadResourceResponse{
 		Diagnostics: []*tfprotov5.Diagnostic{

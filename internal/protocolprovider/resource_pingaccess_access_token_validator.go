@@ -483,6 +483,17 @@ func (r resourcePingAccessAccessTokenValidator) ImportResourceState(_ context.Co
 		"class_name":    tftypes.NewValue(tftypes.String, result.ClassName),
 		"configuration": v,
 	}))
+	if err != nil {
+		return &tfprotov5.ImportResourceStateResponse{
+			Diagnostics: []*tfprotov5.Diagnostic{
+				{
+					Severity: tfprotov5.DiagnosticSeverityError,
+					Summary:  "Error encoding state",
+					Detail:   fmt.Sprintf("Error encoding state: %s", err.Error()),
+				},
+			},
+		}, nil
+	}
 	return &tfprotov5.ImportResourceStateResponse{
 		ImportedResources: []*tfprotov5.ImportedResource{
 			{
