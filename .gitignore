@@ -9,9 +9,11 @@ terraform-provider-pingaccess_v*
 run.log
 coverage.out
 report.json
-pingaccess/terraform.log
+internal/sdkv2provider/terraform.log
+internal/protocolprovider/terraform.log
 pingaccess.lic
 site/
-pingaccess/test_cases/ca/*
+internal/sdkv2provider/test_cases/ca/*
 build/
 tmp/
+/func-tests/.terraform.lock.hcl

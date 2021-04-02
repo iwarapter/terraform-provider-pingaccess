@@ -78,10 +78,6 @@ type RetryError struct {
 	Retryable bool
 }
 
-func (e *RetryError) Unwrap() error {
-	return e.Err
-}
-
 // RetryableError is a helper to create a RetryError that's retryable from a
 // given error. To prevent logic errors, will return an error when passed a
 // nil error.

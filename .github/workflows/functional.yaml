@@ -1,16 +1,19 @@
-on:  [push]
+on:  [push, pull_request]
 name: e2e
 jobs:
   e2e:
     name: e2e
     strategy:
+      fail-fast: false
       matrix:
-        pingaccess-version: [5.3.2, 6.0.4, 6.1.3]
+        pingaccess-version: [5.3.2, 6.0.4, 6.1.3, 6.2.0]
+        terraform-version: [ 0.13.6, 0.14.5 ]
     services:
       pingaccess:
         image: pingidentity/pingaccess:${{ matrix.pingaccess-version }}-edge
         env:
           PING_IDENTITY_ACCEPT_EULA: YES
+          IMAGE_VERSION: pingaccess-alpine-az11-6.1.3-210206-b5f4
           PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
           PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
         ports:
@@ -45,6 +48,8 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ matrix.terraform-version }}
 
       - name: Install Build and Deploy
         run: make build deploy-local
@@ -55,14 +60,19 @@ jobs:
       - name: Terraform Plan
         run: make func-plan
         env:
-          TF_VAR_pa6: ${{ startsWith( matrix.pingaccess-version , '6') }}
+          TF_VAR_pa_version: ${{ matrix.pingaccess-version }}
 
       - name: Terraform Apply
         run: make func-apply
         env:
-          TF_VAR_pa6: ${{ startsWith( matrix.pingaccess-version , '6') }}
+          TF_VAR_pa_version: ${{ matrix.pingaccess-version }}
 
       - name: Terraform Plan
-        run: make func-plan
         env:
-          TF_VAR_pa6: ${{ startsWith( matrix.pingaccess-version , '6') }}
+          TF_VAR_pa_version: ${{ matrix.pingaccess-version }}
+        run: terraform plan -detailed-exitcode
+        working-directory: func-tests
+
+      - name: Container logs
+        if: ${{ failure() }}
+        run: docker logs `docker ps --filter expose=9000 -q`

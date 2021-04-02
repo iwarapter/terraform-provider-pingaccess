@@ -8,6 +8,22 @@ Provides a site authenticator.
 
 ## Example Usage
 
+### Structured Configuration Style
+```hcl
+resource "pingaccess_site_authenticator" "demo_site_authenticator" {
+  name       = "demo-site-authenticator"
+  class_name = "com.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator"
+
+  configuration = {
+    "username" = "demo"
+    "password" = {
+      "value" = "top_5ecr37"
+    }
+  }
+}
+```
+
+### Json Configuration Style
 ```hcl
 resource "pingaccess_site_authenticator" "demo_site_authenticator" {
   name       = "demo-site-authenticator"
@@ -15,7 +31,7 @@ resource "pingaccess_site_authenticator" "demo_site_authenticator" {
 
   configuration = <<EOF
     {
-      "username": "cheese",
+      "username": "demo",
       "password": {
         "value": "top_5ecr37"
       }
@@ -43,6 +59,8 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 PingAccess site authenticator can be imported using the id, e.g.
+
+-> Import assumes the new structured configuration style, the old json style will show a diff on next plan
 
 ```bash
 $ terraform import pingaccess_site_authenticator.demo_site_authenticator 123

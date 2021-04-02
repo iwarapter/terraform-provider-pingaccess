@@ -7,10 +7,15 @@
       exclude: '^vendor/.*$'
     - id: check-added-large-files
       exclude: '^vendor/.*$'
-- repo: https://github.com/syntaqx/git-hooks
-  rev: v0.0.16
+- repo: git://github.com/dnephin/pre-commit-golang
+  rev: master
   hooks:
-#    - id: go-fmt
+    - id: go-fmt
+      exclude: '^vendor/.*$'
+    - id: go-vet
+      exclude: '^vendor/.*$'
+    - id: go-imports
+      exclude: '^vendor/.*$'
     - id: go-mod-tidy
       exclude: '^vendor/.*$'
 - repo: git://github.com/antonbabenko/pre-commit-terraform
