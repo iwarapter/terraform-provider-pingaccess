@@ -73,6 +73,7 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/google/go-cmp v0.5.4
 ## explicit
 github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/cmpopts
 github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
@@ -136,7 +137,7 @@ github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes
 # github.com/hashicorp/terraform-plugin-go-contrib v0.0.0-20210107173939-b612f470fcb7
 ## explicit
 github.com/hashicorp/terraform-plugin-go-contrib/asgotypes
-# github.com/hashicorp/terraform-plugin-mux v0.1.0
+# github.com/hashicorp/terraform-plugin-mux v0.1.1
 ## explicit
 github.com/hashicorp/terraform-plugin-mux
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.5.0
