@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-go v0.2.1
 	github.com/hashicorp/terraform-plugin-go-contrib v0.0.0-20210107173939-b612f470fcb7
-	github.com/hashicorp/terraform-plugin-mux v0.1.0
+	github.com/hashicorp/terraform-plugin-mux v0.1.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.5.0
 	github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201117172106-3133cd85d1ae
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
