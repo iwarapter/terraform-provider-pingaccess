@@ -245,7 +245,7 @@ github.com/oklog/run
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.5.0
 ## explicit
-# github.com/stretchr/testify v1.6.1
+# github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require

@@ -16,7 +16,7 @@ require (
 	github.com/opencontainers/runc v1.0.0-rc9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.5.0 // indirect
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.7.4
 	github.com/tidwall/sjson v1.1.6
 	gopkg.in/yaml.v2 v2.2.8 // indirect
