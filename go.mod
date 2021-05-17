@@ -17,7 +17,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/gjson v1.7.4
+	github.com/tidwall/gjson v1.8.0
 	github.com/tidwall/sjson v1.1.6
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
