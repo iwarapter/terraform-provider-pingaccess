@@ -24,3 +24,21 @@ resource "pingaccess_site_authenticator" "demo_2" {
     }
   }
 }
+
+resource "pingaccess_site_authenticator" "issue_72_json" {
+  name          = "issue 72 jsomn"
+  class_name    = "com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator"
+  configuration = <<EOF
+  {
+    "keyPairId": "${pingaccess_keypair.demo_keypair.id}"
+  }
+  EOF
+}
+
+resource "pingaccess_site_authenticator" "issue_72" {
+  name       = "issue 72"
+  class_name = "com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator"
+  configuration = {
+    "keyPairId" = pingaccess_keypair.demo_keypair.id
+  }
+}

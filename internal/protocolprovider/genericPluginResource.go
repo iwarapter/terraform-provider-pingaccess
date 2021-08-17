@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 )
 
@@ -65,6 +65,9 @@ func (r genericPluginResource) ValidateResourceTypeConfig(_ context.Context, req
 		return resp, nil
 	}
 	if r.descriptors == nil { //no client config - we're done.
+		return &tfprotov5.ValidateResourceTypeConfigResponse{}, nil
+	}
+	if !values["configuration"].IsFullyKnown() {
 		return &tfprotov5.ValidateResourceTypeConfigResponse{}, nil
 	}
 	var name, className string
@@ -131,6 +134,10 @@ func (r genericPluginResource) PlanResourceChange(_ context.Context, req *tfprot
 	} else {
 		_, v, _ = marshal(configuration.Value)
 	}
+	if !proposedValues["configuration"].IsFullyKnown() {
+		v = proposedValues["configuration"]
+	}
+
 	state, err := createGenericClassResourceState(r.resourceType(), r.resourceTypes(), id, name, className, v)
 	if err != nil {
 		return planResourceChangeError(err), nil

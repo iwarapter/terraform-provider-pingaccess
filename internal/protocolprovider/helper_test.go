@@ -6,7 +6,7 @@ import (
 
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
