@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 // GoPrimitive is a way to get at the contents of a tftypes.Value without
@@ -45,7 +45,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		return nil
 	}
 	switch {
-	case value.Is(tftypes.String):
+	case value.Type().Is(tftypes.String):
 		var str string
 		err := value.As(&str)
 		if err != nil {
@@ -53,7 +53,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		}
 		dt.Value = str
 		return nil
-	case value.Is(tftypes.Number):
+	case value.Type().Is(tftypes.Number):
 		num := big.NewFloat(-42)
 		err := value.As(&num)
 		if err != nil {
@@ -61,7 +61,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		}
 		dt.Value = num
 		return nil
-	case value.Is(tftypes.Bool):
+	case value.Type().Is(tftypes.Bool):
 		var b bool
 		err := value.As(&b)
 		if err != nil {
@@ -69,7 +69,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		}
 		dt.Value = b
 		return nil
-	case value.Is(tftypes.Object{}):
+	case value.Type().Is(tftypes.Object{}):
 		msv := map[string]tftypes.Value{}
 		err := value.As(&msv)
 		if err != nil {
@@ -86,7 +86,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		}
 		dt.Value = res
 		return nil
-	case value.Is(tftypes.Tuple{}):
+	case value.Type().Is(tftypes.Tuple{}):
 		vals := []tftypes.Value{}
 		err := value.As(&vals)
 		if err != nil {
@@ -103,7 +103,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		}
 		dt.Value = res
 		return nil
-	case value.Is(tftypes.List{}) || value.Is(tftypes.Set{}):
+	case value.Type().Is(tftypes.List{}) || value.Type().Is(tftypes.Set{}):
 		vals := []tftypes.Value{}
 		err := value.As(&vals)
 		if err != nil {
@@ -130,7 +130,7 @@ func (dt *GoPrimitive) FromTerraform5Value(value tftypes.Value) error {
 		}
 		dt.Value = res.Interface()
 		return nil
-	case value.Is(tftypes.Map{}):
+	case value.Type().Is(tftypes.Map{}):
 		msv := map[string]tftypes.Value{}
 		err := value.As(&msv)
 		if err != nil {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/apparentlymart/go-textseg/textseg"
+	"github.com/apparentlymart/go-textseg/v13/textseg"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -670,6 +670,7 @@ Traversal:
 				trav := make(hcl.Traversal, 0, 1)
 				var firstRange, lastRange hcl.Range
 				firstRange = p.NextRange()
+				lastRange = marker.Range
 				for p.Peek().Type == TokenDot {
 					dot := p.Read()
 
@@ -910,7 +911,7 @@ func (p *parser) parseExpressionTerm() (Expression, hcl.Diagnostics) {
 
 	switch start.Type {
 	case TokenOParen:
-		p.Read() // eat open paren
+		oParen := p.Read() // eat open paren
 
 		p.PushIncludeNewlines(false)
 
@@ -936,8 +937,18 @@ func (p *parser) parseExpressionTerm() (Expression, hcl.Diagnostics) {
 			p.setRecovery()
 		}
 
-		p.Read() // eat closing paren
+		cParen := p.Read() // eat closing paren
 		p.PopIncludeNewlines()
+
+		// Our parser's already taken care of the precedence effect of the
+		// parentheses by considering them to be a kind of "term", but we
+		// still need to include the parentheses in our AST so we can give
+		// an accurate representation of the source range that includes the
+		// open and closing parentheses.
+		expr = &ParenthesesExpr{
+			Expression: expr,
+			SrcRange:   hcl.RangeBetween(oParen.Range, cParen.Range),
+		}
 
 		return expr, diags
 
@@ -1650,7 +1661,7 @@ func (p *parser) parseQuotedStringLiteral() (string, hcl.Range, hcl.Diagnostics)
 
 	var diags hcl.Diagnostics
 	ret := &bytes.Buffer{}
-	var cQuote Token
+	var endRange hcl.Range
 
 Token:
 	for {
@@ -1658,7 +1669,7 @@ Token:
 		switch tok.Type {
 
 		case TokenCQuote:
-			cQuote = tok
+			endRange = tok.Range
 			break Token
 
 		case TokenQuotedLit:
@@ -1701,6 +1712,7 @@ Token:
 				Subject:  &tok.Range,
 				Context:  hcl.RangeBetween(oQuote.Range, tok.Range).Ptr(),
 			})
+			endRange = tok.Range
 			break Token
 
 		default:
@@ -1713,13 +1725,14 @@ Token:
 				Context:  hcl.RangeBetween(oQuote.Range, tok.Range).Ptr(),
 			})
 			p.recover(TokenCQuote)
+			endRange = tok.Range
 			break Token
 
 		}
 
 	}
 
-	return ret.String(), hcl.RangeBetween(oQuote.Range, cQuote.Range), diags
+	return ret.String(), hcl.RangeBetween(oQuote.Range, endRange), diags
 }
 
 // ParseStringLiteralToken processes the given token, which must be either a

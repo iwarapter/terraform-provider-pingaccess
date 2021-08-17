@@ -1,12 +1,16 @@
 package protocol
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
 
+	"github.com/iwarapter/terraform-provider-pingaccess/internal/sdkv2provider"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
+	tfmux "github.com/hashicorp/terraform-plugin-mux"
 	"github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -172,6 +176,77 @@ func TestAccPingAccessSiteAuthenticatorWithDynamicPsuedoType(t *testing.T) {
 			}
 		}`),
 				ExpectError: regexp.MustCompile(`unable to find className 'com.pingidentity.pa.siteauthenticators.foo'\navailable classNames:\ncom.pingidentity.pa.siteauthenticators.BasicAuthTargetSiteAuthenticator`),
+			},
+		},
+	})
+}
+
+func TestAccPingAccessSiteAuthenticatorIssue72(t *testing.T) {
+	resource1 := "pingaccess_site_authenticator.test1"
+	resource2 := "pingaccess_site_authenticator.test2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
+			//"pingaccess": func() (tfprotov5.ProviderServer, error) {
+			//	return Server(), nil
+			//},
+			"pingaccess": func() (tfprotov5.ProviderServer, error) {
+				ctx := context.Background()
+				sdkv2 := sdkv2provider.Provider()
+				factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2.GRPCProvider, Server)
+				if err != nil {
+					return nil, err
+				}
+				return factory.Server(), nil
+			},
+		},
+		CheckDestroy: testAccCheckPingAccessSiteAuthenticatorDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+resource "pingaccess_site_authenticator" "test1" {
+  name = "issue 72 heredoc"
+  class_name = "com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator"
+  configuration = <<EOF
+  {
+    "keyPairId": "${pingaccess_keypair.demo_keypair.id}"
+  }
+  EOF
+}
+
+resource "pingaccess_site_authenticator" "test2" {
+  name = "issue 72 dynamic"
+  class_name = "com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator"
+  configuration = {
+    "keyPairId" = pingaccess_keypair.demo_keypair.id
+  }
+}
+
+resource "pingaccess_keypair" "demo_keypair" {
+  alias             = "demo2"
+  city              = "London"
+  common_name       = "Example"
+  country           = "GB"
+  key_algorithm     = "RSA"
+  key_size          = 2048
+  organization      = "Test"
+  organization_unit = "Development"
+  state             = "London"
+  valid_days        = 365
+}
+
+`,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessSiteAuthenticatorExists(resource1),
+					resource.TestCheckResourceAttr(resource1, "name", "issue 72 heredoc"),
+					resource.TestCheckResourceAttr(resource1, "class_name", "com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator"),
+					resource.TestCheckResourceAttrSet(resource1, "configuration"),
+
+					testAccCheckPingAccessSiteAuthenticatorExists(resource2),
+					resource.TestCheckResourceAttr(resource2, "name", "issue 72 dynamic"),
+					resource.TestCheckResourceAttr(resource2, "class_name", "com.pingidentity.pa.siteauthenticators.MutualTlsSiteAuthenticator"),
+					resource.TestCheckResourceAttrSet(resource2, "configuration.keyPairId"),
+				),
 			},
 		},
 	})

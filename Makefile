@@ -1,14 +1,16 @@
 # Makefile
 VERSION ?= 0.0.1-ci
 NAME=terraform-provider-pingaccess_v${VERSION}
-PINGACCESS_VERSION=6.1.3-edge
+PINGACCESS_VERSION=6.2.2-edge
 BASE_DOCKER_TAG=pingidentity/pingaccess:${PINGACCESS_VERSION}
 OS_NAME := $(shell uname -s | tr A-Z a-z)
+CURDATE := ${shell date +'%y%m%d'}
 
 pa-init:
 	@docker run --rm -d --hostname pingaccess --name pingaccess \
 		-e PING_IDENTITY_DEVOPS_KEY=$(PING_IDENTITY_DEVOPS_KEY) \
 		-e PING_IDENTITY_DEVOPS_USER=$(PING_IDENTITY_DEVOPS_USER) \
+		-e IMAGE_VERSION=pingaccess-alpine-az11-6.2.2-${CURDATE}-b5f4 \
 		-e PING_IDENTITY_ACCEPT_EULA=YES \
 		--publish 9000:9000 ${BASE_DOCKER_TAG}
 

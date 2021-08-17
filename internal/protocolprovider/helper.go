@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 	"github.com/tidwall/gjson"
 )
@@ -24,7 +24,7 @@ func dynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tftypes.Typ
 	if err != nil {
 		return nil, []*tfprotov5.Diagnostic{schemaDataSourceMistmatchDiagnostic(err)}
 	}
-	if !val.Is(types) {
+	if !val.Type().Is(types) {
 		return nil, []*tfprotov5.Diagnostic{
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
@@ -46,7 +46,7 @@ func resourceDynamicValueToTftypesValues(conf *tfprotov5.DynamicValue, types tft
 	if err != nil {
 		return nil, []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}
 	}
-	if !val.Is(types) {
+	if !val.Type().Is(types) {
 		return nil, []*tfprotov5.Diagnostic{
 			{
 				Severity: tfprotov5.DiagnosticSeverityError,
@@ -68,7 +68,7 @@ func valuesFromTypeConfigRequest(req *tfprotov5.ValidateResourceTypeConfigReques
 	if err != nil {
 		return &tfprotov5.ValidateResourceTypeConfigResponse{Diagnostics: []*tfprotov5.Diagnostic{schemaResourceMistmatchDiagnostic(err)}}, nil
 	}
-	if !val.Is(typ) {
+	if !val.Type().Is(typ) {
 		return &tfprotov5.ValidateResourceTypeConfigResponse{
 			Diagnostics: []*tfprotov5.Diagnostic{
 				{
@@ -284,14 +284,10 @@ func descriptorsHasClassName(className string, desc *models.DescriptorsView) *tf
 		}
 	}
 	return &tfprotov5.Diagnostic{
-		Severity: tfprotov5.DiagnosticSeverityError,
-		Summary:  "Class Name Validation Failure",
-		Detail:   fmt.Sprintf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", ")),
-		Attribute: &tftypes.AttributePath{
-			Steps: []tftypes.AttributePathStep{
-				tftypes.AttributeName("class_name"),
-			},
-		},
+		Severity:  tfprotov5.DiagnosticSeverityError,
+		Summary:   "Class Name Validation Failure",
+		Detail:    fmt.Sprintf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", ")),
+		Attribute: &tftypes.AttributePath{},
 	}
 }
 
@@ -318,14 +314,10 @@ func validateConfiguration(className string, configuration asgotypes.GoPrimitive
 					v := gjson.Get(conf, *f.Name)
 					if !v.Exists() {
 						diags = append(diags, &tfprotov5.Diagnostic{
-							Severity: tfprotov5.DiagnosticSeverityError,
-							Summary:  "Configuration Validation Failure",
-							Detail:   fmt.Sprintf("the field '%s' is required for the class_name '%s'", *f.Name, className),
-							Attribute: &tftypes.AttributePath{
-								Steps: []tftypes.AttributePathStep{
-									tftypes.AttributeName("configuration"),
-								},
-							},
+							Severity:  tfprotov5.DiagnosticSeverityError,
+							Summary:   "Configuration Validation Failure",
+							Detail:    fmt.Sprintf("the field '%s' is required for the class_name '%s'", *f.Name, className),
+							Attribute: &tftypes.AttributePath{},
 						})
 					}
 					if !v.IsObject() && v.Str == "" {
@@ -337,12 +329,10 @@ func validateConfiguration(className string, configuration asgotypes.GoPrimitive
 						}
 
 						diags = append(diags, &tfprotov5.Diagnostic{
-							Severity: tfprotov5.DiagnosticSeverityError,
-							Summary:  "Configuration Validation Failure",
-							Detail:   fmt.Sprintf("the field '%s' is required for the class_name '%s'", *f.Name, className),
-							Attribute: &tftypes.AttributePath{
-								Steps: steps,
-							},
+							Severity:  tfprotov5.DiagnosticSeverityError,
+							Summary:   "Configuration Validation Failure",
+							Detail:    fmt.Sprintf("the field '%s' is required for the class_name '%s'", *f.Name, className),
+							Attribute: tftypes.NewAttributePathWithSteps(steps),
 						})
 					}
 				}
@@ -359,15 +349,10 @@ func validateNoNullConfigurationAttributes(configuration asgotypes.GoPrimitive) 
 			if v[s] == nil {
 				diags = append(diags,
 					&tfprotov5.Diagnostic{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  "Configuration Validation Failure",
-						Detail:   fmt.Sprintf("configuration fields cannot be null, remove '%s' or set a non-null value", s),
-						Attribute: &tftypes.AttributePath{
-							Steps: []tftypes.AttributePathStep{
-								tftypes.AttributeName("configuration"),
-								tftypes.ElementKeyString(s),
-							},
-						},
+						Severity:  tfprotov5.DiagnosticSeverityError,
+						Summary:   "Configuration Validation Failure",
+						Detail:    fmt.Sprintf("configuration fields cannot be null, remove '%s' or set a non-null value", s),
+						Attribute: &tftypes.AttributePath{},
 					})
 			}
 		}

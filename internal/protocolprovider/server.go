@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 type provider struct {
@@ -63,44 +63,28 @@ func (p *provider) ConfigureProvider(_ context.Context, req *tfprotov5.Configure
 		err = values["username"].As(&c.Username)
 		if err != nil {
 			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
-				&tftypes.AttributePath{
-					Steps: []tftypes.AttributePathStep{
-						tftypes.AttributeName("username"),
-					},
-				})}}, nil
+				&tftypes.AttributePath{})}}, nil
 		}
 	}
 	if values["password"].IsKnown() && !values["password"].IsNull() {
 		err = values["password"].As(&c.Password)
 		if err != nil {
 			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
-				&tftypes.AttributePath{
-					Steps: []tftypes.AttributePathStep{
-						tftypes.AttributeName("password"),
-					},
-				})}}, nil
+				&tftypes.AttributePath{})}}, nil
 		}
 	}
 	if values["context"].IsKnown() && !values["context"].IsNull() {
 		err = values["context"].As(&c.Context)
 		if err != nil {
 			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
-				&tftypes.AttributePath{
-					Steps: []tftypes.AttributePathStep{
-						tftypes.AttributeName("context"),
-					},
-				})}}, nil
+				&tftypes.AttributePath{})}}, nil
 		}
 	}
 	if values["base_url"].IsKnown() && !values["base_url"].IsNull() {
 		err = values["base_url"].As(&c.BaseURL)
 		if err != nil {
 			return &tfprotov5.ConfigureProviderResponse{Diagnostics: []*tfprotov5.Diagnostic{unexpectedProviderConfigDiagnostic(err,
-				&tftypes.AttributePath{
-					Steps: []tftypes.AttributePathStep{
-						tftypes.AttributeName("base_url"),
-					},
-				})}}, nil
+				&tftypes.AttributePath{})}}, nil
 		}
 	}
 	if v := os.Getenv("PINGACCESS_USERNAME"); v != "" {
