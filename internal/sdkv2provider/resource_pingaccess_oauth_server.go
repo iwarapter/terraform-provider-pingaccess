@@ -34,7 +34,12 @@ func resourcePingAccessOAuthServerSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"client_credentials": oAuthClientCredentials(),
+		"client_credentials": {
+			Type:     schema.TypeList,
+			Required: true,
+			MaxItems: 1,
+			Elem:     oAuthClientCredentialsResource(),
+		},
 		"description": {
 			Type:     schema.TypeString,
 			Optional: true,

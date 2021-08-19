@@ -34,9 +34,10 @@ func TestAccPingAccessPingFederateOAuth(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"},
 			},
 		},
 	})
@@ -48,10 +49,23 @@ func testAccCheckPingAccessPingFederateOAuthDestroy(s *terraform.State) error {
 
 func testAccPingAccessPingFederateOAuthConfig(client, san string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_pingfederate_oauth" "demo_pfo" {
-		client_id = "%s"
-		subject_attribute_name = "%s"
-	}`, client, san)
+resource "pingaccess_pingfederate_oauth" "demo_pfo" {
+  access_validator_id    = 1
+  cache_tokens           = true
+  subject_attribute_name = "%s"
+  name                   = "PingFederate"
+  client_credentials {
+    client_id              = "%s"
+    client_secret {
+      value = "top_secret"
+    }
+  }
+  send_audience              = true
+  token_time_to_live_seconds = 300
+  use_token_introspection    = true
+}
+
+`, san, client)
 }
 
 func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckFunc {
@@ -72,8 +86,8 @@ func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckF
 			return fmt.Errorf("Error: PingFederateOAuth (%s) not found", n)
 		}
 
-		if *result.ClientId != rs.Primary.Attributes["client_id"] {
-			return fmt.Errorf("Error: PingFederateOAuth response (%s) didnt match state (%s)", *result.ClientId, rs.Primary.Attributes["client_id"])
+		if *result.ClientId != rs.Primary.Attributes["client_credentials.0.client_id"] {
+			return fmt.Errorf("Error: PingFederateOAuth response (%s) didnt match state (%s)", *result.ClientId, rs.Primary.Attributes["client_credentials.0.client_id"])
 		}
 
 		return nil
@@ -109,13 +123,30 @@ func Test_resourcePingAccessPingFederateOAuthReadData(t *testing.T) {
 				},
 			},
 		},
+		{
+			PingFederateAccessTokenView: models.PingFederateAccessTokenView{
+				SubjectAttributeName:   String("san"),
+				AccessValidatorId:      Int(1),
+				CacheTokens:            Bool(true),
+				Name:                   String("PingFederate"),
+				SendAudience:           Bool(true),
+				TokenTimeToLiveSeconds: Int(30),
+				UseTokenIntrospection:  Bool(true),
+				ClientCredentials: &models.OAuthClientCredentialsView{
+					ClientId:        String("example"),
+					ClientSecret:    &models.HiddenFieldView{Value: String("secret"), EncryptedValue: String("")},
+					CredentialsType: String("PRIVATE_KEY_JWT"),
+					KeyPairId:       Int(1),
+				},
+			},
+		},
 	}
 	for i, tc := range cases {
 		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
 
 			resourceSchema := resourcePingAccessPingFederateOAuthSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessPingFederateOAuthReadResult(resourceLocalData, &tc.PingFederateAccessTokenView)
+			resourcePingAccessPingFederateOAuthReadResult(resourceLocalData, &tc.PingFederateAccessTokenView, false)
 
 			if got := *resourcePingAccessPingFederateOAuthReadData(resourceLocalData); !cmp.Equal(got, tc.PingFederateAccessTokenView) {
 				t.Errorf("resourcePingAccessPingFederateOAuthReadData() = %v", cmp.Diff(got, tc.PingFederateAccessTokenView))

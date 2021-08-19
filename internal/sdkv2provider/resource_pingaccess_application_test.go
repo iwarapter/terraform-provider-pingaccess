@@ -152,7 +152,13 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_pingfederate_oauth" "app_demo_pfo" {
-		client_id = "my_client"
+		client_credentials {
+			credentials_type = "SECRET"
+			client_id = "my_client"
+			client_secret {
+				value = "secret"
+			}
+		}
 		subject_attribute_name = "sany"
 	}
 

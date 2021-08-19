@@ -12,10 +12,10 @@ import (
 	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func setOfString() *schema.Schema {
@@ -104,18 +104,41 @@ func applicationPolicyItemSchema() *schema.Schema {
 	}
 }
 
-func oAuthClientCredentials() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Required: true,
-		MaxItems: 1,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"client_id": {
-					Type:     schema.TypeString,
-					Required: true,
-				},
-				"client_secret": hiddenField(),
+func oAuthClientCredentialsResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"client_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"client_secret": hiddenField(),
+			"key_pair_id": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			"credentials_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "SECRET",
+				ValidateFunc: validation.StringInSlice([]string{"SECRET", "CERTIFICATE", "PRIVATE_KEY_JWT"}, false),
+			},
+		},
+	}
+}
+
+func hiddenFieldResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"encrypted_value": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"value": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -126,20 +149,7 @@ func hiddenField() *schema.Schema {
 		Type:     schema.TypeList,
 		Optional: true,
 		MaxItems: 1,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"encrypted_value": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
-				},
-				"value": {
-					Type:      schema.TypeString,
-					Optional:  true,
-					Sensitive: true,
-				},
-			},
-		},
+		Elem:     hiddenFieldResource(),
 	}
 }
 
@@ -189,6 +199,12 @@ func expandOAuthClientCredentialsView(in []interface{}) *models.OAuthClientCrede
 		}
 		if val, ok := l["client_secret"]; ok {
 			hf.ClientSecret = expandHiddenFieldView(val.([]interface{}))
+		}
+		if val, ok := l["credentials_type"]; ok {
+			hf.CredentialsType = String(val.(string))
+		}
+		if val, ok := l["key_pair_id"]; ok {
+			hf.KeyPairId = Int(val.(int))
 		}
 	}
 	return hf
@@ -547,6 +563,12 @@ func hashString(s string) int {
 func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCredentialsView, trackPasswords bool, diags *diag.Diagnostics) {
 	pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 	creds := flattenOAuthClientCredentialsView(input)
+	if input.KeyPairId != nil {
+		creds[0]["key_pair_id"] = *input.KeyPairId
+	}
+	if input.CredentialsType != nil {
+		creds[0]["credentials_type"] = *input.CredentialsType
+	}
 	if trackPasswords {
 		enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
 		creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw

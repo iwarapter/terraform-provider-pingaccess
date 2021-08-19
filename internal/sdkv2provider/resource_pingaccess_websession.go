@@ -37,7 +37,12 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 			Optional: true,
 			Default:  false,
 		},
-		"client_credentials": oAuthClientCredentials(),
+		"client_credentials": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem:     oAuthClientCredentialsResource(),
+		},
 		"cookie_domain": {
 			Type:     schema.TypeString,
 			Optional: true,
@@ -227,7 +232,7 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *model
 			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
-	if input.ClientCredentials != nil && input.ClientCredentials.ClientSecret != nil {
+	if input.ClientCredentials != nil && input.ClientCredentials.ClientId != nil {
 		setClientCredentials(d, input.ClientCredentials, trackPasswords, &diags)
 	}
 	return diags

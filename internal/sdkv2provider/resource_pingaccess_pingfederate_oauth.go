@@ -35,11 +35,28 @@ func resourcePingAccessPingFederateOAuthSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"client_id": {
-			Type:     schema.TypeString,
-			Required: true,
+		"client_credentials": {
+			Type:          schema.TypeList,
+			Optional:      true,
+			MaxItems:      1,
+			Elem:          oAuthClientCredentialsResource(),
+			ConflictsWith: []string{"client_id", "client_secret"},
 		},
-		"client_secret": hiddenField(),
+		"client_id": {
+			Type:          schema.TypeString,
+			Optional:      true,
+			RequiredWith:  []string{"client_secret"},
+			Deprecated:    "DEPRECATED - to be removed in a future release; please use 'client_credentials' instead.",
+			ConflictsWith: []string{"client_credentials"},
+		},
+		"client_secret": {
+			Type:          schema.TypeList,
+			Optional:      true,
+			MaxItems:      1,
+			Deprecated:    "DEPRECATED - to be removed in a future release; please use 'client_credentials' instead.",
+			Elem:          hiddenFieldResource(),
+			ConflictsWith: []string{"client_credentials"},
+		},
 		"name": {
 			Type:     schema.TypeString,
 			Optional: true,
@@ -77,7 +94,7 @@ func resourcePingAccessPingFederateOAuthRead(_ context.Context, d *schema.Resour
 		return diag.Errorf("unable to read PingFederateOAuth: %s", err)
 	}
 
-	return resourcePingAccessPingFederateOAuthReadResult(d, result)
+	return resourcePingAccessPingFederateOAuthReadResult(d, result, m.(paClient).CanMaskPasswords())
 }
 
 func resourcePingAccessPingFederateOAuthUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -91,7 +108,7 @@ func resourcePingAccessPingFederateOAuthUpdate(_ context.Context, d *schema.Reso
 	}
 
 	d.SetId("pingfederate_oauth_settings")
-	return resourcePingAccessPingFederateOAuthReadResult(d, result)
+	return resourcePingAccessPingFederateOAuthReadResult(d, result, false)
 }
 
 func resourcePingAccessPingFederateOAuthDelete(_ context.Context, _ *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -103,25 +120,29 @@ func resourcePingAccessPingFederateOAuthDelete(_ context.Context, _ *schema.Reso
 	return nil
 }
 
-func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input *models.PingFederateAccessTokenView) diag.Diagnostics {
+func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input *models.PingFederateAccessTokenView, trackPasswords bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	setResourceDataIntWithDiagnostic(d, "access_validator_id", input.AccessValidatorId, &diags)
 	setResourceDataBoolWithDiagnostic(d, "cache_tokens", input.CacheTokens, &diags)
-	setResourceDataStringWithDiagnostic(d, "client_id", input.ClientId, &diags)
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)
 	setResourceDataBoolWithDiagnostic(d, "send_audience", input.SendAudience, &diags)
 	setResourceDataStringWithDiagnostic(d, "subject_attribute_name", input.SubjectAttributeName, &diags)
 	setResourceDataIntWithDiagnostic(d, "token_time_to_live_seconds", input.TokenTimeToLiveSeconds, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_token_introspection", input.UseTokenIntrospection, &diags)
 
-	if input.ClientSecret != nil {
-		pw, ok := d.GetOk("client_secret.0.value")
-		creds := flattenHiddenFieldView(input.ClientSecret)
-		if ok {
-			creds[0]["value"] = pw
-		}
-		if err := d.Set("client_secret", creds); err != nil {
-			diags = append(diags, diag.FromErr(err)...)
+	if input.ClientCredentials != nil && input.ClientCredentials.ClientId != nil {
+		setClientCredentials(d, input.ClientCredentials, trackPasswords, &diags)
+	} else {
+		setResourceDataStringWithDiagnostic(d, "client_id", input.ClientId, &diags)
+		if input.ClientSecret != nil {
+			pw, ok := d.GetOk("client_secret.0.value")
+			creds := flattenHiddenFieldView(input.ClientSecret)
+			if ok {
+				creds[0]["value"] = pw
+			}
+			if err := d.Set("client_secret", creds); err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 	}
 
@@ -130,8 +151,15 @@ func resourcePingAccessPingFederateOAuthReadResult(d *schema.ResourceData, input
 
 func resourcePingAccessPingFederateOAuthReadData(d *schema.ResourceData) *models.PingFederateAccessTokenView {
 	oauth := &models.PingFederateAccessTokenView{
-		ClientId:             String(d.Get("client_id").(string)),
 		SubjectAttributeName: String(d.Get("subject_attribute_name").(string)),
+	}
+
+	if v, ok := d.GetOk("client_id"); ok {
+		oauth.ClientId = String(v.(string))
+	}
+
+	if v, ok := d.GetOk("client_credentials"); ok {
+		oauth.ClientCredentials = expandOAuthClientCredentialsView(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("access_validator_id"); ok {
