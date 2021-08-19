@@ -110,6 +110,55 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
 		},
+		"application": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"additional_virtual_host_ids": {
+						Type:     schema.TypeSet,
+						Optional: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeInt,
+						},
+					},
+					"case_sensitive": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  true,
+					},
+					"client_cert_header_names": {
+						Type:     schema.TypeSet,
+						Optional: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+					},
+					"context_root": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "/",
+					},
+					"policy": applicationPolicyItemSchema(),
+					"primary_virtual_host_id": {
+						Type:     schema.TypeInt,
+						Required: true,
+					},
+				},
+			},
+			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint", "host"},
+		},
+		"load_balancing_strategy_id": {
+			Type:          schema.TypeInt,
+			Optional:      true,
+			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint", "host"},
+		},
+		"availability_profile_id": {
+			Type:          schema.TypeInt,
+			Optional:      true,
+			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint", "host"},
+		},
 
 		//Common
 		"skip_hostname_verification": {
@@ -210,7 +259,7 @@ func resourcePingAccessPingFederateRuntimeImport(_ context.Context, d *schema.Re
 	if err != nil {
 		return nil, fmt.Errorf("unable to read deprecated PingFederateRuntime: %s", err)
 	}
-	if result.Host != nil && *result.Host != "" {
+	if result.Targets != nil && len(*result.Targets) > 0 {
 		diags := resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d, result)
 		//set defaults for state
 		setResourceDataStringWithDiagnostic(d, "description", String(""), &diags)
@@ -263,6 +312,15 @@ func resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d *schema.Resourc
 	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_proxy", input.UseProxy, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_slo", input.UseSlo, &diags)
+
+	setResourceDataIntWithDiagnostic(d, "availability_profile_id", input.AvailabilityProfileId, &diags)
+	setResourceDataIntWithDiagnostic(d, "load_balancing_strategy_id", input.LoadBalancingStrategyId, &diags)
+	if input.Application != nil {
+		if err := d.Set("application", flattenRuntimeApplication(input.Application)); err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
+	}
+
 	if input.Targets != nil {
 		if err := d.Set("targets", input.Targets); err != nil {
 			diags = append(diags, diag.FromErr(err)...)
@@ -324,6 +382,18 @@ func resourcePingAccessPingFederateDeprecatedRuntimeReadData(d *schema.ResourceD
 
 	if v, ok := d.GetOk("skip_hostname_verification"); ok {
 		pfRuntime.SkipHostnameVerification = Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOk("availability_profile_id"); ok {
+		pfRuntime.AvailabilityProfileId = Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("load_balancing_strategy_id"); ok {
+		pfRuntime.LoadBalancingStrategyId = Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("application"); ok {
+		pfRuntime.Application = expandRuntimeApplication(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("targets"); ok {

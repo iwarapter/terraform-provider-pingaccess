@@ -26,7 +26,7 @@ type SiteAuthenticatorsService struct {
 //New createa a new instance of the SiteAuthenticatorsService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a SiteAuthenticatorsService from the configuration
 //   svc := siteAuthenticators.New(cfg)

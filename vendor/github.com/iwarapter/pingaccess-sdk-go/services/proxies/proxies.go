@@ -26,7 +26,7 @@ type ProxiesService struct {
 //New createa a new instance of the ProxiesService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a ProxiesService from the configuration
 //   svc := proxies.New(cfg)

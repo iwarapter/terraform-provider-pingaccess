@@ -26,7 +26,7 @@ type RulesService struct {
 //New createa a new instance of the RulesService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a RulesService from the configuration
 //   svc := rules.New(cfg)

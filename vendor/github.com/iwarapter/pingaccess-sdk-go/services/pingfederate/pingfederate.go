@@ -25,7 +25,7 @@ type PingfederateService struct {
 //New createa a new instance of the PingfederateService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a PingfederateService from the configuration
 //   svc := pingfederate.New(cfg)
@@ -49,7 +49,7 @@ func (s *PingfederateService) newRequest(op *request.Operation, params, data int
 	return req
 }
 
-//DeletePingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Resets the PingFederate configuration to default values
+//DeletePingFederateCommand - Resets the PingFederate configuration to default values
 //RequestType: DELETE
 //Input:
 func (s *PingfederateService) DeletePingFederateCommand() (resp *http.Response, err error) {
@@ -68,7 +68,7 @@ func (s *PingfederateService) DeletePingFederateCommand() (resp *http.Response, 
 	return req.HTTPResponse, req.Error
 }
 
-//GetPingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Get the PingFederate configuration
+//GetPingFederateCommand - Get the PingFederate configuration
 //RequestType: GET
 //Input:
 func (s *PingfederateService) GetPingFederateCommand() (output *models.PingFederateRuntimeView, resp *http.Response, err error) {
@@ -87,7 +87,7 @@ func (s *PingfederateService) GetPingFederateCommand() (output *models.PingFeder
 	return nil, req.HTTPResponse, req.Error
 }
 
-//UpdatePingFederateCommand - [Attention: This endpoint "/pingfederate" is deprecated. Please use /pingfederate/runtime to configure PingFederate instead] Update the PingFederate configuration
+//UpdatePingFederateCommand - Update the PingFederate configuration
 //RequestType: PUT
 //Input: input *UpdatePingFederateCommandInput
 func (s *PingfederateService) UpdatePingFederateCommand(input *UpdatePingFederateCommandInput) (output *models.PingFederateRuntimeView, resp *http.Response, err error) {
@@ -238,13 +238,13 @@ type UpdatePingFederateAdminCommandInput struct {
 	Body models.PingFederateAdminView
 }
 
-//GetLegacyPingFederateMetadataCommand - [Attention: The endpoint "/pingfederate" is deprecated. This metadata corresponds to that configuration."/pingfederate/runtime" and "/pingfederate/runtime/metadata" should be used instead.] Get the PingFederate metadata
+//GetPingFederateMetadataCommand - Get the PingFederate metadata
 //RequestType: GET
 //Input:
-func (s *PingfederateService) GetLegacyPingFederateMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error) {
+func (s *PingfederateService) GetPingFederateMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error) {
 	path := "/pingfederate/metadata"
 	op := &request.Operation{
-		Name:       "GetLegacyPingFederateMetadataCommand",
+		Name:       "GetPingFederateMetadataCommand",
 		HTTPMethod: "GET",
 		HTTPPath:   path,
 	}
@@ -320,13 +320,13 @@ type UpdatePingFederateRuntimeCommandInput struct {
 	Body models.PingFederateMetadataRuntimeView
 }
 
-//GetPingFederateMetadataCommand - Get the PingFederate Runtime metadata
+//GetPingFederateRuntimeMetadataCommand - Get the PingFederate Runtime metadata
 //RequestType: GET
 //Input:
-func (s *PingfederateService) GetPingFederateMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error) {
+func (s *PingfederateService) GetPingFederateRuntimeMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error) {
 	path := "/pingfederate/runtime/metadata"
 	op := &request.Operation{
-		Name:       "GetPingFederateMetadataCommand",
+		Name:       "GetPingFederateRuntimeMetadataCommand",
 		HTTPMethod: "GET",
 		HTTPPath:   path,
 	}

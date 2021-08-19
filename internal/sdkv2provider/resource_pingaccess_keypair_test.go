@@ -3,6 +3,7 @@ package sdkv2provider
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
@@ -16,14 +17,16 @@ func init() {
 		Name: "keypairs",
 		F: func(r string) error {
 			svc := keyPairs.New(conf)
-			results, _, err := svc.GetKeyPairsCommand(&keyPairs.GetKeyPairsCommandInput{Filter: "acctest_"})
+			results, _, err := svc.GetKeyPairsCommand(&keyPairs.GetKeyPairsCommandInput{})
 			if err != nil {
 				return fmt.Errorf("unable to list keypairs to sweep %s", err)
 			}
 			for _, item := range results.Items {
-				_, err = svc.DeleteKeyPairCommand(&keyPairs.DeleteKeyPairCommandInput{Id: strconv.Itoa(*item.Id)})
-				if err != nil {
-					return fmt.Errorf("unable to sweep keypair %s because %s", strconv.Itoa(*item.Id), err)
+				if !strings.HasPrefix(*item.Alias, "Generated:") {
+					_, err = svc.DeleteKeyPairCommand(&keyPairs.DeleteKeyPairCommandInput{Id: strconv.Itoa(*item.Id)})
+					if err != nil {
+						return fmt.Errorf("unable to sweep keypair %s because %s", strconv.Itoa(*item.Id), err)
+					}
 				}
 			}
 			return nil

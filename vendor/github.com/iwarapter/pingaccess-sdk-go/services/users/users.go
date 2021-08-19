@@ -26,7 +26,7 @@ type UsersService struct {
 //New createa a new instance of the UsersService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a UsersService from the configuration
 //   svc := users.New(cfg)

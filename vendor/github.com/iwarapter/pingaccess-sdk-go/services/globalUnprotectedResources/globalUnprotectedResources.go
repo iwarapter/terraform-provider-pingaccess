@@ -26,7 +26,7 @@ type GlobalUnprotectedResourcesService struct {
 //New createa a new instance of the GlobalUnprotectedResourcesService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a GlobalUnprotectedResourcesService from the configuration
 //   svc := globalUnprotectedResources.New(cfg)

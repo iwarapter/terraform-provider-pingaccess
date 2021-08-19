@@ -26,19 +26,19 @@ func TestMain(m *testing.M) {
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Send response to be tested
 		rw.Header().Set("Content-Type", "application/json;charset=utf-8")
-		rw.Write([]byte(`
+		rw.Write([]byte(fmt.Sprintf(`
 {
-  "issuer": "https://localhost:9031",
-  "authorization_endpoint": "https://localhost:9031/as/authorization.oauth2",
-  "token_endpoint": "https://localhost:9031/as/token.oauth2",
-  "revocation_endpoint": "https://localhost:9031/as/revoke_token.oauth2",
-  "userinfo_endpoint": "https://localhost:9031/idp/userinfo.openid",
-  "introspection_endpoint": "https://localhost:9031/as/introspect.oauth2",
-  "jwks_uri": "https://localhost:9031/pf/JWKS",
-  "registration_endpoint": "https://localhost:9031/as/clients.oauth2",
-  "ping_revoked_sris_endpoint": "https://localhost:9031/pf-ws/rest/sessionMgmt/revokedSris",
-  "ping_end_session_endpoint": "https://localhost:9031/idp/startSLO.ping",
-  "device_authorization_endpoint": "https://localhost:9031/as/device_authz.oauth2",
+  "issuer": "https://%s",
+  "authorization_endpoint": "https://%s/as/authorization.oauth2",
+  "token_endpoint": "https://%s/as/token.oauth2",
+  "revocation_endpoint": "https://%s/as/revoke_token.oauth2",
+  "userinfo_endpoint": "https://%s/idp/userinfo",
+  "introspection_endpoint": "https://%s/as/introspect.oauth2",
+  "jwks_uri": "https://%s/pf/JWKS",
+  "registration_endpoint": "https://%s/as/clients.oauth2",
+  "ping_revoked_sris_endpoint": "https://%s/pf-ws/rest/sessionMgmt/revokedSris",
+  "ping_end_session_endpoint": "https://%s/idp/startSLO.ping",
+  "device_authorization_endpoint": "https://%s/as/device_authz.oauth2",
   "scopes_supported": [ "address", "mail", "phone", "openid", "profile", "group1" ],
   "response_types_supported": [ "code", "token", "id_token", "code token", "code id_token", "token id_token", "code token id_token" ],
   "response_modes_supported": [ "fragment", "query", "form_post" ],
@@ -54,12 +54,12 @@ func TestMain(m *testing.M) {
   "request_object_signing_alg_values_supported": [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
   "id_token_encryption_alg_values_supported": [ "dir", "A128KW", "A192KW", "A256KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "RSA-OAEP" ],
   "id_token_encryption_enc_values_supported": [ "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
-  "backchannel_authentication_endpoint": "https://localhost:9031/as/bc-auth.ciba",
+  "backchannel_authentication_endpoint": "https://%s/as/bc-auth.ciba",
   "backchannel_token_delivery_modes_supported": [ "poll", "ping" ],
   "backchannel_authentication_request_signing_alg_values_supported": [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
   "backchannel_user_code_parameter_supported": false
 }
-`))
+`, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host, req.Host)))
 	}))
 	l, _ := net.Listen("tcp", ":0")
 	server.Listener = l //for CI tests as host.docker.internal is window/macosx

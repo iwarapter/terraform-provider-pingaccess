@@ -181,7 +181,7 @@ func resourcePingAccessApplicationDelete(_ context.Context, d *schema.ResourceDa
 		Id: d.Id(),
 	}
 
-	_, _, err := svc.DeleteApplicationCommand(input)
+	_, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
 		return diag.Errorf("unable to delete Application: %s", err)
 	}

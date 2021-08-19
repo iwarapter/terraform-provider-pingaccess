@@ -43,6 +43,8 @@ build:
 	@go build -mod=vendor -o ${NAME} -trimpath .
 
 deploy-local:
+	@mkdir -p ~/.terraform.d/plugins
+	@cp ${NAME} ~/.terraform.d/plugins/
 	@mkdir -p ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
 	@cp ${NAME} ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
 

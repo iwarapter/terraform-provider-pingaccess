@@ -26,7 +26,7 @@ type AcmeService struct {
 //New createa a new instance of the AcmeService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a AcmeService from the configuration
 //   svc := acme.New(cfg)

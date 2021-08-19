@@ -89,7 +89,7 @@ func dataSourcePingAccessPingFederateRuntimeMetadataSchema() map[string]*schema.
 
 func dataSourcePingAccessPingFederateRuntimeMetadataRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).Pingfederate
-	result, resp, err := svc.GetPingFederateMetadataCommand()
+	result, resp, err := svc.GetPingFederateRuntimeMetadataCommand()
 	if err != nil {
 		return diag.Errorf("unable to read PingFederate Runtime Metadata: %s\n%v", err, resp)
 	}

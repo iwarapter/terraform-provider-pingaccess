@@ -16,9 +16,9 @@ type PingfederateAPI interface {
 	DeletePingFederateAdminCommand() (resp *http.Response, err error)
 	GetPingFederateAdminCommand() (output *models.PingFederateAdminView, resp *http.Response, err error)
 	UpdatePingFederateAdminCommand(input *UpdatePingFederateAdminCommandInput) (output *models.PingFederateAdminView, resp *http.Response, err error)
-	GetLegacyPingFederateMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error)
+	GetPingFederateMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error)
 	DeletePingFederateRuntimeCommand() (resp *http.Response, err error)
 	GetPingFederateRuntimeCommand() (output *models.PingFederateMetadataRuntimeView, resp *http.Response, err error)
 	UpdatePingFederateRuntimeCommand(input *UpdatePingFederateRuntimeCommandInput) (output *models.PingFederateMetadataRuntimeView, resp *http.Response, err error)
-	GetPingFederateMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error)
+	GetPingFederateRuntimeMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error)
 }

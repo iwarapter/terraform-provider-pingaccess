@@ -77,7 +77,7 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 			},
 			{
 				Config:      testAccPingAccessIdentityMappingConfigMissingRequired(),
-				ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'headerName' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
+				ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
 			},
 			{
 				Config: testAccPingAccessIdentityMappingConfigInterpolatedSkipped(),
@@ -104,6 +104,10 @@ func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
 		name = "acctest_%s"
 		configuration = <<EOF
 		{
+ 			"exclusionList": false,
+			"exclusionListAttributes": [],
+			"exclusionListSubject": null,
+			"headerNamePrefix": null,
 			"attributeHeaderMappings": [
 				{
 					"subject": true,
@@ -153,6 +157,10 @@ func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
 		name = "acctest_interpolated"
 		configuration = <<EOF
 		{
+			"exclusionList": false,
+			"exclusionListAttributes": [],
+			"exclusionListSubject": null,
+			"headerNamePrefix": null,
 			"attributeHeaderMappings": [
 				{
 					"subject": true,

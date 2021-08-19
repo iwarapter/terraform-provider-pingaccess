@@ -110,6 +110,10 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 
 		configuration = <<EOF
 		{
+			"exclusionList": false,
+			"exclusionListAttributes": [],
+			"exclusionListSubject": null,
+			"headerNamePrefix": null,
 			"attributeHeaderMappings": [
 				{
 					"subject": true,

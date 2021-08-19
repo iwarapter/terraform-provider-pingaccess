@@ -25,7 +25,7 @@ type OauthService struct {
 //New createa a new instance of the OauthService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a OauthService from the configuration
 //   svc := oauth.New(cfg)

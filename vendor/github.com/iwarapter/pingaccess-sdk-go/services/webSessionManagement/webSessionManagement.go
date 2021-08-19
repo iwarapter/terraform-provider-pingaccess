@@ -25,7 +25,7 @@ type WebSessionManagementService struct {
 //New createa a new instance of the WebSessionManagementService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a WebSessionManagementService from the configuration
 //   svc := webSessionManagement.New(cfg)

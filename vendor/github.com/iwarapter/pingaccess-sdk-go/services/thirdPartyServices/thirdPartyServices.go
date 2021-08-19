@@ -26,7 +26,7 @@ type ThirdPartyServicesService struct {
 //New createa a new instance of the ThirdPartyServicesService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a ThirdPartyServicesService from the configuration
 //   svc := thirdPartyServices.New(cfg)

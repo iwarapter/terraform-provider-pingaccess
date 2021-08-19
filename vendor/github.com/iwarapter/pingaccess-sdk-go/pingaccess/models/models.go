@@ -30,18 +30,18 @@ type AcmeAccountView struct {
 
 //AcmeCertStatusView - The status of a certificate.
 type AcmeCertStatusView struct {
-	Problems map[string]*ProblemDocumentView `json:"problems"`
+	Problems map[string]*ProblemDocumentView `json:"problems,omitempty"`
 	State    *string                         `json:"state"`
 }
 
 //AcmeCertificateRequestView - A reference to a Key Pair to be signed by the ACME protocol.
 type AcmeCertificateRequestView struct {
-	AcmeAccountId  *string             `json:"acmeAccountId"`
-	AcmeCertStatus *AcmeCertStatusView `json:"acmeCertStatus"`
-	AcmeServerId   *string             `json:"acmeServerId"`
+	AcmeAccountId  *string             `json:"acmeAccountId,omitempty"`
+	AcmeCertStatus *AcmeCertStatusView `json:"acmeCertStatus,omitempty"`
+	AcmeServerId   *string             `json:"acmeServerId,omitempty"`
 	Id             *string             `json:"id,omitempty"`
 	KeyPairId      *int                `json:"keyPairId"`
-	Url            *string             `json:"url"`
+	Url            *string             `json:"url,omitempty"`
 }
 
 //AcmeServerView - An ACME server.
@@ -75,6 +75,16 @@ type AdminConfigurationView struct {
 	HttpsProxyId *int    `json:"httpsProxyId,omitempty"`
 }
 
+//AdminTokenProviderView - An Admin Token Provider.
+type AdminTokenProviderView struct {
+	Description               *string    `json:"description,omitempty"`
+	Issuer                    *string    `json:"issuer"`
+	SslCiphers                *[]*string `json:"sslCiphers"`
+	SslProtocols              *[]*string `json:"sslProtocols"`
+	TrustedCertificateGroupId *int       `json:"trustedCertificateGroupId,omitempty"`
+	UseProxy                  *bool      `json:"useProxy,omitempty"`
+}
+
 //AdminWebSessionOidcConfigurationView - An admin web session OIDC configuration.
 type AdminWebSessionOidcConfigurationView struct {
 	CacheUserAttributes           *bool                       `json:"cacheUserAttributes,omitempty"`
@@ -84,19 +94,16 @@ type AdminWebSessionOidcConfigurationView struct {
 	PfsessionStateCacheInSeconds  *int                        `json:"pfsessionStateCacheInSeconds,omitempty"`
 	PkceChallengeType             *string                     `json:"pkceChallengeType,omitempty"`
 	RefreshUserInfoClaimsInterval *int                        `json:"refreshUserInfoClaimsInterval,omitempty"`
-	RequestPreservationType       *string                     `json:"requestPreservationType,omitempty"`
-	RequestProfile                *bool                       `json:"requestProfile,omitempty"`
 	Scopes                        *[]*string                  `json:"scopes,omitempty"`
 	SendRequestedUrlToProvider    *bool                       `json:"sendRequestedUrlToProvider,omitempty"`
 	ValidateSessionIsAlive        *bool                       `json:"validateSessionIsAlive,omitempty"`
-	WebStorageType                *string                     `json:"webStorageType,omitempty"`
 }
 
 //AgentCertificateView - An agent certificate.
 type AgentCertificateView struct {
 	Alias                   *string        `json:"alias"`
 	ChainCertificate        *bool          `json:"chainCertificate"`
-	Expires                 *string        `json:"expires"`
+	Expires                 *int           `json:"expires,omitempty"`
 	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	KeyPair                 *bool          `json:"keyPair"`
@@ -109,7 +116,7 @@ type AgentCertificateView struct {
 	SubjectCn               *string        `json:"subjectCn,omitempty"`
 	SubjectDn               *string        `json:"subjectDn"`
 	TrustedCertificate      *bool          `json:"trustedCertificate"`
-	ValidFrom               *string        `json:"validFrom"`
+	ValidFrom               *int           `json:"validFrom,omitempty"`
 }
 
 //AgentCertificatesView - A collection of agent certificates.
@@ -165,6 +172,7 @@ type ApplicationView struct {
 	AgentId                               *int                      `json:"agentId"`
 	AllowEmptyPathSegments                *bool                     `json:"allowEmptyPathSegments,omitempty"`
 	ApplicationType                       *string                   `json:"applicationType,omitempty"`
+	AuthenticationChallengePolicyId       *string                   `json:"authenticationChallengePolicyId"`
 	CaseSensitivePath                     *bool                     `json:"caseSensitivePath,omitempty"`
 	ContextRoot                           *string                   `json:"contextRoot"`
 	DefaultAuthType                       *string                   `json:"defaultAuthType"`
@@ -206,6 +214,21 @@ type AuthTokenManagementView struct {
 	SigningAlgorithm     *string `json:"signingAlgorithm,omitempty"`
 }
 
+//AuthenticationChallengePoliciesView - A collection of authentication challenge policies.
+type AuthenticationChallengePoliciesView struct {
+	Items []*AuthenticationChallengePolicyView `json:"items"`
+}
+
+//AuthenticationChallengePolicyView - An authentication challenge policy.
+type AuthenticationChallengePolicyView struct {
+	ChallengeResponseChain   []*ChallengeResponseMappingView `json:"challengeResponseChain"`
+	DefaultChallengeResponse *ChallengeResponseView          `json:"defaultChallengeResponse"`
+	Description              *string                         `json:"description,omitempty"`
+	Id                       *string                         `json:"id,omitempty"`
+	Name                     *string                         `json:"name"`
+	System                   *bool                           `json:"system,omitempty"`
+}
+
 //AuthnReqListView - An authentication requirements list.
 type AuthnReqListView struct {
 	AuthnReqs *[]*string  `json:"authnReqs"`
@@ -222,7 +245,7 @@ type AuthnReqListsView struct {
 type AuthorizationServerView struct {
 	AuditLevel                *string                     `json:"auditLevel,omitempty"`
 	CacheTokens               *bool                       `json:"cacheTokens,omitempty"`
-	ClientCredentials         *OAuthClientCredentialsView `json:"clientCredentials"`
+	ClientCredentials         *OAuthClientCredentialsView `json:"clientCredentials,omitempty"`
 	Description               *string                     `json:"description,omitempty"`
 	IntrospectionEndpoint     *string                     `json:"introspectionEndpoint"`
 	Secure                    *bool                       `json:"secure,omitempty"`
@@ -268,7 +291,7 @@ type CSRResponseImportDocView struct {
 //ChainCertificateView - A chain certificate.
 type ChainCertificateView struct {
 	Alias                   *string        `json:"alias"`
-	Expires                 *int           `json:"expires"`
+	Expires                 *int           `json:"expires,omitempty"`
 	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	Md5sum                  *string        `json:"md5sum"`
@@ -279,12 +302,36 @@ type ChainCertificateView struct {
 	SubjectAlternativeNames []*GeneralName `json:"subjectAlternativeNames,omitempty"`
 	SubjectCn               *string        `json:"subjectCn,omitempty"`
 	SubjectDn               *string        `json:"subjectDn"`
-	ValidFrom               *int           `json:"validFrom"`
+	ValidFrom               *int           `json:"validFrom,omitempty"`
 }
 
 //ChainCertificatesDocView
 type ChainCertificatesDocView struct {
 	AddChainCertificates *[]*string `json:"addChainCertificates"`
+}
+
+//ChallengeResponseFilterView - An authentication challenge response filter.
+type ChallengeResponseFilterView struct {
+	ClassName     *string                `json:"className"`
+	Configuration map[string]interface{} `json:"configuration"`
+}
+
+//ChallengeResponseGeneratorView - An authentication challenge response generator.
+type ChallengeResponseGeneratorView struct {
+	ClassName     *string                `json:"className"`
+	Configuration map[string]interface{} `json:"configuration"`
+}
+
+//ChallengeResponseMappingView - A mapping from an unauthenticated request to an authentication challenge response.
+type ChallengeResponseMappingView struct {
+	ChallengeResponse *ChallengeResponseView `json:"challengeResponse"`
+	RequestMatcher    *RequestMatcherView    `json:"requestMatcher"`
+}
+
+//ChallengeResponseView - An authentication challenge response.
+type ChallengeResponseView struct {
+	Filter    *ChallengeResponseFilterView    `json:"filter,omitempty"`
+	Generator *ChallengeResponseGeneratorView `json:"generator"`
 }
 
 //ConfigStatusView - An import or export configuration.
@@ -355,11 +402,17 @@ type DescriptorsView struct {
 	Items []*DescriptorView `json:"items"`
 }
 
+//EmbeddableAccessTokenValidatorView - An Embeddable Access Token Validator configuration.
+type EmbeddableAccessTokenValidatorView struct {
+	ClassName     *string                `json:"className"`
+	Configuration map[string]interface{} `json:"configuration"`
+}
+
 //EngineCertificateView - An engine certificate.
 type EngineCertificateView struct {
 	Alias                   *string        `json:"alias"`
 	ChainCertificate        *bool          `json:"chainCertificate"`
-	Expires                 *string        `json:"expires"`
+	Expires                 *int           `json:"expires,omitempty"`
 	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	KeyPair                 *bool          `json:"keyPair"`
@@ -372,7 +425,7 @@ type EngineCertificateView struct {
 	SubjectCn               *string        `json:"subjectCn,omitempty"`
 	SubjectDn               *string        `json:"subjectDn"`
 	TrustedCertificate      *bool          `json:"trustedCertificate"`
-	ValidFrom               *string        `json:"validFrom"`
+	ValidFrom               *int           `json:"validFrom,omitempty"`
 }
 
 //EngineHealthStatusView
@@ -421,6 +474,11 @@ type EnginesView struct {
 	Items []*EngineView `json:"items"`
 }
 
+//EnvironmentView - An Environment.
+type EnvironmentView struct {
+	Name *string `json:"name"`
+}
+
 //ExportData - A JSON backup file.
 type ExportData struct {
 	Data          map[string]interface{} `json:"data"`
@@ -432,9 +490,9 @@ type ExportData struct {
 
 //ExportParameters - The export parameters for a key pair.
 type ExportParameters struct {
-	HsmProviderId *int    `json:"hsmProviderId"`
-	Id            *int    `json:"id"`
-	Password      *string `json:"password"`
+	HsmProviderId *int             `json:"hsmProviderId"`
+	Id            *int             `json:"id"`
+	Password      *HiddenFieldView `json:"password"`
 }
 
 //GeneralName - A subject alternative name.
@@ -511,7 +569,7 @@ type HttpClientProxyView struct {
 
 //HttpMonitoringView
 type HttpMonitoringView struct {
-	AuditLevel *string `json:"auditLevel"`
+	AuditLevel *string `json:"auditLevel,omitempty"`
 }
 
 //HttpsListenerView - An HTTPS listener.
@@ -591,7 +649,7 @@ type KeyPairView struct {
 	Alias                   *string                 `json:"alias"`
 	ChainCertificates       []*ChainCertificateView `json:"chainCertificates,omitempty"`
 	CsrPending              *bool                   `json:"csrPending"`
-	Expires                 *int                    `json:"expires"`
+	Expires                 *int                    `json:"expires,omitempty"`
 	HsmProviderId           *int                    `json:"hsmProviderId,omitempty"`
 	Id                      *int                    `json:"id,omitempty"`
 	IssuerDn                *string                 `json:"issuerDn"`
@@ -603,7 +661,7 @@ type KeyPairView struct {
 	SubjectAlternativeNames []*GeneralName          `json:"subjectAlternativeNames,omitempty"`
 	SubjectCn               *string                 `json:"subjectCn,omitempty"`
 	SubjectDn               *string                 `json:"subjectDn"`
-	ValidFrom               *int                    `json:"validFrom"`
+	ValidFrom               *int                    `json:"validFrom,omitempty"`
 }
 
 //KeyPairsView - A collection of key pairs.
@@ -696,54 +754,61 @@ type NewKeyPairConfigView struct {
 
 //OAuthClientCredentialsView - OAuth client credentials.
 type OAuthClientCredentialsView struct {
-	ClientId     *string          `json:"clientId"`
-	ClientSecret *HiddenFieldView `json:"clientSecret,omitempty"`
+	ClientId        *string          `json:"clientId"`
+	ClientSecret    *HiddenFieldView `json:"clientSecret,omitempty"`
+	CredentialsType *string          `json:"credentialsType,omitempty"`
+	KeyPairId       *int             `json:"keyPairId,omitempty"`
 }
 
 //OAuthConfigView - An OAuth authentication configuration.
 type OAuthConfigView struct {
-	ClientId             *string                       `json:"clientId"`
-	ClientSecret         *HiddenFieldView              `json:"clientSecret,omitempty"`
-	Enabled              *bool                         `json:"enabled,omitempty"`
-	RoleMapping          *RoleMappingConfigurationView `json:"roleMapping,omitempty"`
-	Scope                *string                       `json:"scope"`
-	SubjectAttributeName *string                       `json:"subjectAttributeName,omitempty"`
+	AccessTokenValidator *EmbeddableAccessTokenValidatorView `json:"accessTokenValidator,omitempty"`
+	ClientCredentials    *OAuthClientCredentialsView         `json:"clientCredentials,omitempty"`
+	ClientId             *string                             `json:"clientId,omitempty"`
+	ClientSecret         *HiddenFieldView                    `json:"clientSecret,omitempty"`
+	Enabled              *bool                               `json:"enabled,omitempty"`
+	RoleMapping          *RoleMappingConfigurationView       `json:"roleMapping,omitempty"`
+	Scope                *string                             `json:"scope"`
+	SubjectAttributeName *string                             `json:"subjectAttributeName,omitempty"`
 }
 
 //OAuthKeyManagementView - An OAuth key management configuration.
 type OAuthKeyManagementView struct {
-	KeyRollEnabled       *bool `json:"keyRollEnabled,omitempty"`
-	KeyRollPeriodInHours *int  `json:"keyRollPeriodInHours,omitempty"`
+	KeyRollEnabled       *bool   `json:"keyRollEnabled,omitempty"`
+	KeyRollPeriodInHours *int    `json:"keyRollPeriodInHours,omitempty"`
+	SigningAlgorithm     *string `json:"signingAlgorithm,omitempty"`
 }
 
 //OIDCProviderMetadata - The OpenID Connect provider's metadata.
 type OIDCProviderMetadata struct {
-	AuthorizationEndpoint                  *string    `json:"authorization_endpoint"`
-	BackchannelAuthenticationEndpoint      *string    `json:"backchannel_authentication_endpoint"`
-	ClaimTypesSupported                    *[]*string `json:"claim_types_supported"`
-	ClaimsParameterSupported               *bool      `json:"claims_parameter_supported"`
-	ClaimsSupported                        *[]*string `json:"claims_supported"`
-	CodeChallengeMethodsSupported          *[]*string `json:"code_challenge_methods_supported"`
-	EndSessionEndpoint                     *string    `json:"end_session_endpoint"`
-	GrantTypesSupported                    *[]*string `json:"grant_types_supported"`
-	IdTokenSigningAlgValuesSupported       *[]*string `json:"id_token_signing_alg_values_supported"`
-	IntrospectionEndpoint                  *string    `json:"introspection_endpoint"`
-	Issuer                                 *string    `json:"issuer"`
-	JwksUri                                *string    `json:"jwks_uri"`
-	PingEndSessionEndpoint                 *string    `json:"ping_end_session_endpoint"`
-	PingRevokedSrisEndpoint                *string    `json:"ping_revoked_sris_endpoint"`
-	RequestObjectSigningAlgValuesSupported *[]*string `json:"request_object_signing_alg_values_supported"`
-	RequestParameterSupported              *bool      `json:"request_parameter_supported"`
-	RequestUriParameterSupported           *bool      `json:"request_uri_parameter_supported"`
-	ResponseModesSupported                 *[]*string `json:"response_modes_supported"`
-	ResponseTypesSupported                 *[]*string `json:"response_types_supported"`
-	RevocationEndpoint                     *string    `json:"revocation_endpoint"`
-	ScopesSupported                        *[]*string `json:"scopes_supported"`
-	SubjectTypesSupported                  *[]*string `json:"subject_types_supported"`
-	TokenEndpoint                          *string    `json:"token_endpoint"`
-	TokenEndpointAuthMethodsSupported      *[]*string `json:"token_endpoint_auth_methods_supported"`
-	UserinfoEndpoint                       *string    `json:"userinfo_endpoint"`
-	UserinfoSigningAlgValuesSupported      *[]*string `json:"userinfo_signing_alg_values_supported"`
+	AuthorizationEndpoint                      *string            `json:"authorization_endpoint"`
+	BackchannelAuthenticationEndpoint          *string            `json:"backchannel_authentication_endpoint"`
+	ClaimTypesSupported                        *[]*string         `json:"claim_types_supported"`
+	ClaimsParameterSupported                   *bool              `json:"claims_parameter_supported"`
+	ClaimsSupported                            *[]*string         `json:"claims_supported"`
+	CodeChallengeMethodsSupported              *[]*string         `json:"code_challenge_methods_supported"`
+	EndSessionEndpoint                         *string            `json:"end_session_endpoint"`
+	GrantTypesSupported                        *[]*string         `json:"grant_types_supported"`
+	IdTokenSigningAlgValuesSupported           *[]*string         `json:"id_token_signing_alg_values_supported"`
+	IntrospectionEndpoint                      *string            `json:"introspection_endpoint"`
+	Issuer                                     *string            `json:"issuer"`
+	JwksUri                                    *string            `json:"jwks_uri"`
+	MtlsEndpointAliases                        map[string]*string `json:"mtls_endpoint_aliases"`
+	PingEndSessionEndpoint                     *string            `json:"ping_end_session_endpoint"`
+	PingRevokedSrisEndpoint                    *string            `json:"ping_revoked_sris_endpoint"`
+	RequestObjectSigningAlgValuesSupported     *[]*string         `json:"request_object_signing_alg_values_supported"`
+	RequestParameterSupported                  *bool              `json:"request_parameter_supported"`
+	RequestUriParameterSupported               *bool              `json:"request_uri_parameter_supported"`
+	ResponseModesSupported                     *[]*string         `json:"response_modes_supported"`
+	ResponseTypesSupported                     *[]*string         `json:"response_types_supported"`
+	RevocationEndpoint                         *string            `json:"revocation_endpoint"`
+	ScopesSupported                            *[]*string         `json:"scopes_supported"`
+	SubjectTypesSupported                      *[]*string         `json:"subject_types_supported"`
+	TokenEndpoint                              *string            `json:"token_endpoint"`
+	TokenEndpointAuthMethodsSupported          *[]*string         `json:"token_endpoint_auth_methods_supported"`
+	TokenEndpointAuthSigningAlgValuesSupported *[]*string         `json:"token_endpoint_auth_signing_alg_values_supported"`
+	UserinfoEndpoint                           *string            `json:"userinfo_endpoint"`
+	UserinfoSigningAlgValuesSupported          *[]*string         `json:"userinfo_signing_alg_values_supported"`
 }
 
 //OIDCProviderPluginView - An OpenID Connect provider plugin.
@@ -767,11 +832,12 @@ type OIDCProviderView struct {
 
 //OidcConfigView - An OIDC authentication configuration.
 type OidcConfigView struct {
-	AuthnReqListId    *int                                  `json:"authnReqListId,omitempty"`
-	Enabled           *bool                                 `json:"enabled,omitempty"`
-	OidcConfiguration *AdminWebSessionOidcConfigurationView `json:"oidcConfiguration"`
-	RoleMapping       *RoleMappingConfigurationView         `json:"roleMapping,omitempty"`
-	UseSlo            *bool                                 `json:"useSlo,omitempty"`
+	AuthnReqListId        *int                                  `json:"authnReqListId,omitempty"`
+	Enabled               *bool                                 `json:"enabled,omitempty"`
+	OidcConfiguration     *AdminWebSessionOidcConfigurationView `json:"oidcConfiguration"`
+	RoleMapping           *RoleMappingConfigurationView         `json:"roleMapping,omitempty"`
+	UseSlo                *bool                                 `json:"useSlo,omitempty"`
+	UsernameAttributeName *string                               `json:"usernameAttributeName,omitempty"`
 }
 
 //OidcLoginTypesView - A collection of valid web session OIDC login types.
@@ -787,11 +853,11 @@ type OptionalAttributeMappingView struct {
 
 //PKCS12FileImportDocView - A PKCS#12 file.
 type PKCS12FileImportDocView struct {
-	Alias             *string    `json:"alias"`
-	ChainCertificates *[]*string `json:"chainCertificates"`
-	FileData          *string    `json:"fileData"`
-	HsmProviderId     *int       `json:"hsmProviderId"`
-	Password          *string    `json:"password"`
+	Alias             *string          `json:"alias"`
+	ChainCertificates *[]*string       `json:"chainCertificates"`
+	FileData          *string          `json:"fileData"`
+	HsmProviderId     *int             `json:"hsmProviderId"`
+	Password          *HiddenFieldView `json:"password"`
 }
 
 //PathPatternView - A pattern for matching request URI paths.
@@ -802,15 +868,16 @@ type PathPatternView struct {
 
 //PingFederateAccessTokenView - A PingAccess OAuth client configuration.
 type PingFederateAccessTokenView struct {
-	AccessValidatorId      *int             `json:"accessValidatorId,omitempty"`
-	CacheTokens            *bool            `json:"cacheTokens,omitempty"`
-	ClientId               *string          `json:"clientId"`
-	ClientSecret           *HiddenFieldView `json:"clientSecret,omitempty"`
-	Name                   *string          `json:"name,omitempty"`
-	SendAudience           *bool            `json:"sendAudience,omitempty"`
-	SubjectAttributeName   *string          `json:"subjectAttributeName"`
-	TokenTimeToLiveSeconds *int             `json:"tokenTimeToLiveSeconds,omitempty"`
-	UseTokenIntrospection  *bool            `json:"useTokenIntrospection,omitempty"`
+	AccessValidatorId      *int                        `json:"accessValidatorId"`
+	CacheTokens            *bool                       `json:"cacheTokens,omitempty"`
+	ClientCredentials      *OAuthClientCredentialsView `json:"clientCredentials,omitempty"`
+	ClientId               *string                     `json:"clientId,omitempty"`
+	ClientSecret           *HiddenFieldView            `json:"clientSecret,omitempty"`
+	Name                   *string                     `json:"name,omitempty"`
+	SendAudience           *bool                       `json:"sendAudience,omitempty"`
+	SubjectAttributeName   *string                     `json:"subjectAttributeName"`
+	TokenTimeToLiveSeconds *int                        `json:"tokenTimeToLiveSeconds,omitempty"`
+	UseTokenIntrospection  *bool                       `json:"useTokenIntrospection,omitempty"`
 }
 
 //PingFederateAdminView - A PingFederate Admin configuration.
@@ -837,21 +904,34 @@ type PingFederateMetadataRuntimeView struct {
 	UseSlo                    *bool   `json:"useSlo,omitempty"`
 }
 
+//PingFederateRuntimeApplicationView - Configuration required to help define application data to handle PingFederate as both a token provider and a proxied application.
+type PingFederateRuntimeApplicationView struct {
+	AdditionalVirtualHostIds *[]*int       `json:"additionalVirtualHostIds,omitempty"`
+	CaseSensitive            *bool         `json:"caseSensitive,omitempty"`
+	ClientCertHeaderNames    *[]*string    `json:"clientCertHeaderNames,omitempty"`
+	ContextRoot              *string       `json:"contextRoot,omitempty"`
+	Policy                   []*PolicyItem `json:"policy,omitempty"`
+	PrimaryVirtualHostId     *int          `json:"primaryVirtualHostId"`
+}
+
 //PingFederateRuntimeView - A PingFederate configuration.
 type PingFederateRuntimeView struct {
-	AuditLevel                *string    `json:"auditLevel,omitempty"`
-	BackChannelBasePath       *string    `json:"backChannelBasePath,omitempty"`
-	BackChannelSecure         *bool      `json:"backChannelSecure,omitempty"`
-	BasePath                  *string    `json:"basePath,omitempty"`
-	ExpectedHostname          *string    `json:"expectedHostname,omitempty"`
-	Host                      *string    `json:"host"`
-	Port                      *int       `json:"port"`
-	Secure                    *bool      `json:"secure,omitempty"`
-	SkipHostnameVerification  *bool      `json:"skipHostnameVerification,omitempty"`
-	Targets                   *[]*string `json:"targets,omitempty"`
-	TrustedCertificateGroupId *int       `json:"trustedCertificateGroupId,omitempty"`
-	UseProxy                  *bool      `json:"useProxy,omitempty"`
-	UseSlo                    *bool      `json:"useSlo,omitempty"`
+	Application               *PingFederateRuntimeApplicationView `json:"application,omitempty"`
+	AuditLevel                *string                             `json:"auditLevel,omitempty"`
+	AvailabilityProfileId     *int                                `json:"availabilityProfileId,omitempty"`
+	BackChannelBasePath       *string                             `json:"backChannelBasePath,omitempty"`
+	BackChannelSecure         *bool                               `json:"backChannelSecure,omitempty"`
+	BasePath                  *string                             `json:"basePath,omitempty"`
+	ExpectedHostname          *string                             `json:"expectedHostname,omitempty"`
+	Host                      *string                             `json:"host"`
+	LoadBalancingStrategyId   *int                                `json:"loadBalancingStrategyId,omitempty"`
+	Port                      *int                                `json:"port"`
+	Secure                    *bool                               `json:"secure,omitempty"`
+	SkipHostnameVerification  *bool                               `json:"skipHostnameVerification,omitempty"`
+	Targets                   *[]*string                          `json:"targets,omitempty"`
+	TrustedCertificateGroupId *int                                `json:"trustedCertificateGroupId,omitempty"`
+	UseProxy                  *bool                               `json:"useProxy,omitempty"`
+	UseSlo                    *bool                               `json:"useSlo,omitempty"`
 }
 
 //PingOne4CView - The PingOne for Customers OIDC provider configuration.
@@ -889,6 +969,31 @@ type PublicKeyView struct {
 	Jwk     map[string]interface{} `json:"jwk"`
 }
 
+//QueryParamConfigView - Query parameter configuration settings to match requests to URLs with query parameters.
+type QueryParamConfigView struct {
+	MatchesNoParams *bool                 `json:"matchesNoParams"`
+	Params          []*QueryParamPairView `json:"params"`
+}
+
+//QueryParamNameView
+type QueryParamNameView struct {
+	Pattern *string `json:"pattern"`
+	Type    *string `json:"type"`
+}
+
+//QueryParamPairView
+type QueryParamPairView struct {
+	Name  *QueryParamNameView  `json:"name"`
+	Value *QueryParamValueView `json:"value"`
+}
+
+//QueryParamValueView
+type QueryParamValueView struct {
+	MatchAny *bool   `json:"matchAny"`
+	Pattern  *string `json:"pattern"`
+	Type     *string `json:"type"`
+}
+
 //QueryParameterView - A name-value pair of custom query parameters.
 type QueryParameterView struct {
 	Name  *string `json:"name"`
@@ -898,6 +1003,7 @@ type QueryParameterView struct {
 //RedirectView - A Redirect.
 type RedirectView struct {
 	AuditLevel   *string             `json:"auditLevel,omitempty"`
+	Id           *string             `json:"id,omitempty"`
 	ResponseCode *int                `json:"responseCode,omitempty"`
 	Source       *HostPortView       `json:"source,omitempty"`
 	Target       *TargetHostPortView `json:"target,omitempty"`
@@ -940,6 +1046,12 @@ type ReplicaAdminsView struct {
 	Items []*ReplicaAdminView `json:"items"`
 }
 
+//RequestMatcherView - A request matcher used to match an unauthenticated request to its challenge response.
+type RequestMatcherView struct {
+	ClassName     *string                `json:"className"`
+	Configuration map[string]interface{} `json:"configuration"`
+}
+
 //RequestPreservationTypesView - A collection of valid web session request preservation types.
 type RequestPreservationTypesView struct {
 	Items []*ItemView `json:"items"`
@@ -976,21 +1088,30 @@ type ResourceOrderView struct {
 	ResourceIds *[]*int     `json:"resourceIds"`
 }
 
+//ResourceTypeConfigurationView - A container for configuration specific to various types of resources.
+type ResourceTypeConfigurationView struct {
+	ResponseGenerator *ResponseGeneratorView `json:"responseGenerator,omitempty"`
+}
+
 //ResourceView - A resource.
 type ResourceView struct {
-	Anonymous               *bool                     `json:"anonymous,omitempty"`
-	ApplicationId           *int                      `json:"applicationId,omitempty"`
-	AuditLevel              *string                   `json:"auditLevel,omitempty"`
-	DefaultAuthTypeOverride *string                   `json:"defaultAuthTypeOverride"`
-	Enabled                 *bool                     `json:"enabled,omitempty"`
-	Id                      json.Number               `json:"id,omitempty"`
-	Methods                 *[]*string                `json:"methods"`
-	Name                    *string                   `json:"name"`
-	PathPatterns            []*PathPatternView        `json:"pathPatterns,omitempty"`
-	PathPrefixes            *[]*string                `json:"pathPrefixes,omitempty"`
-	Policy                  map[string]*[]*PolicyItem `json:"policy,omitempty"`
-	RootResource            *bool                     `json:"rootResource,omitempty"`
-	Unprotected             *bool                     `json:"unprotected,omitempty"`
+	Anonymous                       *bool                          `json:"anonymous,omitempty"`
+	ApplicationId                   *int                           `json:"applicationId,omitempty"`
+	AuditLevel                      *string                        `json:"auditLevel,omitempty"`
+	AuthenticationChallengePolicyId *string                        `json:"authenticationChallengePolicyId"`
+	DefaultAuthTypeOverride         *string                        `json:"defaultAuthTypeOverride"`
+	Enabled                         *bool                          `json:"enabled,omitempty"`
+	Id                              json.Number                    `json:"id,omitempty"`
+	Methods                         *[]*string                     `json:"methods"`
+	Name                            *string                        `json:"name"`
+	PathPatterns                    []*PathPatternView             `json:"pathPatterns,omitempty"`
+	PathPrefixes                    *[]*string                     `json:"pathPrefixes,omitempty"`
+	Policy                          map[string]*[]*PolicyItem      `json:"policy,omitempty"`
+	QueryParamConfig                *QueryParamConfigView          `json:"queryParamConfig,omitempty"`
+	ResourceType                    *string                        `json:"resourceType,omitempty"`
+	ResourceTypeConfiguration       *ResourceTypeConfigurationView `json:"resourceTypeConfiguration,omitempty"`
+	RootResource                    *bool                          `json:"rootResource,omitempty"`
+	Unprotected                     *bool                          `json:"unprotected,omitempty"`
 }
 
 //ResourcesView - A collection of resources.
@@ -998,11 +1119,25 @@ type ResourcesView struct {
 	Items []*ResourceView `json:"items"`
 }
 
+//ResponseGeneratorView
+type ResponseGeneratorView struct {
+	ClassName     *string                `json:"className"`
+	Configuration map[string]interface{} `json:"configuration"`
+}
+
+//RevocationCheckingView - The client certificate revocation checking configuration.
+type RevocationCheckingView struct {
+	CrlChecking                 *bool `json:"crlChecking,omitempty"`
+	DenyRevocationStatusUnknown *bool `json:"denyRevocationStatusUnknown,omitempty"`
+	Ocsp                        *bool `json:"ocsp,omitempty"`
+}
+
 //RoleMappingConfigurationView - Configuration for mapping user attributes to roles.
 type RoleMappingConfigurationView struct {
 	Administrator *RequiredAttributeMappingView `json:"administrator,omitempty"`
 	Auditor       *OptionalAttributeMappingView `json:"auditor,omitempty"`
 	Enabled       *bool                         `json:"enabled,omitempty"`
+	PlatformAdmin *OptionalAttributeMappingView `json:"platformAdmin,omitempty"`
 }
 
 //RuleDescriptorView - A rule descriptor.
@@ -1187,7 +1322,7 @@ type TokenProviderSettingView struct {
 //TrustedCertView - A trusted certificate.
 type TrustedCertView struct {
 	Alias                   *string        `json:"alias"`
-	Expires                 *int           `json:"expires"`
+	Expires                 *int           `json:"expires,omitempty"`
 	Id                      *int           `json:"id,omitempty"`
 	IssuerDn                *string        `json:"issuerDn"`
 	Md5sum                  *string        `json:"md5sum"`
@@ -1198,18 +1333,19 @@ type TrustedCertView struct {
 	SubjectAlternativeNames []*GeneralName `json:"subjectAlternativeNames,omitempty"`
 	SubjectCn               *string        `json:"subjectCn,omitempty"`
 	SubjectDn               *string        `json:"subjectDn"`
-	ValidFrom               *int           `json:"validFrom"`
+	ValidFrom               *int           `json:"validFrom,omitempty"`
 }
 
 //TrustedCertificateGroupView - A trusted certificate group.
 type TrustedCertificateGroupView struct {
-	CertIds                    *[]*int     `json:"certIds,omitempty"`
-	Id                         json.Number `json:"id,omitempty"`
-	IgnoreAllCertificateErrors *bool       `json:"ignoreAllCertificateErrors,omitempty"`
-	Name                       *string     `json:"name"`
-	SkipCertificateDateCheck   *bool       `json:"skipCertificateDateCheck,omitempty"`
-	SystemGroup                *bool       `json:"systemGroup,omitempty"`
-	UseJavaTrustStore          *bool       `json:"useJavaTrustStore,omitempty"`
+	CertIds                    *[]*int                 `json:"certIds,omitempty"`
+	Id                         json.Number             `json:"id,omitempty"`
+	IgnoreAllCertificateErrors *bool                   `json:"ignoreAllCertificateErrors,omitempty"`
+	Name                       *string                 `json:"name"`
+	RevocationChecking         *RevocationCheckingView `json:"revocationChecking,omitempty"`
+	SkipCertificateDateCheck   *bool                   `json:"skipCertificateDateCheck,omitempty"`
+	SystemGroup                *bool                   `json:"systemGroup,omitempty"`
+	UseJavaTrustStore          *bool                   `json:"useJavaTrustStore,omitempty"`
 }
 
 //TrustedCertificateGroupsView - A collection of trusted certificate group items.
@@ -1289,29 +1425,30 @@ type WebSessionManagementView struct {
 
 //WebSessionView - A web session.
 type WebSessionView struct {
-	Audience                      *string                     `json:"audience"`
-	CacheUserAttributes           *bool                       `json:"cacheUserAttributes,omitempty"`
-	ClientCredentials             *OAuthClientCredentialsView `json:"clientCredentials"`
-	CookieDomain                  *string                     `json:"cookieDomain,omitempty"`
-	CookieType                    *string                     `json:"cookieType,omitempty"`
-	EnableRefreshUser             *bool                       `json:"enableRefreshUser,omitempty"`
-	HttpOnlyCookie                *bool                       `json:"httpOnlyCookie,omitempty"`
-	Id                            json.Number                 `json:"id,omitempty"`
-	IdleTimeoutInMinutes          *int                        `json:"idleTimeoutInMinutes,omitempty"`
-	Name                          *string                     `json:"name"`
-	OidcLoginType                 *string                     `json:"oidcLoginType,omitempty"`
-	PfsessionStateCacheInSeconds  *int                        `json:"pfsessionStateCacheInSeconds,omitempty"`
-	PkceChallengeType             *string                     `json:"pkceChallengeType,omitempty"`
-	RefreshUserInfoClaimsInterval *int                        `json:"refreshUserInfoClaimsInterval,omitempty"`
-	RequestPreservationType       *string                     `json:"requestPreservationType,omitempty"`
-	RequestProfile                *bool                       `json:"requestProfile,omitempty"`
-	SameSite                      *string                     `json:"sameSite,omitempty"`
-	Scopes                        *[]*string                  `json:"scopes,omitempty"`
-	SecureCookie                  *bool                       `json:"secureCookie,omitempty"`
-	SendRequestedUrlToProvider    *bool                       `json:"sendRequestedUrlToProvider,omitempty"`
-	SessionTimeoutInMinutes       *int                        `json:"sessionTimeoutInMinutes,omitempty"`
-	ValidateSessionIsAlive        *bool                       `json:"validateSessionIsAlive,omitempty"`
-	WebStorageType                *string                     `json:"webStorageType,omitempty"`
+	Audience                                 *string                     `json:"audience"`
+	CacheUserAttributes                      *bool                       `json:"cacheUserAttributes,omitempty"`
+	ClientCredentials                        *OAuthClientCredentialsView `json:"clientCredentials"`
+	CookieDomain                             *string                     `json:"cookieDomain,omitempty"`
+	CookieType                               *string                     `json:"cookieType,omitempty"`
+	EnableRefreshUser                        *bool                       `json:"enableRefreshUser,omitempty"`
+	FailOnUnsupportedPreservationContentType *bool                       `json:"failOnUnsupportedPreservationContentType"`
+	HttpOnlyCookie                           *bool                       `json:"httpOnlyCookie,omitempty"`
+	Id                                       json.Number                 `json:"id,omitempty"`
+	IdleTimeoutInMinutes                     *int                        `json:"idleTimeoutInMinutes,omitempty"`
+	Name                                     *string                     `json:"name"`
+	OidcLoginType                            *string                     `json:"oidcLoginType,omitempty"`
+	PfsessionStateCacheInSeconds             *int                        `json:"pfsessionStateCacheInSeconds,omitempty"`
+	PkceChallengeType                        *string                     `json:"pkceChallengeType,omitempty"`
+	RefreshUserInfoClaimsInterval            *int                        `json:"refreshUserInfoClaimsInterval,omitempty"`
+	RequestPreservationType                  *string                     `json:"requestPreservationType,omitempty"`
+	RequestProfile                           *bool                       `json:"requestProfile,omitempty"`
+	SameSite                                 *string                     `json:"sameSite,omitempty"`
+	Scopes                                   *[]*string                  `json:"scopes,omitempty"`
+	SecureCookie                             *bool                       `json:"secureCookie,omitempty"`
+	SendRequestedUrlToProvider               *bool                       `json:"sendRequestedUrlToProvider,omitempty"`
+	SessionTimeoutInMinutes                  *int                        `json:"sessionTimeoutInMinutes,omitempty"`
+	ValidateSessionIsAlive                   *bool                       `json:"validateSessionIsAlive,omitempty"`
+	WebStorageType                           *string                     `json:"webStorageType,omitempty"`
 }
 
 //WebSessionsView - A collection of web sessions.

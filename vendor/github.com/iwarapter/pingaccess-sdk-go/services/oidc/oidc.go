@@ -26,7 +26,7 @@ type OidcService struct {
 //New createa a new instance of the OidcService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a OidcService from the configuration
 //   svc := oidc.New(cfg)

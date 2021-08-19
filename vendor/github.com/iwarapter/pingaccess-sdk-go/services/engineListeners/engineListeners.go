@@ -26,7 +26,7 @@ type EngineListenersService struct {
 //New createa a new instance of the EngineListenersService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a EngineListenersService from the configuration
 //   svc := engineListeners.New(cfg)

@@ -17,7 +17,7 @@ func init() {
 		Dependencies: []string{"keypairs", "trusted_certificate_group"},
 		F: func(r string) error {
 			svc := certificates.New(conf)
-			results, _, err := svc.GetTrustedCerts(&certificates.GetTrustedCertsInput{Filter: "acctest_"})
+			results, _, err := svc.GetTrustedCerts(&certificates.GetTrustedCertsInput{})
 			if err != nil {
 				return fmt.Errorf("unable to list certificates to sweep %s", err)
 			}

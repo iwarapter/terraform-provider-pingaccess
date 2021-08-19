@@ -26,7 +26,7 @@ type ConfigService struct {
 //New createa a new instance of the ConfigService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a ConfigService from the configuration
 //   svc := config.New(cfg)
@@ -50,7 +50,7 @@ func (s *ConfigService) newRequest(op *request.Operation, params, data interface
 	return req
 }
 
-//ConfigExportCommand - [Attention: The endpoint "/config/export" is deprecated. The "config/export/workflows" endpoint should be used instead.]    Export a JSON backup of the entire system
+//ConfigExportCommand - Export a JSON backup. This endpoint is not suitable for configurations that take longer than 30 seconds to export. For those configurations, use the "/config/export/workflows" endpoint instead.
 //RequestType: GET
 //Input:
 func (s *ConfigService) ConfigExportCommand() (output *models.ExportData, resp *http.Response, err error) {
@@ -161,7 +161,7 @@ type GetConfigExportWorkflowDataCommandInput struct {
 	Id string
 }
 
-//ConfigImportCommand - [Attention: The endpoint "/config/import" is deprecated. The "config/import/workflows" endpoint should be used instead.]   Import JSON backup.
+//ConfigImportCommand - Import a JSON backup. This endpoint is not suitable for configurations that take longer than 30 seconds to import. For those configurations, use the "/config/import/workflows" endpoint instead.
 //RequestType: POST
 //Input: input *ConfigImportCommandInput
 func (s *ConfigService) ConfigImportCommand(input *ConfigImportCommandInput) (resp *http.Response, err error) {
@@ -205,16 +205,18 @@ func (s *ConfigService) GetConfigImportWorkflowsCommand() (output *models.Config
 	return nil, req.HTTPResponse, req.Error
 }
 
-//AddConfigImportWorkflowCommand - Start an Import of a JSON backup
+//AddConfigImportWorkflowCommand - Start an Import of a JSON backup.
 //RequestType: POST
 //Input: input *AddConfigImportWorkflowCommandInput
 func (s *ConfigService) AddConfigImportWorkflowCommand(input *AddConfigImportWorkflowCommandInput) (resp *http.Response, err error) {
 	path := "/config/import/workflows"
 	op := &request.Operation{
-		Name:        "AddConfigImportWorkflowCommand",
-		HTTPMethod:  "POST",
-		HTTPPath:    path,
-		QueryParams: map[string]string{},
+		Name:       "AddConfigImportWorkflowCommand",
+		HTTPMethod: "POST",
+		HTTPPath:   path,
+		QueryParams: map[string]string{
+			"failFast": input.FailFast,
+		},
 	}
 
 	req := s.newRequest(op, input.Body, nil)
@@ -227,10 +229,12 @@ func (s *ConfigService) AddConfigImportWorkflowCommand(input *AddConfigImportWor
 
 // AddConfigImportWorkflowCommandInput - Inputs for AddConfigImportWorkflowCommand
 type AddConfigImportWorkflowCommandInput struct {
+	FailFast string
+
 	Body models.ExportData
 }
 
-//GetConfigImportWorkflowCommand - Check the status of an Export
+//GetConfigImportWorkflowCommand - Check the status of an Import
 //RequestType: GET
 //Input: input *GetConfigImportWorkflowCommandInput
 func (s *ConfigService) GetConfigImportWorkflowCommand(input *GetConfigImportWorkflowCommandInput) (output *models.ConfigStatusView, resp *http.Response, err error) {

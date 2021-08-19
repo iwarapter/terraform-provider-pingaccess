@@ -26,7 +26,7 @@ type AdminConfigService struct {
 //New createa a new instance of the AdminConfigService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a AdminConfigService from the configuration
 //   svc := adminConfig.New(cfg)

@@ -26,7 +26,7 @@ type AgentsService struct {
 //New createa a new instance of the AgentsService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a AgentsService from the configuration
 //   svc := agents.New(cfg)

@@ -25,7 +25,7 @@ type AuthService struct {
 //New createa a new instance of the AuthService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a AuthService from the configuration
 //   svc := auth.New(cfg)
@@ -236,6 +236,115 @@ func (s *AuthService) UpdateOidcAuthCommand(input *UpdateOidcAuthCommandInput) (
 // UpdateOidcAuthCommandInput - Inputs for UpdateOidcAuthCommand
 type UpdateOidcAuthCommandInput struct {
 	Body models.OidcConfigView
+}
+
+//GetAuthOidcScopesCommand - Get the scopes supported by the current Admin OIDC Provider
+//RequestType: GET
+//Input: input *GetAuthOidcScopesCommandInput
+func (s *AuthService) GetAuthOidcScopesCommand(input *GetAuthOidcScopesCommandInput) (output *models.SupportedScopesView, resp *http.Response, err error) {
+	path := "/auth/oidc/scopes"
+	op := &request.Operation{
+		Name:       "GetAuthOidcScopesCommand",
+		HTTPMethod: "GET",
+		HTTPPath:   path,
+		QueryParams: map[string]string{
+			"clientId": input.ClientId,
+		},
+	}
+	output = &models.SupportedScopesView{}
+	req := s.newRequest(op, nil, output)
+
+	if req.Send() == nil {
+		return output, req.HTTPResponse, nil
+	}
+	return nil, req.HTTPResponse, req.Error
+}
+
+// GetAuthOidcScopesCommandInput - Inputs for GetAuthOidcScopesCommand
+type GetAuthOidcScopesCommandInput struct {
+	ClientId string
+}
+
+//DeleteAdminTokenProviderCommand - Resets the Admin Token Provider configuration to default values
+//RequestType: DELETE
+//Input:
+func (s *AuthService) DeleteAdminTokenProviderCommand() (resp *http.Response, err error) {
+	path := "/auth/tokenProvider"
+	op := &request.Operation{
+		Name:       "DeleteAdminTokenProviderCommand",
+		HTTPMethod: "DELETE",
+		HTTPPath:   path,
+	}
+
+	req := s.newRequest(op, nil, nil)
+
+	if req.Send() == nil {
+		return req.HTTPResponse, nil
+	}
+	return req.HTTPResponse, req.Error
+}
+
+//GetAdminTokenProviderCommand - Get the Admin Token Provider configuration
+//RequestType: GET
+//Input:
+func (s *AuthService) GetAdminTokenProviderCommand() (output *models.AdminTokenProviderView, resp *http.Response, err error) {
+	path := "/auth/tokenProvider"
+	op := &request.Operation{
+		Name:       "GetAdminTokenProviderCommand",
+		HTTPMethod: "GET",
+		HTTPPath:   path,
+	}
+	output = &models.AdminTokenProviderView{}
+	req := s.newRequest(op, nil, output)
+
+	if req.Send() == nil {
+		return output, req.HTTPResponse, nil
+	}
+	return nil, req.HTTPResponse, req.Error
+}
+
+//UpdateAdminTokenProviderCommand - Update the Admin Token Provider configuration
+//RequestType: PUT
+//Input: input *UpdateAdminTokenProviderCommandInput
+func (s *AuthService) UpdateAdminTokenProviderCommand(input *UpdateAdminTokenProviderCommandInput) (output *models.AdminTokenProviderView, resp *http.Response, err error) {
+	path := "/auth/tokenProvider"
+	op := &request.Operation{
+		Name:        "UpdateAdminTokenProviderCommand",
+		HTTPMethod:  "PUT",
+		HTTPPath:    path,
+		QueryParams: map[string]string{},
+	}
+	output = &models.AdminTokenProviderView{}
+	req := s.newRequest(op, input.Body, output)
+
+	if req.Send() == nil {
+		return output, req.HTTPResponse, nil
+	}
+	return nil, req.HTTPResponse, req.Error
+}
+
+// UpdateAdminTokenProviderCommandInput - Inputs for UpdateAdminTokenProviderCommand
+type UpdateAdminTokenProviderCommandInput struct {
+	Body models.AdminTokenProviderView
+}
+
+//GetAdminTokenProviderMetadataCommand - Get the Admin Token Provider metadata
+//RequestType: GET
+//Input:
+func (s *AuthService) GetAdminTokenProviderMetadataCommand() (output *models.OIDCProviderMetadata, resp *http.Response, err error) {
+	path := "/auth/tokenProvider/metadata"
+	op := &request.Operation{
+		Name:       "GetAdminTokenProviderMetadataCommand",
+		HTTPMethod: "GET",
+		HTTPPath:   path,
+	}
+	output = &models.OIDCProviderMetadata{}
+	req := s.newRequest(op, nil, output)
+
+	if req.Send() == nil {
+		return output, req.HTTPResponse, nil
+	}
+	return nil, req.HTTPResponse, req.Error
 }
 
 //DeleteAdminBasicWebSessionCommand - Resets the Admin Web Session configuration to default values

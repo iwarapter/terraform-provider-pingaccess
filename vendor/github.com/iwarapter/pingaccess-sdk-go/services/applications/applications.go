@@ -26,7 +26,7 @@ type ApplicationsService struct {
 //New createa a new instance of the ApplicationsService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a ApplicationsService from the configuration
 //   svc := applications.New(cfg)
@@ -245,6 +245,52 @@ func (s *ApplicationsService) GetApplicationsResourcesMethodsCommand() (output *
 	return nil, req.HTTPResponse, req.Error
 }
 
+//GetApplicationResourceResponseGeneratorDescriptorsCommand - Get descriptors for all Application Resource Response Generators
+//RequestType: GET
+//Input:
+func (s *ApplicationsService) GetApplicationResourceResponseGeneratorDescriptorsCommand() (output *models.DescriptorsView, resp *http.Response, err error) {
+	path := "/applications/resources/responseGenerators/descriptors"
+	op := &request.Operation{
+		Name:       "GetApplicationResourceResponseGeneratorDescriptorsCommand",
+		HTTPMethod: "GET",
+		HTTPPath:   path,
+	}
+	output = &models.DescriptorsView{}
+	req := s.newRequest(op, nil, output)
+
+	if req.Send() == nil {
+		return output, req.HTTPResponse, nil
+	}
+	return nil, req.HTTPResponse, req.Error
+}
+
+//GetApplicationResourceResponseGeneratorDescriptorCommand - Get descriptor for a Response Generator type
+//RequestType: GET
+//Input: input *GetApplicationResourceResponseGeneratorDescriptorCommandInput
+func (s *ApplicationsService) GetApplicationResourceResponseGeneratorDescriptorCommand(input *GetApplicationResourceResponseGeneratorDescriptorCommandInput) (output *models.DescriptorView, resp *http.Response, err error) {
+	path := "/applications/resources/responseGenerators/descriptors/{responseGeneratorType}"
+	path = strings.Replace(path, "{responseGeneratorType}", input.ResponseGeneratorType, -1)
+
+	op := &request.Operation{
+		Name:        "GetApplicationResourceResponseGeneratorDescriptorCommand",
+		HTTPMethod:  "GET",
+		HTTPPath:    path,
+		QueryParams: map[string]string{},
+	}
+	output = &models.DescriptorView{}
+	req := s.newRequest(op, nil, output)
+
+	if req.Send() == nil {
+		return output, req.HTTPResponse, nil
+	}
+	return nil, req.HTTPResponse, req.Error
+}
+
+// GetApplicationResourceResponseGeneratorDescriptorCommandInput - Inputs for GetApplicationResourceResponseGeneratorDescriptorCommand
+type GetApplicationResourceResponseGeneratorDescriptorCommandInput struct {
+	ResponseGeneratorType string
+}
+
 //DeleteApplicationResourceCommand - Delete an Application Resource
 //RequestType: DELETE
 //Input: input *DeleteApplicationResourceCommandInput
@@ -339,7 +385,7 @@ type UpdateApplicationResourceCommandInput struct {
 //DeleteApplicationCommand - Delete an Application
 //RequestType: DELETE
 //Input: input *DeleteApplicationCommandInput
-func (s *ApplicationsService) DeleteApplicationCommand(input *DeleteApplicationCommandInput) (output *models.ApplicationView, resp *http.Response, err error) {
+func (s *ApplicationsService) DeleteApplicationCommand(input *DeleteApplicationCommandInput) (resp *http.Response, err error) {
 	path := "/applications/{id}"
 	path = strings.Replace(path, "{id}", input.Id, -1)
 
@@ -349,13 +395,13 @@ func (s *ApplicationsService) DeleteApplicationCommand(input *DeleteApplicationC
 		HTTPPath:    path,
 		QueryParams: map[string]string{},
 	}
-	output = &models.ApplicationView{}
-	req := s.newRequest(op, nil, output)
+
+	req := s.newRequest(op, nil, nil)
 
 	if req.Send() == nil {
-		return output, req.HTTPResponse, nil
+		return req.HTTPResponse, nil
 	}
-	return nil, req.HTTPResponse, req.Error
+	return req.HTTPResponse, req.Error
 }
 
 // DeleteApplicationCommandInput - Inputs for DeleteApplicationCommand

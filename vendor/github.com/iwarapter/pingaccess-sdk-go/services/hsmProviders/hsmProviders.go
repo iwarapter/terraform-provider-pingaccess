@@ -26,7 +26,7 @@ type HsmProvidersService struct {
 //New createa a new instance of the HsmProvidersService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a HsmProvidersService from the configuration
 //   svc := hsmProviders.New(cfg)

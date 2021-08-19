@@ -25,7 +25,7 @@ type PingoneService struct {
 //New createa a new instance of the PingoneService client.
 //
 // Example:
-//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2FederateM0re").WithEndpoint(paURL.String())
+//   cfg := config.NewConfig().WithUsername("Administrator").WithPassword("2Access").WithEndpoint(paURL)
 //
 //   //Create a PingoneService from the configuration
 //   svc := pingone.New(cfg)
