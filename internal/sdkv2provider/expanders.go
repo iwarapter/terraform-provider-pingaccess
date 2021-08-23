@@ -2,7 +2,7 @@ package sdkv2provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 )
 
 func expandRuntimeApplication(in []interface{}) *models.PingFederateRuntimeApplicationView {

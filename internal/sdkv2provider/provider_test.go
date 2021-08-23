@@ -13,14 +13,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/version"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	tfmux "github.com/hashicorp/terraform-plugin-mux"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
+	paCfg "github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/config"
 )
 
 var conf *paCfg.Config
+var paVersion string
 
 func TestMain(m *testing.M) {
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
@@ -71,6 +74,12 @@ func TestMain(m *testing.M) {
 	os.Setenv("PINGFEDERATE_TEST_IP", strings.Replace(server.URL, "[::]", host, -1))
 
 	conf = paCfg.NewConfig().WithUsername("administrator").WithPassword("2Access").WithEndpoint("https://localhost:9000/pa-admin-api/v3")
+	vs := version.New(conf)
+	v, _, err := vs.VersionCommand()
+	if err != nil {
+		panic(err)
+	}
+	paVersion = *v.Version
 	resource.TestMain(m)
 }
 

@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 	"github.com/tidwall/gjson"
 )
 

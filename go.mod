@@ -1,6 +1,6 @@
 module github.com/iwarapter/terraform-provider-pingaccess
 
-go 1.16
+go 1.14
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -19,7 +19,8 @@ require (
 	github.com/hashicorp/terraform-plugin-mux v0.2.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/hashicorp/yamux v0.0.0-20210707203944-259a57b3608c // indirect
-	github.com/iwarapter/pingaccess-sdk-go v1.0.1-0.20210819123837-5f18d0aa6974
+	github.com/iwarapter/pingaccess-sdk-go/v60 v60.0.0-20210823205911-0b96ee7c642e
+	github.com/iwarapter/pingaccess-sdk-go/v62 v62.0.0-20210823213316-eaec13608a5f
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

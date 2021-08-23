@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/trustedCertificateGroups"
 )
 
 type dataPingAccessTrustedCertificateGroups struct {

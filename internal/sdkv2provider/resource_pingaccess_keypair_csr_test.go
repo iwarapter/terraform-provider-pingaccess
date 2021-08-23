@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/keyPairs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

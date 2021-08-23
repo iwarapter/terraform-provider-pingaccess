@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/identityMappings"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/identityMappings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 

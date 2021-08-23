@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
 	tfmux "github.com/hashicorp/terraform-plugin-mux"
-	"github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/siteAuthenticators"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

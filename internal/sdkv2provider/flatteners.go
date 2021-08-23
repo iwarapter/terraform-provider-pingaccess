@@ -1,6 +1,6 @@
 package sdkv2provider
 
-import "github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+import "github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 
 func flattenRuntimeApplication(in *models.PingFederateRuntimeApplicationView) []map[string]interface{} {
 	m := make([]map[string]interface{}, 0, 1)

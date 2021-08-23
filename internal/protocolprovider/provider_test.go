@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
+	paCfg "github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/config"
 )
 
 var conf *paCfg.Config

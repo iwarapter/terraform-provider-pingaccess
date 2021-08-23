@@ -11,8 +11,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+	models60 "github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/models"
+	keyPairs60 "github.com/iwarapter/pingaccess-sdk-go/v60/services/keyPairs"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/keyPairs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -175,23 +177,60 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 
 func resourcePingAccessKeyPairCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).KeyPairs
+	//Import a keypair
 	if _, ok := d.GetOk("file_data"); ok {
-		input := keyPairs.ImportKeyPairCommandInput{
-			Body: models.PKCS12FileImportDocView{
+		//Import a keypair using 6.2+ API
+		if m.(paClient).Is62OrAbove() {
+			input := keyPairs.ImportKeyPairCommandInput{
+				Body: models.PKCS12FileImportDocView{
+					Alias:             String(d.Get("alias").(string)),
+					FileData:          String(d.Get("file_data").(string)),
+					Password:          &models.HiddenFieldView{Value: String(d.Get("password").(string))},
+					ChainCertificates: &[]*string{},
+					HsmProviderId:     Int(d.Get("hsm_provider_id").(int)),
+				},
+			}
+			result, _, err := svc.ImportKeyPairCommand(&input)
+			if err != nil {
+				return diag.Errorf("unable to create KeyPair: %s", err)
+			}
+
+			d.SetId(strconv.Itoa(*result.Id))
+			return resourcePingAccessKeyPairReadResult(d, result)
+		}
+		//Import a keypair using 6.0 API
+		input := keyPairs60.ImportKeyPairCommandInput{
+			Body: models60.PKCS12FileImportDocView{
 				Alias:             String(d.Get("alias").(string)),
 				FileData:          String(d.Get("file_data").(string)),
-				Password:          &models.HiddenFieldView{Value: String(d.Get("password").(string))},
+				Password:          String(d.Get("password").(string)),
 				ChainCertificates: &[]*string{},
 				HsmProviderId:     Int(d.Get("hsm_provider_id").(int)),
 			},
 		}
-		result, _, err := svc.ImportKeyPairCommand(&input)
+		svc60 := m.(paClient).KeyPairsV60
+		result, _, err := svc60.ImportKeyPairCommand(&input)
 		if err != nil {
 			return diag.Errorf("unable to create KeyPair: %s", err)
 		}
 
 		d.SetId(strconv.Itoa(*result.Id))
-		return resourcePingAccessKeyPairReadResult(d, result)
+		return resourcePingAccessKeyPairReadResult(d, &models.KeyPairView{
+			Alias:              result.Alias,
+			CsrPending:         result.CsrPending,
+			Expires:            result.Expires,
+			HsmProviderId:      result.HsmProviderId,
+			Id:                 result.Id,
+			IssuerDn:           result.IssuerDn,
+			Md5sum:             result.Md5sum,
+			SerialNumber:       result.SerialNumber,
+			Sha1sum:            result.Sha1sum,
+			SignatureAlgorithm: result.SignatureAlgorithm,
+			Status:             result.Status,
+			SubjectCn:          result.SubjectCn,
+			SubjectDn:          result.SubjectDn,
+			ValidFrom:          result.ValidFrom,
+		})
 	}
 
 	input := keyPairs.GenerateKeyPairCommandInput{
