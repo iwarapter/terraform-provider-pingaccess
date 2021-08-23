@@ -45,6 +45,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
+        terraform_wrapper: false
         terraform_version: ${{ matrix.terraform-version }}
 
     - name: Test
