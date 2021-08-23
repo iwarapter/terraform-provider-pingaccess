@@ -3,14 +3,19 @@ package sdkv2provider
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
-	resourceName := "data.pingaccess_pingfederate_runtime_metadata.test"
+	re := regexp.MustCompile(`^(6\.[0-9])`)
+	if !re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
+	}
 
+	resourceName := "data.pingaccess_pingfederate_runtime_metadata.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,

@@ -100,10 +100,16 @@ func testAccCheckPingAccessKeyPairCsrDestroy(s *terraform.State) error {
 
 func testAccPingAccessKeyPairCsrConfig(signedCert, chain string) string {
 	return fmt.Sprintf(`
+
+data "pingaccess_trusted_certificate_group" "test" {
+	name = "Trust Any"
+}
+
 resource "pingaccess_keypair_csr" "test" {
   keypair_id = "1"
   file_data = "%s"
   chain_certificates = ["%s"]
+  trusted_certificate_group_id = data.pingaccess_trusted_certificate_group.test.id
 }
 `, base64.StdEncoding.EncodeToString([]byte(signedCert)), base64.StdEncoding.EncodeToString([]byte(chain)))
 }

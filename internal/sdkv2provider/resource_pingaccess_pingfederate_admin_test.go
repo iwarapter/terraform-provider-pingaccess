@@ -40,7 +40,7 @@ func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"admin_password.0.value"}, //we cant verify passwords
+				ImportStateVerifyIgnore: []string{"admin_password.0.value", "admin_password.0.encrypted_value"}, //we cant verify passwords
 			},
 		},
 	})

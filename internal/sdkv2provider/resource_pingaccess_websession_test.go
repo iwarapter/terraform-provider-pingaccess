@@ -2,6 +2,7 @@ package sdkv2provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
@@ -35,6 +36,10 @@ func init() {
 
 func TestAccPingAccessWebSession(t *testing.T) {
 	resourceName := "pingaccess_websession.demo_session"
+
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	canMask := re.MatchString(paVersion)
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
@@ -64,13 +69,13 @@ func TestAccPingAccessWebSession(t *testing.T) {
 				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessWebSessionExists(resourceName),
-					testAccCheckPingAccessWebSessionCanTrackPasswordChanges(resourceName, true),
+					testAccCheckPingAccessWebSessionCanTrackPasswordChanges(resourceName, canMask),
 					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
 					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo-session"),
 					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "changeme"),
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: canMask,
 			},
 			{
 				Config: testAccPingAccessWebSessionConfig("woot", "changeme"),
@@ -84,7 +89,7 @@ func TestAccPingAccessWebSession(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"}, //we cant verify passwords
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value", "client_credentials.0.client_secret.0.encrypted_value"}, //we cant verify passwords
 			},
 		},
 	})

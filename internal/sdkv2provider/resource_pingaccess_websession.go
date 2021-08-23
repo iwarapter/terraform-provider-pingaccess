@@ -216,7 +216,6 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *model
 	setResourceDataBoolWithDiagnostic(d, "http_only_cookie", input.HttpOnlyCookie, &diags)
 	setResourceDataIntWithDiagnostic(d, "idle_timeout_in_minutes", input.IdleTimeoutInMinutes, &diags)
 	setResourceDataStringWithDiagnostic(d, "oidc_login_type", input.OidcLoginType, &diags)
-	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", input.PkceChallengeType, &diags)
 	setResourceDataIntWithDiagnostic(d, "pfsession_state_cache_in_seconds", input.PfsessionStateCacheInSeconds, &diags)
 	setResourceDataIntWithDiagnostic(d, "refresh_user_info_claims_interval", input.RefreshUserInfoClaimsInterval, &diags)
 	setResourceDataStringWithDiagnostic(d, "request_preservation_type", input.RequestPreservationType, &diags)
@@ -226,6 +225,10 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *model
 	setResourceDataBoolWithDiagnostic(d, "send_requested_url_to_provider", input.SendRequestedUrlToProvider, &diags)
 	setResourceDataIntWithDiagnostic(d, "session_timeout_in_minutes", input.SessionTimeoutInMinutes, &diags)
 	setResourceDataBoolWithDiagnostic(d, "validate_session_is_alive", input.ValidateSessionIsAlive, &diags)
+
+	// Default is off however this field is not supported before PA 6.0 so we set to OFF to match schema default for 5.3 and override if provided.
+	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", String("OFF"), &diags)
+	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", input.PkceChallengeType, &diags)
 
 	if input.Scopes != nil {
 		if err := d.Set("scopes", *input.Scopes); err != nil {

@@ -13,6 +13,8 @@ import (
 	"strings"
 	"testing"
 
+	protocol "github.com/iwarapter/terraform-provider-pingaccess/internal/protocolprovider"
+
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/version"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
@@ -92,7 +94,7 @@ func init() {
 		"pingaccess": func() (tfprotov5.ProviderServer, error) {
 			ctx := context.Background()
 			sdkv2 := testAccProvider.GRPCProvider
-			factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2)
+			factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2, protocol.Server)
 			if err != nil {
 				return nil, err
 			}

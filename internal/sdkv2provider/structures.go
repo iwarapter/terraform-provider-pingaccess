@@ -568,6 +568,9 @@ func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCrede
 	}
 	if input.CredentialsType != nil {
 		creds[0]["credentials_type"] = *input.CredentialsType
+	} else {
+		//set the resource state default
+		creds[0]["credentials_type"] = "SECRET"
 	}
 	if trackPasswords {
 		enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")

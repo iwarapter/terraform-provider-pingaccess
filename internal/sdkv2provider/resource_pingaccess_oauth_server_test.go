@@ -18,6 +18,9 @@ import (
 func TestAccPingAccessOAuthServer(t *testing.T) {
 	resourceName := "pingaccess_oauth_server.demo_pfr"
 
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	canMask := re.MatchString(paVersion)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
@@ -39,12 +42,12 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessOAuthServerExists(resourceName),
-					testAccCheckPingAccessOAuthServerCanTrackPasswordChanges(resourceName, true),
+					testAccCheckPingAccessOAuthServerCanTrackPasswordChanges(resourceName, canMask),
 					resource.TestCheckResourceAttr(resourceName, "introspection_endpoint", "/introspect"),
 					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "secret"),
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: canMask,
 			},
 			{
 				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
@@ -59,7 +62,7 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"},
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value", "client_credentials.0.client_secret.0.encrypted_value"},
 			},
 			{
 				Config: testAccPingAccessOAuthServerConfig("https://thing/introspect", "secret"),

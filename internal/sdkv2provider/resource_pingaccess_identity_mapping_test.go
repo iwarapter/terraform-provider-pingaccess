@@ -77,7 +77,7 @@ func TestAccPingAccessIdentityMapping(t *testing.T) {
 			},
 			{
 				Config:      testAccPingAccessIdentityMappingConfigMissingRequired(),
-				ExpectError: regexp.MustCompile(`configuration validation failed against the class descriptor definition\nthe field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
+				ExpectError: regexp.MustCompile(`the field 'audience' is required for the class_name 'com.pingidentity.pa.identitymappings.JwtIdentityMapping'`),
 			},
 			{
 				Config: testAccPingAccessIdentityMappingConfigInterpolatedSkipped(),
@@ -98,16 +98,21 @@ func testAccCheckPingAccessIdentityMappingDestroy(s *terraform.State) error {
 }
 
 func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
+	block := ""
+	re := regexp.MustCompile(`^(6\.[2-9])`)
+	if re.MatchString(paVersion) {
+		block = `"exclusionList": false,
+			"exclusionListAttributes": [],
+			"exclusionListSubject": null,
+			"headerNamePrefix": null,`
+	}
 	return fmt.Sprintf(`
 	resource "pingaccess_identity_mapping" "acc_test_idm" {
 		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
 		name = "acctest_%s"
 		configuration = <<EOF
 		{
- 			"exclusionList": false,
-			"exclusionListAttributes": [],
-			"exclusionListSubject": null,
-			"headerNamePrefix": null,
+			%s
 			"attributeHeaderMappings": [
 				{
 					"subject": true,
@@ -118,7 +123,7 @@ func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
 			"headerClientCertificateMappings": []
 		}
 		EOF
-	}`, name, configUpdate)
+	}`, name, block, configUpdate)
 }
 
 func testAccPingAccessIdentityMappingConfigWrongClassName() string {
@@ -151,16 +156,21 @@ func testAccPingAccessIdentityMappingConfigMissingRequired() string {
 }
 
 func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
-	return `
+	block := ""
+	re := regexp.MustCompile(`^(6\.[2-9])`)
+	if re.MatchString(paVersion) {
+		block = `"exclusionList": false,
+			"exclusionListAttributes": [],
+			"exclusionListSubject": null,
+			"headerNamePrefix": null,`
+	}
+	return fmt.Sprintf(`
 	resource "pingaccess_identity_mapping" "acc_test_idm" {
 		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
 		name = "acctest_interpolated"
 		configuration = <<EOF
 		{
-			"exclusionList": false,
-			"exclusionListAttributes": [],
-			"exclusionListSubject": null,
-			"headerNamePrefix": null,
+			%s
 			"attributeHeaderMappings": [
 				{
 					"subject": true,
@@ -177,7 +187,7 @@ func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
 	   host                         = "idmfoo"
 	   port                         = 80
 	}
-`
+`, block)
 }
 
 func testAccCheckPingAccessIdentityMappingExists(n string) resource.TestCheckFunc {

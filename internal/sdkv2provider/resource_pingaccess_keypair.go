@@ -307,6 +307,7 @@ func resourcePingAccessKeyPairDelete(_ context.Context, d *schema.ResourceData, 
 
 func resourcePingAccessKeyPairImport(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	svc := m.(paClient).KeyPairs
+	is6 := m.(paClient).Is60OrAbove()
 	input := keyPairs.GetKeyPairCommandInput{
 		Id: d.Id(),
 	}
@@ -328,6 +329,11 @@ func resourcePingAccessKeyPairImport(_ context.Context, d *schema.ResourceData, 
 	}
 
 	diags := resourcePingAccessKeyPairReadResult(d, result)
+	if !is6 {
+		//hsm providers are only available in 6+ so we just set to state to match the default for 5.3
+		setResourceDataIntWithDiagnostic(d, "hsm_provider_id", Int(0), &diags)
+	}
+
 	//import based on upload
 	//TODO unable to properly support upload style imports - https://discuss.hashicorp.com/t/importer-functions-reading-file-config/17624/2
 

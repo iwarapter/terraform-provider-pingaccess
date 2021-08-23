@@ -261,10 +261,6 @@ func resourcePingAccessPingFederateRuntimeImport(_ context.Context, d *schema.Re
 	}
 	if result.Targets != nil && len(*result.Targets) > 0 {
 		diags := resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d, result)
-		//set defaults for state
-		setResourceDataStringWithDiagnostic(d, "description", String(""), &diags)
-		setResourceDataStringWithDiagnostic(d, "issuer", String(""), &diags)
-		setResourceDataStringWithDiagnostic(d, "sts_token_exchange_endpoint", String(""), &diags)
 		if diags.HasError() {
 			return nil, fmt.Errorf("unable to store deprecated PingFederateRuntime in state: %s", err)
 		}

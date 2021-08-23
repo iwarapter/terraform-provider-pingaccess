@@ -15,10 +15,11 @@ import (
 
 func init() {
 	resource.AddTestSweepers("virtualhosts", &resource.Sweeper{
-		Name: "virtualhosts",
+		Name:         "virtualhosts",
+		Dependencies: []string{"applications"},
 		F: func(r string) error {
 			svc := virtualhosts.New(conf)
-			results, _, err := svc.GetVirtualHostsCommand(&virtualhosts.GetVirtualHostsCommandInput{Filter: "acctest-"})
+			results, _, err := svc.GetVirtualHostsCommand(&virtualhosts.GetVirtualHostsCommandInput{})
 			if err != nil {
 				return fmt.Errorf("unable to list virtualhosts to sweep %s", err)
 			}

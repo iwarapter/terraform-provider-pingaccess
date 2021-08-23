@@ -70,7 +70,7 @@ func testAccPingAccessEngineListenerConfig(host string, secure bool) string {
 	resource "pingaccess_engine_listener" "acc_test" {
 	   name   = "acctest_engine-%s"
 	   port   = 443
-	   secure	= %t
+	   secure = %t
 	}`, host, secure)
 }
 
