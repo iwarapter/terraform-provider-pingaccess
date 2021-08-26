@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/identityMappings"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/identityMappings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -37,23 +37,29 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 			}
 			return validateConfiguration(className, d, desc)
 		},
+		Description: `Provides configuration for Identity Mappings within PingAccess.
+
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the configuration block.`,
 	}
 }
 
 func resourcePingAccessIdentityMappingSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"class_name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The identity mapping's class name.",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of the identity mapping.",
 		},
 		"configuration": {
 			Type:             schema.TypeString,
 			Required:         true,
 			DiffSuppressFunc: suppressEquivalentJSONDiffs,
+			Description:      "The identity mapping's configuration data.",
 		},
 	}
 }

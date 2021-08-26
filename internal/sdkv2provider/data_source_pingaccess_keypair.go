@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/keyPairs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,9 +24,15 @@ func dataSourcePingAccessKeyPair() *schema.Resource {
 	delete(sch, "organization_unit")
 	delete(sch, "state")
 	delete(sch, "valid_days")
+	sch["hsm_provider_id"] = &schema.Schema{
+		Type:        schema.TypeInt,
+		Computed:    true,
+		Description: "The HSM Provider ID. The default value is 0 indicating an HSM is not used for this key pair.",
+	}
 	return &schema.Resource{
 		ReadContext: dataSourcePingAccessKeyPairRead,
 		Schema:      sch,
+		Description: "Use this data source to get keypair information in the PingAccess instance.",
 	}
 }
 

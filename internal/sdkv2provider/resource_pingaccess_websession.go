@@ -3,8 +3,8 @@ package sdkv2provider
 import (
 	"context"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/webSessions"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/webSessions"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -20,8 +20,8 @@ func resourcePingAccessWebSession() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessWebSessionSchema(),
+		Schema:      resourcePingAccessWebSessionSchema(),
+		Description: `Provides configuration for Web Sessions within PingAccess.`,
 	}
 }
 
@@ -31,81 +31,102 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			Required:         true,
 			ValidateDiagFunc: validateAudience,
+			Description:      "Enter a unique identifier between 1 and 32 characters that defines who the PA Token is applicable to.",
 		},
 		"cache_user_attributes": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Specify if PingAccess should cache user attribute information for use in policy decisions. When disabled, this data is encoded and stored in the session cookie.",
 		},
-		"client_credentials": oAuthClientCredentials(),
+		"client_credentials": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			MaxItems:    1,
+			Description: "Specify the client credentials.",
+			Elem:        oAuthClientCredentialsResource(),
+		},
 		"cookie_domain": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The domain where the cookie is stored--for example, corp.yourcompany.com.",
 		},
 		"cookie_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ValidateDiagFunc: validateCookieType,
 			Default:          "Encrypted",
+			Description:      "Specify an Encrypted JWT or a Signed JWT web session cookie. Default is Encrypted.",
 		},
 		"enable_refresh_user": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Specify if you want to have PingAccess periodically refresh user data from PingFederate for use in policy decisions.",
 		},
 		"http_only_cookie": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Enable the HttpOnly flag on cookies that contain the PA Token.",
 		},
 		"idle_timeout_in_minutes": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  60,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     60,
+			Description: "The length of time you want the PingAccess Token to remain active when no activity is detected.",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of the web session.",
 		},
 		"oidc_login_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "Code",
 			ValidateDiagFunc: validateOidcLoginType,
+			Description:      "The web session token type.",
 		},
 		"pkce_challenge_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "OFF",
 			ValidateDiagFunc: validatePkceChallengeType,
+			Description:      "Specify the code_challenge_method to use for PKCE during the Code login flow. OFF signifies to not use PKCE.",
 		},
 		"pfsession_state_cache_in_seconds": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  60,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     60,
+			Description: "Specify the number of seconds to cache PingFederate Session State information.",
 		},
 		"refresh_user_info_claims_interval": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  60,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     60,
+			Description: "Specify the maximum number of seconds to cache user attribute information when the Refresh User is enabled.",
 		},
 		"request_preservation_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "POST",
 			ValidateDiagFunc: validateRequestPreservationType,
+			Description:      "Specify the types of request data to be preserved if the user is redirected to an authentication page when submitting information to a protected resource.",
 		},
 		"request_profile": {
-			Type:       schema.TypeBool,
-			Optional:   true,
-			Default:    true,
-			Deprecated: "DEPRECATED - to be removed in a future release; please use 'scopes' instead",
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Specifies whether the default scopes ('profile', 'email', 'address', and 'phone') should be specified in the access request.",
+			Deprecated:  "DEPRECATED - to be removed in a future release; please use 'scopes' instead",
 		},
 		"same_site": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "None",
 			ValidateDiagFunc: validateWebSessionSameSite,
+			Description:      "Specify the SameSite attribute to be used when setting the PingAccess Cookie. Default is None which allows the cookie to be used in a third-party context. If the cookie is not used in a third-party context then Lax is recommended.",
 		},
 		"scopes": {
 			Type:     schema.TypeSet,
@@ -113,35 +134,41 @@ func resourcePingAccessWebSessionSchema() map[string]*schema.Schema {
 			DefaultFunc: func() (interface{}, error) {
 				return []interface{}{"profile", "email", "address", "phone"}, nil
 			},
+			Description: "The list of scopes to be specified in the access request. If not specified, the default scopes ('profile', 'email', 'address', and 'phone') will be used. The openid scope is implied and does not need to be specified in this list.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"secure_cookie": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Specify whether the PingAccess Cookie must be sent using only HTTPS connections.",
 		},
 		"send_requested_url_to_provider": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Specify if you want to send the requested URL as part of the authentication request to the OpenID Connect Provider.",
 		},
 		"session_timeout_in_minutes": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  480,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     480,
+			Description: "The length of time you want the PA Token to remain active. Once the PA Token expires, an authenticated user must re-authenticate.",
 		},
 		"validate_session_is_alive": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Specify if PingAccess should validate sessions with the configured PingFederate instance during request processing.",
 		},
 		"web_storage_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "SessionStorage",
 			ValidateDiagFunc: validateWebStorageType,
+			Description:      "Specify the type of web storage to use for request preservation data, either `SessionStorage` or `LocalStorage`. Default is SessionStorage.",
 		},
 	}
 }
@@ -211,7 +238,6 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *model
 	setResourceDataBoolWithDiagnostic(d, "http_only_cookie", input.HttpOnlyCookie, &diags)
 	setResourceDataIntWithDiagnostic(d, "idle_timeout_in_minutes", input.IdleTimeoutInMinutes, &diags)
 	setResourceDataStringWithDiagnostic(d, "oidc_login_type", input.OidcLoginType, &diags)
-	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", input.PkceChallengeType, &diags)
 	setResourceDataIntWithDiagnostic(d, "pfsession_state_cache_in_seconds", input.PfsessionStateCacheInSeconds, &diags)
 	setResourceDataIntWithDiagnostic(d, "refresh_user_info_claims_interval", input.RefreshUserInfoClaimsInterval, &diags)
 	setResourceDataStringWithDiagnostic(d, "request_preservation_type", input.RequestPreservationType, &diags)
@@ -222,12 +248,16 @@ func resourcePingAccessWebSessionReadResult(d *schema.ResourceData, input *model
 	setResourceDataIntWithDiagnostic(d, "session_timeout_in_minutes", input.SessionTimeoutInMinutes, &diags)
 	setResourceDataBoolWithDiagnostic(d, "validate_session_is_alive", input.ValidateSessionIsAlive, &diags)
 
+	// Default is off however this field is not supported before PA 6.0 so we set to OFF to match schema default for 5.3 and override if provided.
+	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", String("OFF"), &diags)
+	setResourceDataStringWithDiagnostic(d, "pkce_challenge_type", input.PkceChallengeType, &diags)
+
 	if input.Scopes != nil {
 		if err := d.Set("scopes", *input.Scopes); err != nil {
 			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
-	if input.ClientCredentials != nil && input.ClientCredentials.ClientSecret != nil {
+	if input.ClientCredentials != nil && input.ClientCredentials.ClientId != nil {
 		setClientCredentials(d, input.ClientCredentials, trackPasswords, &diags)
 	}
 	return diags

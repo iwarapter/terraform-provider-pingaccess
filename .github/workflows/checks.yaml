@@ -6,7 +6,6 @@ jobs:
     env:
       GO111MODULE: on
     steps:
-
       - name: Install tools
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin

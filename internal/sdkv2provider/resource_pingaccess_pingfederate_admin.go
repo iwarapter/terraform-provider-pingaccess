@@ -3,8 +3,8 @@ package sdkv2provider
 import (
 	"context"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/pingfederate"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,47 +20,64 @@ func resourcePingAccessPingFederateAdmin() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessPingFederateAdminSchema(),
+		Description: `Manages the PingAccess PingFederate Admin configuration.
+
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Deleting this resource resets the PingFederate Admin configuration to default values.`,
 	}
 }
 
 func resourcePingAccessPingFederateAdminSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"admin_password": requiredHiddenField(),
+		"admin_password": {
+			Type:        schema.TypeList,
+			Required:    true,
+			MaxItems:    1,
+			Description: "The password for the administrator username.",
+			Elem:        hiddenFieldResource(),
+		},
 		"admin_username": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The administrator username.",
 		},
 		"audit_level": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ValidateDiagFunc: validateAuditLevel,
 			Default:          "ON",
+			Description:      "Enable to record requests to the PingFederate Administrative API to the audit store.",
 		},
 		"base_path": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The base path, if needed, for Administration API.",
 		},
 		"host": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The host name or IP address for PingFederate Administration API.",
 		},
 		"port": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "The port number for PingFederate Administration API.",
 		},
 		"secure": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Enable if PingFederate is expecting HTTPS connections.",
 		},
 		"trusted_certificate_group_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "The group of certificates to use when authenticating to PingFederate Administrative API.",
 		},
 		"use_proxy": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "True if a proxy should be used for HTTP or HTTPS requests.",
 		},
 	}
 }

@@ -1,0 +1,1 @@
+terraform import pingaccess_certificate.example 123

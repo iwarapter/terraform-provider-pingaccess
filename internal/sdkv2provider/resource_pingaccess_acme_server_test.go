@@ -2,10 +2,11 @@ package sdkv2provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/acme"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,6 +18,10 @@ func init() {
 	resource.AddTestSweepers("acme_server", &resource.Sweeper{
 		Name: "acme_server",
 		F: func(r string) error {
+			re := regexp.MustCompile(`^(6\.[0-9])`)
+			if !re.MatchString(paVersion) {
+				return nil
+			}
 			svc := acme.New(conf)
 			results, _, err := svc.GetAcmeServersCommand(&acme.GetAcmeServersCommandInput{Filter: "acctest_"})
 			if err != nil {
@@ -35,7 +40,10 @@ func init() {
 
 func TestAccPingAccessAcmeServer(t *testing.T) {
 	resourceName := "pingaccess_acme_server.acc_test"
-
+	re := regexp.MustCompile(`^(6\.[0-9])`)
+	if !re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,

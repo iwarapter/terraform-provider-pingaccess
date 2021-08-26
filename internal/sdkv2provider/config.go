@@ -10,54 +10,57 @@ import (
 	"regexp"
 	"syscall"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
-	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
-	"github.com/iwarapter/pingaccess-sdk-go/services/adminConfig"
-	"github.com/iwarapter/pingaccess-sdk-go/services/adminSessionInfo"
-	"github.com/iwarapter/pingaccess-sdk-go/services/agents"
-	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
-	"github.com/iwarapter/pingaccess-sdk-go/services/auth"
-	"github.com/iwarapter/pingaccess-sdk-go/services/authTokenManagement"
-	"github.com/iwarapter/pingaccess-sdk-go/services/authnReqLists"
-	"github.com/iwarapter/pingaccess-sdk-go/services/backup"
-	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
-	"github.com/iwarapter/pingaccess-sdk-go/services/config"
-	"github.com/iwarapter/pingaccess-sdk-go/services/engineListeners"
-	"github.com/iwarapter/pingaccess-sdk-go/services/engines"
-	"github.com/iwarapter/pingaccess-sdk-go/services/globalUnprotectedResources"
-	"github.com/iwarapter/pingaccess-sdk-go/services/highAvailability"
-	"github.com/iwarapter/pingaccess-sdk-go/services/hsmProviders"
-	"github.com/iwarapter/pingaccess-sdk-go/services/httpConfig"
-	"github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners"
-	"github.com/iwarapter/pingaccess-sdk-go/services/identityMappings"
-	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
-	"github.com/iwarapter/pingaccess-sdk-go/services/license"
-	"github.com/iwarapter/pingaccess-sdk-go/services/oauth"
-	"github.com/iwarapter/pingaccess-sdk-go/services/oauthKeyManagement"
-	"github.com/iwarapter/pingaccess-sdk-go/services/oidc"
-	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
-	"github.com/iwarapter/pingaccess-sdk-go/services/pingone"
-	"github.com/iwarapter/pingaccess-sdk-go/services/proxies"
-	"github.com/iwarapter/pingaccess-sdk-go/services/redirects"
-	"github.com/iwarapter/pingaccess-sdk-go/services/rejectionHandlers"
-	"github.com/iwarapter/pingaccess-sdk-go/services/rules"
-	"github.com/iwarapter/pingaccess-sdk-go/services/rulesets"
-	"github.com/iwarapter/pingaccess-sdk-go/services/sharedSecrets"
-	"github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators"
-	"github.com/iwarapter/pingaccess-sdk-go/services/sites"
-	"github.com/iwarapter/pingaccess-sdk-go/services/thirdPartyServices"
-	"github.com/iwarapter/pingaccess-sdk-go/services/tokenProvider"
-	"github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups"
-	"github.com/iwarapter/pingaccess-sdk-go/services/unknownResources"
-	"github.com/iwarapter/pingaccess-sdk-go/services/users"
-	"github.com/iwarapter/pingaccess-sdk-go/services/version"
-	"github.com/iwarapter/pingaccess-sdk-go/services/virtualhosts"
-	"github.com/iwarapter/pingaccess-sdk-go/services/webSessionManagement"
-	"github.com/iwarapter/pingaccess-sdk-go/services/webSessions"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/accessTokenValidators"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/acme"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/adminConfig"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/adminSessionInfo"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/agents"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/auth"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/authTokenManagement"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/authnReqLists"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/backup"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/certificates"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/config"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/engineListeners"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/engines"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/globalUnprotectedResources"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/highAvailability"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/hsmProviders"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/httpConfig"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/httpsListeners"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/identityMappings"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/keyPairs"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/license"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/oauth"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/oauthKeyManagement"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/oidc"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/pingfederate"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/pingone"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/proxies"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/redirects"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rejectionHandlers"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rules"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rulesets"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/sharedSecrets"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/siteAuthenticators"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/sites"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/thirdPartyServices"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/tokenProvider"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/trustedCertificateGroups"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/unknownResources"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/users"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/version"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/virtualhosts"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/webSessionManagement"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/webSessions"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	paCfg "github.com/iwarapter/pingaccess-sdk-go/pingaccess/config"
+	paCfg "github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/config"
+
+	paCfg60 "github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/config"
+	keyPairs60 "github.com/iwarapter/pingaccess-sdk-go/v60/services/keyPairs"
 )
 
 type cfg struct {
@@ -89,6 +92,7 @@ type paClient struct {
 	HttpsListeners             httpsListeners.HttpsListenersAPI
 	IdentityMappings           identityMappings.IdentityMappingsAPI
 	KeyPairs                   keyPairs.KeyPairsAPI
+	KeyPairsV60                keyPairs60.KeyPairsAPI
 	License                    license.LicenseAPI
 	Oauth                      oauth.OauthAPI
 	OauthKeyManagement         oauthKeyManagement.OauthKeyManagementAPI
@@ -132,9 +136,10 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 	}
 
 	cfg := paCfg.NewConfig().WithEndpoint(u.String() + c.Context).WithUsername(c.Username).WithPassword(c.Password)
-
+	cfg60 := paCfg60.NewConfig().WithEndpoint(u.String() + c.Context).WithUsername(c.Username).WithPassword(c.Password)
 	if os.Getenv("TF_LOG") == "DEBUG" || os.Getenv("TF_LOG") == "TRACE" {
 		cfg.WithDebug(true)
+		cfg60.WithDebug(true)
 	}
 
 	client := paClient{
@@ -159,6 +164,7 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 		HttpsListeners:             httpsListeners.New(cfg),
 		IdentityMappings:           identityMappings.New(cfg),
 		KeyPairs:                   keyPairs.New(cfg),
+		KeyPairsV60:                keyPairs60.New(cfg60),
 		License:                    license.New(cfg),
 		Oauth:                      oauth.New(cfg),
 		OauthKeyManagement:         oauthKeyManagement.New(cfg),
@@ -202,6 +208,18 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 // Checks whether we are running against PingAccess 6.1 or above and can track password changes
 func (c paClient) CanMaskPasswords() bool {
 	re := regexp.MustCompile(`^(6\.[1-9])`)
+	return re.MatchString(c.apiVersion)
+}
+
+// Checks whether we are running against PingAccess 6.2 or above
+func (c paClient) Is62OrAbove() bool {
+	re := regexp.MustCompile(`^(6\.[2-9])`)
+	return re.MatchString(c.apiVersion)
+}
+
+// Checks whether we are running against PingAccess 6.0 or above
+func (c paClient) Is60OrAbove() bool {
+	re := regexp.MustCompile(`^(6\.[0-9])`)
 	return re.MatchString(c.apiVersion)
 }
 

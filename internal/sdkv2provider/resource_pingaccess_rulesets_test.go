@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/rulesets"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rulesets"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

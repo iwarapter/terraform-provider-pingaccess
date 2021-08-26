@@ -81,8 +81,19 @@ resource "pingaccess_acme_server" "acc_test" {
   url   = "https://host.docker.internal:14000/dir"
 }
 
+resource "pingaccess_pingfederate_runtime" "pa62_demo" {
+  count                        = local.isPA6_2 ? 1 : 0
+  targets                      = ["pingfederate-engine.obb-bank.raidiam.io:443"]
+  trusted_certificate_group_id = data.pingaccess_trusted_certificate_group.trust_any.id
+  application {
+    primary_virtual_host_id = 1
+  }
+  back_channel_secure        = true
+  skip_hostname_verification = false
+}
+
 resource "pingaccess_pingfederate_runtime" "pa6_demo" {
-  count                        = local.isPA6 ? 1 : 0
+  count                        = (local.isPA6 && !local.isPA6_2) ? 1 : 0
   description                  = "demo"
   issuer                       = "https://pingfederate:9031"
   sts_token_exchange_endpoint  = "https://foo/bar"

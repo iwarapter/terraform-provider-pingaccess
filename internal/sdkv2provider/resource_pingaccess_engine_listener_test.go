@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/engineListeners"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/engineListeners"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -70,7 +70,7 @@ func testAccPingAccessEngineListenerConfig(host string, secure bool) string {
 	resource "pingaccess_engine_listener" "acc_test" {
 	   name   = "acctest_engine-%s"
 	   port   = 443
-	   secure	= %t
+	   secure = %t
 	}`, host, secure)
 }
 

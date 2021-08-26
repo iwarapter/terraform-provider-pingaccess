@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/pingfederate"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/pingfederate"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,6 +21,9 @@ func resourcePingAccessPingFederateRuntime() *schema.Resource {
 			StateContext: resourcePingAccessPingFederateRuntimeImport,
 		},
 		Schema: resourcePingAccessPingFederateRuntimeSchema(),
+		Description: `Manages the PingAccess PingFederate configuration.
+
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Deleting this resource resets the PingFederate configuration to default values.`,
 	}
 }
 
@@ -33,17 +36,20 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			Optional:      true,
 			RequiredWith:  []string{"issuer"},
 			ConflictsWith: []string{"audit_level", "back_channel_base_path", "back_channel_secure", "base_path", "expected_hostname", "host", "port", "secure", "targets"},
+			Description:   "The description of the PingFederate Runtime token provider.",
 		},
 		"issuer": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"audit_level", "back_channel_base_path", "back_channel_secure", "base_path", "expected_hostname", "host", "port", "secure", "targets"},
+			Description:   "The issuer url of the PingFederate token provider.",
 		},
 		"sts_token_exchange_endpoint": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			RequiredWith:  []string{"issuer"},
 			ConflictsWith: []string{"audit_level", "back_channel_base_path", "back_channel_secure", "base_path", "expected_hostname", "host", "port", "secure", "targets"},
+			Description:   "The url of the PingFederate STS token-to-token exchange endpoint that is used for token mediation. Specify if it is being served from a different host/port than the issuer is. Otherwise, it is assumed to be {issuer}/pf/sts.wst.",
 		},
 
 		//Deprecated API
@@ -53,12 +59,14 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			Default:       "ON",
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "Enable to record requests to PingFederate to the audit store.",
 		},
 		"back_channel_base_path": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "The base path, if needed, for the PingFederate Runtime accessed using a Back Channel hostname. This field is ignored when the PingFederate application is configured.",
 		},
 		"back_channel_secure": {
 			Type:          schema.TypeBool,
@@ -66,18 +74,21 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			Default:       false,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "Enable if PingFederate is expecting HTTPS connections for calls via the Back Channel hostnames.",
 		},
 		"base_path": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "The base path, if needed, for PingFederate Runtime. This field is ignored when the PingFederate application is configured.",
 		},
 		"expected_hostname": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "The name of the host expected in the certificate.",
 		},
 		"host": {
 			Type:          schema.TypeString,
@@ -85,6 +96,7 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			RequiredWith:  []string{"host", "port"},
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "The host name or IP address for PingFederate Runtime. This field is ignored and can be an empty string when the PingFederate application is configured.",
 		},
 		"port": {
 			Type:          schema.TypeInt,
@@ -92,6 +104,7 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			RequiredWith:  []string{"host", "port"},
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
+			Description:   "The port number for PingFederate Runtime. This field is ignored when the PingFederate application is configured.",
 		},
 		"secure": {
 			Type:          schema.TypeBool,
@@ -110,27 +123,81 @@ func resourcePingAccessPingFederateRuntimeSchema() map[string]*schema.Schema {
 			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint"},
 			Deprecated:    deprecationMsg,
 		},
+		"application": {
+			Type:        schema.TypeSet,
+			Optional:    true,
+			MaxItems:    1,
+			Description: "Application configuration for the PingFederate runtime application proxied by PingAccess.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"additional_virtual_host_ids": {
+						Type:     schema.TypeSet,
+						Optional: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeInt,
+						},
+					},
+					"case_sensitive": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  true,
+					},
+					"client_cert_header_names": {
+						Type:     schema.TypeSet,
+						Optional: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+					},
+					"context_root": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "/",
+					},
+					"policy": applicationPolicyItemSchema(),
+					"primary_virtual_host_id": {
+						Type:     schema.TypeInt,
+						Required: true,
+					},
+				},
+			},
+			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint", "host"},
+		},
+		"load_balancing_strategy_id": {
+			Type:          schema.TypeInt,
+			Optional:      true,
+			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint", "host"},
+		},
+		"availability_profile_id": {
+			Type:          schema.TypeInt,
+			Optional:      true,
+			ConflictsWith: []string{"description", "issuer", "sts_token_exchange_endpoint", "host"},
+		},
 
 		//Common
 		"skip_hostname_verification": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Set to true if HTTP communications to PingFederate should not perform hostname verification of the certificate.",
 		},
 		"trusted_certificate_group_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "The group of certificates to use when authenticating to PingFederate.",
 		},
 		"use_proxy": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Set to true if a proxy should be used for HTTP or HTTPS requests.",
 		},
 		"use_slo": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Set to true if OIDC single log out should be used on the /pa/oidc/logout on the engines.",
 		},
 	}
 }
@@ -210,12 +277,8 @@ func resourcePingAccessPingFederateRuntimeImport(_ context.Context, d *schema.Re
 	if err != nil {
 		return nil, fmt.Errorf("unable to read deprecated PingFederateRuntime: %s", err)
 	}
-	if result.Host != nil && *result.Host != "" {
+	if result.Targets != nil && len(*result.Targets) > 0 {
 		diags := resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d, result)
-		//set defaults for state
-		setResourceDataStringWithDiagnostic(d, "description", String(""), &diags)
-		setResourceDataStringWithDiagnostic(d, "issuer", String(""), &diags)
-		setResourceDataStringWithDiagnostic(d, "sts_token_exchange_endpoint", String(""), &diags)
 		if diags.HasError() {
 			return nil, fmt.Errorf("unable to store deprecated PingFederateRuntime in state: %s", err)
 		}
@@ -263,6 +326,15 @@ func resourcePingAccessPingFederateDeprecatedRuntimeReadResult(d *schema.Resourc
 	setResourceDataIntWithDiagnostic(d, "trusted_certificate_group_id", input.TrustedCertificateGroupId, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_proxy", input.UseProxy, &diags)
 	setResourceDataBoolWithDiagnostic(d, "use_slo", input.UseSlo, &diags)
+
+	setResourceDataIntWithDiagnostic(d, "availability_profile_id", input.AvailabilityProfileId, &diags)
+	setResourceDataIntWithDiagnostic(d, "load_balancing_strategy_id", input.LoadBalancingStrategyId, &diags)
+	if input.Application != nil {
+		if err := d.Set("application", flattenRuntimeApplication(input.Application)); err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
+	}
+
 	if input.Targets != nil {
 		if err := d.Set("targets", input.Targets); err != nil {
 			diags = append(diags, diag.FromErr(err)...)
@@ -324,6 +396,18 @@ func resourcePingAccessPingFederateDeprecatedRuntimeReadData(d *schema.ResourceD
 
 	if v, ok := d.GetOk("skip_hostname_verification"); ok {
 		pfRuntime.SkipHostnameVerification = Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOk("availability_profile_id"); ok {
+		pfRuntime.AvailabilityProfileId = Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("load_balancing_strategy_id"); ok {
+		pfRuntime.LoadBalancingStrategyId = Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("application"); ok {
+		pfRuntime.Application = expandRuntimeApplication(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("targets"); ok {

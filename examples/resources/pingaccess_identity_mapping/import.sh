@@ -1,0 +1,1 @@
+terraform import pingaccess_identity_mapping.example 123

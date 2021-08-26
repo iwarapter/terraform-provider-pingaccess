@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/trustedCertificateGroups"
 )
 
 type dataPingAccessTrustedCertificateGroups struct {
@@ -37,6 +37,7 @@ func (d dataPingAccessTrustedCertificateGroups) schema() *tfprotov5.Schema {
 	return &tfprotov5.Schema{
 		Version: 1,
 		Block: &tfprotov5.SchemaBlock{
+			Description: "Use this data source to get the ID of a trusted certificate group in Ping Access, you can reference it by name without having to hard code the IDs as input.",
 			Attributes: []*tfprotov5.SchemaAttribute{
 				{
 					Name:     "id",
@@ -48,32 +49,38 @@ func (d dataPingAccessTrustedCertificateGroups) schema() *tfprotov5.Schema {
 					Type: tftypes.List{
 						ElementType: tftypes.String,
 					},
-					Computed: true,
+					Computed:    true,
+					Description: "The IDs of the certificates that are in the trusted certificate group.",
 				},
 				{
-					Name:     "ignore_all_certificate_errors",
-					Type:     tftypes.Bool,
-					Computed: true,
+					Name:        "ignore_all_certificate_errors",
+					Type:        tftypes.Bool,
+					Computed:    true,
+					Description: "This field is read-only and is only set to true for the Trust Any certificate group.",
 				},
 				{
-					Name:     "name",
-					Type:     tftypes.String,
-					Required: true,
+					Name:        "name",
+					Type:        tftypes.String,
+					Required:    true,
+					Description: "The name of trusted certificate group.",
 				},
 				{
-					Name:     "skip_certificate_date_check",
-					Type:     tftypes.Bool,
-					Computed: true,
+					Name:        "skip_certificate_date_check",
+					Type:        tftypes.Bool,
+					Computed:    true,
+					Description: "This field is true if certificates that have expired or are not yet valid but have passed the other certificate checks should be trusted.",
 				},
 				{
-					Name:     "system_group",
-					Type:     tftypes.Bool,
-					Computed: true,
+					Name:        "system_group",
+					Type:        tftypes.Bool,
+					Computed:    true,
+					Description: "This field is read-only and indicates the trusted certificate group cannot be modified.",
 				},
 				{
-					Name:     "use_java_trust_store",
-					Type:     tftypes.Bool,
-					Computed: true,
+					Name:        "use_java_trust_store",
+					Type:        tftypes.Bool,
+					Computed:    true,
+					Description: "This field is true if the certificates in the group should also include all certificates in the Java Trust Store.",
 				},
 			},
 		},

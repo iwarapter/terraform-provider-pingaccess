@@ -11,8 +11,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/keyPairs"
+	models60 "github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/models"
+	keyPairs60 "github.com/iwarapter/pingaccess-sdk-go/v60/services/keyPairs"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/keyPairs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,8 +29,10 @@ func resourcePingAccessKeyPair() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourcePingAccessKeyPairImport,
 		},
-
 		Schema: resourcePingAccessKeyPairSchema(),
+		Description: `Provides configuration for Keypairs within PingAccess.
+
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the configuration block.`,
 	}
 }
 
@@ -43,12 +47,14 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"alias": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "A unique alias name to identify the key pair. Special characters and spaces are allowed.",
 		},
 		"chain_certificates": {
-			Type:     schema.TypeSet,
-			Computed: true,
+			Type:        schema.TypeSet,
+			Computed:    true,
+			Description: "The complete list of certificates in the key pair certificate chain.",
 			Elem: &schema.Resource{
 				Schema: sch,
 			},
@@ -58,6 +64,7 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 			Optional:      true,
 			ConflictsWith: []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
 			RequiredWith:  []string{"file_data", "password"},
+			Description:   "Base-64 encoded PKCS12 or PEM file data. For PEM, the private key must precede the certificates, and certificates must be ordered from leaf to root. In BCFIPS mode, only PEM with PBES2 and AES or Triple DES encryption is accepted and 128-bit salt is required.",
 		},
 		"password": {
 			Type:          schema.TypeString,
@@ -65,54 +72,63 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 			Optional:      true,
 			ConflictsWith: []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
 			RequiredWith:  []string{"file_data", "password"},
+			Description:   "The password used to protect the private key. In FIPS mode, the password must be at least 14 characters.",
 		},
 		"city": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The city or other primary location (L) where the company operates.",
 		},
 		"common_name": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The common name (CN) identifying the certificate.",
 		},
 		"country": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The country (C) where the company is based, using two capital letters.",
 		},
 		"key_algorithm": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The key algorithm to use to generate a key.",
 		},
 		"key_size": {
 			Type:          schema.TypeInt,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The number of bits used in the key. Choices depend on selected key algorithm.",
 		},
 		"organization": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The organization (O) or company name creating the certificate.",
 		},
 		"organization_unit": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The specific unit within the organization (OU).",
 		},
 		"state": {
 			Type:          schema.TypeString,
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The state (ST) or other political unit encompassing the location.",
 		},
 		//"subject_alternative_names": {},
 		"valid_days": {
@@ -120,64 +136,98 @@ func resourcePingAccessKeyPairSchema() map[string]*schema.Schema {
 			Optional:      true,
 			ConflictsWith: []string{"file_data", "password"},
 			RequiredWith:  []string{"city", "common_name", "country", "key_algorithm", "key_size", "organization", "organization_unit", "state", "valid_days"},
+			Description:   "The number of days the certificate is valid.",
 		},
 		"csr_pending": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "True if a CSR is generated for this key pair.",
 		},
 		"expires": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "The date at which the certificate expires as the number of milliseconds since January 1, 1970, 00:00:00 GMT.",
 		},
 		"hsm_provider_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  "0",
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     "0",
+			Description: "The HSM Provider ID. The default value is 0 indicating an HSM is not used for this key pair.",
 		},
 		"issuer_dn": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The issuer DN for the certificate.",
 		},
 		"md5sum": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The MD5 sum for the certificate. The value will be set to "" when in FIPS mode.`,
 		},
 		"serial_number": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The serial number for the certificate.",
 		},
 		"sha1sum": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The SHA1 sum for the certificate.",
 		},
 		"signature_algorithm": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The algorithm used to sign the certificate.",
 		},
 		"status": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "A high-level status for the certificate.",
 		},
 		"subject_cn": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The subject CN for the certificate.",
 		},
 		"subject_dn": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The subject DN for the certificate.",
 		},
 		"valid_from": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "The date at which the certificate is valid from as the number of milliseconds since January 1, 1970, 00:00:00 GMT.",
 		},
 	}
 }
 
 func resourcePingAccessKeyPairCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).KeyPairs
+	//Import a keypair
 	if _, ok := d.GetOk("file_data"); ok {
-		input := keyPairs.ImportKeyPairCommandInput{
-			Body: models.PKCS12FileImportDocView{
+		//Import a keypair using 6.2+ API
+		if m.(paClient).Is62OrAbove() {
+			input := keyPairs.ImportKeyPairCommandInput{
+				Body: models.PKCS12FileImportDocView{
+					Alias:             String(d.Get("alias").(string)),
+					FileData:          String(d.Get("file_data").(string)),
+					Password:          &models.HiddenFieldView{Value: String(d.Get("password").(string))},
+					ChainCertificates: &[]*string{},
+					HsmProviderId:     Int(d.Get("hsm_provider_id").(int)),
+				},
+			}
+			result, _, err := svc.ImportKeyPairCommand(&input)
+			if err != nil {
+				return diag.Errorf("unable to create KeyPair: %s", err)
+			}
+
+			d.SetId(strconv.Itoa(*result.Id))
+			return resourcePingAccessKeyPairReadResult(d, result)
+		}
+		//Import a keypair using 6.0 API
+		input := keyPairs60.ImportKeyPairCommandInput{
+			Body: models60.PKCS12FileImportDocView{
 				Alias:             String(d.Get("alias").(string)),
 				FileData:          String(d.Get("file_data").(string)),
 				Password:          String(d.Get("password").(string)),
@@ -185,13 +235,29 @@ func resourcePingAccessKeyPairCreate(_ context.Context, d *schema.ResourceData, 
 				HsmProviderId:     Int(d.Get("hsm_provider_id").(int)),
 			},
 		}
-		result, _, err := svc.ImportKeyPairCommand(&input)
+		svc60 := m.(paClient).KeyPairsV60
+		result, _, err := svc60.ImportKeyPairCommand(&input)
 		if err != nil {
 			return diag.Errorf("unable to create KeyPair: %s", err)
 		}
 
 		d.SetId(strconv.Itoa(*result.Id))
-		return resourcePingAccessKeyPairReadResult(d, result)
+		return resourcePingAccessKeyPairReadResult(d, &models.KeyPairView{
+			Alias:              result.Alias,
+			CsrPending:         result.CsrPending,
+			Expires:            result.Expires,
+			HsmProviderId:      result.HsmProviderId,
+			Id:                 result.Id,
+			IssuerDn:           result.IssuerDn,
+			Md5sum:             result.Md5sum,
+			SerialNumber:       result.SerialNumber,
+			Sha1sum:            result.Sha1sum,
+			SignatureAlgorithm: result.SignatureAlgorithm,
+			Status:             result.Status,
+			SubjectCn:          result.SubjectCn,
+			SubjectDn:          result.SubjectDn,
+			ValidFrom:          result.ValidFrom,
+		})
 	}
 
 	input := keyPairs.GenerateKeyPairCommandInput{
@@ -236,7 +302,7 @@ func resourcePingAccessKeyPairUpdate(_ context.Context, d *schema.ResourceData, 
 		Body: models.PKCS12FileImportDocView{
 			Alias:             String(d.Get("alias").(string)),
 			FileData:          String(d.Get("file_data").(string)),
-			Password:          String(d.Get("password").(string)),
+			Password:          &models.HiddenFieldView{Value: String(d.Get("password").(string))},
 			ChainCertificates: &[]*string{},
 		},
 		Id: d.Id(),
@@ -268,6 +334,7 @@ func resourcePingAccessKeyPairDelete(_ context.Context, d *schema.ResourceData, 
 
 func resourcePingAccessKeyPairImport(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	svc := m.(paClient).KeyPairs
+	is6 := m.(paClient).Is60OrAbove()
 	input := keyPairs.GetKeyPairCommandInput{
 		Id: d.Id(),
 	}
@@ -289,6 +356,11 @@ func resourcePingAccessKeyPairImport(_ context.Context, d *schema.ResourceData, 
 	}
 
 	diags := resourcePingAccessKeyPairReadResult(d, result)
+	if !is6 {
+		//hsm providers are only available in 6+ so we just set to state to match the default for 5.3
+		setResourceDataIntWithDiagnostic(d, "hsm_provider_id", Int(0), &diags)
+	}
+
 	//import based on upload
 	//TODO unable to properly support upload style imports - https://discuss.hashicorp.com/t/importer-functions-reading-file-config/17624/2
 

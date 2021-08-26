@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/applications"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,62 +22,72 @@ func resourcePingAccessApplicationResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourcePingAccessApplicationResourceImport,
 		},
-
-		Schema: resourcePingAccessApplicationResourceSchema(),
+		Schema:      resourcePingAccessApplicationResourceSchema(),
+		Description: "Provides configuration for Application Resources within PingAccess.",
 	}
 }
 
 func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"anonymous": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "True if the resource is anonymous.",
 		},
 		"application_id": {
-			Type:     schema.TypeString,
-			Required: true,
-			ForceNew: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			ForceNew:    true,
+			Description: "The id of the associated application. This field is read-only.",
 		},
 		"audit_level": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "ON",
 			ValidateDiagFunc: validateAuditLevel,
+			Description:      "Indicates if audit logging is enabled for the resource.",
 		},
 		"default_auth_type_override": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ValidateDiagFunc: validateWebOrAPI,
+			Description:      "For Web + API applications (dynamic) default_auth_type selects the processing mode when a request: does not have a token (web session, OAuth bearer) or has both tokens. default_auth_type_override overrides the default_auth_type at the application level for this resource. A value of null indicates the resource should not override the default_auth_type.",
 		},
 		"enabled": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "True if the resource is enabled.",
 		},
 		"methods": {
-			Type:     schema.TypeSet,
-			Required: true,
+			Type:        schema.TypeSet,
+			Required:    true,
+			Description: "An array of HTTP methods configured for the resource.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of the resource.",
 		},
 		"path_patterns": {
-			Type:     schema.TypeSet,
-			Optional: true,
+			Type:        schema.TypeSet,
+			Optional:    true,
+			Description: "A list of one or more request path-matching patterns.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"pattern": {
-						Type:     schema.TypeString,
-						Required: true,
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type').",
 					},
 					"type": {
-						Type:     schema.TypeString,
-						Required: true,
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "The pattern syntax type.",
 					},
 				},
 			},
@@ -92,14 +102,16 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		},
 		"policy": applicationPolicySchema(),
 		"root_resource": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "True if the resource is the root resource for the application.",
 		},
 		"unprotected": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "True if the resource is unprotected.",
 		},
 	}
 }

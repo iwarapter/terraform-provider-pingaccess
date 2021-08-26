@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/certificates"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,7 +17,7 @@ func init() {
 		Dependencies: []string{"keypairs", "trusted_certificate_group"},
 		F: func(r string) error {
 			svc := certificates.New(conf)
-			results, _, err := svc.GetTrustedCerts(&certificates.GetTrustedCertsInput{Filter: "acctest_"})
+			results, _, err := svc.GetTrustedCerts(&certificates.GetTrustedCertsInput{})
 			if err != nil {
 				return fmt.Errorf("unable to list certificates to sweep %s", err)
 			}

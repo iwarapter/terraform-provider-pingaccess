@@ -3,8 +3,8 @@ package sdkv2provider
 import (
 	"context"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/authnReqLists"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/authnReqLists"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,18 +19,26 @@ func resourcePingAccessAuthnReqList() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessAuthnReqListSchema(),
+		Schema:      resourcePingAccessAuthnReqListSchema(),
+		Description: `Provides configuration for Authentication Requirements within PingAccess.`,
 	}
 }
 
 func resourcePingAccessAuthnReqListSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of the authentication requirements list.",
 		},
-		"authn_reqs": requiredListOfString(),
+		"authn_reqs": {
+			Type:        schema.TypeList,
+			Required:    true,
+			Description: "The ordered list of authentication requirements, or identifiers, which define how PingFederate will authenticate a user during the OIDC login flow.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 	}
 }
 

@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/oauth"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/oauth"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,6 +17,9 @@ import (
 
 func TestAccPingAccessOAuthServer(t *testing.T) {
 	resourceName := "pingaccess_oauth_server.demo_pfr"
+
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	canMask := re.MatchString(paVersion)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -39,12 +42,12 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessOAuthServerExists(resourceName),
-					testAccCheckPingAccessOAuthServerCanTrackPasswordChanges(resourceName, true),
+					testAccCheckPingAccessOAuthServerCanTrackPasswordChanges(resourceName, canMask),
 					resource.TestCheckResourceAttr(resourceName, "introspection_endpoint", "/introspect"),
 					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_secret.0.value", "secret"),
 					resource.TestCheckResourceAttrSet(resourceName, "client_credentials.0.client_secret.0.encrypted_value"),
 				),
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: canMask,
 			},
 			{
 				Config: testAccPingAccessOAuthServerConfig("/introspect", "secret"),
@@ -59,7 +62,7 @@ func TestAccPingAccessOAuthServer(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"},
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value", "client_credentials.0.client_secret.0.encrypted_value"},
 			},
 			{
 				Config: testAccPingAccessOAuthServerConfig("https://thing/introspect", "secret"),
@@ -170,6 +173,8 @@ func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 						Value:          String("Secrets"),
 						EncryptedValue: String("foo"),
 					},
+					KeyPairId:       Int(0),
+					CredentialsType: String("SECRET"),
 				},
 				AuditLevel:             String("ON"),
 				TokenTimeToLiveSeconds: Int(-1),
@@ -182,8 +187,10 @@ func Test_resourcePingAccessOAuthServerReadData(t *testing.T) {
 				Targets:                   &[]*string{String("localhost")},
 				TrustedCertificateGroupId: Int(0),
 				ClientCredentials: &models.OAuthClientCredentialsView{
-					ClientId:     String("client"),
-					ClientSecret: &models.HiddenFieldView{},
+					ClientId:        String("client"),
+					ClientSecret:    &models.HiddenFieldView{},
+					KeyPairId:       Int(1),
+					CredentialsType: String("PRIVATE_KEY_JWT"),
 				},
 				AuditLevel:             String("none"),
 				Secure:                 Bool(true),

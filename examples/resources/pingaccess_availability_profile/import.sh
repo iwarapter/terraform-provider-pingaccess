@@ -1,0 +1,1 @@
+terraform import pingaccess_availability_profile.example 123

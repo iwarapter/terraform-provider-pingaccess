@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/accessTokenValidators"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

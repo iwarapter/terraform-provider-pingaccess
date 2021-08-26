@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/rules"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rules"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,7 +21,6 @@ func resourcePingAccessRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
 		Schema: resourcePingAccessRuleSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			svc := m.(paClient).Rules
@@ -35,24 +34,39 @@ func resourcePingAccessRule() *schema.Resource {
 			}
 			return validateRulesConfiguration(className, d, desc)
 		},
+		Description: `Provides configuration for Rules within PingAccess.
+
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the configuration block.`,
 	}
 }
 
 func resourcePingAccessRuleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"class_name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The rule's class name.",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The rule's name.",
 		},
-		"supported_destinations": setOfString(),
+		"supported_destinations": {
+			Type:        schema.TypeSet,
+			Optional:    true,
+			Computed:    true,
+			Deprecated:  "This field is read-only and should not be set, future versions of the provider will enforce this.",
+			Description: "The supported destinations for this rule.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"configuration": {
 			Type:             schema.TypeString,
 			Required:         true,
 			DiffSuppressFunc: suppressEquivalentJSONDiffs,
+			Description:      "The rule's configuration data.",
 		},
 	}
 }

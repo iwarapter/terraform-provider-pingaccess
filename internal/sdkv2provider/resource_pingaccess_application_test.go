@@ -3,19 +3,39 @@ package sdkv2provider
 import (
 	"fmt"
 	"os"
-	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/applications"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+func init() {
+	resource.AddTestSweepers("applications", &resource.Sweeper{
+		Name: "applications",
+		F: func(r string) error {
+			svc := applications.New(conf)
+			results, _, err := svc.GetApplicationsCommand(&applications.GetApplicationsCommandInput{})
+			if err != nil {
+				return fmt.Errorf("unable to list applications to sweep %s", err)
+			}
+			for _, item := range results.Items {
+				_, err = svc.DeleteApplicationCommand(&applications.DeleteApplicationCommandInput{Id: item.Id.String()})
+				if err != nil {
+					return fmt.Errorf("unable to sweep application %s because %s", item.Id.String(), err)
+				}
+			}
+			return nil
+		},
+	})
+}
 
 func TestAccPingAccessApplication(t *testing.T) {
 	resourceName := "pingaccess_application.acc_test"
@@ -51,6 +71,28 @@ func testAccCheckPingAccessApplicationDestroy(s *terraform.State) error {
 }
 
 func testAccPingAccessApplicationConfig(name, context, appType string) string {
+	block := ""
+	oauth := `client_id              = "foo"
+  client_secret {
+    value = "top_secret"
+  }`
+	re := regexp.MustCompile(`^(6\.[2-9])`)
+	if re.MatchString(paVersion) {
+		block = `"exclusionList": false,
+			"exclusionListAttributes": [],
+			"exclusionListSubject": null,
+			"headerNamePrefix": null,`
+	}
+	re = regexp.MustCompile(`^(6\.[1-9])`)
+	if re.MatchString(paVersion) {
+		oauth = `client_credentials {
+			credentials_type = "SECRET"
+			client_id = "my_client"
+			client_secret {
+				value = "secret"
+			}
+		}`
+	}
 	return fmt.Sprintf(`
 	resource "pingaccess_site" "acc_test_site" {
 		name                         = "acc_test_site"
@@ -110,6 +152,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 
 		configuration = <<EOF
 		{
+			%s
 			"attributeHeaderMappings": [
 				{
 					"subject": true,
@@ -148,7 +191,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 
 	resource "pingaccess_pingfederate_oauth" "app_demo_pfo" {
-		client_id = "my_client"
+		%s
 		subject_attribute_name = "sany"
 	}
 
@@ -174,7 +217,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 			"phone"
 		]
 	}
-	`, name, context, appType, appType, os.Getenv("PINGFEDERATE_TEST_IP"))
+	`, name, context, appType, appType, block, oauth, os.Getenv("PINGFEDERATE_TEST_IP"))
 }
 
 func testAccCheckPingAccessApplicationExists(n string) resource.TestCheckFunc {
@@ -183,9 +226,6 @@ func testAccCheckPingAccessApplicationExists(n string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
-
-		// b, _ := json.Marshal(rs)
-		// fmt.Printf("%s", b)
 
 		if rs.Primary.ID == "" || rs.Primary.ID == "0" {
 			return fmt.Errorf("No application ID is set")
@@ -205,26 +245,6 @@ func testAccCheckPingAccessApplicationExists(n string) resource.TestCheckFunc {
 		}
 
 		return nil
-	}
-}
-
-func Test_flattenIdentityMappingIds(t *testing.T) {
-	type args struct {
-		in map[string]*int
-	}
-	tests := []struct {
-		name string
-		args args
-		want []interface{}
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := flattenIdentityMappingIds(tt.args.in); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("flattenIdentityMappingIds() = %v, want %v", got, tt.want)
-			}
-		})
 	}
 }
 

@@ -2,9 +2,10 @@ package sdkv2provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -13,7 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccPingAccessPingFederateOAuth(t *testing.T) {
+func TestAccPingAccessPingFederateOAuth61OrBelow(t *testing.T) {
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	if re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 5.3 or 6.0, not: %s", paVersion)
+	}
 	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -22,21 +27,56 @@ func TestAccPingAccessPingFederateOAuth(t *testing.T) {
 		CheckDestroy:             testAccCheckPingAccessPingFederateOAuthDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPingAccessPingFederateOAuthConfig("my_client", "san"),
+				Config: testAccPingAccessPingFederateOAuthConfig60("my_client", "san"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateOAuthExists(resourceName),
 				),
 			},
 			{
-				Config: testAccPingAccessPingFederateOAuthConfig("my_client", "sany"),
+				Config: testAccPingAccessPingFederateOAuthConfig60("my_client", "sany"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPingAccessPingFederateOAuthExists(resourceName),
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"client_secret.0.value", "client_secret.0.encrypted_value"},
+			},
+		},
+	})
+}
+
+func TestAccPingAccessPingFederateOAuth61OrAbove(t *testing.T) {
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	if !re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
+	}
+	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProviders,
+		CheckDestroy:             testAccCheckPingAccessPingFederateOAuthDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPingAccessPingFederateOAuthConfig61("my_client", "san"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessPingFederateOAuthExists(resourceName),
+				),
+			},
+			{
+				Config: testAccPingAccessPingFederateOAuthConfig61("my_client", "sany"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessPingFederateOAuthExists(resourceName),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"client_credentials.0.client_secret.0.value"},
 			},
 		},
 	})
@@ -46,12 +86,44 @@ func testAccCheckPingAccessPingFederateOAuthDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPingAccessPingFederateOAuthConfig(client, san string) string {
+func testAccPingAccessPingFederateOAuthConfig60(client, san string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_pingfederate_oauth" "demo_pfo" {
-		client_id = "%s"
-		subject_attribute_name = "%s"
-	}`, client, san)
+resource "pingaccess_pingfederate_oauth" "demo_pfo" {
+  access_validator_id    = 1
+  cache_tokens           = true
+  subject_attribute_name = "%s"
+  name                   = "PingFederate"
+  client_id              = "%s"
+  client_secret {
+    value = "top_secret"
+  }
+  send_audience              = true
+  token_time_to_live_seconds = 300
+  use_token_introspection    = true
+}
+
+`, san, client)
+}
+
+func testAccPingAccessPingFederateOAuthConfig61(client, san string) string {
+	return fmt.Sprintf(`
+resource "pingaccess_pingfederate_oauth" "demo_pfo" {
+  access_validator_id    = 1
+  cache_tokens           = true
+  subject_attribute_name = "%s"
+  name                   = "PingFederate"
+  client_credentials {
+    client_id              = "%s"
+    client_secret {
+      value = "top_secret"
+    }
+  }
+  send_audience              = true
+  token_time_to_live_seconds = 300
+  use_token_introspection    = true
+}
+
+`, san, client)
 }
 
 func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckFunc {
@@ -72,8 +144,8 @@ func testAccCheckPingAccessPingFederateOAuthExists(n string) resource.TestCheckF
 			return fmt.Errorf("Error: PingFederateOAuth (%s) not found", n)
 		}
 
-		if *result.ClientId != rs.Primary.Attributes["client_id"] {
-			return fmt.Errorf("Error: PingFederateOAuth response (%s) didnt match state (%s)", *result.ClientId, rs.Primary.Attributes["client_id"])
+		if *result.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Error: PingFederateOAuth response (%s) didnt match state (%s)", *result.Name, rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -109,13 +181,30 @@ func Test_resourcePingAccessPingFederateOAuthReadData(t *testing.T) {
 				},
 			},
 		},
+		{
+			PingFederateAccessTokenView: models.PingFederateAccessTokenView{
+				SubjectAttributeName:   String("san"),
+				AccessValidatorId:      Int(1),
+				CacheTokens:            Bool(true),
+				Name:                   String("PingFederate"),
+				SendAudience:           Bool(true),
+				TokenTimeToLiveSeconds: Int(30),
+				UseTokenIntrospection:  Bool(true),
+				ClientCredentials: &models.OAuthClientCredentialsView{
+					ClientId:        String("example"),
+					ClientSecret:    &models.HiddenFieldView{Value: String("secret"), EncryptedValue: String("")},
+					CredentialsType: String("PRIVATE_KEY_JWT"),
+					KeyPairId:       Int(1),
+				},
+			},
+		},
 	}
 	for i, tc := range cases {
 		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {
 
 			resourceSchema := resourcePingAccessPingFederateOAuthSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			resourcePingAccessPingFederateOAuthReadResult(resourceLocalData, &tc.PingFederateAccessTokenView)
+			resourcePingAccessPingFederateOAuthReadResult(resourceLocalData, &tc.PingFederateAccessTokenView, false)
 
 			if got := *resourcePingAccessPingFederateOAuthReadData(resourceLocalData); !cmp.Equal(got, tc.PingFederateAccessTokenView) {
 				t.Errorf("resourcePingAccessPingFederateOAuthReadData() = %v", cmp.Diff(got, tc.PingFederateAccessTokenView))

@@ -3,8 +3,8 @@ package sdkv2provider
 import (
 	"context"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/acme"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/acme"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,22 +18,24 @@ func resourcePingAccessAcmeServer() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessAcmeServerSchema(),
+		Schema:      resourcePingAccessAcmeServerSchema(),
+		Description: `Provides configuration for ACME Server within PingAccess.`,
 	}
 }
 
 func resourcePingAccessAcmeServerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
-			ForceNew: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			ForceNew:    true,
+			Description: "A user-friendly name for the ACME server.",
 		},
 		"url": {
-			Type:     schema.TypeString,
-			Required: true,
-			ForceNew: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			ForceNew:    true,
+			Description: "The URL of the ACME directory resource on the ACME server.",
 		},
 		"acme_accounts": acmeServerAccountsSchema(),
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/rulesets"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rulesets"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,7 +20,8 @@ func resourcePingAccessRuleSet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: resourcePingAccessRuleSetSchema(),
+		Schema:      resourcePingAccessRuleSetSchema(),
+		Description: `Provides configuration for Rulesets within PingAccess.`,
 	}
 }
 
@@ -30,15 +31,18 @@ func resourcePingAccessRuleSetSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			Required:         true,
 			ValidateDiagFunc: validateRuleOrRuleSet,
+			Description:      "The rule set's element type (what it contains). Can be either `Rule` or `Ruleset`.",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The rule set's name.",
 		},
 		"policy": {
-			Type:     schema.TypeSet,
-			Required: true,
-			MinItems: 1,
+			Type:        schema.TypeSet,
+			Required:    true,
+			MinItems:    1,
+			Description: "The list of policy ids assigned to the rule set.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -47,12 +51,12 @@ func resourcePingAccessRuleSetSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			Required:         true,
 			ValidateDiagFunc: validateSuccessIfAllSucceedOrSuccessIfAnyOneSucceeds,
+			Description:      "The rule set's success criteria. Can be either `SuccessIfAllSucceed` or `SuccessIfAnyOneSucceeds`.",
 		},
 	}
 }
 
 func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// log.Printf("[INFO] resourcePingAccessRuleSetCreate")
 	name := d.Get("name").(string)
 	elementType := d.Get("element_type").(string)
 	policy := expandStringList(d.Get("policy").(*schema.Set).List())

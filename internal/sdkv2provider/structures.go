@@ -9,59 +9,32 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-func setOfString() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
-
-func requiredListOfString() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Required: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
-
-func computedListOfString() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
 
 func acmeServerAccountsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Optional: true,
+		Type:        schema.TypeList,
+		Computed:    true,
+		Optional:    true,
+		Description: "An array of references to accounts. This array is read-only.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"location": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "An absolute path to the associated resource.",
 				},
 				"id": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The id of the associated resource. When both id and location are specified, id takes precedence and location is ignored.",
 				},
 			},
 		},
@@ -70,52 +43,81 @@ func acmeServerAccountsSchema() *schema.Schema {
 
 func applicationPolicySchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"web": applicationPolicyItemSchema(),
 				"api": applicationPolicyItemSchema(),
 			},
 		},
-		// DefaultFunc: func() (interface{}, error) {
-		// 	return []map[string][]interface{}{}, nil
-		// },
 	}
 }
 
 func applicationPolicyItemSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "List of Rule/RuleSets to be applied.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"type": {
-					Type:     schema.TypeString,
-					Required: true,
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "If this is either a `Rule` or `RuleSet`.",
 				},
 				"id": {
-					Type:     schema.TypeString,
-					Required: true,
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The ID of the specific rule or ruleset.",
 				},
 			},
 		},
 	}
 }
 
-func oAuthClientCredentials() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Required: true,
-		MaxItems: 1,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"client_id": {
-					Type:     schema.TypeString,
-					Required: true,
-				},
-				"client_secret": hiddenField(),
+func oAuthClientCredentialsResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"client_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Specify the client ID.",
+			},
+			"client_secret": hiddenField(),
+			"key_pair_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
+				Description: "Specify the ID of a key pair to use for mutual TLS.",
+			},
+			"credentials_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "SECRET",
+				Description:  "Specify the credential type.",
+				ValidateFunc: validation.StringInSlice([]string{"SECRET", "CERTIFICATE", "PRIVATE_KEY_JWT"}, false),
+			},
+		},
+	}
+}
+
+func hiddenFieldResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"encrypted_value": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "encrypted value of the field, as originally returned by the API.",
+			},
+			"value": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "The value of the field. This field takes precedence over the encryptedValue field, if both are specified.",
 			},
 		},
 	}
@@ -123,31 +125,12 @@ func oAuthClientCredentials() *schema.Schema {
 
 func hiddenField() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"encrypted_value": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
-				},
-				"value": {
-					Type:      schema.TypeString,
-					Optional:  true,
-					Sensitive: true,
-				},
-			},
-		},
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Specify the client secret.",
+		Elem:        hiddenFieldResource(),
 	}
-}
-
-func requiredHiddenField() *schema.Schema {
-	sch := hiddenField()
-	sch.Optional = false
-	sch.Required = true
-	return sch
 }
 
 func expandHiddenFieldView(in []interface{}) *models.HiddenFieldView {
@@ -189,6 +172,12 @@ func expandOAuthClientCredentialsView(in []interface{}) *models.OAuthClientCrede
 		}
 		if val, ok := l["client_secret"]; ok {
 			hf.ClientSecret = expandHiddenFieldView(val.([]interface{}))
+		}
+		if val, ok := l["credentials_type"]; ok {
+			hf.CredentialsType = String(val.(string))
+		}
+		if val, ok := l["key_pair_id"]; ok {
+			hf.KeyPairId = Int(val.(int))
 		}
 	}
 	return hf
@@ -547,6 +536,15 @@ func hashString(s string) int {
 func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCredentialsView, trackPasswords bool, diags *diag.Diagnostics) {
 	pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 	creds := flattenOAuthClientCredentialsView(input)
+	if input.KeyPairId != nil {
+		creds[0]["key_pair_id"] = *input.KeyPairId
+	}
+	if input.CredentialsType != nil {
+		creds[0]["credentials_type"] = *input.CredentialsType
+	} else {
+		//set the resource state default
+		creds[0]["credentials_type"] = "SECRET"
+	}
 	if trackPasswords {
 		enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
 		creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go-contrib/asgotypes"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 )
 
 type genericPluginResource struct {
@@ -26,36 +26,6 @@ func (r genericPluginResource) resourceTypes() map[string]tftypes.Type {
 		"name":          tftypes.String,
 		"class_name":    tftypes.String,
 		"configuration": tftypes.DynamicPseudoType,
-	}
-}
-
-func (r genericPluginResource) schema() *tfprotov5.Schema {
-	return &tfprotov5.Schema{
-		Version: 1,
-		Block: &tfprotov5.SchemaBlock{
-			Attributes: []*tfprotov5.SchemaAttribute{
-				{
-					Name:     "id",
-					Type:     tftypes.String,
-					Computed: true,
-				},
-				{
-					Name:     "name",
-					Type:     tftypes.String,
-					Required: true,
-				},
-				{
-					Name:     "class_name",
-					Type:     tftypes.String,
-					Required: true,
-				},
-				{
-					Name:     "configuration",
-					Type:     tftypes.DynamicPseudoType,
-					Required: true,
-				},
-			},
-		},
 	}
 }
 

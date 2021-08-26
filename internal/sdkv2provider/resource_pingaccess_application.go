@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/applications"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/applications"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,27 +21,30 @@ func resourcePingAccessApplication() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessApplicationSchema(),
+		Schema:      resourcePingAccessApplicationSchema(),
+		Description: `Provides configuration for Applications within PingAccess.`,
 	}
 }
 
 func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"access_validator_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "The ID of the access token validator for local token validation, 1 if the application is protected remotely by an Authorization Server, or zero if unprotected. Only applies to applications of type API.",
 		},
 		"agent_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "The ID of the agent associated with the application or zero if none.",
 		},
 		"application_type": {
-			Type:     schema.TypeString,
-			Required: true,
-			ForceNew: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			ForceNew:    true,
+			Description: "The type of application.",
 			ValidateDiagFunc: func(value interface{}, path cty.Path) diag.Diagnostics {
 				v := value.(string)
 				if v != "Web" && v != "API" && v != "Dynamic" {
@@ -51,86 +54,100 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 			},
 		},
 		"case_sensitive_path": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "True if the path is case sensitive.",
 		},
 		"context_root": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The context root of the application.",
 		},
 		"default_auth_type": {
-			Type:       schema.TypeString,
-			Optional:   true,
-			Deprecated: "This field is no longer used and should be removed.",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Deprecated:  "This field is no longer used and should be removed.",
+			Description: "For Web + API applications (dynamic) default_auth_type selects the processing mode when a request: does not have a token (web session, OAuth bearer) or has both tokens. This setting applies to all resources in the application except where overridden with default_auth_type_override.",
 		},
 		"description": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "A description of the application.",
 		},
 		"destination": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The application destination type.",
 		},
 		"enabled": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "True if the application is enabled.",
 		},
 		"identity_mapping_ids": {
-			Type:     schema.TypeList,
-			Optional: true,
-			MaxItems: 1,
-			MinItems: 0,
+			Type:        schema.TypeList,
+			Optional:    true,
+			MaxItems:    1,
+			MinItems:    0,
+			Description: "A map of Identity Mappings associated with the application. The key is 'web' or 'api' and the value is an Identity Mapping ID.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
-						Type:     schema.TypeString,
-						Optional: true,
-						Default:  "0",
-						// DefaultFunc: func() (interface{}, error) { return "0", nil },
+						Type:        schema.TypeString,
+						Optional:    true,
+						Default:     "0",
+						Description: "Identity mapping ID for web application.",
 					},
 					"api": {
-						Type:     schema.TypeString,
-						Optional: true,
-						Default:  "0",
-						// DefaultFunc: func() (interface{}, error) { return "0", nil },
+						Type:        schema.TypeString,
+						Optional:    true,
+						Default:     "0",
+						Description: "Identity mapping ID for api application.",
 					},
 				},
 			},
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The application name.",
 		},
 		"policy": applicationPolicySchema(),
 		"realm": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The OAuth realm associated with the application.",
 		},
 		"require_https": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "True if the application requires HTTPS connections.",
 		},
 		"site_id": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The ID of the site associated with the application or zero if none.",
 		},
 		"spa_support_enabled": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Enable SPA support.",
 		},
 		"virtual_host_ids": {
-			Type:     schema.TypeSet,
-			Required: true,
+			Type:        schema.TypeSet,
+			Required:    true,
+			Description: "An array of virtual host IDs associated with the application.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"web_session_id": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "0",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "0",
+			Description: "The ID of the web session associated with the application or zero if none.",
 		},
 	}
 }
@@ -181,7 +198,7 @@ func resourcePingAccessApplicationDelete(_ context.Context, d *schema.ResourceDa
 		Id: d.Id(),
 	}
 
-	_, _, err := svc.DeleteApplicationCommand(input)
+	_, err := svc.DeleteApplicationCommand(input)
 	if err != nil {
 		return diag.Errorf("unable to delete Application: %s", err)
 	}

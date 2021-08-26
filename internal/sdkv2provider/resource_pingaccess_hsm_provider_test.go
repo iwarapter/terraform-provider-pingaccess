@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/hsmProviders"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/hsmProviders"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -32,6 +32,10 @@ func init() {
 }
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
+	re := regexp.MustCompile(`^(6\.[1-9])`)
+	if !re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
+	}
 	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },

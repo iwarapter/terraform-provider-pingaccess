@@ -3,8 +3,10 @@ package sdkv2provider
 import (
 	"context"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/httpsListeners"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,24 +23,30 @@ func resourcePingAccessHTTPSListener() *schema.Resource {
 		},
 
 		Schema: resourcePingAccessHTTPSListenerSchema(),
+		Description: `Manages the PingAccess HTTPS Listeners configuration.
+
+-> This resource manages a fixed resources within PingAccess and can only manage the specified names. Deleting this resource just stops tracking it's configuration.`,
 	}
 }
 
 func resourcePingAccessHTTPSListenerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Type:             schema.TypeString,
-			Required:         true,
-			ValidateDiagFunc: validateHTTPListenerName,
-			ForceNew:         true,
+			Type:         schema.TypeString,
+			Required:     true,
+			ValidateFunc: validation.StringInSlice([]string{"ADMIN", "AGENT", "ENGINE", "CONFIG QUERY", "SIDEBAND"}, false),
+			ForceNew:     true,
+			Description:  "The name of the HTTPS listener. One of `ADMIN`, `AGENT`, `ENGINE`, `CONFIG QUERY`, `SIDEBAND`",
 		},
 		"key_pair_id": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "The ID of the default key pair used by the HTTPS listener.",
 		},
 		"use_server_cipher_suite_order": {
-			Type:     schema.TypeBool,
-			Required: true,
+			Type:        schema.TypeBool,
+			Required:    true,
+			Description: "Enable server cipher suite ordering for the HTTPS listener.",
 		},
 	}
 }

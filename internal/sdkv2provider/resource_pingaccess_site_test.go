@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/sites"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/sites"
 
 	"github.com/google/go-cmp/cmp"
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/iwarapter/pingaccess-sdk-go/services/certificates"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/certificates"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,6 +17,7 @@ func dataSourcePingAccessCertificate() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourcePingAccessCertificateRead,
 		Schema:      sch,
+		Description: "Use this data source to get certificate information in the PingAccess instance.",
 	}
 }
 

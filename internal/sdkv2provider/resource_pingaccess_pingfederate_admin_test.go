@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -40,7 +40,7 @@ func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"admin_password.0.value"}, //we cant verify passwords
+				ImportStateVerifyIgnore: []string{"admin_password.0.value", "admin_password.0.encrypted_value"}, //we cant verify passwords
 			},
 		},
 	})

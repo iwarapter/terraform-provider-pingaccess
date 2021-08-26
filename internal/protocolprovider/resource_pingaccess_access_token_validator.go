@@ -11,8 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
-	"github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/services/accessTokenValidators"
 )
 
 type resourcePingAccessAccessTokenValidator struct {
@@ -21,7 +21,41 @@ type resourcePingAccessAccessTokenValidator struct {
 }
 
 func (r resourcePingAccessAccessTokenValidator) schema() *tfprotov5.Schema {
-	return r.genericPluginResource.schema()
+	return &tfprotov5.Schema{
+		Version: 1,
+		Block: &tfprotov5.SchemaBlock{
+			Description: `Provides configuration for Access Token Validators within PingAccess.
+
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the ` + "configuration" + ` block.
+`,
+			Attributes: []*tfprotov5.SchemaAttribute{
+				{
+					Name:        "id",
+					Type:        tftypes.String,
+					Computed:    true,
+					Description: "When creating a new AccessTokenValidator, this is the ID for the AccessTokenValidator.",
+				},
+				{
+					Name:        "name",
+					Type:        tftypes.String,
+					Required:    true,
+					Description: "The access token validator's name.",
+				},
+				{
+					Name:        "class_name",
+					Type:        tftypes.String,
+					Required:    true,
+					Description: "The access token validator's class name.",
+				},
+				{
+					Name:        "configuration",
+					Type:        tftypes.DynamicPseudoType,
+					Required:    true,
+					Description: "The access token validator's configuration data.",
+				},
+			},
+		},
+	}
 }
 
 func (r resourcePingAccessAccessTokenValidator) UpgradeResourceState(_ context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {

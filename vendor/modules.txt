@@ -53,8 +53,6 @@ github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 github.com/bgentry/go-netrc/netrc
-# github.com/containerd/continuity v0.0.0-20200228182428-0f16d7a0959c
-## explicit
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.12.0
@@ -85,8 +83,6 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
-# github.com/gotestyourself/gotestyourself v2.2.0+incompatible
-## explicit
 # github.com/hashicorp/errwrap v1.1.0
 ## explicit
 github.com/hashicorp/errwrap
@@ -160,6 +156,8 @@ github.com/hashicorp/terraform-plugin-sdk/v2/diag
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema
+github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure
+github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/addrs
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/configs/configschema
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/configs/hcl2shim
@@ -174,58 +172,67 @@ github.com/hashicorp/terraform-plugin-sdk/v2/terraform
 # github.com/hashicorp/yamux v0.0.0-20210707203944-259a57b3608c
 ## explicit
 github.com/hashicorp/yamux
-# github.com/iwarapter/pingaccess-sdk-go v0.0.0-20201117172106-3133cd85d1ae
+# github.com/iwarapter/pingaccess-sdk-go/v60 v60.0.0-20210823205911-0b96ee7c642e
 ## explicit
-github.com/iwarapter/pingaccess-sdk-go/pingaccess
-github.com/iwarapter/pingaccess-sdk-go/pingaccess/client
-github.com/iwarapter/pingaccess-sdk-go/pingaccess/client/metadata
-github.com/iwarapter/pingaccess-sdk-go/pingaccess/config
-github.com/iwarapter/pingaccess-sdk-go/pingaccess/models
-github.com/iwarapter/pingaccess-sdk-go/pingaccess/request
-github.com/iwarapter/pingaccess-sdk-go/services/accessTokenValidators
-github.com/iwarapter/pingaccess-sdk-go/services/acme
-github.com/iwarapter/pingaccess-sdk-go/services/adminConfig
-github.com/iwarapter/pingaccess-sdk-go/services/adminSessionInfo
-github.com/iwarapter/pingaccess-sdk-go/services/agents
-github.com/iwarapter/pingaccess-sdk-go/services/applications
-github.com/iwarapter/pingaccess-sdk-go/services/auth
-github.com/iwarapter/pingaccess-sdk-go/services/authTokenManagement
-github.com/iwarapter/pingaccess-sdk-go/services/authnReqLists
-github.com/iwarapter/pingaccess-sdk-go/services/backup
-github.com/iwarapter/pingaccess-sdk-go/services/certificates
-github.com/iwarapter/pingaccess-sdk-go/services/config
-github.com/iwarapter/pingaccess-sdk-go/services/engineListeners
-github.com/iwarapter/pingaccess-sdk-go/services/engines
-github.com/iwarapter/pingaccess-sdk-go/services/globalUnprotectedResources
-github.com/iwarapter/pingaccess-sdk-go/services/highAvailability
-github.com/iwarapter/pingaccess-sdk-go/services/hsmProviders
-github.com/iwarapter/pingaccess-sdk-go/services/httpConfig
-github.com/iwarapter/pingaccess-sdk-go/services/httpsListeners
-github.com/iwarapter/pingaccess-sdk-go/services/identityMappings
-github.com/iwarapter/pingaccess-sdk-go/services/keyPairs
-github.com/iwarapter/pingaccess-sdk-go/services/license
-github.com/iwarapter/pingaccess-sdk-go/services/oauth
-github.com/iwarapter/pingaccess-sdk-go/services/oauthKeyManagement
-github.com/iwarapter/pingaccess-sdk-go/services/oidc
-github.com/iwarapter/pingaccess-sdk-go/services/pingfederate
-github.com/iwarapter/pingaccess-sdk-go/services/pingone
-github.com/iwarapter/pingaccess-sdk-go/services/proxies
-github.com/iwarapter/pingaccess-sdk-go/services/redirects
-github.com/iwarapter/pingaccess-sdk-go/services/rejectionHandlers
-github.com/iwarapter/pingaccess-sdk-go/services/rules
-github.com/iwarapter/pingaccess-sdk-go/services/rulesets
-github.com/iwarapter/pingaccess-sdk-go/services/sharedSecrets
-github.com/iwarapter/pingaccess-sdk-go/services/siteAuthenticators
-github.com/iwarapter/pingaccess-sdk-go/services/sites
-github.com/iwarapter/pingaccess-sdk-go/services/thirdPartyServices
-github.com/iwarapter/pingaccess-sdk-go/services/tokenProvider
-github.com/iwarapter/pingaccess-sdk-go/services/trustedCertificateGroups
-github.com/iwarapter/pingaccess-sdk-go/services/unknownResources
-github.com/iwarapter/pingaccess-sdk-go/services/users
-github.com/iwarapter/pingaccess-sdk-go/services/version
-github.com/iwarapter/pingaccess-sdk-go/services/virtualhosts
-github.com/iwarapter/pingaccess-sdk-go/services/webSessionManagement
-github.com/iwarapter/pingaccess-sdk-go/services/webSessions
+github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess
+github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/client
+github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/client/metadata
+github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/config
+github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/models
+github.com/iwarapter/pingaccess-sdk-go/v60/pingaccess/request
+github.com/iwarapter/pingaccess-sdk-go/v60/services/keyPairs
+# github.com/iwarapter/pingaccess-sdk-go/v62 v62.0.0-20210823213316-eaec13608a5f
+## explicit
+github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess
+github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/client
+github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/client/metadata
+github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/config
+github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models
+github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/request
+github.com/iwarapter/pingaccess-sdk-go/v62/services/accessTokenValidators
+github.com/iwarapter/pingaccess-sdk-go/v62/services/acme
+github.com/iwarapter/pingaccess-sdk-go/v62/services/adminConfig
+github.com/iwarapter/pingaccess-sdk-go/v62/services/adminSessionInfo
+github.com/iwarapter/pingaccess-sdk-go/v62/services/agents
+github.com/iwarapter/pingaccess-sdk-go/v62/services/applications
+github.com/iwarapter/pingaccess-sdk-go/v62/services/auth
+github.com/iwarapter/pingaccess-sdk-go/v62/services/authTokenManagement
+github.com/iwarapter/pingaccess-sdk-go/v62/services/authnReqLists
+github.com/iwarapter/pingaccess-sdk-go/v62/services/backup
+github.com/iwarapter/pingaccess-sdk-go/v62/services/certificates
+github.com/iwarapter/pingaccess-sdk-go/v62/services/config
+github.com/iwarapter/pingaccess-sdk-go/v62/services/engineListeners
+github.com/iwarapter/pingaccess-sdk-go/v62/services/engines
+github.com/iwarapter/pingaccess-sdk-go/v62/services/globalUnprotectedResources
+github.com/iwarapter/pingaccess-sdk-go/v62/services/highAvailability
+github.com/iwarapter/pingaccess-sdk-go/v62/services/hsmProviders
+github.com/iwarapter/pingaccess-sdk-go/v62/services/httpConfig
+github.com/iwarapter/pingaccess-sdk-go/v62/services/httpsListeners
+github.com/iwarapter/pingaccess-sdk-go/v62/services/identityMappings
+github.com/iwarapter/pingaccess-sdk-go/v62/services/keyPairs
+github.com/iwarapter/pingaccess-sdk-go/v62/services/license
+github.com/iwarapter/pingaccess-sdk-go/v62/services/oauth
+github.com/iwarapter/pingaccess-sdk-go/v62/services/oauthKeyManagement
+github.com/iwarapter/pingaccess-sdk-go/v62/services/oidc
+github.com/iwarapter/pingaccess-sdk-go/v62/services/pingfederate
+github.com/iwarapter/pingaccess-sdk-go/v62/services/pingone
+github.com/iwarapter/pingaccess-sdk-go/v62/services/proxies
+github.com/iwarapter/pingaccess-sdk-go/v62/services/redirects
+github.com/iwarapter/pingaccess-sdk-go/v62/services/rejectionHandlers
+github.com/iwarapter/pingaccess-sdk-go/v62/services/rules
+github.com/iwarapter/pingaccess-sdk-go/v62/services/rulesets
+github.com/iwarapter/pingaccess-sdk-go/v62/services/sharedSecrets
+github.com/iwarapter/pingaccess-sdk-go/v62/services/siteAuthenticators
+github.com/iwarapter/pingaccess-sdk-go/v62/services/sites
+github.com/iwarapter/pingaccess-sdk-go/v62/services/thirdPartyServices
+github.com/iwarapter/pingaccess-sdk-go/v62/services/tokenProvider
+github.com/iwarapter/pingaccess-sdk-go/v62/services/trustedCertificateGroups
+github.com/iwarapter/pingaccess-sdk-go/v62/services/unknownResources
+github.com/iwarapter/pingaccess-sdk-go/v62/services/users
+github.com/iwarapter/pingaccess-sdk-go/v62/services/version
+github.com/iwarapter/pingaccess-sdk-go/v62/services/virtualhosts
+github.com/iwarapter/pingaccess-sdk-go/v62/services/webSessionManagement
+github.com/iwarapter/pingaccess-sdk-go/v62/services/webSessions
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
 # github.com/jstemmer/go-junit-report v0.9.1
@@ -238,8 +245,6 @@ github.com/klauspost/compress/huff0
 github.com/klauspost/compress/snappy
 github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
-# github.com/konsorten/go-windows-terminal-sequences v1.0.2
-## explicit
 # github.com/mattn/go-colorable v0.1.8
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.13
@@ -263,12 +268,8 @@ github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.1.0
 ## explicit
 github.com/oklog/run
-# github.com/opencontainers/runc v1.0.0-rc9
-## explicit
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/sirupsen/logrus v1.5.0
-## explicit
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
@@ -497,6 +498,4 @@ google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/pluginpb
 # gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 gopkg.in/yaml.v3
-# gotest.tools v2.2.0+incompatible
-## explicit
 # github.com/go-git/go-git-fixtures/v4 v4.2.1 => github.com/go-git/go-git-fixtures/v4 v4.0.1

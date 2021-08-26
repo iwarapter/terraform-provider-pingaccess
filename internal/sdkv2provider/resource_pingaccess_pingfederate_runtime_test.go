@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"testing"
 
-	"github.com/iwarapter/pingaccess-sdk-go/pingaccess/models"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -15,10 +16,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestAccPingAccessPingFederateRuntime(t *testing.T) {
+func TestAccPingAccessPingFederateRuntimeIssuer(t *testing.T) {
+	re := regexp.MustCompile(`^(6\.[0-9])`)
+	if !re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
+	}
 	resourceName := "pingaccess_pingfederate_runtime.demo"
-	u, _ := url.Parse(os.Getenv("PINGFEDERATE_TEST_IP"))
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
@@ -53,6 +56,24 @@ func TestAccPingAccessPingFederateRuntime(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+		},
+	})
+}
+
+func TestAccPingAccessPingFederateRuntimeDeprecatedRuntime(t *testing.T) {
+	re := regexp.MustCompile(`^(6\.[2-9])`)
+	if re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 5.3, 6.0 or 6.1, not: %s", paVersion)
+	}
+	resourceName := "pingaccess_pingfederate_runtime.demo"
+	u, _ := url.Parse(os.Getenv("PINGFEDERATE_TEST_IP"))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProviders,
+		CheckDestroy:             testAccCheckPingAccessPingFederateRuntimeDestroy,
+		Steps: []resource.TestStep{
+
 			{
 				Config: testAccPingAccessPingFederateDeprecatedRuntimeConfig(u.Hostname(), u.Port(), "ON"),
 				Check: resource.ComposeTestCheckFunc(
@@ -62,7 +83,7 @@ func TestAccPingAccessPingFederateRuntime(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "2"),
 					resource.TestCheckResourceAttr(resourceName, "use_proxy", "true"),
 					resource.TestCheckResourceAttr(resourceName, "audit_level", "ON"),
-					resource.TestCheckResourceAttr(resourceName, "back_channel_secure", "false"),
+					resource.TestCheckResourceAttr(resourceName, "back_channel_secure", "true"),
 					resource.TestCheckResourceAttr(resourceName, "host", u.Hostname()),
 					resource.TestCheckResourceAttr(resourceName, "port", u.Port()),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
@@ -77,9 +98,59 @@ func TestAccPingAccessPingFederateRuntime(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "2"),
 					resource.TestCheckResourceAttr(resourceName, "use_proxy", "true"),
 					resource.TestCheckResourceAttr(resourceName, "audit_level", "OFF"),
-					resource.TestCheckResourceAttr(resourceName, "back_channel_secure", "false"),
+					resource.TestCheckResourceAttr(resourceName, "back_channel_secure", "true"),
 					resource.TestCheckResourceAttr(resourceName, "host", u.Hostname()),
 					resource.TestCheckResourceAttr(resourceName, "port", u.Port()),
+					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPingAccessPingFederateRuntimeNewConfig(t *testing.T) {
+	re := regexp.MustCompile(`^(6\.[2-9])`)
+	if !re.MatchString(paVersion) {
+		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
+	}
+	resourceName := "pingaccess_pingfederate_runtime.demo"
+	u, _ := url.Parse(os.Getenv("PINGFEDERATE_TEST_IP"))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProviders,
+		CheckDestroy:             testAccCheckPingAccessPingFederateRuntimeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPingAccessPingFederateNewRuntimeConfig(u.Hostname(), u.Port(), "ON"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessPingFederateDeprecatedRuntimeExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_slo", "false"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "2"),
+					resource.TestCheckResourceAttr(resourceName, "use_proxy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "audit_level", "ON"),
+					resource.TestCheckResourceAttr(resourceName, "back_channel_secure", "true"),
+					resource.TestCheckResourceAttr(resourceName, "targets.0", u.Hostname()+":"+u.Port()),
+					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
+				),
+			},
+			{
+				Config: testAccPingAccessPingFederateNewRuntimeConfig(u.Hostname(), u.Port(), "OFF"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessPingFederateDeprecatedRuntimeExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "skip_hostname_verification", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_slo", "false"),
+					resource.TestCheckResourceAttr(resourceName, "trusted_certificate_group_id", "2"),
+					resource.TestCheckResourceAttr(resourceName, "use_proxy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "audit_level", "OFF"),
+					resource.TestCheckResourceAttr(resourceName, "back_channel_secure", "true"),
+					resource.TestCheckResourceAttr(resourceName, "targets.0", u.Hostname()+":"+u.Port()),
 					resource.TestCheckResourceAttr(resourceName, "secure", "false"),
 				),
 			},
@@ -119,6 +190,23 @@ func testAccPingAccessPingFederateDeprecatedRuntimeConfig(host, port, configChan
 		use_slo = false
 		trusted_certificate_group_id = 2
 		use_proxy = true
+  		back_channel_secure = true
+	}`, host, port, configChange)
+}
+
+func testAccPingAccessPingFederateNewRuntimeConfig(host, port, configChange string) string {
+	return fmt.Sprintf(`
+	resource "pingaccess_pingfederate_runtime" "demo" {
+		targets = ["%s:%s"]
+		audit_level = "%s"
+		skip_hostname_verification = true
+		use_slo = false
+		trusted_certificate_group_id = 2
+		use_proxy = true
+		application {
+	    	primary_virtual_host_id = 1
+  		}
+  		back_channel_secure = true
 	}`, host, port, configChange)
 }
 
@@ -239,6 +327,38 @@ func Test_resourcePingAccessPingFederateDeprecatedRuntimeReadData(t *testing.T) 
 				TrustedCertificateGroupId: Int(2),
 				UseProxy:                  Bool(true),
 				UseSlo:                    Bool(true),
+			},
+		},
+		{
+			PingFederateRuntime: models.PingFederateRuntimeView{
+				//Defaults
+				AuditLevel:        String("ON"),
+				BackChannelSecure: Bool(true),
+				Host:              String(""),
+				Port:              Int(0),
+				UseProxy:          Bool(false),
+				UseSlo:            Bool(false),
+				//test
+				Targets:                   &[]*string{String("t1:9031")},
+				SkipHostnameVerification:  Bool(true),
+				TrustedCertificateGroupId: Int(2),
+				Application: &models.PingFederateRuntimeApplicationView{
+					PrimaryVirtualHostId:     Int(1),
+					AdditionalVirtualHostIds: &[]*int{},
+					CaseSensitive:            Bool(true),
+					ClientCertHeaderNames:    &[]*string{},
+					ContextRoot:              String("/"),
+					Policy: []*models.PolicyItem{
+						{
+							Id:   "1",
+							Type: String("Rule"),
+						},
+						{
+							Id:   "2",
+							Type: String("Rule"),
+						},
+					},
+				},
 			},
 		},
 	}

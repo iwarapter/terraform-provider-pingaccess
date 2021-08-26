@@ -1,4 +1,4 @@
-on:  [push, pull_request]
+on:  [push]
 name: ci
 jobs:
   getdate:
@@ -12,14 +12,19 @@ jobs:
       date: ${{ steps.getdate.outputs.date }}
   build:
     name: build
-    needs: getdate
     runs-on: ubuntu-latest
+    needs: getdate
+    strategy:
+      fail-fast: false
+      matrix:
+        pingaccess-version: [ 5.3.2, 6.0.4, 6.1.3, 6.2.2 ]
+        terraform-version: [ 0.13.6, 0.14.5 ]
     services:
       pingaccess:
-        image: pingidentity/pingaccess:6.1.3-edge
+        image: pingidentity/pingaccess:${{ matrix.pingaccess-version }}-edge
         env:
           PING_IDENTITY_ACCEPT_EULA: YES
-          IMAGE_VERSION: pingaccess-alpine-az11-6.1.3-${{ needs.getdate.outputs.date }}-b5f4
+          IMAGE_VERSION: pingaccess-alpine-az11-${{ matrix.pingaccess-version }}-${{ needs.getdate.outputs.date }}-b5f4
           PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
           PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
         ports:
@@ -37,15 +42,19 @@ jobs:
     - name: Checkout Source
       uses: actions/checkout@v2
 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_wrapper: false
+        terraform_version: ${{ matrix.terraform-version }}
+
     - name: Test
-      env:
-        PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
-        PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
       run: |
         TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out
         go tool cover -func=coverage.out
 
     - name: SonarCloud Scan
+      if: ${{ matrix.pingaccess-version == '6.2.2' }}
       uses: sonarsource/sonarcloud-github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
