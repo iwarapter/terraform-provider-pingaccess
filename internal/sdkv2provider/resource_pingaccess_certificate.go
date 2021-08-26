@@ -23,59 +23,72 @@ func resourcePingAccessCertificate() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourcePingAccessCertificateImport,
 		},
-		Schema: resourcePingAccessCertificateSchema(),
+		Schema:      resourcePingAccessCertificateSchema(),
+		Description: `Provides configuration for Certificates within PingAccess.`,
 	}
 }
 
 func resourcePingAccessCertificateSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"alias": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The alias for the certificate.",
 		},
 		"file_data": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The base64-encoded data of the certificate.",
 		},
 		"expires": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "The date at which the certificate expires as the number of milliseconds since January 1, 1970, 00:00:00 GMT.",
 		},
 		"issuer_dn": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The issuer DN for the certificate.",
 		},
 		"md5sum": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: `The MD5 sum for the certificate. The value will be set to "" when in FIPS mode.`,
 		},
 		"serial_number": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The serial number for the certificate.",
 		},
 		"sha1sum": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The SHA1 sum for the certificate.",
 		},
 		"signature_algorithm": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The algorithm used to sign the certificate.",
 		},
 		"status": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "A high-level status for the certificate.",
 		},
 		"subject_cn": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The subject CN for the certificate.",
 		},
 		"subject_dn": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The subject DN for the certificate.",
 		},
 		"valid_from": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "The date at which the certificate is valid from as the number of milliseconds since January 1, 1970, 00:00:00 GMT.",
 		},
 	}
 }

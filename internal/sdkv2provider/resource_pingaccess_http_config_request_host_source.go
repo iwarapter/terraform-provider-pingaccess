@@ -20,15 +20,26 @@ func resourcePingAccessHTTPConfigRequestHostSource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessHTTPConfigRequestHostSourceResourceSchema(),
+		Description: `Manages the PingAccess HTTP Request Host Source configuration.
+
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Deleting this resource resets the HTTP Request Host Source configuration to default values.`,
 	}
 }
 
 func resourcePingAccessHTTPConfigRequestHostSourceResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"header_name_list": requiredListOfString(),
+		"header_name_list": {
+			Type:        schema.TypeList,
+			Required:    true,
+			Description: "An array of header names used to identify the host source name.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"list_value_location": {
 			Type:             schema.TypeString,
 			Required:         true,
+			Description:      "The location in a matching header value list to use as the source.",
 			ValidateDiagFunc: validateListLocationValue,
 		},
 	}

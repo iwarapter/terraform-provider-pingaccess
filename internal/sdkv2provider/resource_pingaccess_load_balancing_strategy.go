@@ -35,23 +35,29 @@ func resourcePingAccessLoadBalancingStrategy() *schema.Resource {
 			}
 			return validateConfiguration(className, d, desc)
 		},
+		Description: `Provides configuration for Load Balancing Strategies within PingAccess.
+
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the configuration block.`,
 	}
 }
 
 func resourcePingAccessLoadBalancingStrategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"class_name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The class name of the load balancing strategy.",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of the load balancing strategy.",
 		},
 		"configuration": {
 			Type:             schema.TypeString,
 			Required:         true,
 			DiffSuppressFunc: suppressEquivalentJSONDiffs,
+			Description:      "The load balancing strategy's configuration data.",
 		},
 	}
 }

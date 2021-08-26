@@ -1,0 +1,1 @@
+terraform import pingaccess_third_party_service.example 123

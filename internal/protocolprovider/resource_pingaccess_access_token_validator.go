@@ -33,7 +33,7 @@ func (r resourcePingAccessAccessTokenValidator) schema() *tfprotov5.Schema {
 					Name:        "id",
 					Type:        tftypes.String,
 					Computed:    true,
-					Description: "When creating a new AccessTokenValidator, this is the ID for the AccessTokenValidator. If not specified, an ID will be automatically assigned.",
+					Description: "When creating a new AccessTokenValidator, this is the ID for the AccessTokenValidator.",
 				},
 				{
 					Name:        "name",

@@ -11,14 +11,16 @@ func dataSourcePingAccessVersion() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourcePingAccessVersionRead,
 		Schema:      dataSourcePingAccessVersionSchema(),
+		Description: "Use this data source to get the version of the PingAccess instance.",
 	}
 }
 
 func dataSourcePingAccessVersionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"version": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The version of PingAccess.",
 		},
 	}
 }

@@ -21,42 +21,49 @@ func resourcePingAccessTrustedCertificateGroups() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessTrustedCertificateGroupsSchema(),
+		Schema:      resourcePingAccessTrustedCertificateGroupsSchema(),
+		Description: `Provides configuration for Trusted Certificate Groups within PingAccess.`,
 	}
 }
 
 func resourcePingAccessTrustedCertificateGroupsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"cert_ids": {
-			Type:     schema.TypeList,
-			Optional: true,
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "The IDs of the certificates that are in the trusted certificate group.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"ignore_all_certificate_errors": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Computed:    true,
+			Deprecated:  "This field is read-only and should not be set, future versions of the provider will enforce this.",
+			Description: "This field is read-only and is only set to true for the Trust Any certificate group.",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of trusted certificate group.",
 		},
 		"skip_certificate_date_check": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "This field is true if certificates that have expired or are not yet valid but have passed the other certificate checks should be trusted.",
 		},
 		"system_group": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "This field is read-only and indicates the trusted certificate group cannot be modified.",
 		},
 		"use_java_trust_store": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "This field is true if the certificates in the group should also include all certificates in the Java Trust Store.",
 		},
 	}
 }

@@ -19,8 +19,10 @@ func resourcePingAccessAuthTokenManagement() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
 		Schema: resourcePingAccessAuthTokenManagementSchema(),
+		Description: `Manages the PingAccess Auth Token Management configuration.
+
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Deleting this resource resets the Auth Token Management configuration to default values.`,
 	}
 }
 

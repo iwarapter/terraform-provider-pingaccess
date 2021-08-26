@@ -11,79 +11,178 @@ func dataSourcePingAccessPingFederateRuntimeMetadata() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourcePingAccessPingFederateRuntimeMetadataRead,
 		Schema:      dataSourcePingAccessPingFederateRuntimeMetadataSchema(),
+		Description: "Use this data source to get the PingFederate Runtime metadata.",
 	}
 }
 
 func dataSourcePingAccessPingFederateRuntimeMetadataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"authorization_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL of the OpenID Connect provider's authorization endpoint.",
 		},
 		"backchannel_authentication_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The endpoint used to initiate an out-of-band authentication.",
 		},
-		"claim_types_supported": computedListOfString(),
+		"claim_types_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the claim types that the OpenID Connect provider supports.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"claims_parameter_supported": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "Boolean value specifying whether the OpenID Connect provider supports use of the claims parameter, with true indicating support.",
 		},
-		"claims_supported":                 computedListOfString(),
-		"code_challenge_methods_supported": computedListOfString(),
+		"claims_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the claim names of the claims that the OpenID Connect provider MAY be able to supply values for.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"code_challenge_methods_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "Proof Key for Code Exchange (PKCE) code challenge methods supported by this OpenID Connect provider.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"end_session_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL at the OpenID Connect provider to which a relying party can perform a redirect to request that the end-user be logged out at the OpenID Connect provider.",
 		},
-		"grant_types_supported":                 computedListOfString(),
-		"id_token_signing_alg_values_supported": computedListOfString(),
+		"grant_types_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the OAuth 2.0 grant type values that this OpenID Connect provider supports.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"id_token_signing_alg_values_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the JWS signing algorithms supported by the OpenID Connect provider for the id token to encode the claims in a JWT.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"introspection_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL of the OpenID Connect provider's OAuth 2.0 introspection endpoint.",
 		},
 		"issuer": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "OpenID Connect provider's issuer identifier URL.",
 		},
 		"jwks_uri": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL of the OpenID Connect provider's JWK Set document.",
 		},
 		"ping_end_session_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "PingFederate logout endpoint. (Not applicable if PingFederate is not the OpenID Connect provider)",
 		},
 		"ping_revoked_sris_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "PingFederate session revocation endpoint. (Not applicable if PingFederate is not the OpenID Connect provider)",
 		},
-		"request_object_signing_alg_values_supported": computedListOfString(),
+		"request_object_signing_alg_values_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the JWS signing algorithms supported by the OpenID Connect provider for request objects.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"request_parameter_supported": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "Boolean value specifying whether the OpenID Connect provider supports use of the request parameter, with true indicating support.",
 		},
 		"request_uri_parameter_supported": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "Boolean value specifying whether the OpenID Connect provider supports use of the request_uri parameter, with true indicating support.",
 		},
-		"response_modes_supported": computedListOfString(),
-		"response_types_supported": computedListOfString(),
+		"response_modes_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the OAuth 2.0 \"response_mode\" values that this OpenID Connect provider supports.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"response_types_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the OAuth 2.0 \"response_type\" values that this OpenID Connect provider supports.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"revocation_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL of the OpenID Connect provider's OAuth 2.0 revocation endpoint.",
 		},
-		"scopes_supported":        computedListOfString(),
-		"subject_types_supported": computedListOfString(),
+		"scopes_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the OAuth 2.0 \"scope\" values that this OpenID Connect provider supports.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"subject_types_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the Subject Identifier types that this OpenID Connect provider supports.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"token_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL of the OpenID Connect provider's token endpoint.",
 		},
-		"token_endpoint_auth_methods_supported": computedListOfString(),
+		"token_endpoint_auth_methods_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of client authentication methods supported by this token endpoint.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 		"userinfo_endpoint": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "URL of the OpenID Connect provider's userInfo endpoint.",
 		},
-		"userinfo_signing_alg_values_supported": computedListOfString(),
+		"userinfo_signing_alg_values_supported": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "JSON array containing a list of the JWS signing algorithms supported by the userInfo endpoint to encode the claims in a JWT.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
 	}
 }
 

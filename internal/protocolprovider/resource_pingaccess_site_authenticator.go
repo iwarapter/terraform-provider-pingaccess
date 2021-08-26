@@ -19,7 +19,41 @@ type resourcePingAccessSiteAuthenticator struct {
 }
 
 func (r resourcePingAccessSiteAuthenticator) schema() *tfprotov5.Schema {
-	return r.genericPluginResource.schema()
+	return &tfprotov5.Schema{
+		Version: 1,
+		Block: &tfprotov5.SchemaBlock{
+			Description: `Provides configuration for Site Authenticators within PingAccess.
+~> This resource will store any credentials in the backend state file, please ensure you use an appropriate backend with the relevant encryption/access controls etc for this.
+-> The PingAccess API does not provider repeatable means of querying a sensitive value, we are unable to detect configuration drift of any sensitive fields in the ` + "configuration" + ` block.
+`,
+			Attributes: []*tfprotov5.SchemaAttribute{
+				{
+					Name:        "id",
+					Type:        tftypes.String,
+					Computed:    true,
+					Description: "When creating a new SiteAuthenticator, this is the ID for the SiteAuthenticator.",
+				},
+				{
+					Name:        "name",
+					Type:        tftypes.String,
+					Required:    true,
+					Description: "The site authenticator's name.",
+				},
+				{
+					Name:        "class_name",
+					Type:        tftypes.String,
+					Required:    true,
+					Description: "The site authenticator's class name.",
+				},
+				{
+					Name:        "configuration",
+					Type:        tftypes.DynamicPseudoType,
+					Required:    true,
+					Description: "The site authenticator's configuration data.",
+				},
+			},
+		},
+	}
 }
 
 func (r resourcePingAccessSiteAuthenticator) UpgradeResourceState(_ context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {

@@ -85,14 +85,6 @@ func validateListLocationValue(value interface{}, _ cty.Path) diag.Diagnostics {
 	return nil
 }
 
-func validateHTTPListenerName(value interface{}, _ cty.Path) diag.Diagnostics {
-	v := value.(string)
-	if v != "ADMIN" && v != "AGENT" && v != "ENGINE" && v != "CONFIG QUERY" {
-		return diag.Errorf("must be either 'ADMIN', 'AGENT' or 'ENGINE' or 'CONFIG QUERY' not %s", v)
-	}
-	return nil
-}
-
 func validateWebSessionSameSite(value interface{}, _ cty.Path) diag.Diagnostics {
 	v := value.(string)
 	if v != "Disabled" && v != "Lax" && v != "None" {

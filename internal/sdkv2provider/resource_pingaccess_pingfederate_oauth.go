@@ -20,24 +20,30 @@ func resourcePingAccessPingFederateOAuth() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessPingFederateOAuthSchema(),
+		Description: `Manages the PingFederate OAuth Client configuration.
+
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Deleting this resource resets the PingFederate OAuth Client configuration to default values.`,
 	}
 }
 
 func resourcePingAccessPingFederateOAuthSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"access_validator_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  1,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     1,
+			Description: "The Access Validator Id. This field is read-only.",
 		},
 		"cache_tokens": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Enable to retain token details for subsequent requests.",
 		},
 		"client_credentials": {
 			Type:          schema.TypeList,
 			Optional:      true,
 			MaxItems:      1,
+			Description:   "Specify the credentials for the OAuth client configured in PingFederate.",
 			Elem:          oAuthClientCredentialsResource(),
 			ConflictsWith: []string{"client_id", "client_secret"},
 		},
@@ -45,6 +51,7 @@ func resourcePingAccessPingFederateOAuthSchema() map[string]*schema.Schema {
 			Type:          schema.TypeString,
 			Optional:      true,
 			RequiredWith:  []string{"client_secret"},
+			Description:   "The Client ID which PingAccess should use when requesting PingFederate to validate access tokens. The client must have Access Token Validation grant type allowed.",
 			Deprecated:    "DEPRECATED - to be removed in a future release; please use 'client_credentials' instead.",
 			ConflictsWith: []string{"client_credentials"},
 		},
@@ -52,31 +59,37 @@ func resourcePingAccessPingFederateOAuthSchema() map[string]*schema.Schema {
 			Type:          schema.TypeList,
 			Optional:      true,
 			MaxItems:      1,
+			Description:   "The Client Secret for the Client ID.",
 			Deprecated:    "DEPRECATED - to be removed in a future release; please use 'client_credentials' instead.",
 			Elem:          hiddenFieldResource(),
 			ConflictsWith: []string{"client_credentials"},
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "PingFederate",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The unique Access Validator name.",
+			Default:     "PingFederate",
 		},
 		"send_audience": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Enable to send the URI the user requested as the 'aud' OAuth parameter for PingAccess to use to select an Access Token Manager.",
 		},
 		"subject_attribute_name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The attribute you want to use from the OAuth access token as the subject for auditing purposes.",
 		},
 		"token_time_to_live_seconds": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  -1,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     -1,
+			Description: "Defines the number of seconds to cache the access token. -1 means no limit. This value should be less than the PingFederate Token Lifetime.",
 		},
 		"use_token_introspection": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Specify if token introspection is enabled.",
 		},
 	}
 }

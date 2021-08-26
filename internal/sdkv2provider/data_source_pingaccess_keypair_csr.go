@@ -15,14 +15,17 @@ func dataSourcePingAccessKeyPairCsr() *schema.Resource {
 		ReadContext: dataSourcePingAccessKeyPairCsrRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "ID of the Key Pair to to retrieve the CSR.",
 			},
 			"cert_request_pem": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The PEM encoded Certificate Signing Request.",
 			},
 		},
+		Description: "Use this data source to get Keypair Certificate Signing Request in the PingAccess instance.",
 	}
 }
 

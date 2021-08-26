@@ -29,36 +29,6 @@ func (r genericPluginResource) resourceTypes() map[string]tftypes.Type {
 	}
 }
 
-func (r genericPluginResource) schema() *tfprotov5.Schema {
-	return &tfprotov5.Schema{
-		Version: 1,
-		Block: &tfprotov5.SchemaBlock{
-			Attributes: []*tfprotov5.SchemaAttribute{
-				{
-					Name:     "id",
-					Type:     tftypes.String,
-					Computed: true,
-				},
-				{
-					Name:     "name",
-					Type:     tftypes.String,
-					Required: true,
-				},
-				{
-					Name:     "class_name",
-					Type:     tftypes.String,
-					Required: true,
-				},
-				{
-					Name:     "configuration",
-					Type:     tftypes.DynamicPseudoType,
-					Required: true,
-				},
-			},
-		},
-	}
-}
-
 func (r genericPluginResource) ValidateResourceTypeConfig(_ context.Context, req *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
 	resp, values := valuesFromTypeConfigRequest(req, r.resourceType())
 	if resp != nil {

@@ -20,40 +20,45 @@ func resourcePingAccessVirtualHost() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessVirtualHostSchema(),
+		Schema:      resourcePingAccessVirtualHostSchema(),
+		Description: `Provides configuration for Virtualhosts within PingAccess.`,
 	}
 }
 
 func resourcePingAccessVirtualHostSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"agent_resource_cache_ttl": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "Indicates the number of seconds the Agent can cache resources for this application.",
 		},
 		"host": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The host name for the Virtual Host.",
 		},
 		"key_pair_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "Key pair assigned to Virtual Host used by SNI, If no key pair is assigned to a virtual host, ENGINE HTTPS Listener key pair will be used.",
 		},
 		"port": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "The integer port number for the Virtual Host.",
 		},
 		"trusted_certificate_group_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "Trusted Certificate Group assigned to Virtual Host for client certificate authentication.",
 		},
 	}
 }
 
-func resourcePingAccessVirtualHostCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessVirtualHostCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).Virtualhosts
 	input := virtualhosts.AddVirtualHostCommandInput{
 		Body: *resourcePingAccessVirtualHostReadData(d),
@@ -68,7 +73,7 @@ func resourcePingAccessVirtualHostCreate(ctx context.Context, d *schema.Resource
 	return resourcePingAccessVirtualHostReadResult(d, &input.Body)
 }
 
-func resourcePingAccessVirtualHostRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessVirtualHostRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).Virtualhosts
 	input := &virtualhosts.GetVirtualHostCommandInput{
 		Id: d.Id(),
@@ -80,7 +85,7 @@ func resourcePingAccessVirtualHostRead(ctx context.Context, d *schema.ResourceDa
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
 
-func resourcePingAccessVirtualHostUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessVirtualHostUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).Virtualhosts
 	input := virtualhosts.UpdateVirtualHostCommandInput{
 		Body: *resourcePingAccessVirtualHostReadData(d),
@@ -94,7 +99,7 @@ func resourcePingAccessVirtualHostUpdate(ctx context.Context, d *schema.Resource
 	return resourcePingAccessVirtualHostReadResult(d, result)
 }
 
-func resourcePingAccessVirtualHostDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePingAccessVirtualHostDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc := m.(paClient).Virtualhosts
 	input := &virtualhosts.DeleteVirtualHostCommandInput{
 		Id: d.Id(),

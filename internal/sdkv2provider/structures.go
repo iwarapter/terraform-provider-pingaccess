@@ -18,50 +18,23 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-func setOfString() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
-
-func requiredListOfString() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Required: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
-
-func computedListOfString() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	}
-}
-
 func acmeServerAccountsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Optional: true,
+		Type:        schema.TypeList,
+		Computed:    true,
+		Optional:    true,
+		Description: "An array of references to accounts. This array is read-only.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"location": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "An absolute path to the associated resource.",
 				},
 				"id": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "The id of the associated resource. When both id and location are specified, id takes precedence and location is ignored.",
 				},
 			},
 		},
@@ -70,34 +43,35 @@ func acmeServerAccountsSchema() *schema.Schema {
 
 func applicationPolicySchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"web": applicationPolicyItemSchema(),
 				"api": applicationPolicyItemSchema(),
 			},
 		},
-		// DefaultFunc: func() (interface{}, error) {
-		// 	return []map[string][]interface{}{}, nil
-		// },
 	}
 }
 
 func applicationPolicyItemSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "List of Rule/RuleSets to be applied.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"type": {
-					Type:     schema.TypeString,
-					Required: true,
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "If this is either a `Rule` or `RuleSet`.",
 				},
 				"id": {
-					Type:     schema.TypeString,
-					Required: true,
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The ID of the specific rule or ruleset.",
 				},
 			},
 		},
@@ -108,19 +82,22 @@ func oAuthClientCredentialsResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"client_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Specify the client ID.",
 			},
 			"client_secret": hiddenField(),
 			"key_pair_id": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
+				Description: "Specify the ID of a key pair to use for mutual TLS.",
 			},
 			"credentials_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "SECRET",
+				Description:  "Specify the credential type.",
 				ValidateFunc: validation.StringInSlice([]string{"SECRET", "CERTIFICATE", "PRIVATE_KEY_JWT"}, false),
 			},
 		},
@@ -131,14 +108,16 @@ func hiddenFieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"encrypted_value": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "encrypted value of the field, as originally returned by the API.",
 			},
 			"value": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "The value of the field. This field takes precedence over the encryptedValue field, if both are specified.",
 			},
 		},
 	}
@@ -146,18 +125,12 @@ func hiddenFieldResource() *schema.Resource {
 
 func hiddenField() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
-		Elem:     hiddenFieldResource(),
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Specify the client secret.",
+		Elem:        hiddenFieldResource(),
 	}
-}
-
-func requiredHiddenField() *schema.Schema {
-	sch := hiddenField()
-	sch.Optional = false
-	sch.Required = true
-	return sch
 }
 
 func expandHiddenFieldView(in []interface{}) *models.HiddenFieldView {

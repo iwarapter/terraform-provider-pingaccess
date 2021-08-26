@@ -17,6 +17,7 @@ func dataSourcePingAccessCertificate() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourcePingAccessCertificateRead,
 		Schema:      sch,
+		Description: "Use this data source to get certificate information in the PingAccess instance.",
 	}
 }
 

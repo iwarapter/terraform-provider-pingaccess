@@ -20,30 +20,34 @@ func resourcePingAccessKeyPairCsr() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessKeyPairCsrSchema(),
+		Schema:      resourcePingAccessKeyPairCsrSchema(),
+		Description: `Provides configuration for Keypair CSRs within PingAccess.`,
 	}
 }
 
 func resourcePingAccessKeyPairCsrSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"keypair_id": {
-			Type:     schema.TypeString,
-			Required: true,
-			ForceNew: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			ForceNew:    true,
+			Description: "ID of the Key Pair to update.",
 		},
 		"file_data": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The CSR response data.",
 		},
 		"trusted_certificate_group_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "The ID of the trusted certificate group associated with the CSR response.",
 		},
 		"chain_certificates": {
-			Type:     schema.TypeList,
-			Optional: true,
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "A list of base64-encoded certificates to add to the key pair certificate chain.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},

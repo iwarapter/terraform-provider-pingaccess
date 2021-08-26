@@ -19,30 +19,34 @@ func resourcePingAccessEngineListener() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		Schema: resourcePingAccessEngineListenerSchema(),
+		Schema:      resourcePingAccessEngineListenerSchema(),
+		Description: `Provides configuration for Engine Listeners within PingAccess.`,
 	}
 }
 
 func resourcePingAccessEngineListenerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The name of the engine listener.",
 		},
 		"port": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "The port the engine listener listens on.",
 		},
 		"secure": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Indicator if the engine listener should listen to HTTPS connections.",
 		},
 		"trusted_certificate_group_id": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  0,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     0,
+			Description: "Trusted Certificate Group assigned to engine listener for client certificate authentication.",
 		},
 	}
 }

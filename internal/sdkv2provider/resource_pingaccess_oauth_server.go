@@ -20,67 +20,82 @@ func resourcePingAccessOAuthServer() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: resourcePingAccessOAuthServerSchema(),
+		Description: `Manages the PingAccess Third Party OAuth Server configuration.
+
+-> This resource manages a singleton within PingAccess and as such you should ONLY ever declare one of this resource type. Deleting this resource resets the Third Party OAuth Server configuration to default values.`,
 	}
 }
 
 func resourcePingAccessOAuthServerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"audit_level": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "ON",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "ON",
+			Description: "Enable to record requests to third-party OAuth 2.0 Authorization Server to the audit store.",
 		},
 		"cache_tokens": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Enable to retain token details for subsequent requests.",
 		},
 		"client_credentials": {
-			Type:     schema.TypeList,
-			Required: true,
-			MaxItems: 1,
-			Elem:     oAuthClientCredentialsResource(),
+			Type:        schema.TypeList,
+			Required:    true,
+			MaxItems:    1,
+			Description: "Specify the client credentials.",
+			Elem:        oAuthClientCredentialsResource(),
 		},
 		"description": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "The description of the third-party OAuth 2.0 Authorization Server.",
 		},
 		"introspection_endpoint": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The third-party OAuth 2.0 Authorization Server's token introspection endpoint.",
 		},
 
 		"secure": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Enable if third-party OAuth 2.0 Authorization Server is expecting HTTPS connections.",
 		},
 		"send_audience": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Enable to send the URI the user requested as the 'aud' OAuth parameter for PingAccess to the OAuth 2.0 Authorization server.",
 		},
 		"subject_attribute_name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The attribute you want to use from the OAuth access token as the subject for auditing purposes.",
 		},
 		"targets": {
-			Type:     schema.TypeSet,
-			Required: true,
-			MinItems: 1,
+			Type:        schema.TypeSet,
+			Required:    true,
+			MinItems:    1,
+			Description: "One or more server hostname:port pairs used to access third-party OAuth 2.0 Authorization Server.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"token_time_to_live_seconds": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			Default:  -1,
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Default:     -1,
+			Description: "Defines the number of seconds to cache the access token. -1 means no limit. This value should be less than the PingFederate Token Lifetime.",
 		},
 		"trusted_certificate_group_id": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "The group of certificates to use when authenticating to third-party OAuth 2.0 Authorization Server.",
 		},
 		"use_proxy": {
-			Type:     schema.TypeBool,
-			Optional: true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "True if a proxy should be used for HTTP or HTTPS requests.",
 		},
 	}
 }
