@@ -1,4 +1,24 @@
-## 0.7.0 (Unreleased)
+## 0.8.0 (Unreleased)
+
+NOTES:
+
+* This release has been built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+
+FEATURES:
+
+* Add support for dynamic configuration blocks to allow native HCL when defining plugin configuration, supported resources:
+    - `pingaccess_access_token_validator`
+    - `pingaccess_site_authenticator`
+* Add support for proxied pingfederate runtime (PA 6.2+). (#72)
+* Extend support for `websession` and `pingfederate_oauth` resource `client_credentials` block to support certificate/private key jwt auth. (#75)
+
+BUG FIXES:
+
+* Fix issue with site authenticator not handling interpolated value. (#74)
+* Fix issue with applications not correctly tracking policies. (#48)
+
+
+## 0.7.0 (November 23, 2020)
 
 NOTES:
 
