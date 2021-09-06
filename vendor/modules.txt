@@ -274,15 +274,14 @@ github.com/pmezard/go-difflib/difflib
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/tidwall/gjson v1.8.1
+# github.com/tidwall/gjson v1.9.0
 ## explicit
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.3
 github.com/tidwall/match
 # github.com/tidwall/pretty v1.2.0
-## explicit
 github.com/tidwall/pretty
-# github.com/tidwall/sjson v1.1.7
+# github.com/tidwall/sjson v1.2.1
 ## explicit
 github.com/tidwall/sjson
 # github.com/ulikunitz/xz v0.5.8

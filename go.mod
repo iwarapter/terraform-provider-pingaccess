@@ -27,9 +27,8 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/gjson v1.8.1
-	github.com/tidwall/pretty v1.2.0 // indirect
-	github.com/tidwall/sjson v1.1.7
+	github.com/tidwall/gjson v1.9.0
+	github.com/tidwall/sjson v1.2.1
 	github.com/zclconf/go-cty v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912 // indirect
