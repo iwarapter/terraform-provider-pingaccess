@@ -125,11 +125,11 @@ github.com/hashicorp/hcl/v2/ext/customdecode
 github.com/hashicorp/hcl/v2/hclsyntax
 # github.com/hashicorp/logutils v1.0.0
 github.com/hashicorp/logutils
-# github.com/hashicorp/terraform-exec v0.14.0
+# github.com/hashicorp/terraform-exec v0.15.0
 github.com/hashicorp/terraform-exec/internal/version
 github.com/hashicorp/terraform-exec/tfexec
 github.com/hashicorp/terraform-exec/tfinstall
-# github.com/hashicorp/terraform-json v0.12.0
+# github.com/hashicorp/terraform-json v0.13.0
 github.com/hashicorp/terraform-json
 # github.com/hashicorp/terraform-plugin-go v0.4.1-0.20211111180840-21a2c2c31535
 ## explicit
@@ -150,7 +150,7 @@ github.com/hashicorp/terraform-plugin-go-contrib/asgotypes
 # github.com/hashicorp/terraform-plugin-mux v0.3.0
 ## explicit
 github.com/hashicorp/terraform-plugin-mux
-# github.com/hashicorp/terraform-plugin-sdk/v2 v2.8.0
+# github.com/hashicorp/terraform-plugin-sdk/v2 v2.9.0
 ## explicit
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
@@ -292,8 +292,7 @@ github.com/ulikunitz/xz/lzma
 # github.com/vmihailenco/msgpack v4.0.4+incompatible
 github.com/vmihailenco/msgpack
 github.com/vmihailenco/msgpack/codes
-# github.com/zclconf/go-cty v1.9.0
-## explicit
+# github.com/zclconf/go-cty v1.9.1
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function
