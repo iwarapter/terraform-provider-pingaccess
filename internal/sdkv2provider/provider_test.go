@@ -79,7 +79,7 @@ func TestMain(m *testing.M) {
 	vs := version.New(conf)
 	v, _, err := vs.VersionCommand()
 	if err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 	paVersion = *v.Version
 	resource.TestMain(m)
