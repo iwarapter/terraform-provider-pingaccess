@@ -3,7 +3,6 @@ package sdkv2provider
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
@@ -26,16 +25,11 @@ func resourcePingAccessIdentityMapping() *schema.Resource {
 
 		Schema: resourcePingAccessIdentityMappingSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			svc := m.(paClient).IdentityMappings
-			desc, _, err := svc.GetIdentityMappingDescriptorsCommand()
-			if err != nil {
-				return fmt.Errorf("unable to retrieve IdentityMapping descriptors %s", err)
-			}
 			className := d.Get("class_name").(string)
-			if err := descriptorsHasClassName(className, desc); err != nil {
+			if err := descriptorsHasClassName(className, m.(paClient).IdentityMappingDescriptors); err != nil {
 				return err
 			}
-			return validateConfiguration(className, d, desc)
+			return validateConfiguration(className, d, m.(paClient).IdentityMappingDescriptors)
 		},
 		Description: `Provides configuration for Identity Mappings within PingAccess.
 
@@ -76,7 +70,7 @@ func resourcePingAccessIdentityMappingCreate(_ context.Context, d *schema.Resour
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
+	return resourcePingAccessIdentityMappingReadResult(d, result, m.(paClient).IdentityMappingDescriptors)
 }
 
 func resourcePingAccessIdentityMappingRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -89,7 +83,7 @@ func resourcePingAccessIdentityMappingRead(_ context.Context, d *schema.Resource
 
 		return diag.Errorf("unable to read IdentityMapping: %s", err)
 	}
-	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
+	return resourcePingAccessIdentityMappingReadResult(d, result, m.(paClient).IdentityMappingDescriptors)
 }
 
 func resourcePingAccessIdentityMappingUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -105,7 +99,7 @@ func resourcePingAccessIdentityMappingUpdate(_ context.Context, d *schema.Resour
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessIdentityMappingReadResult(d, result, svc)
+	return resourcePingAccessIdentityMappingReadResult(d, result, m.(paClient).IdentityMappingDescriptors)
 }
 
 func resourcePingAccessIdentityMappingDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -118,7 +112,7 @@ func resourcePingAccessIdentityMappingDelete(_ context.Context, d *schema.Resour
 	return nil
 }
 
-func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *models.IdentityMappingView, svc identityMappings.IdentityMappingsAPI) diag.Diagnostics {
+func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *models.IdentityMappingView, desc *models.DescriptorsView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
@@ -128,7 +122,6 @@ func resourcePingAccessIdentityMappingReadResult(d *schema.ResourceData, input *
 	//Search the Identity Mappings descriptors for CONCEALED fields, and update the original value back as we cannot use the
 	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
 	//has changed and needs updating
-	desc, _, _ := svc.GetIdentityMappingDescriptorsCommand()
 	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
 
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)

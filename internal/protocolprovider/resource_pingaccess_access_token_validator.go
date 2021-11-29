@@ -59,35 +59,20 @@ func (r resourcePingAccessAccessTokenValidator) schema() *tfprotov5.Schema {
 }
 
 func (r resourcePingAccessAccessTokenValidator) UpgradeResourceState(_ context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
+	var t tftypes.Type
 	switch req.Version {
+	case 0:
+		t = tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{
+				"id":            tftypes.String,
+				"name":          tftypes.String,
+				"class_name":    tftypes.String,
+				"configuration": tftypes.String,
+			},
+		}
+
 	case 1:
-		val, err := req.RawState.Unmarshal(r.resourceType())
-		if err != nil {
-			return &tfprotov5.UpgradeResourceStateResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  unexpectedConfigurationFormat,
-						Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-					},
-				},
-			}, nil
-		}
-		dv, err := tfprotov5.NewDynamicValue(r.resourceType(), val)
-		if err != nil {
-			return &tfprotov5.UpgradeResourceStateResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  unexpectedConfigurationFormat,
-						Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-					},
-				},
-			}, nil
-		}
-		return &tfprotov5.UpgradeResourceStateResponse{
-			UpgradedState: &dv,
-		}, nil
+		t = r.resourceType()
 	default:
 		return &tfprotov5.UpgradeResourceStateResponse{
 			Diagnostics: []*tfprotov5.Diagnostic{
@@ -99,6 +84,33 @@ func (r resourcePingAccessAccessTokenValidator) UpgradeResourceState(_ context.C
 			},
 		}, nil
 	}
+	val, err := req.RawState.Unmarshal(t)
+	if err != nil {
+		return &tfprotov5.UpgradeResourceStateResponse{
+			Diagnostics: []*tfprotov5.Diagnostic{
+				{
+					Severity: tfprotov5.DiagnosticSeverityError,
+					Summary:  unexpectedConfigurationFormat,
+					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+				},
+			},
+		}, nil
+	}
+	dv, err := tfprotov5.NewDynamicValue(r.resourceType(), val)
+	if err != nil {
+		return &tfprotov5.UpgradeResourceStateResponse{
+			Diagnostics: []*tfprotov5.Diagnostic{
+				{
+					Severity: tfprotov5.DiagnosticSeverityError,
+					Summary:  unexpectedConfigurationFormat,
+					Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
+				},
+			},
+		}, nil
+	}
+	return &tfprotov5.UpgradeResourceStateResponse{
+		UpgradedState: &dv,
+	}, nil
 }
 
 func (r resourcePingAccessAccessTokenValidator) ReadResource(_ context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {

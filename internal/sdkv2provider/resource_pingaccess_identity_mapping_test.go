@@ -3,7 +3,6 @@ package sdkv2provider
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"regexp"
 	"testing"
 
@@ -251,12 +250,8 @@ func testAccCheckPingAccessIdentityMappingAttributes(n string) resource.TestChec
 	}
 }
 
-type idmappingsMock struct {
-	identityMappings.IdentityMappingsAPI
-}
-
-func (i idmappingsMock) GetIdentityMappingDescriptorsCommand() (output *models.DescriptorsView, resp *http.Response, err error) {
-	return &models.DescriptorsView{
+func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
+	desc := &models.DescriptorsView{
 		Items: []*models.DescriptorView{
 			{
 				ClassName: String("something"),
@@ -269,11 +264,7 @@ func (i idmappingsMock) GetIdentityMappingDescriptorsCommand() (output *models.D
 				Label: nil,
 				Type:  nil,
 			},
-		}}, nil, nil
-}
-
-func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
-
+		}}
 	cases := []struct {
 		Name            string
 		IdentityMapping models.IdentityMappingView
@@ -293,7 +284,7 @@ func Test_resourcePingAccessIdentityMappingReadData(t *testing.T) {
 
 			resourceSchema := resourcePingAccessIdentityMappingSchema()
 			resourceLocalData := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
-			diags := resourcePingAccessIdentityMappingReadResult(resourceLocalData, &tc.IdentityMapping, idmappingsMock{})
+			diags := resourcePingAccessIdentityMappingReadResult(resourceLocalData, &tc.IdentityMapping, desc)
 
 			checkDiagnostics(t, tc.Name, diags, tc.ExpectedDiags)
 

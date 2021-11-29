@@ -3,7 +3,6 @@ package sdkv2provider
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/highAvailability"
 
@@ -24,16 +23,11 @@ func resourcePingAccessAvailabilityProfile() *schema.Resource {
 		},
 		Schema: resourcePingAccessAvailabilityProfileSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			svc := m.(paClient).HighAvailability
-			desc, _, err := svc.GetAvailabilityProfileDescriptorsCommand()
-			if err != nil {
-				return fmt.Errorf("unable to retrieve AvailabilityProfile descriptors %s", err)
-			}
 			className := d.Get("class_name").(string)
-			if err := descriptorsHasClassName(className, desc); err != nil {
+			if err := descriptorsHasClassName(className, m.(paClient).HighAvailabilityDescriptors); err != nil {
 				return err
 			}
-			return validateConfiguration(className, d, desc)
+			return validateConfiguration(className, d, m.(paClient).HighAvailabilityDescriptors)
 		},
 		Description: `Provides configuration for Availability Profiles within PingAccess.
 
@@ -74,7 +68,7 @@ func resourcePingAccessAvailabilityProfileCreate(_ context.Context, d *schema.Re
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessAvailabilityProfileReadResult(d, result, svc)
+	return resourcePingAccessAvailabilityProfileReadResult(d, result, m.(paClient).HighAvailabilityDescriptors)
 }
 
 func resourcePingAccessAvailabilityProfileRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -89,7 +83,7 @@ func resourcePingAccessAvailabilityProfileRead(_ context.Context, d *schema.Reso
 		return diag.Errorf("unable to read AvailabilityProfile: %s", err)
 	}
 
-	return resourcePingAccessAvailabilityProfileReadResult(d, result, svc)
+	return resourcePingAccessAvailabilityProfileReadResult(d, result, m.(paClient).HighAvailabilityDescriptors)
 }
 
 func resourcePingAccessAvailabilityProfileUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -105,7 +99,7 @@ func resourcePingAccessAvailabilityProfileUpdate(_ context.Context, d *schema.Re
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessAvailabilityProfileReadResult(d, result, svc)
+	return resourcePingAccessAvailabilityProfileReadResult(d, result, m.(paClient).HighAvailabilityDescriptors)
 }
 
 func resourcePingAccessAvailabilityProfileDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -117,7 +111,7 @@ func resourcePingAccessAvailabilityProfileDelete(_ context.Context, d *schema.Re
 	return nil
 }
 
-func resourcePingAccessAvailabilityProfileReadResult(d *schema.ResourceData, input *models.AvailabilityProfileView, svc highAvailability.HighAvailabilityAPI) diag.Diagnostics {
+func resourcePingAccessAvailabilityProfileReadResult(d *schema.ResourceData, input *models.AvailabilityProfileView, desc *models.DescriptorsView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
@@ -127,7 +121,6 @@ func resourcePingAccessAvailabilityProfileReadResult(d *schema.ResourceData, inp
 	//Search the Availability Profiles descriptors for CONCEALED fields, and update the original value back as we cannot use the
 	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
 	//has changed and needs updating
-	desc, _, _ := svc.GetAvailabilityProfileDescriptorsCommand()
 	config = maskConfigFromDescriptors(desc, input.ClassName, originalConfig, config)
 
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)

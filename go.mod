@@ -14,10 +14,10 @@ require (
 	github.com/hashicorp/go-plugin v1.4.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/hcl/v2 v2.10.1 // indirect
-	github.com/hashicorp/terraform-plugin-go v0.3.1
+	github.com/hashicorp/terraform-plugin-go v0.4.1-0.20211111180840-21a2c2c31535
 	github.com/hashicorp/terraform-plugin-go-contrib v0.0.0-20210427110104-ec2cb6aeea00
-	github.com/hashicorp/terraform-plugin-mux v0.2.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
+	github.com/hashicorp/terraform-plugin-mux v0.3.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.8.0
 	github.com/hashicorp/yamux v0.0.0-20210707203944-259a57b3608c // indirect
 	github.com/iwarapter/pingaccess-sdk-go/v60 v60.0.0-20210823205911-0b96ee7c642e
 	github.com/iwarapter/pingaccess-sdk-go/v62 v62.0.0-20210823213316-eaec13608a5f
