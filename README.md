@@ -8,6 +8,7 @@ PingAccess Terraform Provider
   ![ci](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/ci/badge.svg)
   ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)
   ![GitHub release (latest by date)](https://img.shields.io/github/v/release/iwarapter/terraform-provider-pingaccess)
+  [![Github All Releases](https://img.shields.io/github/downloads/iwarapter/terraform-provider-pingaccess/total.svg)]()
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
