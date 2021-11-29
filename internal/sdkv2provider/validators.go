@@ -100,3 +100,11 @@ func validateAuditLevel(value interface{}, _ cty.Path) diag.Diagnostics {
 	}
 	return nil
 }
+
+func validateResourceType(value interface{}, _ cty.Path) diag.Diagnostics {
+	v := value.(string)
+	if v != "Standard" && v != "Virtual" {
+		return diag.Errorf("must be either 'Standard' or 'Virtual' not %s", v)
+	}
+	return nil
+}

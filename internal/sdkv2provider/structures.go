@@ -235,6 +235,40 @@ func flattenPolicyItem(in []*models.PolicyItem) []interface{} {
 	return m
 }
 
+func expandResourceTypeConfiguration(in []interface{}) *models.ResourceTypeConfigurationView {
+	rtcv := &models.ResourceTypeConfigurationView{}
+
+	for _, raw := range in {
+		l := raw.(map[string]interface{})
+		if val, ok := l["response_generator"]; ok {
+			rtcv.ResponseGenerator = expandResponseGenerator(val.(*schema.Set).List())
+		}
+	}
+
+	return rtcv
+}
+
+func expandResponseGenerator(in []interface{}) *models.ResponseGeneratorView {
+	rg := &models.ResponseGeneratorView{}
+	for _, raw := range in {
+		if raw == nil {
+			return rg
+		}
+		l := raw.(map[string]interface{})
+		if val, ok := l["class_name"]; ok {
+			rg.ClassName = String(val.(string))
+		}
+		if val, ok := l["configuration"]; ok {
+			config := val.(string)
+			var dat map[string]interface{}
+			_ = json.Unmarshal([]byte(config), &dat)
+			rg.Configuration = dat
+		}
+	}
+
+	return rg
+}
+
 func expandPolicy(in []interface{}) map[string]*[]*models.PolicyItem {
 	ca := map[string]*[]*models.PolicyItem{}
 
@@ -281,6 +315,34 @@ func flattenPathPatternView(in []*models.PathPatternView) []interface{} {
 		s["type"] = v.Type
 		m = append(m, s)
 	}
+	return m
+}
+
+func flattenResourceTypeConfiguration(in *models.ResourceTypeConfigurationView) []interface{} {
+	var m []interface{}
+
+	s := make(map[string]interface{})
+	if in.ResponseGenerator != nil {
+		s["response_generator"] = flattenResponseGenerator(in.ResponseGenerator)
+		m = append(m, s)
+	}
+
+	return m
+}
+
+func flattenResponseGenerator(in *models.ResponseGeneratorView) []interface{} {
+	var m []interface{}
+	s := make(map[string]interface{})
+	if in.ClassName != nil {
+		s["class_name"] = *in.ClassName
+	}
+
+	if in.Configuration != nil {
+		b, _ := json.Marshal(in.Configuration)
+		s["configuration"] = String(string(b))
+	}
+	m = append(m, s)
+
 	return m
 }
 

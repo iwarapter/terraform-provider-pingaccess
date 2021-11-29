@@ -113,6 +113,46 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 			Default:     false,
 			Description: "True if the resource is unprotected.",
 		},
+		"resource_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "Standard",
+			ValidateDiagFunc: validateResourceType,
+			Description:      "The type of this resource. 'Standard' resources are those served by the protected applications. 'Virtual' resources do not have a corresponding resource in the protected application. Instead, when accessing the resource, PingAccess returns a response created by the response generator defined in the resource type configuration. The default type is 'Standard'.",
+		},
+		"resource_type_configuration": {
+			Type:        schema.TypeSet,
+			Optional:    true,
+			MinItems:    0,
+			MaxItems:    1,
+			Description: "A container for configuration specific to different types of resources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"response_generator": {
+						Type:        schema.TypeSet,
+						Optional:    true,
+						MinItems:    1,
+						MaxItems:    1,
+						Description: "The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type').",
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"class_name": {
+									Type:        schema.TypeString,
+									Optional:    true,
+									Description: "The response generator's class name.",
+								},
+								"configuration": {
+									Type:             schema.TypeString,
+									Optional:         true,
+									DiffSuppressFunc: suppressEquivalentJSONDiffs,
+									Description:      "The response generator's configuration data.",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -242,6 +282,15 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
+
+	setResourceDataStringWithDiagnostic(d, "resource_type", rv.ResourceType, &diags)
+
+	if rv.ResourceTypeConfiguration != nil {
+		if err := d.Set("resource_type_configuration", flattenResourceTypeConfiguration(rv.ResourceTypeConfiguration)); err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
+	}
+
 	return diags
 }
 
@@ -292,6 +341,14 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *mode
 	if v, ok := d.GetOk("policy"); ok {
 		resource.Policy = expandPolicy(v.([]interface{}))
 
+	}
+
+	if v, ok := d.GetOk("resource_type"); ok {
+		resource.ResourceType = String(v.(string))
+	}
+
+	if v, ok := d.GetOk("resource_type_configuration"); ok {
+		resource.ResourceTypeConfiguration = expandResourceTypeConfiguration(v.(*schema.Set).List())
 	}
 
 	return resource
