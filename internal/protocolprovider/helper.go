@@ -224,8 +224,8 @@ func marshalMap(i interface{}) (tftypes.Type, tftypes.Value, error) {
 		vals[value.String()] = v
 	}
 
-	return tftypes.Map{AttributeType: typ}, tftypes.NewValue(tftypes.Map{
-		AttributeType: typ,
+	return tftypes.Map{ElementType: typ}, tftypes.NewValue(tftypes.Map{
+		ElementType: typ,
 	}, vals), nil
 }
 

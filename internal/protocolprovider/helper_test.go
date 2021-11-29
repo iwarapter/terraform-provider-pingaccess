@@ -85,7 +85,7 @@ func Test_marshalDynamicPseudoTypes(t *testing.T) {
 		},
 		"map-string": {
 			tfval: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.String,
+				ElementType: tftypes.String,
 			}, map[string]tftypes.Value{
 				"a": tftypes.NewValue(tftypes.String, "foo"),
 				"b": tftypes.NewValue(tftypes.String, "bar"),
