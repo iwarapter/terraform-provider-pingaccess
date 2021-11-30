@@ -59,6 +59,8 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
 - **path_patterns** (Block Set) A list of one or more request path-matching patterns. (see [below for nested schema](#nestedblock--path_patterns))
 - **path_prefixes** (Set of String, Deprecated)
 - **policy** (Block List, Max: 1) A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items. (see [below for nested schema](#nestedblock--policy))
+- **resource_type** (String) The type of this resource. 'Standard' resources are those served by the protected applications. 'Virtual' resources do not have a corresponding resource in the protected application. Instead, when accessing the resource, PingAccess returns a response created by the response generator defined in the resource type configuration. The default type is 'Standard'.
+- **resource_type_configuration** (Block List) A container for configuration specific to different types of resources. (see [below for nested schema](#nestedblock--resource_type_configuration))
 - **root_resource** (Boolean) True if the resource is the root resource for the application.
 - **unprotected** (Boolean) True if the resource is unprotected.
 
@@ -99,6 +101,26 @@ Required:
 
 - **id** (String) The ID of the specific rule or ruleset.
 - **type** (String) If this is either a `Rule` or `RuleSet`.
+
+
+
+<a id="nestedblock--resource_type_configuration"></a>
+### Nested Schema for `resource_type_configuration`
+
+Required:
+
+- **response_generator** (Block List, Min: 1) The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type'). (see [below for nested schema](#nestedblock--resource_type_configuration--response_generator))
+
+<a id="nestedblock--resource_type_configuration--response_generator"></a>
+### Nested Schema for `resource_type_configuration.response_generator`
+
+Required:
+
+- **class_name** (String) The response generator's class name.
+
+Optional:
+
+- **configuration** (String) The response generator's configuration data.
 
 ## Import
 

@@ -401,7 +401,7 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				ResourceType: String("Virtual"),
 
 				ResourceTypeConfiguration: &models.ResourceTypeConfigurationView{
-					&models.ResponseGeneratorView{
+					ResponseGenerator: &models.ResponseGeneratorView{
 						ClassName: String("com.pingidentity.pa.resources.responsegenerator.TemplateResponseGenerator"),
 						Configuration: map[string]interface{}{
 							"test": "value",
