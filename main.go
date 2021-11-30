@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	tf5server "github.com/hashicorp/terraform-plugin-go/tfprotov5/server"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
 	tfmux "github.com/hashicorp/terraform-plugin-mux"
 	protocol "github.com/iwarapter/terraform-provider-pingaccess/internal/protocolprovider"
 	"github.com/iwarapter/terraform-provider-pingaccess/internal/sdkv2provider"

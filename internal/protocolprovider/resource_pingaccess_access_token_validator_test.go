@@ -1,9 +1,14 @@
 package protocol
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
+
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
@@ -216,5 +221,45 @@ func testAccCheckPingAccessAccessTokenValidatorExists(n string) resource.TestChe
 		}
 
 		return nil
+	}
+}
+
+func Test_resourcePingAccessAccessTokenValidator_UpgradeResourceState(t *testing.T) {
+	r := resourcePingAccessAccessTokenValidator{
+		client:                accessTokenValidators.New(&config.Config{Endpoint: String("foo")}),
+		genericPluginResource: genericPluginResource{},
+	}
+	tests := []struct {
+		name string
+		ctx  context.Context
+		req  *tfprotov5.UpgradeResourceStateRequest
+		resp *tfprotov5.UpgradeResourceStateResponse
+	}{
+		{
+			"we can upgrade state",
+			context.Background(),
+			&tfprotov5.UpgradeResourceStateRequest{
+				TypeName: "pingaccess_access_token_validator",
+				Version:  0,
+				RawState: &tfprotov5.RawState{
+					JSON: []byte(`{
+            "class_name": "com.pingidentity.pa.accesstokenvalidators.JwksEndpoint",
+            "configuration": "{\"audience\":null,\"description\":null,\"issuer\":null,\"path\":\"/bar\",\"subjectAttributeName\":\"demo\"}",
+            "id": "3",
+            "name": "demo"
+          }`),
+				},
+			},
+			&tfprotov5.UpgradeResourceStateResponse{
+				UpgradedState: &tfprotov5.DynamicValue{MsgPack: []byte{132, 170, 99, 108, 97, 115, 115, 95, 110, 97, 109, 101, 217, 54, 99, 111, 109, 46, 112, 105, 110, 103, 105, 100, 101, 110, 116, 105, 116, 121, 46, 112, 97, 46, 97, 99, 99, 101, 115, 115, 116, 111, 107, 101, 110, 118, 97, 108, 105, 100, 97, 116, 111, 114, 115, 46, 74, 119, 107, 115, 69, 110, 100, 112, 111, 105, 110, 116, 173, 99, 111, 110, 102, 105, 103, 117, 114, 97, 116, 105, 111, 110, 146, 196, 8, 34, 115, 116, 114, 105, 110, 103, 34, 217, 94, 123, 34, 97, 117, 100, 105, 101, 110, 99, 101, 34, 58, 110, 117, 108, 108, 44, 34, 100, 101, 115, 99, 114, 105, 112, 116, 105, 111, 110, 34, 58, 110, 117, 108, 108, 44, 34, 105, 115, 115, 117, 101, 114, 34, 58, 110, 117, 108, 108, 44, 34, 112, 97, 116, 104, 34, 58, 34, 47, 98, 97, 114, 34, 44, 34, 115, 117, 98, 106, 101, 99, 116, 65, 116, 116, 114, 105, 98, 117, 116, 101, 78, 97, 109, 101, 34, 58, 34, 100, 101, 109, 111, 34, 125, 162, 105, 100, 161, 51, 164, 110, 97, 109, 101, 164, 100, 101, 109, 111}},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp, err := r.UpgradeResourceState(tt.ctx, tt.req)
+			require.NoError(t, err)
+			assert.Equal(t, tt.resp, resp)
+		})
 	}
 }

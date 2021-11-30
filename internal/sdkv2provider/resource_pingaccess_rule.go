@@ -3,7 +3,6 @@ package sdkv2provider
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/rules"
@@ -23,16 +22,11 @@ func resourcePingAccessRule() *schema.Resource {
 		},
 		Schema: resourcePingAccessRuleSchema(),
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
-			svc := m.(paClient).Rules
-			desc, _, err := svc.GetRuleDescriptorsCommand()
-			if err != nil {
-				return fmt.Errorf("unable to retrieve Rule descriptors %s", err)
-			}
 			className := d.Get("class_name").(string)
-			if err := ruleDescriptorsHasClassName(className, desc); err != nil {
+			if err := ruleDescriptorsHasClassName(className, m.(paClient).RuleDescriptions); err != nil {
 				return err
 			}
-			return validateRulesConfiguration(className, d, desc)
+			return validateRulesConfiguration(className, d, m.(paClient).RuleDescriptions)
 		},
 		Description: `Provides configuration for Rules within PingAccess.
 
@@ -83,7 +77,7 @@ func resourcePingAccessRuleCreate(_ context.Context, d *schema.ResourceData, m i
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessRuleReadResult(d, result, svc)
+	return resourcePingAccessRuleReadResult(d, result, m.(paClient).RuleDescriptions)
 }
 
 func resourcePingAccessRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -97,7 +91,7 @@ func resourcePingAccessRuleRead(_ context.Context, d *schema.ResourceData, m int
 		return diag.Errorf("unable to read Rule: %s", err)
 	}
 
-	return resourcePingAccessRuleReadResult(d, result, svc)
+	return resourcePingAccessRuleReadResult(d, result, m.(paClient).RuleDescriptions)
 }
 
 func resourcePingAccessRuleUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -113,7 +107,7 @@ func resourcePingAccessRuleUpdate(_ context.Context, d *schema.ResourceData, m i
 	}
 
 	d.SetId(result.Id.String())
-	return resourcePingAccessRuleReadResult(d, result, svc)
+	return resourcePingAccessRuleReadResult(d, result, m.(paClient).RuleDescriptions)
 }
 
 func resourcePingAccessRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -125,7 +119,7 @@ func resourcePingAccessRuleDelete(_ context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
-func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *models.RuleView, svc rules.RulesAPI) diag.Diagnostics {
+func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *models.RuleView, desc *models.RuleDescriptorsView) diag.Diagnostics {
 	var diags diag.Diagnostics
 	b, _ := json.Marshal(input.Configuration)
 	config := string(b)
@@ -135,7 +129,6 @@ func resourcePingAccessRuleReadResult(d *schema.ResourceData, input *models.Rule
 	//Search the Rules descriptors for CONCEALED fields, and update the original value back as we cannot use the
 	//encryptedValue provided by the API, whilst this gives us a stable plan - we cannot determine if a CONCEALED value
 	//has changed and needs updating
-	desc, _, _ := svc.GetRuleDescriptorsCommand()
 	config = maskConfigFromRuleDescriptors(desc, input.ClassName, originalConfig, config)
 
 	setResourceDataStringWithDiagnostic(d, "name", input.Name, &diags)

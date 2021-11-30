@@ -56,49 +56,6 @@ func (r resourcePingAccessSiteAuthenticator) schema() *tfprotov5.Schema {
 	}
 }
 
-func (r resourcePingAccessSiteAuthenticator) UpgradeResourceState(_ context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
-	switch req.Version {
-	case 1:
-		val, err := req.RawState.Unmarshal(r.resourceType())
-		if err != nil {
-			return &tfprotov5.UpgradeResourceStateResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  unexpectedConfigurationFormat,
-						Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-					},
-				},
-			}, nil
-		}
-		dv, err := tfprotov5.NewDynamicValue(r.resourceType(), val)
-		if err != nil {
-			return &tfprotov5.UpgradeResourceStateResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					{
-						Severity: tfprotov5.DiagnosticSeverityError,
-						Summary:  unexpectedConfigurationFormat,
-						Detail:   "The resource got a configuration that did not match its schema, This may indication an error in the provider.\n\nError: " + err.Error(),
-					},
-				},
-			}, nil
-		}
-		return &tfprotov5.UpgradeResourceStateResponse{
-			UpgradedState: &dv,
-		}, nil
-	default:
-		return &tfprotov5.UpgradeResourceStateResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
-				{
-					Severity: tfprotov5.DiagnosticSeverityError,
-					Summary:  unexpectedConfigurationFormat,
-					Detail:   "The provider doesn't know how to upgrade from the current state version. Try an earlier release of the provider.",
-				},
-			},
-		}, nil
-	}
-}
-
 func (r resourcePingAccessSiteAuthenticator) ReadResource(_ context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
 	values, diags := resourceDynamicValueToTftypesValues(req.CurrentState, r.resourceType())
 	if len(diags) > 0 {

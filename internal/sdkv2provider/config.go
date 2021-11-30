@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"syscall"
 
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/accessTokenValidators"
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/acme"
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/adminConfig"
@@ -71,51 +73,54 @@ type cfg struct {
 }
 
 type paClient struct {
-	AccessTokenValidators      accessTokenValidators.AccessTokenValidatorsAPI
-	Acme                       acme.AcmeAPI
-	AdminConfig                adminConfig.AdminConfigAPI
-	AdminSessionInfo           adminSessionInfo.AdminSessionInfoAPI
-	Agents                     agents.AgentsAPI
-	Applications               applications.ApplicationsAPI
-	Auth                       auth.AuthAPI
-	AuthTokenManagement        authTokenManagement.AuthTokenManagementAPI
-	AuthnReqLists              authnReqLists.AuthnReqListsAPI
-	Backup                     backup.BackupAPI
-	Certificates               certificates.CertificatesAPI
-	Config                     config.ConfigAPI
-	EngineListeners            engineListeners.EngineListenersAPI
-	Engines                    engines.EnginesAPI
-	GlobalUnprotectedResources globalUnprotectedResources.GlobalUnprotectedResourcesAPI
-	HighAvailability           highAvailability.HighAvailabilityAPI
-	HsmProviders               hsmProviders.HsmProvidersAPI
-	HttpConfig                 httpConfig.HttpConfigAPI
-	HttpsListeners             httpsListeners.HttpsListenersAPI
-	IdentityMappings           identityMappings.IdentityMappingsAPI
-	KeyPairs                   keyPairs.KeyPairsAPI
-	KeyPairsV60                keyPairs60.KeyPairsAPI
-	License                    license.LicenseAPI
-	Oauth                      oauth.OauthAPI
-	OauthKeyManagement         oauthKeyManagement.OauthKeyManagementAPI
-	Oidc                       oidc.OidcAPI
-	Pingfederate               pingfederate.PingfederateAPI
-	Pingone                    pingone.PingoneAPI
-	Proxies                    proxies.ProxiesAPI
-	Redirects                  redirects.RedirectsAPI
-	RejectionHandlers          rejectionHandlers.RejectionHandlersAPI
-	Rules                      rules.RulesAPI
-	Rulesets                   rulesets.RulesetsAPI
-	SharedSecrets              sharedSecrets.SharedSecretsAPI
-	SiteAuthenticators         siteAuthenticators.SiteAuthenticatorsAPI
-	Sites                      sites.SitesAPI
-	ThirdPartyServices         thirdPartyServices.ThirdPartyServicesAPI
-	TokenProvider              tokenProvider.TokenProviderAPI
-	TrustedCertificateGroups   trustedCertificateGroups.TrustedCertificateGroupsAPI
-	UnknownResources           unknownResources.UnknownResourcesAPI
-	Users                      users.UsersAPI
-	Version                    version.VersionAPI
-	Virtualhosts               virtualhosts.VirtualhostsAPI
-	WebSessionManagement       webSessionManagement.WebSessionManagementAPI
-	WebSessions                webSessions.WebSessionsAPI
+	AccessTokenValidators       accessTokenValidators.AccessTokenValidatorsAPI
+	Acme                        acme.AcmeAPI
+	AdminConfig                 adminConfig.AdminConfigAPI
+	AdminSessionInfo            adminSessionInfo.AdminSessionInfoAPI
+	Agents                      agents.AgentsAPI
+	Applications                applications.ApplicationsAPI
+	Auth                        auth.AuthAPI
+	AuthTokenManagement         authTokenManagement.AuthTokenManagementAPI
+	AuthnReqLists               authnReqLists.AuthnReqListsAPI
+	Backup                      backup.BackupAPI
+	Certificates                certificates.CertificatesAPI
+	Config                      config.ConfigAPI
+	EngineListeners             engineListeners.EngineListenersAPI
+	Engines                     engines.EnginesAPI
+	GlobalUnprotectedResources  globalUnprotectedResources.GlobalUnprotectedResourcesAPI
+	HighAvailability            highAvailability.HighAvailabilityAPI
+	HighAvailabilityDescriptors *models.DescriptorsView
+	HsmProviders                hsmProviders.HsmProvidersAPI
+	HttpConfig                  httpConfig.HttpConfigAPI
+	HttpsListeners              httpsListeners.HttpsListenersAPI
+	IdentityMappings            identityMappings.IdentityMappingsAPI
+	IdentityMappingDescriptors  *models.DescriptorsView
+	KeyPairs                    keyPairs.KeyPairsAPI
+	KeyPairsV60                 keyPairs60.KeyPairsAPI
+	License                     license.LicenseAPI
+	Oauth                       oauth.OauthAPI
+	OauthKeyManagement          oauthKeyManagement.OauthKeyManagementAPI
+	Oidc                        oidc.OidcAPI
+	Pingfederate                pingfederate.PingfederateAPI
+	Pingone                     pingone.PingoneAPI
+	Proxies                     proxies.ProxiesAPI
+	Redirects                   redirects.RedirectsAPI
+	RejectionHandlers           rejectionHandlers.RejectionHandlersAPI
+	Rules                       rules.RulesAPI
+	RuleDescriptions            *models.RuleDescriptorsView
+	Rulesets                    rulesets.RulesetsAPI
+	SharedSecrets               sharedSecrets.SharedSecretsAPI
+	SiteAuthenticators          siteAuthenticators.SiteAuthenticatorsAPI
+	Sites                       sites.SitesAPI
+	ThirdPartyServices          thirdPartyServices.ThirdPartyServicesAPI
+	TokenProvider               tokenProvider.TokenProviderAPI
+	TrustedCertificateGroups    trustedCertificateGroups.TrustedCertificateGroupsAPI
+	UnknownResources            unknownResources.UnknownResourcesAPI
+	Users                       users.UsersAPI
+	Version                     version.VersionAPI
+	Virtualhosts                virtualhosts.VirtualhostsAPI
+	WebSessionManagement        webSessionManagement.WebSessionManagementAPI
+	WebSessions                 webSessions.WebSessionsAPI
 
 	apiVersion string
 }
@@ -201,6 +206,34 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 	}
 
 	client.apiVersion = *v.Version
+
+	client.RuleDescriptions, _, err = client.Rules.GetRuleDescriptorsCommand()
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Connection Error",
+			Detail:   fmt.Sprintf("Unable to connect to PingAccess: %s", checkErr(err)),
+		})
+		return nil, diags
+	}
+	client.IdentityMappingDescriptors, _, err = client.IdentityMappings.GetIdentityMappingDescriptorsCommand()
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Connection Error",
+			Detail:   fmt.Sprintf("Unable to connect to PingAccess: %s", checkErr(err)),
+		})
+		return nil, diags
+	}
+	client.HighAvailabilityDescriptors, _, err = client.HighAvailability.GetAvailabilityProfileDescriptorsCommand()
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Connection Error",
+			Detail:   fmt.Sprintf("Unable to connect to PingAccess: %s", checkErr(err)),
+		})
+		return nil, diags
+	}
 
 	return client, nil
 }
