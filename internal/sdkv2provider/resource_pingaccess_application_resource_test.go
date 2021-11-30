@@ -331,43 +331,42 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 	cases := []struct {
 		Resource models.ResourceView
 	}{
-		/*
-			{
-				Resource: models.ResourceView{
-					Anonymous:               Bool(false),
-					ApplicationId:           Int(0),
-					AuditLevel:              String("false"),
-					DefaultAuthTypeOverride: String("false"),
-					Enabled:                 Bool(false),
-					Methods:                 &[]*string{String("false")},
-					Name:                    String("false"),
-					// PathPatterns: []*pa.PathPatternView{
-					// 	&pa.PathPatternView{
-					// 		Pattern: String("/*"),
-					// 		Type:    String("WILDCARD"),
-					// 	},
-					// },
-					PathPrefixes: &[]*string{String("false")},
-					Policy: map[string]*[]*models.PolicyItem{
-						"Web": {
-							{
-								Id:   json.Number("1"),
-								Type: String("Rule"),
-							},
-							{
-								Id:   json.Number("2"),
-								Type: String("RuleSet"),
-							},
-						},
-						"API": {},
-					},
-					RootResource: Bool(false),
-					Unprotected:  Bool(false),
-					ResourceType: String("Standard"),
-				},
-			},
 
-		*/
+		{
+			Resource: models.ResourceView{
+				Anonymous:               Bool(false),
+				ApplicationId:           Int(0),
+				AuditLevel:              String("false"),
+				DefaultAuthTypeOverride: String("false"),
+				Enabled:                 Bool(false),
+				Methods:                 &[]*string{String("false")},
+				Name:                    String("false"),
+				// PathPatterns: []*pa.PathPatternView{
+				// 	&pa.PathPatternView{
+				// 		Pattern: String("/*"),
+				// 		Type:    String("WILDCARD"),
+				// 	},
+				// },
+				PathPrefixes: &[]*string{String("false")},
+				Policy: map[string]*[]*models.PolicyItem{
+					"Web": {
+						{
+							Id:   json.Number("1"),
+							Type: String("Rule"),
+						},
+						{
+							Id:   json.Number("2"),
+							Type: String("RuleSet"),
+						},
+					},
+					"API": {},
+				},
+				RootResource: Bool(false),
+				Unprotected:  Bool(false),
+				ResourceType: String("Standard"),
+			},
+		},
+
 		{
 			Resource: models.ResourceView{
 				Anonymous:               Bool(false),
@@ -403,7 +402,7 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 
 				ResourceTypeConfiguration: &models.ResourceTypeConfigurationView{
 					&models.ResponseGeneratorView{
-						ClassName: String("gugus"),
+						ClassName: String("com.pingidentity.pa.resources.responsegenerator.TemplateResponseGenerator"),
 						Configuration: map[string]interface{}{
 							"test": "value",
 						},
@@ -411,23 +410,20 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				},
 			},
 		},
-		/*
-			{
-				Resource: models.ResourceView{
-					ApplicationId: Int(0),
-					Methods:       &[]*string{String("GET")},
-					Name:          String("false"),
-					Anonymous:     Bool(false),
-					AuditLevel:    String("OFF"),
-					Enabled:       Bool(false),
-					RootResource:  Bool(true),
-					Unprotected:   Bool(true),
-					ResourceType:  String("Standard"),
-				},
+
+		{
+			Resource: models.ResourceView{
+				ApplicationId: Int(0),
+				Methods:       &[]*string{String("GET")},
+				Name:          String("false"),
+				Anonymous:     Bool(false),
+				AuditLevel:    String("OFF"),
+				Enabled:       Bool(false),
+				RootResource:  Bool(true),
+				Unprotected:   Bool(true),
+				ResourceType:  String("Standard"),
 			},
-
-		*/
-
+		},
 	}
 	for i, tc := range cases {
 		t.Run(fmt.Sprintf("tc:%v", i), func(t *testing.T) {

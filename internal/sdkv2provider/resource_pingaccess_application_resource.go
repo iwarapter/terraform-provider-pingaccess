@@ -121,24 +121,20 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 			Description:      "The type of this resource. 'Standard' resources are those served by the protected applications. 'Virtual' resources do not have a corresponding resource in the protected application. Instead, when accessing the resource, PingAccess returns a response created by the response generator defined in the resource type configuration. The default type is 'Standard'.",
 		},
 		"resource_type_configuration": {
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 			Optional:    true,
-			MinItems:    0,
-			MaxItems:    1,
 			Description: "A container for configuration specific to different types of resources.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"response_generator": {
-						Type:        schema.TypeSet,
-						Optional:    true,
-						MinItems:    1,
-						MaxItems:    1,
+						Type:        schema.TypeList,
+						Required:    true,
 						Description: "The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type').",
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"class_name": {
 									Type:        schema.TypeString,
-									Optional:    true,
+									Required:    true,
 									Description: "The response generator's class name.",
 								},
 								"configuration": {
@@ -348,7 +344,7 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *mode
 	}
 
 	if v, ok := d.GetOk("resource_type_configuration"); ok {
-		resource.ResourceTypeConfiguration = expandResourceTypeConfiguration(v.(*schema.Set).List())
+		resource.ResourceTypeConfiguration = expandResourceTypeConfiguration(v.([]interface{}))
 	}
 
 	return resource
