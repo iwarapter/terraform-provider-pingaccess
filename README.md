@@ -51,10 +51,10 @@ https://registry.terraform.io/providers/iwarapter/pingaccess/latest/docs
 The provider is current tested against the following versions of PingAccess
 
 | PingAccess | Status |
-|------------|--------|
-| 6.0.4 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
-| 6.1.3 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
-| 6.2.0 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+|----------|--------|
+| 6.2.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+| 6.3.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+| 7.0.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
 
 Testing the Provider
 ---------------------------
