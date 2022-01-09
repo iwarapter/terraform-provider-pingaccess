@@ -2,7 +2,6 @@ package sdkv2provider
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
@@ -15,8 +14,7 @@ import (
 )
 
 func TestAccPingAccessPingFederateOAuth61OrBelow(t *testing.T) {
-	re := regexp.MustCompile(`^(6\.[1-9])`)
-	if re.MatchString(paVersion) {
+	if (paClient{apiVersion: paVersion}).Is61OrAbove() {
 		t.Skipf("This test only runs against PingAccess 5.3 or 6.0, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"
@@ -49,8 +47,7 @@ func TestAccPingAccessPingFederateOAuth61OrBelow(t *testing.T) {
 }
 
 func TestAccPingAccessPingFederateOAuth61OrAbove(t *testing.T) {
-	re := regexp.MustCompile(`^(6\.[1-9])`)
-	if !re.MatchString(paVersion) {
+	if !(paClient{apiVersion: paVersion}).Is61OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"

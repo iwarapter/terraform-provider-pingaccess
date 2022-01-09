@@ -1,7 +1,6 @@
 # Makefile
-VERSION ?= 0.0.1-ci
-NAME=terraform-provider-pingaccess_v${VERSION}
-PINGACCESS_VERSION ?= 6.2.2-edge
+NAME=terraform-provider-pingaccess
+PINGACCESS_VERSION ?= 7.0.2-edge
 BASE_DOCKER_TAG=pingidentity/pingaccess:${PINGACCESS_VERSION}
 OS_NAME := $(shell uname -s | tr A-Z a-z)
 CURDATE := ${shell date +'%y%m%d'}
@@ -41,12 +40,6 @@ test-and-report:
 
 build:
 	@go build -mod=vendor -o ${NAME} -trimpath .
-
-deploy-local:
-	@mkdir -p ~/.terraform.d/plugins
-	@cp ${NAME} ~/.terraform.d/plugins/
-	@mkdir -p ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
-	@cp ${NAME} ~/.terraform.d/plugins/registry.terraform.io/iwarapter/pingaccess/${VERSION}/${OS_NAME}_amd64
 
 func-init:
 	@rm -rf func-tests/.terraform
