@@ -18,7 +18,7 @@ import (
 func TestAccPingAccessOAuthServer(t *testing.T) {
 	resourceName := "pingaccess_oauth_server.demo_pfr"
 
-	canMask := (paClient{apiVersion: paVersion}).Is61OrAbove()
+	canMask := !(paClient{apiVersion: paVersion}).Is61OrAbove()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },

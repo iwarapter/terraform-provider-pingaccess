@@ -36,7 +36,7 @@ func init() {
 func TestAccPingAccessWebSession(t *testing.T) {
 	resourceName := "pingaccess_websession.demo_session"
 
-	canMask := (paClient{apiVersion: paVersion}).Is61OrAbove()
+	canMask := !(paClient{apiVersion: paVersion}).Is61OrAbove()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },

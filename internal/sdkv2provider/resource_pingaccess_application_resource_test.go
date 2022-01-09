@@ -38,7 +38,7 @@ func TestAccPingAccessApplicationResource(t *testing.T) {
 	}`
 	resourceName := "pingaccess_application_resource.app_res_test_resource"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessApplicationResourceDestroy,

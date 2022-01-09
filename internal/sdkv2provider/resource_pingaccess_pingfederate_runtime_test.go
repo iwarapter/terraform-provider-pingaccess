@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccPingAccessPingFederateRuntimeIssuer(t *testing.T) {
-	if (paClient{apiVersion: paVersion}).Is60OrAbove() {
+	if !(paClient{apiVersion: paVersion}).Is60OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_pingfederate_runtime.demo"

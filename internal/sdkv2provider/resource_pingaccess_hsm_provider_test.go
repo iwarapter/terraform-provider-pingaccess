@@ -32,7 +32,7 @@ func init() {
 }
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
-	if (paClient{apiVersion: paVersion}).Is61OrAbove() {
+	if !(paClient{apiVersion: paVersion}).Is61OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
