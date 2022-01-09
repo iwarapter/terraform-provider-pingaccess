@@ -1,11 +1,14 @@
 package sdkv2provider
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
@@ -81,6 +84,87 @@ func TestConfig_Client(t *testing.T) {
 			if !reflect.DeepEqual(diags, tt.want) {
 				t.Errorf("Client() diags = %v, want %v", diags, tt.want)
 			}
+		})
+	}
+}
+
+func TestIs60OrAbove(t *testing.T) {
+	cli := paClient{}
+	tests := []struct {
+		version string
+		expect  bool
+	}{
+		{"6.0", true},
+		{"6.1", true},
+		{"6.2", true},
+		{"6.3", true},
+		{"7.0", true},
+		{"7.1", true},
+		{"7.2", true},
+		{"7.3", true},
+		{"8.0", true},
+		{"8.1", true},
+		{"8.2", true},
+		{"8.3", true},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("we handle %s", tt.version), func(t *testing.T) {
+			cli.apiVersion = tt.version
+			assert.Equal(t, tt.expect, cli.Is60OrAbove())
+		})
+	}
+}
+
+func TestIs61OrAbove(t *testing.T) {
+	cli := paClient{}
+	tests := []struct {
+		version string
+		expect  bool
+	}{
+		{"6.0", false},
+		{"6.1", true},
+		{"6.2", true},
+		{"6.3", true},
+		{"7.0", true},
+		{"7.1", true},
+		{"7.2", true},
+		{"7.3", true},
+		{"8.0", true},
+		{"8.1", true},
+		{"8.2", true},
+		{"8.3", true},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("we handle %s", tt.version), func(t *testing.T) {
+			cli.apiVersion = tt.version
+			assert.Equal(t, tt.expect, cli.Is61OrAbove())
+		})
+	}
+}
+
+func TestIs62OrAbove(t *testing.T) {
+	cli := paClient{}
+	tests := []struct {
+		version string
+		expect  bool
+	}{
+		{"6.0", false},
+		{"6.1", false},
+		{"6.2", true},
+		{"6.3", true},
+		{"7.0", true},
+		{"7.1", true},
+		{"7.2", true},
+		{"7.3", true},
+		{"8.0", true},
+		{"8.1", true},
+		{"8.2", true},
+		{"8.3", true},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("we handle %s", tt.version), func(t *testing.T) {
+			cli.apiVersion = tt.version
+			assert.Equal(t, tt.expect, cli.Is62OrAbove())
 		})
 	}
 }

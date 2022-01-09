@@ -142,7 +142,7 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 
 	cfg := paCfg.NewConfig().WithEndpoint(u.String() + c.Context).WithUsername(c.Username).WithPassword(c.Password)
 	cfg60 := paCfg60.NewConfig().WithEndpoint(u.String() + c.Context).WithUsername(c.Username).WithPassword(c.Password)
-	if os.Getenv("TF_LOG") == "DEBUG" || os.Getenv("TF_LOG") == "TRACE" {
+	if os.Getenv("TF_LOG") == "DEBUG" || os.Getenv("TF_LOG") == "TRACE" || os.Getenv("TF_LOG_PROVIDER") == "DEBUG" || os.Getenv("TF_LOG_PROVIDER") == "TRACE" {
 		cfg.WithDebug(true)
 		cfg60.WithDebug(true)
 	}
@@ -246,13 +246,19 @@ func (c paClient) CanMaskPasswords() bool {
 
 // Checks whether we are running against PingAccess 6.2 or above
 func (c paClient) Is62OrAbove() bool {
-	re := regexp.MustCompile(`^(6\.[2-9])`)
-	return re.MatchString(c.apiVersion)
+	re := regexp.MustCompile(`^(6\.[0-1])`)
+	return c.Is60OrAbove() && !re.MatchString(c.apiVersion)
+}
+
+// Checks whether we are running against PingAccess 6.2 or above
+func (c paClient) Is61OrAbove() bool {
+	re := regexp.MustCompile(`^(6\.[0])`)
+	return c.Is60OrAbove() && !re.MatchString(c.apiVersion)
 }
 
 // Checks whether we are running against PingAccess 6.0 or above
 func (c paClient) Is60OrAbove() bool {
-	re := regexp.MustCompile(`^(6\.[0-9])`)
+	re := regexp.MustCompile(`^([6-9]\.[0-9])`)
 	return re.MatchString(c.apiVersion)
 }
 

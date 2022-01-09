@@ -2,7 +2,6 @@ package sdkv2provider
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
@@ -37,8 +36,7 @@ func init() {
 func TestAccPingAccessWebSession(t *testing.T) {
 	resourceName := "pingaccess_websession.demo_session"
 
-	re := regexp.MustCompile(`^(6\.[1-9])`)
-	canMask := re.MatchString(paVersion)
+	canMask := (paClient{apiVersion: paVersion}).Is61OrAbove()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
