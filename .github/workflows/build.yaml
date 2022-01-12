@@ -26,6 +26,8 @@ jobs:
           IMAGE_VERSION: pingaccess-alpine-az11-${{ matrix.pingaccess-version }}-${{ needs.getdate.outputs.date }}-b5f4
           PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
           PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
+          TAIL_LOG_PARALLEL: "y"
+          TAIL_LOG_FILES: "/opt/out/instance/log/pingaccess.log /opt/out/instance/log/pingaccess_api_audit.log"
         ports:
           - 9000:9000
     env:
@@ -51,6 +53,12 @@ jobs:
       run: |
         TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out
         go tool cover -func=coverage.out
+
+    - name: Container logs
+      if: ${{ failure() }}
+      run: |
+        docker ps
+        docker logs "${{ job.services.pingaccess.id }}"
 
     - name: SonarCloud Scan
       if: ${{ matrix.pingaccess-version == '6.2.2' }}
