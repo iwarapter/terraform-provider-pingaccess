@@ -58,7 +58,7 @@ jobs:
       if: ${{ failure() }}
       run: |
         docker ps
-        docker logs "${{ job.services.pingfederate.id }}"
+        docker logs "${{ job.services.pingaccess.id }}"
 
     - name: SonarCloud Scan
       if: ${{ matrix.pingaccess-version == '6.2.2' }}
