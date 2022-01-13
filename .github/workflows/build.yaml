@@ -51,7 +51,7 @@ jobs:
 
     - name: Test
       run: |
-        TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out
+        TF_ACC=1 TF_LOG_PROVIDER=DEBUG TF_LOG_PATH=./terraform.log go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out
         go tool cover -func=coverage.out
 
     - name: Container logs
@@ -59,6 +59,12 @@ jobs:
       run: |
         docker ps
         docker logs "${{ job.services.pingaccess.id }}"
+
+    - name: Provider logs
+      if: ${{ failure() }}
+      run: |
+        cat internal/protocolprovider/terraform.log
+        cat internal/sdkv2provider/terraform.log
 
     - name: SonarCloud Scan
       if: ${{ matrix.pingaccess-version == '6.2.2' }}
