@@ -229,17 +229,19 @@ func (t Result) ForEach(iterator func(key, value Result) bool) {
 		return
 	}
 	json := t.Raw
-	var keys bool
+	var obj bool
 	var i int
 	var key, value Result
 	for ; i < len(json); i++ {
 		if json[i] == '{' {
 			i++
 			key.Type = String
-			keys = true
+			obj = true
 			break
 		} else if json[i] == '[' {
 			i++
+			key.Type = Number
+			key.Num = -1
 			break
 		}
 		if json[i] > ' ' {
@@ -251,7 +253,7 @@ func (t Result) ForEach(iterator func(key, value Result) bool) {
 	var ok bool
 	var idx int
 	for ; i < len(json); i++ {
-		if keys {
+		if obj {
 			if json[i] != '"' {
 				continue
 			}
@@ -267,6 +269,8 @@ func (t Result) ForEach(iterator func(key, value Result) bool) {
 			}
 			key.Raw = str
 			key.Index = s + t.Index
+		} else {
+			key.Num += 1
 		}
 		for ; i < len(json); i++ {
 			if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
@@ -2665,6 +2669,8 @@ var modifiers = map[string]func(json, arg string) string{
 	"valid":   modValid,
 	"keys":    modKeys,
 	"values":  modValues,
+	"tostr":   modToStr,
+	"fromstr": modFromStr,
 }
 
 // AddModifier binds a custom modifier command to the GJSON syntax.
@@ -2948,6 +2954,22 @@ func modValid(json, arg string) string {
 		return ""
 	}
 	return json
+}
+
+// @fromstr converts a string to json
+//   "{\"id\":1023,\"name\":\"alert\"}" -> {"id":1023,"name":"alert"}
+func modFromStr(json, arg string) string {
+	if !Valid(json) {
+		return ""
+	}
+	return Parse(json).String()
+}
+
+// @tostr converts a string to json
+//   {"id":1023,"name":"alert"} -> "{\"id\":1023,\"name\":\"alert\"}"
+func modToStr(str, arg string) string {
+	data, _ := json.Marshal(str)
+	return string(data)
 }
 
 // stringHeader instead of reflect.StringHeader
