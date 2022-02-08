@@ -14,7 +14,7 @@ import (
 
 func TestAccPingAccessHTTPConfigRequestHostSource(t *testing.T) {
 	resourceName := "pingaccess_http_config_request_host_source.demo"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessHTTPConfigRequestHostSourceDestroy,

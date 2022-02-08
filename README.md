@@ -48,13 +48,13 @@ Using the Provider
 Please see the terraform registry docs for detailed usage documentation:
 https://registry.terraform.io/providers/iwarapter/pingaccess/latest/docs
 
-The provider is current tested against the following versions of PingAccess
+The provider is currently tested against the following versions of PingAccess
 
 | PingAccess | Status |
-|----------|--------|
-| 6.2.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
-| 6.3.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
-| 7.0.2 | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+|------------|--------|
+| 6.2.2      | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+| 6.3.3      | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
+| 7.0.3      | ![e2e](https://github.com/iwarapter/terraform-provider-pingaccess/workflows/e2e/badge.svg)|
 
 Testing the Provider
 ---------------------------

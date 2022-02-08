@@ -40,7 +40,7 @@ func init() {
 func TestAccPingAccessIdentityMapping(t *testing.T) {
 	resourceName := "pingaccess_identity_mapping.acc_test_idm"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessIdentityMappingDestroy,

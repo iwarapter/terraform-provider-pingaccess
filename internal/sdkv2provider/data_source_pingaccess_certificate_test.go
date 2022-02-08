@@ -12,7 +12,7 @@ import (
 func TestAccPingAccessCertificateDataSource(t *testing.T) {
 	resourceName := "data.pingaccess_certificate.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessCertificateDataSourceDestroy,
@@ -36,7 +36,7 @@ func TestAccPingAccessCertificateDataSource(t *testing.T) {
 }
 
 func TestAccPingAccessCertificateDataSource_NotFound(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessCertificateDataSourceDestroy,
