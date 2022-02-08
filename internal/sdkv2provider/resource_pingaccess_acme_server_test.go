@@ -41,7 +41,7 @@ func TestAccPingAccessAcmeServer(t *testing.T) {
 	if !(paClient{apiVersion: paVersion}).Is60OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
 	}
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessAcmeServerDestroy,

@@ -1,6 +1,6 @@
 # Makefile
 NAME=terraform-provider-pingaccess
-PINGACCESS_VERSION ?= 7.0.2-edge
+PINGACCESS_VERSION ?= 7.0.3-edge
 BASE_DOCKER_TAG=pingidentity/pingaccess:${PINGACCESS_VERSION}
 OS_NAME := $(shell uname -s | tr A-Z a-z)
 CURDATE := ${shell date +'%y%m%d'}

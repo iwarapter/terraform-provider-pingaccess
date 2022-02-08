@@ -12,7 +12,7 @@ import (
 func TestAccPingAccessTrustedCertificateGroupsDataSource(t *testing.T) {
 	resourceName := "data.pingaccess_trusted_certificate_group.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				return Server(), nil
@@ -34,7 +34,7 @@ func TestAccPingAccessTrustedCertificateGroupsDataSource(t *testing.T) {
 }
 
 func TestAccPingAccessTrustedCertificateGroupsDataSource_NotFound(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				return Server(), nil

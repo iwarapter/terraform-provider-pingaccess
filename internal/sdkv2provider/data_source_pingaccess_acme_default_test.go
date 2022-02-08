@@ -11,7 +11,7 @@ func TestAccPingAccessAcmeDefaultDataSource(t *testing.T) {
 		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
 	}
 	resourceName := "data.pingaccess_acme_default.test"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

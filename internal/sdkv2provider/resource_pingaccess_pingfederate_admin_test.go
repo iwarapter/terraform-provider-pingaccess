@@ -19,7 +19,7 @@ func TestAccPingAccessPingFederateAdmin(t *testing.T) {
 	u, _ := url.Parse(os.Getenv("PINGFEDERATE_TEST_IP"))
 	resourceName := "pingaccess_pingfederate_admin.demo"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessPingFederateAdminDestroy,
