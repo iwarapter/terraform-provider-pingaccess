@@ -36,7 +36,7 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

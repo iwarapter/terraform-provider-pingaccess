@@ -38,7 +38,7 @@ func TestAccPingAccessWebSession(t *testing.T) {
 
 	canMask := !(paClient{apiVersion: paVersion}).Is61OrAbove()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessWebSessionDestroy,

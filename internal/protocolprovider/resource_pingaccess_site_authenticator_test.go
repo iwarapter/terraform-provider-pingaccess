@@ -40,7 +40,7 @@ func init() {
 func TestAccPingAccessSiteAuthenticator(t *testing.T) {
 	resourceName := "pingaccess_site_authenticator.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				return Server(), nil
@@ -119,7 +119,7 @@ EOF`),
 func TestAccPingAccessSiteAuthenticatorWithDynamicPsuedoType(t *testing.T) {
 	resourceName := "pingaccess_site_authenticator.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				return Server(), nil
@@ -185,7 +185,7 @@ func TestAccPingAccessSiteAuthenticatorIssue72(t *testing.T) {
 	resource1 := "pingaccess_site_authenticator.test1"
 	resource2 := "pingaccess_site_authenticator.test2"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			//"pingaccess": func() (tfprotov5.ProviderServer, error) {
 			//	return Server(), nil

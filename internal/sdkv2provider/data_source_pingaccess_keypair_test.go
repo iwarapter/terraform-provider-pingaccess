@@ -11,7 +11,7 @@ import (
 func TestAccPingAccessKeyPairDataSource(t *testing.T) {
 	resourceName := "data.pingaccess_keypair.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessKeyPairDataSourceDestroy,
@@ -30,7 +30,7 @@ func TestAccPingAccessKeyPairDataSource(t *testing.T) {
 }
 
 func TestAccPingAccessKeyPairDataSource_NotFound(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessKeyPairDataSourceDestroy,

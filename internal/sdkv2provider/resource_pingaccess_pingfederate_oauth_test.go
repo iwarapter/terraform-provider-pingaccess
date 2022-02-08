@@ -19,7 +19,7 @@ func TestAccPingAccessPingFederateOAuth61OrBelow(t *testing.T) {
 	}
 	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessPingFederateOAuthDestroy,
@@ -52,7 +52,7 @@ func TestAccPingAccessPingFederateOAuth61OrAbove(t *testing.T) {
 	}
 	resourceName := "pingaccess_pingfederate_oauth.demo_pfo"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessPingFederateOAuthDestroy,

@@ -34,7 +34,7 @@ func init() {
 func TestAccPingAccessRule(t *testing.T) {
 	resourceName := "pingaccess_rule.acc_test_rule"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessRuleDestroy,

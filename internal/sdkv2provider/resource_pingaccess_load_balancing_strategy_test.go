@@ -34,7 +34,7 @@ func init() {
 func TestAccPingAccessLoadBalancingStrategy(t *testing.T) {
 	resourceName := "pingaccess_load_balancing_strategy.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessLoadBalancingStrategyDestroy,

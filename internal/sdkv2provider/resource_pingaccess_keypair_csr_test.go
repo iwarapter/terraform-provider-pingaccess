@@ -81,7 +81,7 @@ func TestAccPingAccessKeyPairCsr(t *testing.T) {
 	}
 	signedCert := buf.String()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessKeyPairCsrDestroy,
