@@ -36,7 +36,7 @@ func init() {
 func TestAccPingAccessThirdPartyService(t *testing.T) {
 	resourceName := "pingaccess_third_party_service.demo_tps"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessThirdPartyServiceDestroy,

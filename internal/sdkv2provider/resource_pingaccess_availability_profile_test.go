@@ -34,7 +34,7 @@ func init() {
 func TestAccPingAccessAvailabilityProfile(t *testing.T) {
 	resourceName := "pingaccess_availability_profile.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessAvailabilityProfileDestroy,

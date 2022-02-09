@@ -35,7 +35,7 @@ func init() {
 
 func TestAccPingAccessTrustedCertificateGroups(t *testing.T) {
 	resourceName := "pingaccess_trusted_certificate_group.demo_tcg"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessTrustedCertificateGroupsDestroy,

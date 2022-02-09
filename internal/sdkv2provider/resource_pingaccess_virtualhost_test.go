@@ -37,7 +37,7 @@ func init() {
 func TestAccPingAccessVirtualHost(t *testing.T) {
 	resourceName := "pingaccess_virtualhost.acc_test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessVirtualHostDestroy,

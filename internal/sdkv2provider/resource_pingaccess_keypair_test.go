@@ -38,7 +38,7 @@ func TestAccPingAccessKeyPair(t *testing.T) {
 	resourceName := "pingaccess_keypair.test"
 	resourceNameGen := "pingaccess_keypair.test_generate"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessKeyPairDestroy,

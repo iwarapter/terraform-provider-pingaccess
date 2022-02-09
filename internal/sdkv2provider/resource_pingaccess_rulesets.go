@@ -39,7 +39,7 @@ func resourcePingAccessRuleSetSchema() map[string]*schema.Schema {
 			Description: "The rule set's name.",
 		},
 		"policy": {
-			Type:        schema.TypeSet,
+			Type:        schema.TypeList,
 			Required:    true,
 			MinItems:    1,
 			Description: "The list of policy ids assigned to the rule set.",
@@ -59,7 +59,7 @@ func resourcePingAccessRuleSetSchema() map[string]*schema.Schema {
 func resourcePingAccessRuleSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 	elementType := d.Get("element_type").(string)
-	policy := expandStringList(d.Get("policy").(*schema.Set).List())
+	policy := expandStringList(d.Get("policy").([]interface{}))
 	successCriteria := d.Get("success_criteria").(string)
 
 	//TODO generalise this into a helper function
@@ -103,7 +103,7 @@ func resourcePingAccessRuleSetRead(ctx context.Context, d *schema.ResourceData, 
 func resourcePingAccessRuleSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 	elementType := d.Get("element_type").(string)
-	policy := expandStringList(d.Get("policy").(*schema.Set).List())
+	policy := expandStringList(d.Get("policy").([]interface{}))
 	successCriteria := d.Get("success_criteria").(string)
 
 	//TODO generalise this into a helper function

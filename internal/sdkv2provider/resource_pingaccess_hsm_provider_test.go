@@ -32,12 +32,11 @@ func init() {
 }
 
 func TestAccPingAccessHsmProvider(t *testing.T) {
-	re := regexp.MustCompile(`^(6\.[1-9])`)
-	if !re.MatchString(paVersion) {
+	if !(paClient{apiVersion: paVersion}).Is61OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_hsm_provider.acc_test_hsm"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		Steps: []resource.TestStep{

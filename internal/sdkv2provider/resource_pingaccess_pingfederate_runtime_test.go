@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
@@ -17,8 +16,7 @@ import (
 )
 
 func TestAccPingAccessPingFederateRuntimeIssuer(t *testing.T) {
-	re := regexp.MustCompile(`^(6\.[0-9])`)
-	if !re.MatchString(paVersion) {
+	if !(paClient{apiVersion: paVersion}).Is60OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.0 and above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_pingfederate_runtime.demo"
@@ -61,8 +59,7 @@ func TestAccPingAccessPingFederateRuntimeIssuer(t *testing.T) {
 }
 
 func TestAccPingAccessPingFederateRuntimeDeprecatedRuntime(t *testing.T) {
-	re := regexp.MustCompile(`^(6\.[2-9])`)
-	if re.MatchString(paVersion) {
+	if !(paClient{apiVersion: paVersion}).Is62OrAbove() {
 		t.Skipf("This test only runs against PingAccess 5.3, 6.0 or 6.1, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_pingfederate_runtime.demo"
@@ -114,8 +111,7 @@ func TestAccPingAccessPingFederateRuntimeDeprecatedRuntime(t *testing.T) {
 }
 
 func TestAccPingAccessPingFederateRuntimeNewConfig(t *testing.T) {
-	re := regexp.MustCompile(`^(6\.[2-9])`)
-	if !re.MatchString(paVersion) {
+	if !(paClient{apiVersion: paVersion}).Is61OrAbove() {
 		t.Skipf("This test only runs against PingAccess 6.1 or above, not: %s", paVersion)
 	}
 	resourceName := "pingaccess_pingfederate_runtime.demo"

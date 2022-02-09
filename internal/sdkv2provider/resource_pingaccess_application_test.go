@@ -3,7 +3,6 @@ package sdkv2provider
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -76,15 +75,13 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
   client_secret {
     value = "top_secret"
   }`
-	re := regexp.MustCompile(`^(6\.[2-9])`)
-	if re.MatchString(paVersion) {
+	if (paClient{apiVersion: paVersion}).Is62OrAbove() {
 		block = `"exclusionList": false,
 			"exclusionListAttributes": [],
 			"exclusionListSubject": null,
 			"headerNamePrefix": null,`
 	}
-	re = regexp.MustCompile(`^(6\.[1-9])`)
-	if re.MatchString(paVersion) {
+	if (paClient{apiVersion: paVersion}).Is61OrAbove() {
 		oauth = `client_credentials {
 			credentials_type = "SECRET"
 			client_id = "my_client"

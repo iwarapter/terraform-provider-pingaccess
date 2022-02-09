@@ -41,7 +41,7 @@ func init() {
 func TestAccPingAccessAccessTokenValidator(t *testing.T) {
 	resourceName := "pingaccess_access_token_validator.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				return Server(), nil
@@ -108,7 +108,7 @@ EOF`),
 func TestAccPingAccessAccessTokenValidatorWithDynamicPsuedoType(t *testing.T) {
 	resourceName := "pingaccess_access_token_validator.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				return Server(), nil

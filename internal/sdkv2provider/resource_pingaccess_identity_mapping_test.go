@@ -40,7 +40,7 @@ func init() {
 func TestAccPingAccessIdentityMapping(t *testing.T) {
 	resourceName := "pingaccess_identity_mapping.acc_test_idm"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV5ProviderFactories: testAccProviders,
 		CheckDestroy:             testAccCheckPingAccessIdentityMappingDestroy,
@@ -98,8 +98,7 @@ func testAccCheckPingAccessIdentityMappingDestroy(s *terraform.State) error {
 
 func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
 	block := ""
-	re := regexp.MustCompile(`^(6\.[2-9])`)
-	if re.MatchString(paVersion) {
+	if (paClient{apiVersion: paVersion}).Is62OrAbove() {
 		block = `"exclusionList": false,
 			"exclusionListAttributes": [],
 			"exclusionListSubject": null,
@@ -156,8 +155,7 @@ func testAccPingAccessIdentityMappingConfigMissingRequired() string {
 
 func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
 	block := ""
-	re := regexp.MustCompile(`^(6\.[2-9])`)
-	if re.MatchString(paVersion) {
+	if (paClient{apiVersion: paVersion}).Is61OrAbove() {
 		block = `"exclusionList": false,
 			"exclusionListAttributes": [],
 			"exclusionListSubject": null,
