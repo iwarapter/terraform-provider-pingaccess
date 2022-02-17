@@ -272,12 +272,7 @@ func resourcePingAccessApplicationResourceReadResult(d *schema.ResourceData, rv 
 	}
 	setResourceDataBoolWithDiagnostic(d, "root_resource", rv.RootResource, &diags)
 	setResourceDataBoolWithDiagnostic(d, "unprotected", rv.Unprotected, &diags)
-
-	if rv.Policy != nil && (len(*rv.Policy["Web"]) != 0 || len(*rv.Policy["API"]) != 0) {
-		if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-			diags = append(diags, diag.FromErr(err)...)
-		}
-	}
+	diags = append(diags, flattenPolicies(d, rv.Policy)...)
 
 	setResourceDataStringWithDiagnostic(d, "resource_type", rv.ResourceType, &diags)
 

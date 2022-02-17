@@ -241,13 +241,8 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.
 			diags = append(diags, diag.FromErr(err)...)
 		}
 	}
-	if rv.Policy != nil {
-		if len(*rv.Policy["API"]) > 0 || len(*rv.Policy["Web"]) > 0 || policyStateHasData(d) {
-			if err := d.Set("policy", flattenPolicy(rv.Policy)); err != nil {
-				diags = append(diags, diag.FromErr(err)...)
-			}
-		}
-	}
+	diags = append(diags, flattenPolicies(d, rv.Policy)...)
+
 	return diags
 }
 

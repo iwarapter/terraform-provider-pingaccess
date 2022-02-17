@@ -1,6 +1,10 @@
 package sdkv2provider
 
-import "github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/models"
+)
 
 func flattenRuntimeApplication(in *models.PingFederateRuntimeApplicationView) []map[string]interface{} {
 	m := make([]map[string]interface{}, 0, 1)
@@ -25,4 +29,15 @@ func flattenRuntimeApplication(in *models.PingFederateRuntimeApplicationView) []
 	}
 	m = append(m, s)
 	return m
+}
+
+func flattenPolicies(d *schema.ResourceData, policies map[string]*[]*models.PolicyItem) diag.Diagnostics {
+	if policies != nil {
+		if len(*policies["API"]) > 0 || len(*policies["Web"]) > 0 || policyStateHasData(d) {
+			if err := d.Set("policy", flattenPolicy(policies)); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+	return nil
 }
