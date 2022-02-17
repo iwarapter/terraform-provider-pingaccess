@@ -141,6 +141,47 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
   policy {
 	%s
   }
+
+  resource_type = "Standard"
+
+}
+
+resource "pingaccess_application_resource" "app_res_virtual_resource" {
+  name = "acc_test_woot_virtual"
+  methods = [
+    "*"
+  ]
+
+  path_patterns {
+    pattern = "/virtual"
+    type    = "WILDCARD"
+  }
+
+  path_prefixes = [
+	"/virtual"
+  ]
+  audit_level = "OFF"
+  anonymous = false
+  enabled = true
+  root_resource = false
+  application_id = pingaccess_application.app_res_test.id
+
+  resource_type = "Virtual"
+
+  resource_type_configuration {
+      response_generator {
+          class_name = "com.pingidentity.pa.resources.responsegenerator.TemplateResponseGenerator"
+          configuration = <<EOF
+          {
+              "template": "<h1>Hello from Virtual Resource</h1>",
+              "responseCode": 200,
+              "mediaType": "text/html;charset=utf-8"
+          }
+          EOF
+      }
+  }
+
+  depends_on = [pingaccess_application_resource.app_res_test_resource]
 }
 
 resource "pingaccess_application_resource" "app_res_test_root_resource" {
@@ -165,6 +206,8 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
   enabled = true
   root_resource = true
   application_id = pingaccess_application.app_res_test.id
+
+  resource_type = "Standard"
 }
 
 resource "pingaccess_rule" "acc_test_resource_rule" {
@@ -288,6 +331,7 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 	cases := []struct {
 		Resource models.ResourceView
 	}{
+
 		{
 			Resource: models.ResourceView{
 				Anonymous:               Bool(false),
@@ -319,8 +363,54 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				},
 				RootResource: Bool(false),
 				Unprotected:  Bool(false),
+				ResourceType: String("Standard"),
 			},
 		},
+
+		{
+			Resource: models.ResourceView{
+				Anonymous:               Bool(false),
+				ApplicationId:           Int(0),
+				AuditLevel:              String("false"),
+				DefaultAuthTypeOverride: String("false"),
+				Enabled:                 Bool(false),
+				Methods:                 &[]*string{String("false")},
+				Name:                    String("false"),
+				// PathPatterns: []*pa.PathPatternView{
+				// 	&pa.PathPatternView{
+				// 		Pattern: String("/*"),
+				// 		Type:    String("WILDCARD"),
+				// 	},
+				// },
+				PathPrefixes: &[]*string{String("false")},
+				Policy: map[string]*[]*models.PolicyItem{
+					"Web": {
+						{
+							Id:   json.Number("1"),
+							Type: String("Rule"),
+						},
+						{
+							Id:   json.Number("2"),
+							Type: String("RuleSet"),
+						},
+					},
+					"API": {},
+				},
+				RootResource: Bool(false),
+				Unprotected:  Bool(false),
+				ResourceType: String("Virtual"),
+
+				ResourceTypeConfiguration: &models.ResourceTypeConfigurationView{
+					ResponseGenerator: &models.ResponseGeneratorView{
+						ClassName: String("com.pingidentity.pa.resources.responsegenerator.TemplateResponseGenerator"),
+						Configuration: map[string]interface{}{
+							"test": "value",
+						},
+					},
+				},
+			},
+		},
+
 		{
 			Resource: models.ResourceView{
 				ApplicationId: Int(0),
@@ -331,6 +421,7 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				Enabled:       Bool(false),
 				RootResource:  Bool(true),
 				Unprotected:   Bool(true),
+				ResourceType:  String("Standard"),
 			},
 		},
 	}
