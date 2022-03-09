@@ -240,8 +240,8 @@ func (c *cfg) Client() (interface{}, diag.Diagnostics) {
 
 // Checks whether we are running against PingAccess 6.1 or above and can track password changes
 func (c paClient) CanMaskPasswords() bool {
-	re := regexp.MustCompile(`^(6\.[1-9])`)
-	return re.MatchString(c.apiVersion)
+	re := regexp.MustCompile(`^(6\.0)`)
+	return c.Is60OrAbove() && !re.MatchString(c.apiVersion)
 }
 
 // Checks whether we are running against PingAccess 6.2 or above

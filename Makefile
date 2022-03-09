@@ -39,7 +39,7 @@ test-and-report:
 	@TF_ACC=1 go test -mod=vendor ./... -v -trimpath -coverprofile=coverage.out -json | tee report.json
 
 build:
-	@go build -mod=vendor -o ${NAME} -trimpath .
+	@go install -mod=vendor -trimpath .
 
 func-init:
 	@rm -rf func-tests/.terraform
