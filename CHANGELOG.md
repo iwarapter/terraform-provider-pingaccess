@@ -1,13 +1,18 @@
-## 0.9.0 (Unreleased)
+## 0.9.0 (March 9th, 2022)
 
 NOTES:
 
 * This release has been built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
-* PingIdentity no longer publish docker images for 5.3x so testing for this version of PingAccess is no longer possible.
+
+FEATUERS:
+
+* Support for virtual resources of applications. (#98)
 
 BUG FIXES:
 
 * Fix bug with state upgrade for `pingaccess_access_token_validator`. (#92)
+* Fix ordering of policy rules on `pingaccess_ruleset`. (#111)
+* Fix panic when using private key jwt on websession. (#116)
 
 ## 0.8.0 (August 26th, 2021)
 
