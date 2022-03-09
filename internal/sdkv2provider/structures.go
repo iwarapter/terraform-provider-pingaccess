@@ -170,7 +170,7 @@ func expandOAuthClientCredentialsView(in []interface{}) *models.OAuthClientCrede
 		if val, ok := l["client_id"]; ok {
 			hf.ClientId = String(val.(string))
 		}
-		if val, ok := l["client_secret"]; ok {
+		if val, ok := l["client_secret"]; ok && len(val.([]interface{})) > 0 {
 			hf.ClientSecret = expandHiddenFieldView(val.([]interface{}))
 		}
 		if val, ok := l["credentials_type"]; ok {
@@ -536,6 +536,7 @@ func hashString(s string) int {
 func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCredentialsView, trackPasswords bool, diags *diag.Diagnostics) {
 	pw, ok := d.GetOk("client_credentials.0.client_secret.0.value")
 	creds := flattenOAuthClientCredentialsView(input)
+
 	if input.KeyPairId != nil {
 		creds[0]["key_pair_id"] = *input.KeyPairId
 	}
@@ -545,7 +546,7 @@ func setClientCredentials(d *schema.ResourceData, input *models.OAuthClientCrede
 		//set the resource state default
 		creds[0]["credentials_type"] = "SECRET"
 	}
-	if trackPasswords {
+	if _, hasClientSecret := creds[0]["client_secret"]; hasClientSecret && trackPasswords {
 		enc, encOk := d.GetOk("client_credentials.0.client_secret.0.encrypted_value")
 		creds[0]["client_secret"].([]map[string]interface{})[0]["value"] = pw
 		if err := d.Set("client_credentials", creds); err != nil {

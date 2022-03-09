@@ -93,6 +93,42 @@ func TestAccPingAccessWebSession(t *testing.T) {
 	})
 }
 
+func TestAccPingAccessWebSessionPrivateKeyJwt(t *testing.T) {
+	resourceName := "pingaccess_websession.demo_session"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProviders,
+		CheckDestroy:             testAccCheckPingAccessWebSessionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPingAccessWebSessionPrivateKeyJwtConfig("woot"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "audience", "woot"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo-session-two"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_id", "websession"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.credentials_type", "PRIVATE_KEY_JWT"),
+				),
+			},
+			{
+				Config: testAccPingAccessWebSessionPrivateKeyJwtConfig("bar"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessWebSessionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "audience", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "name", "acctest_demo-session-two"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.client_id", "websession"),
+					resource.TestCheckResourceAttr(resourceName, "client_credentials.0.credentials_type", "PRIVATE_KEY_JWT"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckPingAccessWebSessionDestroy(s *terraform.State) error {
 	return nil
 }
@@ -115,6 +151,19 @@ func testAccPingAccessWebSessionConfig(audience, password string) string {
 			"phone"
 		]
 	}`, audience, password)
+}
+
+func testAccPingAccessWebSessionPrivateKeyJwtConfig(audience string) string {
+	return fmt.Sprintf(`
+	resource "pingaccess_websession" "demo_session" {
+		name = "acctest_demo-session-two"
+		audience = "%s"
+		client_credentials {
+			client_id = "websession"
+			credentials_type = "PRIVATE_KEY_JWT"
+		}
+		scopes = ["profile","address","email","phone"]
+	}`, audience)
 }
 
 func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
