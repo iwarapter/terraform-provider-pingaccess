@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
-	tfmux "github.com/hashicorp/terraform-plugin-mux"
+	tfmux "github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/siteAuthenticators"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -193,11 +193,11 @@ func TestAccPingAccessSiteAuthenticatorIssue72(t *testing.T) {
 			"pingaccess": func() (tfprotov5.ProviderServer, error) {
 				ctx := context.Background()
 				sdkv2 := sdkv2provider.Provider()
-				factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2.GRPCProvider, Server)
+				factory, err := tfmux.NewMuxServer(ctx, sdkv2.GRPCProvider, Server)
 				if err != nil {
 					return nil, err
 				}
-				return factory.Server(), nil
+				return factory.ProviderServer(), nil
 			},
 		},
 		CheckDestroy: testAccCheckPingAccessSiteAuthenticatorDestroy,

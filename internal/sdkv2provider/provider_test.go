@@ -18,7 +18,7 @@ import (
 	"github.com/iwarapter/pingaccess-sdk-go/v62/services/version"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	tfmux "github.com/hashicorp/terraform-plugin-mux"
+	tfmux "github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	paCfg "github.com/iwarapter/pingaccess-sdk-go/v62/pingaccess/config"
@@ -94,11 +94,11 @@ func init() {
 		"pingaccess": func() (tfprotov5.ProviderServer, error) {
 			ctx := context.Background()
 			sdkv2 := testAccProvider.GRPCProvider
-			factory, err := tfmux.NewSchemaServerFactory(ctx, sdkv2, protocol.Server)
+			factory, err := tfmux.NewMuxServer(ctx, sdkv2, protocol.Server)
 			if err != nil {
 				return nil, err
 			}
-			return factory.Server(), nil
+			return factory.ProviderServer(), nil
 		},
 	}
 }
