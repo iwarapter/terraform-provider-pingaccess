@@ -95,6 +95,7 @@ func resourcePingAccessApplicationResourceSchema() map[string]*schema.Schema {
 		"path_prefixes": {
 			Type:       schema.TypeSet,
 			Optional:   true,
+			Computed:   true,
 			Deprecated: "To be removed in a future release; please use 'path_patterns' instead",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -311,11 +312,6 @@ func resourcePingAccessApplicationResourceReadData(d *schema.ResourceData) *mode
 	resource.Enabled = Bool(d.Get("enabled").(bool))
 	resource.RootResource = Bool(d.Get("root_resource").(bool))
 	resource.Unprotected = Bool(d.Get("unprotected").(bool))
-
-	if v, ok := d.GetOk("path_prefixes"); ok {
-		pathPrefixes := expandStringList(v.(*schema.Set).List())
-		resource.PathPrefixes = &pathPrefixes
-	}
 
 	if v, ok := d.GetOk("path_patterns"); ok {
 		pathPatterns := v.(*schema.Set).List()

@@ -128,10 +128,6 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
     type    = "WILDCARD"
   }
 
-  path_prefixes = [
-	"/as/token.oauth2",
-	"%s"
-  ]
   audit_level = "OFF"
   anonymous = false
   enabled = true
@@ -157,9 +153,6 @@ resource "pingaccess_application_resource" "app_res_virtual_resource" {
     type    = "WILDCARD"
   }
 
-  path_prefixes = [
-	"/virtual"
-  ]
   audit_level = "OFF"
   anonymous = false
   enabled = true
@@ -189,10 +182,6 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
   methods = [
     "*"
 	]
-
-  path_prefixes = [
-		"/*"
-  ]
 
   path_patterns {
     pattern = "/*"
@@ -259,7 +248,7 @@ resource "pingaccess_rule" "acc_test_resource_rule_two" {
 	}
 	EOF
 }
-	`, name, context, context, policy)
+	`, name, context, policy)
 }
 
 func testAccCheckPingAccessApplicationResourceExists(n string) resource.TestCheckFunc {
@@ -341,13 +330,12 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				Enabled:                 Bool(false),
 				Methods:                 &[]*string{String("false")},
 				Name:                    String("false"),
-				// PathPatterns: []*pa.PathPatternView{
-				// 	&pa.PathPatternView{
-				// 		Pattern: String("/*"),
-				// 		Type:    String("WILDCARD"),
-				// 	},
-				// },
-				PathPrefixes: &[]*string{String("false")},
+				PathPatterns: []*models.PathPatternView{
+					{
+						Pattern: String("/*"),
+						Type:    String("WILDCARD"),
+					},
+				},
 				Policy: map[string]*[]*models.PolicyItem{
 					"Web": {
 						{
@@ -376,13 +364,12 @@ func Test_resourcePingAccessApplicationResourceReadData(t *testing.T) {
 				Enabled:                 Bool(false),
 				Methods:                 &[]*string{String("false")},
 				Name:                    String("false"),
-				// PathPatterns: []*pa.PathPatternView{
-				// 	&pa.PathPatternView{
-				// 		Pattern: String("/*"),
-				// 		Type:    String("WILDCARD"),
-				// 	},
-				// },
-				PathPrefixes: &[]*string{String("false")},
+				PathPatterns: []*models.PathPatternView{
+					{
+						Pattern: String("/*"),
+						Type:    String("WILDCARD"),
+					},
+				},
 				Policy: map[string]*[]*models.PolicyItem{
 					"Web": {
 						{
