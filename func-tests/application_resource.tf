@@ -15,11 +15,6 @@ resource "pingaccess_application_resource" "demo_application_resource" {
     type    = "WILDCARD"
   }
 
-  path_prefixes = [
-    "/as/token.oauth2",
-    "/foo",
-  ]
-
   audit_level    = "OFF"
   anonymous      = false
   enabled        = true

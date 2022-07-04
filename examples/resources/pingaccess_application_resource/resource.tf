@@ -1,7 +1,6 @@
 resource "pingaccess_application_resource" "app_res_test_root_resource" {
   name           = "Root Resource"
   methods        = ["*"]
-  path_prefixes  = ["/*"]
   audit_level    = "ON"
   anonymous      = false
   enabled        = true
