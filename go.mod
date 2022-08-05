@@ -12,8 +12,8 @@ require (
 	github.com/iwarapter/pingaccess-sdk-go/v60 v60.0.0-20210823205911-0b96ee7c642e
 	github.com/iwarapter/pingaccess-sdk-go/v62 v62.0.0-20210823213316-eaec13608a5f
 	github.com/stretchr/testify v1.7.2
-	github.com/tidwall/gjson v1.14.1
-	github.com/tidwall/sjson v1.2.4
+	github.com/tidwall/gjson v1.14.2
+	github.com/tidwall/sjson v1.2.5
 )
 
 require (
