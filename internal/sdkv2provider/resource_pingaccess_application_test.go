@@ -214,6 +214,43 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 			"phone"
 		]
 	}
+
+resource "pingaccess_application" "app_res_test" {
+	access_validator_id = 0
+	application_type 	= "Web"
+	agent_id			= 0
+	name				= "acc_test_regex"
+	context_root		= "/ordering"
+	default_auth_type	= "Web"
+	destination			= "Site"
+	manual_ordering_enabled = true
+	site_id				= pingaccess_site.acc_test_site.id
+	virtual_host_ids	= [pingaccess_virtualhost.acc_test_virtualhost.id]
+
+	identity_mapping_ids {
+		web = 0
+		api = 0
+	}
+}
+
+resource "pingaccess_application_resource" "app_res_test_resource" {
+  name = "acc_test_regex_pattern"
+  methods = ["*"]
+
+  path_patterns {
+    pattern = "/.*"
+    type    = "REGEX"
+  }
+
+  audit_level = "OFF"
+  anonymous = false
+  enabled = true
+  root_resource = false
+  application_id = pingaccess_application.app_res_test.id
+  resource_type = "Standard"
+}
+
+
 	`, name, context, appType, appType, block, oauth, os.Getenv("PINGFEDERATE_TEST_IP"))
 }
 

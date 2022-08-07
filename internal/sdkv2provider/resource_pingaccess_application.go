@@ -108,6 +108,12 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 				},
 			},
 		},
+		"manual_ordering_enabled": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Enable explicit, manual ordering of application resources and permit regex path patterns.",
+		},
 		"name": {
 			Type:        schema.TypeString,
 			Required:    true,
@@ -216,6 +222,7 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.
 	setResourceDataStringWithDiagnostic(d, "destination", rv.Destination, &diags)
 	setResourceDataBoolWithDiagnostic(d, "enabled", rv.Enabled, &diags)
 	setResourceDataStringWithDiagnostic(d, "name", rv.Name, &diags)
+	setResourceDataBoolWithDiagnostic(d, "manual_ordering_enabled", rv.ManualOrderingEnabled, &diags)
 	setResourceDataStringWithDiagnostic(d, "realm", rv.Realm, &diags)
 	setResourceDataBoolWithDiagnostic(d, "require_https", rv.RequireHTTPS, &diags)
 	siteID := strconv.Itoa(*rv.SiteId)
@@ -302,6 +309,9 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *models.Appli
 
 	if _, ok := d.GetOk("realm"); ok {
 		application.Realm = String(d.Get("realm").(string))
+	}
+	if v, ok := d.GetOk("manual_ordering_enabled"); ok {
+		application.ManualOrderingEnabled = Bool(v.(bool))
 	}
 
 	if _, ok := d.GetOk("require_https"); ok {
