@@ -17,10 +17,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pingaccess-version: [ 6.2.2, 6.3.3, 7.0.3 ]
+        pingaccess-version: [ 6.2.2, 6.3.4, 7.0.4, 7.1.0 ]
     services:
       pingaccess:
-        image: pingidentity/pingaccess:${{ matrix.pingaccess-version }}-edge
+        image: ghcr.io/iwarapter/pingaccess:${{ matrix.pingaccess-version }}-edge
         env:
           PING_IDENTITY_ACCEPT_EULA: YES
           IMAGE_VERSION: pingaccess-alpine-az11-${{ matrix.pingaccess-version }}-${{ needs.getdate.outputs.date }}-b5f4
