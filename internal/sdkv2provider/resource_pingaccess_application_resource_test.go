@@ -80,7 +80,7 @@ func testAccCheckPingAccessApplicationResourceDestroy(s *terraform.State) error 
 func testAccPingAccessApplicationResourceConfig(name string, context string, policy string) string {
 	return fmt.Sprintf(`
 resource "pingaccess_site" "app_res_test_site" {
-  name                       = "acc_test_app_res_test_site"
+  name                       = "acctest_app_res_test_site"
   targets                    = ["localhost:4321"]
   max_connections            = -1
   max_web_socket_connections = -1

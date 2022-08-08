@@ -92,7 +92,7 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 	}
 	return fmt.Sprintf(`
 resource "pingaccess_site" "acc_test_site" {
-  name                       = "acc_test_site"
+  name                       = "acctest_site"
   targets                    = ["localhost:4321"]
   max_connections            = -1
   max_web_socket_connections = -1
@@ -226,7 +226,6 @@ resource "pingaccess_application" "app_res_test" {
   manual_ordering_enabled = true
   site_id                 = pingaccess_site.acc_test_site.id
   virtual_host_ids        = [pingaccess_virtualhost.acc_test_virtualhost.id]
-
   identity_mapping_ids {
     web = 0
     api = 0
@@ -313,7 +312,8 @@ func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 					},
 					"Web": {},
 				},
-				WebSessionId: Int(0),
+				ManualOrderingEnabled: Bool(true),
+				WebSessionId:          Int(0),
 			},
 		},
 	}
@@ -356,7 +356,8 @@ func Test_issue48(t *testing.T) {
 			},
 			"Web": {},
 		},
-		WebSessionId: Int(0),
+		ManualOrderingEnabled: Bool(true),
+		WebSessionId:          Int(0),
 	}
 
 	resourceSchema := resourcePingAccessApplicationSchema()
