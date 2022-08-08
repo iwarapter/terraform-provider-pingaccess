@@ -76,31 +76,31 @@ func testAccCheckPingAccessLoadBalancingStrategyDestroy(s *terraform.State) erro
 
 func testAccPingAccessLoadBalancingStrategyConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_load_balancing_strategy" "test" {
-		name = "acctest_example"
-		class_name = "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"
-		configuration = <<EOF
+resource "pingaccess_load_balancing_strategy" "test" {
+  name          = "acctest_example"
+  class_name    = "com.pingidentity.pa.ha.lb.header.HeaderBasedLoadBalancingPlugin"
+  configuration = <<EOF
 		{
 			"headerName": "%s",
 			"fallbackToFirstAvailableHost": false
 		}
 		EOF
-	}`, configUpdate)
+}`, configUpdate)
 }
 
 func testAccPingAccessLoadBalancingStrategyConfigInvalidClassName() string {
 	return `
-	resource "pingaccess_load_balancing_strategy" "test" {
-		class_name = "com.pingidentity.pa.ha.lb.header.foo"
-		name = "foo"
+resource "pingaccess_load_balancing_strategy" "test" {
+  class_name = "com.pingidentity.pa.ha.lb.header.foo"
+  name       = "foo"
 
-		configuration = <<EOF
+  configuration = <<EOF
 		{
 			"headerName": "foo",
 			"fallbackToFirstAvailableHost": false
 		}
 		EOF
-	}`
+}`
 }
 
 func testAccCheckPingAccessLoadBalancingStrategyExists(n string) resource.TestCheckFunc {

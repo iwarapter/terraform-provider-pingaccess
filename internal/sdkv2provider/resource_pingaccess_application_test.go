@@ -91,63 +91,63 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 		}`
 	}
 	return fmt.Sprintf(`
-	resource "pingaccess_site" "acc_test_site" {
-		name                         = "acc_test_site"
-		targets                      = ["localhost:4321"]
-		max_connections              = -1
-		max_web_socket_connections   = -1
-		availability_profile_id      = 1
-	}
+resource "pingaccess_site" "acc_test_site" {
+  name                       = "acc_test_site"
+  targets                    = ["localhost:4321"]
+  max_connections            = -1
+  max_web_socket_connections = -1
+  availability_profile_id    = 1
+}
 
-	resource "pingaccess_virtualhost" "acc_test_virtualhost" {
-		host                         = "acctest-localhost"
-		port                         = 4001
-		agent_resource_cache_ttl     = 900
-		key_pair_id                  = 0
-		trusted_certificate_group_id = 0
- }
+resource "pingaccess_virtualhost" "acc_test_virtualhost" {
+  host                         = "acctest-localhost"
+  port                         = 4001
+  agent_resource_cache_ttl     = 900
+  key_pair_id                  = 0
+  trusted_certificate_group_id = 0
+}
 
-	resource "pingaccess_application" "acc_test" {
-		access_validator_id = 0
-		application_type 		= "Web"
-		agent_id						= 0
-		name								= "%s"
-		context_root				= "%s"
-		destination					= "Site"
-		site_id							= "${pingaccess_site.acc_test_site.id}"
-		spa_support_enabled = false
-		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
-		web_session_id 			= "${pingaccess_websession.my_session.id}"
+resource "pingaccess_application" "acc_test" {
+  access_validator_id = 0
+  application_type    = "Web"
+  agent_id            = 0
+  name                = "%s"
+  context_root        = "%s"
+  destination         = "Site"
+  site_id             = "${pingaccess_site.acc_test_site.id}"
+  spa_support_enabled = false
+  virtual_host_ids    = ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
+  web_session_id      = "${pingaccess_websession.my_session.id}"
 
-		// identity_mapping_ids {
-		// 	web = 0
-		// 	api = 0
-		// }
+  // identity_mapping_ids {
+  // 	web = 0
+  // 	api = 0
+  // }
 
-		policy {
-			web {
-				type = "Rule"
-				id = "${pingaccess_rule.acc_test_app_rule.id}"
-			}
-		}
-	}
+  policy {
+    web {
+      type = "Rule"
+      id   = "${pingaccess_rule.acc_test_app_rule.id}"
+    }
+  }
+}
 
-	resource "pingaccess_application" "acc_test_two" {
-		application_type 		= "%s"
-		agent_id						= 0
-		name								= "api-demo"
-		context_root				= "/"
-		default_auth_type		= "%s"
-		destination					= "Site"
-		site_id							= "${pingaccess_site.acc_test_site.id}"
-		virtual_host_ids		= ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
-	}
+resource "pingaccess_application" "acc_test_two" {
+  application_type  = "%s"
+  agent_id          = 0
+  name              = "api-demo"
+  context_root      = "/"
+  default_auth_type = "%s"
+  destination       = "Site"
+  site_id           = "${pingaccess_site.acc_test_site.id}"
+  virtual_host_ids  = ["${pingaccess_virtualhost.acc_test_virtualhost.id}"]
+}
 
-	resource "pingaccess_identity_mapping" "idm_foo" {
-		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
-		name       = "acctest_foo"
+resource "pingaccess_identity_mapping" "idm_foo" {
+  class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
+  name       = "acctest_foo"
 
-		configuration = <<EOF
+  configuration = <<EOF
 		{
 			%s
 			"attributeHeaderMappings": [
@@ -160,16 +160,16 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 			"headerClientCertificateMappings": []
 		}
 		EOF
-	}
+}
 
-	resource "pingaccess_rule" "acc_test_app_rule" {
-		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "acctest_app_rule"
-		supported_destinations = [
-			"Site",
-			"Agent"
-		]
-		configuration = <<EOF
+resource "pingaccess_rule" "acc_test_app_rule" {
+  class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+  name       = "acctest_app_rule"
+  supported_destinations = [
+    "Site",
+    "Agent"
+  ]
+  configuration = <<EOF
 		{
 			"cidrNotation": "127.0.0.1/32",
 			"negate": false,
@@ -185,56 +185,56 @@ func testAccPingAccessApplicationConfig(name, context, appType string) string {
 			"rejectionHandlingEnabled": false
 		}
 		EOF
-	}
+}
 
-	resource "pingaccess_pingfederate_oauth" "app_demo_pfo" {
+resource "pingaccess_pingfederate_oauth" "app_demo_pfo" {
 		%s
-		subject_attribute_name = "sany"
-	}
+  subject_attribute_name = "sany"
+}
 
-	resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-		issuer = "%s"
-		trusted_certificate_group_id = 2
-	}
+resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
+  issuer                       = "%s"
+  trusted_certificate_group_id = 2
+}
 
-	resource "pingaccess_websession" "my_session" {
-		depends_on = [pingaccess_pingfederate_runtime.app_demo_pfr, pingaccess_pingfederate_oauth.app_demo_pfo]
-		name = "acctest_session"
-		audience = "all"
-		client_credentials {
-			client_id = "websession"
-			client_secret {
-				value = "secret"
-			}
-		}
-		scopes = [
-			"profile",
-			"address",
-			"email",
-			"phone"
-		]
-	}
+resource "pingaccess_websession" "my_session" {
+  depends_on = [pingaccess_pingfederate_runtime.app_demo_pfr, pingaccess_pingfederate_oauth.app_demo_pfo]
+  name       = "acctest_session"
+  audience   = "all"
+  client_credentials {
+    client_id = "websession"
+    client_secret {
+      value = "secret"
+    }
+  }
+  scopes = [
+    "profile",
+    "address",
+    "email",
+    "phone"
+  ]
+}
 
 resource "pingaccess_application" "app_res_test" {
-	access_validator_id = 0
-	application_type 	= "Web"
-	agent_id			= 0
-	name				= "acc_test_regex"
-	context_root		= "/ordering"
-	default_auth_type	= "Web"
-	destination			= "Site"
-	manual_ordering_enabled = true
-	site_id				= pingaccess_site.acc_test_site.id
-	virtual_host_ids	= [pingaccess_virtualhost.acc_test_virtualhost.id]
+  access_validator_id     = 0
+  application_type        = "Web"
+  agent_id                = 0
+  name                    = "acc_test_regex"
+  context_root            = "/ordering"
+  default_auth_type       = "Web"
+  destination             = "Site"
+  manual_ordering_enabled = true
+  site_id                 = pingaccess_site.acc_test_site.id
+  virtual_host_ids        = [pingaccess_virtualhost.acc_test_virtualhost.id]
 
-	identity_mapping_ids {
-		web = 0
-		api = 0
-	}
+  identity_mapping_ids {
+    web = 0
+    api = 0
+  }
 }
 
 resource "pingaccess_application_resource" "app_res_test_resource" {
-  name = "acc_test_regex_pattern"
+  name    = "acc_test_regex_pattern"
   methods = ["*"]
 
   path_patterns {
@@ -242,13 +242,15 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
     type    = "REGEX"
   }
 
-  audit_level = "OFF"
-  anonymous = false
-  enabled = true
-  root_resource = false
+  audit_level    = "OFF"
+  anonymous      = false
+  enabled        = true
+  root_resource  = false
   application_id = pingaccess_application.app_res_test.id
-  resource_type = "Standard"
+  resource_type  = "Standard"
 }
+
+
 
 
 	`, name, context, appType, appType, block, oauth, os.Getenv("PINGFEDERATE_TEST_IP"))

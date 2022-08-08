@@ -88,12 +88,12 @@ func testAccCheckPingAccessThirdPartyServiceDestroy(s *terraform.State) error {
 
 func testAccPingAccessThirdPartyServiceConfig(name, target string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_third_party_service" "demo_tps" {
-		name = "%s"
-		targets = [
-			"%s"
-		]
-	}`, name, target)
+resource "pingaccess_third_party_service" "demo_tps" {
+  name = "%s"
+  targets = [
+    "%s"
+  ]
+}`, name, target)
 }
 
 func testAccCheckPingAccessThirdPartyServiceExists(n string) resource.TestCheckFunc {

@@ -76,11 +76,11 @@ func testAccCheckPingAccessAvailabilityProfileDestroy(s *terraform.State) error 
 
 func testAccPingAccessAvailabilityProfileConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_availability_profile" "test" {
-		class_name = "com.pingidentity.pa.ha.availability.ondemand.OnDemandAvailabilityPlugin"
-		name = "acctest_foo"
+resource "pingaccess_availability_profile" "test" {
+  class_name = "com.pingidentity.pa.ha.availability.ondemand.OnDemandAvailabilityPlugin"
+  name       = "acctest_foo"
 
-		configuration = <<EOF
+  configuration = <<EOF
 		{
 			"connectTimeout": %s,
 			"pooledConnectionTimeout": -1,
@@ -91,16 +91,16 @@ func testAccPingAccessAvailabilityProfileConfig(configUpdate string) string {
 			"failureHttpStatusCodes": []
 		}
 		EOF
-	}`, configUpdate)
+}`, configUpdate)
 }
 
 func testAccPingAccessAvailabilityProfileConfigInvalidClassName() string {
 	return `
-	resource "pingaccess_availability_profile" "test" {
-		class_name = "com.pingidentity.pa.AvailabilityProfiles.foo"
-		name = "foo"
+resource "pingaccess_availability_profile" "test" {
+  class_name = "com.pingidentity.pa.AvailabilityProfiles.foo"
+  name       = "foo"
 
-		configuration = <<EOF
+  configuration = <<EOF
 		{
 			"description": null,
 			"path": "/foo",
@@ -109,7 +109,7 @@ func testAccPingAccessAvailabilityProfileConfigInvalidClassName() string {
 			"audience": null
 		}
 		EOF
-	}`
+}`
 }
 
 func testAccCheckPingAccessAvailabilityProfileExists(n string) resource.TestCheckFunc {

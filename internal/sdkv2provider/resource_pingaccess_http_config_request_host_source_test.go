@@ -52,13 +52,13 @@ func testAccCheckPingAccessHTTPConfigRequestHostSourceDestroy(s *terraform.State
 
 func testAccPingAccessHTTPConfigRequestHostSourceConfig(header, location string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_http_config_request_host_source" "demo" {
-		header_name_list = [
-			"Host",
-			"%s"
-		]
-		list_value_location = "%s"
-	}`, header, location)
+resource "pingaccess_http_config_request_host_source" "demo" {
+  header_name_list = [
+    "Host",
+    "%s"
+  ]
+  list_value_location = "%s"
+}`, header, location)
 }
 
 func testAccCheckPingAccessHTTPConfigRequestHostSourceExists(n string) resource.TestCheckFunc {

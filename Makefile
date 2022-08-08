@@ -19,9 +19,16 @@ checks:
 	@gosec ./...
 	@goimports -w internal
 
+fmt:
+	@find ./internal/sdkv2provider -type f -name '*_test.go' | sort -u | xargs -I {} terrafmt fmt --fmtcompat {}
+	@find ./internal/framework -type f -name '*_test.go' | sort -u | xargs -I {} terrafmt fmt --fmtcompat {}
+
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
 	go test ./... -v -sweep=all -timeout 60m
+
+install:
+	@go install -gcflags "all=-trimpath=$GOPATH" -mod=vendor .
 
 test-proto:
 	@TF_ACC=1 go test -mod=vendor ./internal/protocolprovider -v -trimpath

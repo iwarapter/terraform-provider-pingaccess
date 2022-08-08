@@ -165,45 +165,45 @@ func testAccCheckPingAccessPingFederateRuntimeDestroy(_ *terraform.State) error 
 
 func testAccPingAccessPingFederateRuntimeConfig(issuer, configChange string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_pingfederate_runtime" "demo" {
-		description = "%s"
-		issuer = "%s"
-		skip_hostname_verification = true
-		sts_token_exchange_endpoint = "https://foo/bar"
-		use_slo = false
-		trusted_certificate_group_id = 2
-		use_proxy = true
-	}`, configChange, issuer)
+resource "pingaccess_pingfederate_runtime" "demo" {
+  description                  = "%s"
+  issuer                       = "%s"
+  skip_hostname_verification   = true
+  sts_token_exchange_endpoint  = "https://foo/bar"
+  use_slo                      = false
+  trusted_certificate_group_id = 2
+  use_proxy                    = true
+}`, configChange, issuer)
 }
 
 func testAccPingAccessPingFederateDeprecatedRuntimeConfig(host, port, configChange string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_pingfederate_runtime" "demo" {
-		host = "%s"
-		port = %s
-		audit_level = "%s"
-		skip_hostname_verification = true
-		use_slo = false
-		trusted_certificate_group_id = 2
-		use_proxy = true
-  		back_channel_secure = true
-	}`, host, port, configChange)
+resource "pingaccess_pingfederate_runtime" "demo" {
+  host                         = "%s"
+  port                         = %s
+  audit_level                  = "%s"
+  skip_hostname_verification   = true
+  use_slo                      = false
+  trusted_certificate_group_id = 2
+  use_proxy                    = true
+  back_channel_secure          = true
+}`, host, port, configChange)
 }
 
 func testAccPingAccessPingFederateNewRuntimeConfig(host, port, configChange string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_pingfederate_runtime" "demo" {
-		targets = ["%s:%s"]
-		audit_level = "%s"
-		skip_hostname_verification = true
-		use_slo = false
-		trusted_certificate_group_id = 2
-		use_proxy = true
-		application {
-	    	primary_virtual_host_id = 1
-  		}
-  		back_channel_secure = true
-	}`, host, port, configChange)
+resource "pingaccess_pingfederate_runtime" "demo" {
+  targets                      = ["%s:%s"]
+  audit_level                  = "%s"
+  skip_hostname_verification   = true
+  use_slo                      = false
+  trusted_certificate_group_id = 2
+  use_proxy                    = true
+  application {
+    primary_virtual_host_id = 1
+  }
+  back_channel_secure = true
+}`, host, port, configChange)
 }
 
 func testAccCheckPingAccessPingFederateRuntimeExists(n string) resource.TestCheckFunc {

@@ -77,10 +77,10 @@ func testAccCheckPingAccessAcmeServerDestroy(s *terraform.State) error {
 
 func testAccPingAccessAcmeServerConfig(url string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_acme_server" "acc_test" {
-	   	name 				= "acctest_foo"
-	   	url 				= "%s"
-	}`, url)
+resource "pingaccess_acme_server" "acc_test" {
+  name = "acctest_foo"
+  url  = "%s"
+}`, url)
 }
 
 func testAccCheckPingAccessAcmeServerExists(n string) resource.TestCheckFunc {

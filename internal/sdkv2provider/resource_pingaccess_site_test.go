@@ -95,14 +95,14 @@ func testAccCheckPingAccessSiteDestroy(s *terraform.State) error {
 
 func testAccPingAccessSiteConfig(name string, targets []string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_site" "acc_test" {
-		name                         = "%s"
-		targets                      = ["%s"]
-		max_connections              = -1
-		max_web_socket_connections   = -1
-		availability_profile_id      = 1
-		use_target_host_header     	 = false
-	}`, name, strings.Join(targets, ","))
+resource "pingaccess_site" "acc_test" {
+  name                       = "%s"
+  targets                    = ["%s"]
+  max_connections            = -1
+  max_web_socket_connections = -1
+  availability_profile_id    = 1
+  use_target_host_header     = false
+}`, name, strings.Join(targets, ","))
 }
 
 func testAccCheckPingAccessSiteExists(n string) resource.TestCheckFunc {

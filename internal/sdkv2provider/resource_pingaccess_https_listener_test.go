@@ -54,9 +54,9 @@ func testAccCheckPingAccessHTTPSListenerDestroy(s *terraform.State) error {
 func testAccPingAccessHTTPSListenerConfig(cipher bool) string {
 	return fmt.Sprintf(`
 resource "pingaccess_https_listener" "acc_test" {
-	name   						  = "ADMIN"
-	key_pair_id 				  = 1
-	use_server_cipher_suite_order = %t
+  name                          = "ADMIN"
+  key_pair_id                   = 1
+  use_server_cipher_suite_order = %t
 }`, cipher)
 }
 

@@ -71,21 +71,21 @@ func TestAccPingAccessRuleSet(t *testing.T) {
 
 func testAccPingAccessRuleSetConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_ruleset" "ruleset_one" {
-		name             = "acctest_ruleset-one"
-		success_criteria = "%s"
-		element_type     = "Rule"
-		policy = [pingaccess_rule.ruleset_rule_one.id]
-	}
+resource "pingaccess_ruleset" "ruleset_one" {
+  name             = "acctest_ruleset-one"
+  success_criteria = "%s"
+  element_type     = "Rule"
+  policy           = [pingaccess_rule.ruleset_rule_one.id]
+}
 
-	resource "pingaccess_rule" "ruleset_rule_one" {
-		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "acctest_ruleset-rule-one"
-		supported_destinations = [
-			"Site",
-			"Agent"
-		]
-		configuration = <<EOF
+resource "pingaccess_rule" "ruleset_rule_one" {
+  class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+  name       = "acctest_ruleset-rule-one"
+  supported_destinations = [
+    "Site",
+    "Agent"
+  ]
+  configuration = <<EOF
 		{
 			"cidrNotation": "127.0.0.1/32",
 			"negate": false,
@@ -101,7 +101,7 @@ func testAccPingAccessRuleSetConfig(configUpdate string) string {
 			"rejectionHandlingEnabled": false
 		}
 		EOF
-	}`, configUpdate)
+}`, configUpdate)
 }
 
 func testAccCheckPingAccessRuleSetAttributes(n string) resource.TestCheckFunc {

@@ -69,17 +69,17 @@ func testAccCheckPingAccessCertificateDestroy(s *terraform.State) error {
 
 func testAccPingAccessCertificateConfig(name string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_trusted_certificate_group" "test" {
-		name = "acctest_tcg"
-		cert_ids = [
-			pingaccess_certificate.test.id
-		]
-	}
+resource "pingaccess_trusted_certificate_group" "test" {
+  name = "acctest_tcg"
+  cert_ids = [
+    pingaccess_certificate.test.id
+  ]
+}
 
-	resource "pingaccess_certificate" "test" {
-		alias = "acctest_%s"
-		file_data = base64encode(chomp(file("test_cases/amazon_root_ca1.pem")))
-	}`, name)
+resource "pingaccess_certificate" "test" {
+  alias     = "acctest_%s"
+  file_data = base64encode(chomp(file("test_cases/amazon_root_ca1.pem")))
+}`, name)
 }
 
 func testAccCheckPingAccessCertificateExists(n string) resource.TestCheckFunc {
