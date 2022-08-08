@@ -24,21 +24,21 @@ resource "pingaccess_acme_server" "example" {
 
 ### Required
 
-- **name** (String) A user-friendly name for the ACME server.
-- **url** (String) The URL of the ACME directory resource on the ACME server.
+- `name` (String) A user-friendly name for the ACME server.
+- `url` (String) The URL of the ACME directory resource on the ACME server.
 
 ### Read-Only
 
-- **acme_accounts** (Block List) An array of references to accounts. This array is read-only. (see [below for nested schema](#nestedblock--acme_accounts))
-- **id** (String) The ID of this resource.
+- `acme_accounts` (Block List) An array of references to accounts. This array is read-only. (see [below for nested schema](#nestedblock--acme_accounts))
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--acme_accounts"></a>
 ### Nested Schema for `acme_accounts`
 
 Read-Only:
 
-- **id** (String) The id of the associated resource. When both id and location are specified, id takes precedence and location is ignored.
-- **location** (String) An absolute path to the associated resource.
+- `id` (String) The id of the associated resource. When both id and location are specified, id takes precedence and location is ignored.
+- `location` (String) An absolute path to the associated resource.
 
 ## Import
 

@@ -46,52 +46,52 @@ resource "pingaccess_pingfederate_runtime" "example_standard" {
 
 ### Optional
 
-- **application** (Block Set, Max: 1) Application configuration for the PingFederate runtime application proxied by PingAccess. (see [below for nested schema](#nestedblock--application))
-- **audit_level** (String, Deprecated) Enable to record requests to PingFederate to the audit store.
-- **availability_profile_id** (Number)
-- **back_channel_base_path** (String, Deprecated) The base path, if needed, for the PingFederate Runtime accessed using a Back Channel hostname. This field is ignored when the PingFederate application is configured.
-- **back_channel_secure** (Boolean, Deprecated) Enable if PingFederate is expecting HTTPS connections for calls via the Back Channel hostnames.
-- **base_path** (String, Deprecated) The base path, if needed, for PingFederate Runtime. This field is ignored when the PingFederate application is configured.
-- **description** (String) The description of the PingFederate Runtime token provider.
-- **expected_hostname** (String, Deprecated) The name of the host expected in the certificate.
-- **host** (String, Deprecated) The host name or IP address for PingFederate Runtime. This field is ignored and can be an empty string when the PingFederate application is configured.
-- **issuer** (String) The issuer url of the PingFederate token provider.
-- **load_balancing_strategy_id** (Number)
-- **port** (Number, Deprecated) The port number for PingFederate Runtime. This field is ignored when the PingFederate application is configured.
-- **secure** (Boolean, Deprecated)
-- **skip_hostname_verification** (Boolean) Set to true if HTTP communications to PingFederate should not perform hostname verification of the certificate.
-- **sts_token_exchange_endpoint** (String) The url of the PingFederate STS token-to-token exchange endpoint that is used for token mediation. Specify if it is being served from a different host/port than the issuer is. Otherwise, it is assumed to be {issuer}/pf/sts.wst.
-- **targets** (Set of String, Deprecated)
-- **trusted_certificate_group_id** (Number) The group of certificates to use when authenticating to PingFederate.
-- **use_proxy** (Boolean) Set to true if a proxy should be used for HTTP or HTTPS requests.
-- **use_slo** (Boolean) Set to true if OIDC single log out should be used on the /pa/oidc/logout on the engines.
+- `application` (Block Set, Max: 1) Application configuration for the PingFederate runtime application proxied by PingAccess. (see [below for nested schema](#nestedblock--application))
+- `audit_level` (String, Deprecated) Enable to record requests to PingFederate to the audit store.
+- `availability_profile_id` (Number)
+- `back_channel_base_path` (String, Deprecated) The base path, if needed, for the PingFederate Runtime accessed using a Back Channel hostname. This field is ignored when the PingFederate application is configured.
+- `back_channel_secure` (Boolean, Deprecated) Enable if PingFederate is expecting HTTPS connections for calls via the Back Channel hostnames.
+- `base_path` (String, Deprecated) The base path, if needed, for PingFederate Runtime. This field is ignored when the PingFederate application is configured.
+- `description` (String) The description of the PingFederate Runtime token provider.
+- `expected_hostname` (String, Deprecated) The name of the host expected in the certificate.
+- `host` (String, Deprecated) The host name or IP address for PingFederate Runtime. This field is ignored and can be an empty string when the PingFederate application is configured.
+- `issuer` (String) The issuer url of the PingFederate token provider.
+- `load_balancing_strategy_id` (Number)
+- `port` (Number, Deprecated) The port number for PingFederate Runtime. This field is ignored when the PingFederate application is configured.
+- `secure` (Boolean, Deprecated)
+- `skip_hostname_verification` (Boolean) Set to true if HTTP communications to PingFederate should not perform hostname verification of the certificate.
+- `sts_token_exchange_endpoint` (String) The url of the PingFederate STS token-to-token exchange endpoint that is used for token mediation. Specify if it is being served from a different host/port than the issuer is. Otherwise, it is assumed to be {issuer}/pf/sts.wst.
+- `targets` (Set of String, Deprecated)
+- `trusted_certificate_group_id` (Number) The group of certificates to use when authenticating to PingFederate.
+- `use_proxy` (Boolean) Set to true if a proxy should be used for HTTP or HTTPS requests.
+- `use_slo` (Boolean) Set to true if OIDC single log out should be used on the /pa/oidc/logout on the engines.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--application"></a>
 ### Nested Schema for `application`
 
 Required:
 
-- **primary_virtual_host_id** (Number)
+- `primary_virtual_host_id` (Number)
 
 Optional:
 
-- **additional_virtual_host_ids** (Set of Number)
-- **case_sensitive** (Boolean)
-- **client_cert_header_names** (Set of String)
-- **context_root** (String)
-- **policy** (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--application--policy))
+- `additional_virtual_host_ids` (Set of Number)
+- `case_sensitive` (Boolean)
+- `client_cert_header_names` (Set of String)
+- `context_root` (String)
+- `policy` (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--application--policy))
 
 <a id="nestedblock--application--policy"></a>
 ### Nested Schema for `application.policy`
 
 Required:
 
-- **id** (String) The ID of the specific rule or ruleset.
-- **type** (String) If this is either a `Rule` or `RuleSet`.
+- `id` (String) The ID of the specific rule or ruleset.
+- `type` (String) If this is either a `Rule` or `RuleSet`.
 
 ## Import
 

@@ -39,13 +39,13 @@ resource "pingaccess_identity_mapping" "example" {
 
 ### Required
 
-- **class_name** (String) The identity mapping's class name.
-- **configuration** (String) The identity mapping's configuration data.
-- **name** (String) The name of the identity mapping.
+- `class_name` (String) The identity mapping's class name.
+- `configuration` (String) The identity mapping's configuration data.
+- `name` (String) The name of the identity mapping.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

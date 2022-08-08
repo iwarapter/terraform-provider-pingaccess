@@ -24,18 +24,18 @@ resource "pingaccess_virtualhost" "example" {
 
 ### Required
 
-- **host** (String) The host name for the Virtual Host.
-- **port** (Number) The integer port number for the Virtual Host.
+- `host` (String) The host name for the Virtual Host.
+- `port` (Number) The integer port number for the Virtual Host.
 
 ### Optional
 
-- **agent_resource_cache_ttl** (Number) Indicates the number of seconds the Agent can cache resources for this application.
-- **key_pair_id** (Number) Key pair assigned to Virtual Host used by SNI, If no key pair is assigned to a virtual host, ENGINE HTTPS Listener key pair will be used.
-- **trusted_certificate_group_id** (Number) Trusted Certificate Group assigned to Virtual Host for client certificate authentication.
+- `agent_resource_cache_ttl` (Number) Indicates the number of seconds the Agent can cache resources for this application.
+- `key_pair_id` (Number) Key pair assigned to Virtual Host used by SNI, If no key pair is assigned to a virtual host, ENGINE HTTPS Listener key pair will be used.
+- `trusted_certificate_group_id` (Number) Trusted Certificate Group assigned to Virtual Host for client certificate authentication.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

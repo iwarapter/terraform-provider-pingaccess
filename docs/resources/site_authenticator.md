@@ -50,13 +50,13 @@ resource "pingaccess_site_authenticator" "json_example" {
 
 ### Required
 
-- **class_name** (String) The site authenticator's class name.
-- **configuration** (Dynamic) The site authenticator's configuration data.
-- **name** (String) The site authenticator's name.
+- `class_name` (String) The site authenticator's class name.
+- `configuration` (Dynamic) The site authenticator's configuration data.
+- `name` (String) The site authenticator's name.
 
 ### Read-Only
 
-- **id** (String) When creating a new SiteAuthenticator, this is the ID for the SiteAuthenticator.
+- `id` (String) When creating a new SiteAuthenticator, this is the ID for the SiteAuthenticator.
 
 ## Import
 

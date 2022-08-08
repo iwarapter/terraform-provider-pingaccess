@@ -50,13 +50,13 @@ resource "pingaccess_access_token_validator" "heredoc" {
 
 ### Required
 
-- **class_name** (String) The access token validator's class name.
-- **configuration** (Dynamic) The access token validator's configuration data.
-- **name** (String) The access token validator's name.
+- `class_name` (String) The access token validator's class name.
+- `configuration` (Dynamic) The access token validator's configuration data.
+- `name` (String) The access token validator's name.
 
 ### Read-Only
 
-- **id** (String) When creating a new AccessTokenValidator, this is the ID for the AccessTokenValidator.
+- `id` (String) When creating a new AccessTokenValidator, this is the ID for the AccessTokenValidator.
 
 ## Import
 

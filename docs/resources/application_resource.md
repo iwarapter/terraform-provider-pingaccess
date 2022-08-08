@@ -45,35 +45,35 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
 
 ### Required
 
-- **application_id** (String) The id of the associated application. This field is read-only.
-- **methods** (Set of String) An array of HTTP methods configured for the resource.
-- **name** (String) The name of the resource.
+- `application_id` (String) The id of the associated application. This field is read-only.
+- `methods` (Set of String) An array of HTTP methods configured for the resource.
+- `name` (String) The name of the resource.
 
 ### Optional
 
-- **anonymous** (Boolean) True if the resource is anonymous.
-- **audit_level** (String) Indicates if audit logging is enabled for the resource.
-- **default_auth_type_override** (String) For Web + API applications (dynamic) default_auth_type selects the processing mode when a request: does not have a token (web session, OAuth bearer) or has both tokens. default_auth_type_override overrides the default_auth_type at the application level for this resource. A value of null indicates the resource should not override the default_auth_type.
-- **enabled** (Boolean) True if the resource is enabled.
-- **path_patterns** (Block Set) A list of one or more request path-matching patterns. (see [below for nested schema](#nestedblock--path_patterns))
-- **path_prefixes** (Set of String, Deprecated)
-- **policy** (Block List, Max: 1) A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items. (see [below for nested schema](#nestedblock--policy))
-- **resource_type** (String) The type of this resource. 'Standard' resources are those served by the protected applications. 'Virtual' resources do not have a corresponding resource in the protected application. Instead, when accessing the resource, PingAccess returns a response created by the response generator defined in the resource type configuration. The default type is 'Standard'.
-- **resource_type_configuration** (Block List) A container for configuration specific to different types of resources. (see [below for nested schema](#nestedblock--resource_type_configuration))
-- **root_resource** (Boolean) True if the resource is the root resource for the application.
-- **unprotected** (Boolean) True if the resource is unprotected.
+- `anonymous` (Boolean) True if the resource is anonymous.
+- `audit_level` (String) Indicates if audit logging is enabled for the resource.
+- `default_auth_type_override` (String) For Web + API applications (dynamic) default_auth_type selects the processing mode when a request: does not have a token (web session, OAuth bearer) or has both tokens. default_auth_type_override overrides the default_auth_type at the application level for this resource. A value of null indicates the resource should not override the default_auth_type.
+- `enabled` (Boolean) True if the resource is enabled.
+- `path_patterns` (Block Set) A list of one or more request path-matching patterns. (see [below for nested schema](#nestedblock--path_patterns))
+- `path_prefixes` (Set of String, Deprecated)
+- `policy` (Block List, Max: 1) A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items. (see [below for nested schema](#nestedblock--policy))
+- `resource_type` (String) The type of this resource. 'Standard' resources are those served by the protected applications. 'Virtual' resources do not have a corresponding resource in the protected application. Instead, when accessing the resource, PingAccess returns a response created by the response generator defined in the resource type configuration. The default type is 'Standard'.
+- `resource_type_configuration` (Block List) A container for configuration specific to different types of resources. (see [below for nested schema](#nestedblock--resource_type_configuration))
+- `root_resource` (Boolean) True if the resource is the root resource for the application.
+- `unprotected` (Boolean) True if the resource is unprotected.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--path_patterns"></a>
 ### Nested Schema for `path_patterns`
 
 Required:
 
-- **pattern** (String) The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type').
-- **type** (String) The pattern syntax type.
+- `pattern` (String) The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type').
+- `type` (String) The pattern syntax type.
 
 
 <a id="nestedblock--policy"></a>
@@ -81,16 +81,16 @@ Required:
 
 Optional:
 
-- **api** (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--api))
-- **web** (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--web))
+- `api` (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--api))
+- `web` (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--web))
 
 <a id="nestedblock--policy--api"></a>
 ### Nested Schema for `policy.api`
 
 Required:
 
-- **id** (String) The ID of the specific rule or ruleset.
-- **type** (String) If this is either a `Rule` or `RuleSet`.
+- `id` (String) The ID of the specific rule or ruleset.
+- `type` (String) If this is either a `Rule` or `RuleSet`.
 
 
 <a id="nestedblock--policy--web"></a>
@@ -98,8 +98,8 @@ Required:
 
 Required:
 
-- **id** (String) The ID of the specific rule or ruleset.
-- **type** (String) If this is either a `Rule` or `RuleSet`.
+- `id` (String) The ID of the specific rule or ruleset.
+- `type` (String) If this is either a `Rule` or `RuleSet`.
 
 
 
@@ -108,18 +108,18 @@ Required:
 
 Required:
 
-- **response_generator** (Block List, Min: 1) The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type'). (see [below for nested schema](#nestedblock--resource_type_configuration--response_generator))
+- `response_generator` (Block List, Min: 1) The path-matching pattern, relative to the Application context root (interpreted according to the pattern 'type'). (see [below for nested schema](#nestedblock--resource_type_configuration--response_generator))
 
 <a id="nestedblock--resource_type_configuration--response_generator"></a>
 ### Nested Schema for `resource_type_configuration.response_generator`
 
 Required:
 
-- **class_name** (String) The response generator's class name.
+- `class_name` (String) The response generator's class name.
 
 Optional:
 
-- **configuration** (String) The response generator's configuration data.
+- `configuration` (String) The response generator's configuration data.
 
 ## Import
 

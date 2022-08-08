@@ -24,12 +24,12 @@ resource "pingaccess_authn_req_list" "example" {
 
 ### Required
 
-- **authn_reqs** (List of String) The ordered list of authentication requirements, or identifiers, which define how PingFederate will authenticate a user during the OIDC login flow.
-- **name** (String) The name of the authentication requirements list.
+- `authn_reqs` (List of String) The ordered list of authentication requirements, or identifiers, which define how PingFederate will authenticate a user during the OIDC login flow.
+- `name` (String) The name of the authentication requirements list.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

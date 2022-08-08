@@ -30,14 +30,14 @@ resource "pingaccess_ruleset" "example" {
 
 ### Required
 
-- **element_type** (String) The rule set's element type (what it contains). Can be either `Rule` or `Ruleset`.
-- **name** (String) The rule set's name.
-- **policy** (List of String) The list of policy ids assigned to the rule set.
-- **success_criteria** (String) The rule set's success criteria. Can be either `SuccessIfAllSucceed` or `SuccessIfAnyOneSucceeds`.
+- `element_type` (String) The rule set's element type (what it contains). Can be either `Rule` or `Ruleset`.
+- `name` (String) The rule set's name.
+- `policy` (List of String) The list of policy ids assigned to the rule set.
+- `success_criteria` (String) The rule set's success criteria. Can be either `SuccessIfAllSucceed` or `SuccessIfAnyOneSucceeds`.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

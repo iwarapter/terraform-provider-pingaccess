@@ -24,24 +24,24 @@ resource "pingaccess_third_party_service" "example" {
 
 ### Required
 
-- **name** (String) The name of the third-party service.
-- **targets** (Set of String) The {hostname}:{port} pairs for the hosts that make up the third-party service.
+- `name` (String) The name of the third-party service.
+- `targets` (Set of String) The {hostname}:{port} pairs for the hosts that make up the third-party service.
 
 ### Optional
 
-- **availability_profile_id** (Number) The ID of the availability profile associated with the third-party service.
-- **expected_hostname** (String) The name of the host expected in the third-party service's certificate.
-- **host_value** (String) The Host header field value in the requests sent to a Third-Party Services. When set, PingAccess will use the hostValue as the Host header field value. Otherwise, the target value will be used.
-- **load_balancing_strategy_id** (Number) The ID of the load balancing strategy associated with the third-party service.
-- **max_connections** (Number) The maximum number of HTTP persistent connections you want PingAccess to have open and maintain for the third-party service. -1 indicates unlimited connections.
-- **secure** (Boolean) This field is true if the third-party service expects HTTPS connections.
-- **skip_hostname_verification** (Boolean) This field is true if the hostname verification of the third-party service's certificate should be skipped.
-- **trusted_certificate_group_id** (Number) The ID of the trusted certificate group associated with the third-party service.
-- **use_proxy** (Boolean) True if a proxy should be used for HTTP or HTTPS requests.
+- `availability_profile_id` (Number) The ID of the availability profile associated with the third-party service.
+- `expected_hostname` (String) The name of the host expected in the third-party service's certificate.
+- `host_value` (String) The Host header field value in the requests sent to a Third-Party Services. When set, PingAccess will use the hostValue as the Host header field value. Otherwise, the target value will be used.
+- `load_balancing_strategy_id` (Number) The ID of the load balancing strategy associated with the third-party service.
+- `max_connections` (Number) The maximum number of HTTP persistent connections you want PingAccess to have open and maintain for the third-party service. -1 indicates unlimited connections.
+- `secure` (Boolean) This field is true if the third-party service expects HTTPS connections.
+- `skip_hostname_verification` (Boolean) This field is true if the hostname verification of the third-party service's certificate should be skipped.
+- `trusted_certificate_group_id` (Number) The ID of the trusted certificate group associated with the third-party service.
+- `use_proxy` (Boolean) True if a proxy should be used for HTTP or HTTPS requests.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

@@ -17,5 +17,5 @@ description: |-
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
-- **location** (String)
+- `id` (String) The ID of this resource.
+- `location` (String)
