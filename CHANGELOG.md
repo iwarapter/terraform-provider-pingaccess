@@ -1,3 +1,25 @@
+## 0.11.0 (August 9th, 2022)
+
+NOTES:
+
+* This release has been built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+* Added functional testing against PingAccess 7.1.0
+
+FEATURES:
+
+* Add support for `manual_ordering_enabled` on `pingaccess_application` this partially support application resource ordering. (#93)
+
+## 0.10.0 (July 4th, 2022)
+
+NOTES:
+
+* This release has been built for PingAccess 6.x and uses the SDK for that version, whilst the API remains mostly the same backwards compatibility with PingAccess 5.x is not being maintained.
+
+BUG FIXES:
+
+* Fix allow removing `path_prefixes` for `pingaccess_application_resource `. (#134)
+* Fix resource policies not correctly refreshing from state. (#109)
+
 ## 0.9.0 (March 9th, 2022)
 
 NOTES:
