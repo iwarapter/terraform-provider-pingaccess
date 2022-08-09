@@ -39,39 +39,40 @@ resource "pingaccess_application" "example" {
 
 ### Required
 
-- **application_type** (String) The type of application.
-- **context_root** (String) The context root of the application.
-- **destination** (String) The application destination type.
-- **name** (String) The application name.
-- **site_id** (String) The ID of the site associated with the application or zero if none.
-- **virtual_host_ids** (Set of String) An array of virtual host IDs associated with the application.
+- `application_type` (String) The type of application.
+- `context_root` (String) The context root of the application.
+- `destination` (String) The application destination type.
+- `name` (String) The application name.
+- `site_id` (String) The ID of the site associated with the application or zero if none.
+- `virtual_host_ids` (Set of String) An array of virtual host IDs associated with the application.
 
 ### Optional
 
-- **access_validator_id** (Number) The ID of the access token validator for local token validation, 1 if the application is protected remotely by an Authorization Server, or zero if unprotected. Only applies to applications of type API.
-- **agent_id** (Number) The ID of the agent associated with the application or zero if none.
-- **case_sensitive_path** (Boolean) True if the path is case sensitive.
-- **default_auth_type** (String, Deprecated) For Web + API applications (dynamic) default_auth_type selects the processing mode when a request: does not have a token (web session, OAuth bearer) or has both tokens. This setting applies to all resources in the application except where overridden with default_auth_type_override.
-- **description** (String) A description of the application.
-- **enabled** (Boolean) True if the application is enabled.
-- **identity_mapping_ids** (Block List, Max: 1) A map of Identity Mappings associated with the application. The key is 'web' or 'api' and the value is an Identity Mapping ID. (see [below for nested schema](#nestedblock--identity_mapping_ids))
-- **policy** (Block List, Max: 1) A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items. (see [below for nested schema](#nestedblock--policy))
-- **realm** (String) The OAuth realm associated with the application.
-- **require_https** (Boolean) True if the application requires HTTPS connections.
-- **spa_support_enabled** (Boolean) Enable SPA support.
-- **web_session_id** (String) The ID of the web session associated with the application or zero if none.
+- `access_validator_id` (Number) The ID of the access token validator for local token validation, 1 if the application is protected remotely by an Authorization Server, or zero if unprotected. Only applies to applications of type API.
+- `agent_id` (Number) The ID of the agent associated with the application or zero if none.
+- `case_sensitive_path` (Boolean) True if the path is case sensitive.
+- `default_auth_type` (String, Deprecated) For Web + API applications (dynamic) default_auth_type selects the processing mode when a request: does not have a token (web session, OAuth bearer) or has both tokens. This setting applies to all resources in the application except where overridden with default_auth_type_override.
+- `description` (String) A description of the application.
+- `enabled` (Boolean) True if the application is enabled.
+- `identity_mapping_ids` (Block List, Max: 1) A map of Identity Mappings associated with the application. The key is 'web' or 'api' and the value is an Identity Mapping ID. (see [below for nested schema](#nestedblock--identity_mapping_ids))
+- `manual_ordering_enabled` (Boolean) Enable explicit, manual ordering of application resources and permit regex path patterns.
+- `policy` (Block List, Max: 1) A map of policy items associated with the resource. The key is 'web' or 'api' and the value is a list of Policy Items. (see [below for nested schema](#nestedblock--policy))
+- `realm` (String) The OAuth realm associated with the application.
+- `require_https` (Boolean) True if the application requires HTTPS connections.
+- `spa_support_enabled` (Boolean) Enable SPA support.
+- `web_session_id` (String) The ID of the web session associated with the application or zero if none.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--identity_mapping_ids"></a>
 ### Nested Schema for `identity_mapping_ids`
 
 Optional:
 
-- **api** (String) Identity mapping ID for api application.
-- **web** (String) Identity mapping ID for web application.
+- `api` (String) Identity mapping ID for api application.
+- `web` (String) Identity mapping ID for web application.
 
 
 <a id="nestedblock--policy"></a>
@@ -79,16 +80,16 @@ Optional:
 
 Optional:
 
-- **api** (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--api))
-- **web** (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--web))
+- `api` (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--api))
+- `web` (Block List) List of Rule/RuleSets to be applied. (see [below for nested schema](#nestedblock--policy--web))
 
 <a id="nestedblock--policy--api"></a>
 ### Nested Schema for `policy.api`
 
 Required:
 
-- **id** (String) The ID of the specific rule or ruleset.
-- **type** (String) If this is either a `Rule` or `RuleSet`.
+- `id` (String) The ID of the specific rule or ruleset.
+- `type` (String) If this is either a `Rule` or `RuleSet`.
 
 
 <a id="nestedblock--policy--web"></a>
@@ -96,8 +97,8 @@ Required:
 
 Required:
 
-- **id** (String) The ID of the specific rule or ruleset.
-- **type** (String) If this is either a `Rule` or `RuleSet`.
+- `id` (String) The ID of the specific rule or ruleset.
+- `type` (String) If this is either a `Rule` or `RuleSet`.
 
 ## Import
 

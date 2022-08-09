@@ -110,7 +110,7 @@ resource "pingaccess_pingfederate_oauth" "demo_pfo" {
   subject_attribute_name = "%s"
   name                   = "PingFederate"
   client_credentials {
-    client_id              = "%s"
+    client_id = "%s"
     client_secret {
       value = "top_secret"
     }
@@ -119,6 +119,7 @@ resource "pingaccess_pingfederate_oauth" "demo_pfo" {
   token_time_to_live_seconds = 300
   use_token_introspection    = true
 }
+
 
 `, san, client)
 }

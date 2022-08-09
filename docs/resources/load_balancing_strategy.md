@@ -33,13 +33,13 @@ resource "pingaccess_load_balancing_strategy" "test" {
 
 ### Required
 
-- **class_name** (String) The class name of the load balancing strategy.
-- **configuration** (String) The load balancing strategy's configuration data.
-- **name** (String) The name of the load balancing strategy.
+- `class_name` (String) The class name of the load balancing strategy.
+- `configuration` (String) The load balancing strategy's configuration data.
+- `name` (String) The name of the load balancing strategy.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

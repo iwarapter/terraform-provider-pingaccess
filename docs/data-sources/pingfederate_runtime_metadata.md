@@ -21,30 +21,30 @@ data "pingaccess_pingfederate_runtime_metadata" "meta" {}
 
 ### Read-Only
 
-- **authorization_endpoint** (String) URL of the OpenID Connect provider's authorization endpoint.
-- **backchannel_authentication_endpoint** (String) The endpoint used to initiate an out-of-band authentication.
-- **claim_types_supported** (List of String) JSON array containing a list of the claim types that the OpenID Connect provider supports.
-- **claims_parameter_supported** (Boolean) Boolean value specifying whether the OpenID Connect provider supports use of the claims parameter, with true indicating support.
-- **claims_supported** (List of String) JSON array containing a list of the claim names of the claims that the OpenID Connect provider MAY be able to supply values for.
-- **code_challenge_methods_supported** (List of String) Proof Key for Code Exchange (PKCE) code challenge methods supported by this OpenID Connect provider.
-- **end_session_endpoint** (String) URL at the OpenID Connect provider to which a relying party can perform a redirect to request that the end-user be logged out at the OpenID Connect provider.
-- **grant_types_supported** (List of String) JSON array containing a list of the OAuth 2.0 grant type values that this OpenID Connect provider supports.
-- **id** (String) The ID of this resource.
-- **id_token_signing_alg_values_supported** (List of String) JSON array containing a list of the JWS signing algorithms supported by the OpenID Connect provider for the id token to encode the claims in a JWT.
-- **introspection_endpoint** (String) URL of the OpenID Connect provider's OAuth 2.0 introspection endpoint.
-- **issuer** (String) OpenID Connect provider's issuer identifier URL.
-- **jwks_uri** (String) URL of the OpenID Connect provider's JWK Set document.
-- **ping_end_session_endpoint** (String) PingFederate logout endpoint. (Not applicable if PingFederate is not the OpenID Connect provider)
-- **ping_revoked_sris_endpoint** (String) PingFederate session revocation endpoint. (Not applicable if PingFederate is not the OpenID Connect provider)
-- **request_object_signing_alg_values_supported** (List of String) JSON array containing a list of the JWS signing algorithms supported by the OpenID Connect provider for request objects.
-- **request_parameter_supported** (Boolean) Boolean value specifying whether the OpenID Connect provider supports use of the request parameter, with true indicating support.
-- **request_uri_parameter_supported** (Boolean) Boolean value specifying whether the OpenID Connect provider supports use of the request_uri parameter, with true indicating support.
-- **response_modes_supported** (List of String) JSON array containing a list of the OAuth 2.0 "response_mode" values that this OpenID Connect provider supports.
-- **response_types_supported** (List of String) JSON array containing a list of the OAuth 2.0 "response_type" values that this OpenID Connect provider supports.
-- **revocation_endpoint** (String) URL of the OpenID Connect provider's OAuth 2.0 revocation endpoint.
-- **scopes_supported** (List of String) JSON array containing a list of the OAuth 2.0 "scope" values that this OpenID Connect provider supports.
-- **subject_types_supported** (List of String) JSON array containing a list of the Subject Identifier types that this OpenID Connect provider supports.
-- **token_endpoint** (String) URL of the OpenID Connect provider's token endpoint.
-- **token_endpoint_auth_methods_supported** (List of String) JSON array containing a list of client authentication methods supported by this token endpoint.
-- **userinfo_endpoint** (String) URL of the OpenID Connect provider's userInfo endpoint.
-- **userinfo_signing_alg_values_supported** (List of String) JSON array containing a list of the JWS signing algorithms supported by the userInfo endpoint to encode the claims in a JWT.
+- `authorization_endpoint` (String) URL of the OpenID Connect provider's authorization endpoint.
+- `backchannel_authentication_endpoint` (String) The endpoint used to initiate an out-of-band authentication.
+- `claim_types_supported` (List of String) JSON array containing a list of the claim types that the OpenID Connect provider supports.
+- `claims_parameter_supported` (Boolean) Boolean value specifying whether the OpenID Connect provider supports use of the claims parameter, with true indicating support.
+- `claims_supported` (List of String) JSON array containing a list of the claim names of the claims that the OpenID Connect provider MAY be able to supply values for.
+- `code_challenge_methods_supported` (List of String) Proof Key for Code Exchange (PKCE) code challenge methods supported by this OpenID Connect provider.
+- `end_session_endpoint` (String) URL at the OpenID Connect provider to which a relying party can perform a redirect to request that the end-user be logged out at the OpenID Connect provider.
+- `grant_types_supported` (List of String) JSON array containing a list of the OAuth 2.0 grant type values that this OpenID Connect provider supports.
+- `id` (String) The ID of this resource.
+- `id_token_signing_alg_values_supported` (List of String) JSON array containing a list of the JWS signing algorithms supported by the OpenID Connect provider for the id token to encode the claims in a JWT.
+- `introspection_endpoint` (String) URL of the OpenID Connect provider's OAuth 2.0 introspection endpoint.
+- `issuer` (String) OpenID Connect provider's issuer identifier URL.
+- `jwks_uri` (String) URL of the OpenID Connect provider's JWK Set document.
+- `ping_end_session_endpoint` (String) PingFederate logout endpoint. (Not applicable if PingFederate is not the OpenID Connect provider)
+- `ping_revoked_sris_endpoint` (String) PingFederate session revocation endpoint. (Not applicable if PingFederate is not the OpenID Connect provider)
+- `request_object_signing_alg_values_supported` (List of String) JSON array containing a list of the JWS signing algorithms supported by the OpenID Connect provider for request objects.
+- `request_parameter_supported` (Boolean) Boolean value specifying whether the OpenID Connect provider supports use of the request parameter, with true indicating support.
+- `request_uri_parameter_supported` (Boolean) Boolean value specifying whether the OpenID Connect provider supports use of the request_uri parameter, with true indicating support.
+- `response_modes_supported` (List of String) JSON array containing a list of the OAuth 2.0 "response_mode" values that this OpenID Connect provider supports.
+- `response_types_supported` (List of String) JSON array containing a list of the OAuth 2.0 "response_type" values that this OpenID Connect provider supports.
+- `revocation_endpoint` (String) URL of the OpenID Connect provider's OAuth 2.0 revocation endpoint.
+- `scopes_supported` (List of String) JSON array containing a list of the OAuth 2.0 "scope" values that this OpenID Connect provider supports.
+- `subject_types_supported` (List of String) JSON array containing a list of the Subject Identifier types that this OpenID Connect provider supports.
+- `token_endpoint` (String) URL of the OpenID Connect provider's token endpoint.
+- `token_endpoint_auth_methods_supported` (List of String) JSON array containing a list of client authentication methods supported by this token endpoint.
+- `userinfo_endpoint` (String) URL of the OpenID Connect provider's userInfo endpoint.
+- `userinfo_signing_alg_values_supported` (List of String) JSON array containing a list of the JWS signing algorithms supported by the userInfo endpoint to encode the claims in a JWT.

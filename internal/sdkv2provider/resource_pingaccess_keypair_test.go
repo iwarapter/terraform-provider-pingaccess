@@ -92,27 +92,27 @@ func testAccCheckPingAccessKeyPairDestroy(s *terraform.State) error {
 
 func testAccPingAccessKeyPairConfig() string {
 	return `
-	resource "pingaccess_keypair" "test" {
-		alias = "acctest_test"
-		file_data = filebase64("test_cases/provider.p12")
-		password = "password"
-	}`
+resource "pingaccess_keypair" "test" {
+  alias     = "acctest_test"
+  file_data = filebase64("test_cases/provider.p12")
+  password  = "password"
+}`
 }
 
 func testAccPingAccessKeyPairConfigGenerate() string {
 	return `
-	resource "pingaccess_keypair" "test_generate" {
-		alias = "acctest_test2"
-		city = "Test"
-		common_name = "Test"
-		country = "GB"
-		key_algorithm = "RSA"
-		key_size = 2048
-		organization = "Test"
-		organization_unit = "Test"
-		state = "Test"
-		valid_days = 365
-	}`
+resource "pingaccess_keypair" "test_generate" {
+  alias             = "acctest_test2"
+  city              = "Test"
+  common_name       = "Test"
+  country           = "GB"
+  key_algorithm     = "RSA"
+  key_size          = 2048
+  organization      = "Test"
+  organization_unit = "Test"
+  state             = "Test"
+  valid_days        = 365
+}`
 }
 
 func testAccCheckPingAccessKeyPairExists(n string) resource.TestCheckFunc {

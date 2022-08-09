@@ -46,14 +46,14 @@ func testAccCheckPingAccessKeyPairCsrDataSourceDestroy(s *terraform.State) error
 
 func testAccPingAccessKeyPairCsrDataSourceConfig() string {
 	return `
-	data "pingaccess_keypair_csr" "test" {
-		id = "1"
-	}`
+data "pingaccess_keypair_csr" "test" {
+  id = "1"
+}`
 }
 
 func testAccPingAccessKeyPairCsrDataSourceConfigNonExistent() string {
 	return `
-	data "pingaccess_keypair_csr" "test" {
-		id = "junk"
-	}`
+data "pingaccess_keypair_csr" "test" {
+  id = "junk"
+}`
 }

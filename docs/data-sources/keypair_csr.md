@@ -23,8 +23,8 @@ data "pingaccess_keypair_csr" "example" {
 
 ### Required
 
-- **id** (String) ID of the Key Pair to to retrieve the CSR.
+- `id` (String) ID of the Key Pair to to retrieve the CSR.
 
 ### Read-Only
 
-- **cert_request_pem** (String) The PEM encoded Certificate Signing Request.
+- `cert_request_pem` (String) The PEM encoded Certificate Signing Request.

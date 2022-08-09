@@ -79,13 +79,13 @@ func testAccCheckPingAccessVirtualHostDestroy(s *terraform.State) error {
 
 func testAccPingAccessVirtualHostConfig(host string, port int) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_virtualhost" "acc_test" {
-	   host                         = "acctest-%s"
-	   port                         = %d
-	   agent_resource_cache_ttl     = 900
-	   key_pair_id                  = 0
-	   trusted_certificate_group_id = 0
-	}`, host, port)
+resource "pingaccess_virtualhost" "acc_test" {
+  host                         = "acctest-%s"
+  port                         = %d
+  agent_resource_cache_ttl     = 900
+  key_pair_id                  = 0
+  trusted_certificate_group_id = 0
+}`, host, port)
 }
 
 func testAccCheckPingAccessVirtualHostExists(n string) resource.TestCheckFunc {

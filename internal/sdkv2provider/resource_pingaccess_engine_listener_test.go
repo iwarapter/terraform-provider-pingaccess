@@ -67,11 +67,11 @@ func testAccCheckPingAccessEngineListenerDestroy(s *terraform.State) error {
 
 func testAccPingAccessEngineListenerConfig(host string, secure bool) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_engine_listener" "acc_test" {
-	   name   = "acctest_engine-%s"
-	   port   = 443
-	   secure = %t
-	}`, host, secure)
+resource "pingaccess_engine_listener" "acc_test" {
+  name   = "acctest_engine-%s"
+  port   = 443
+  secure = %t
+}`, host, secure)
 }
 
 func testAccCheckPingAccessEngineListenerExists(n string) resource.TestCheckFunc {

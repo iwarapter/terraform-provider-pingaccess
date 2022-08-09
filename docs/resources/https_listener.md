@@ -28,13 +28,13 @@ resource "pingaccess_https_listener" "example" {
 
 ### Required
 
-- **key_pair_id** (Number) The ID of the default key pair used by the HTTPS listener.
-- **name** (String) The name of the HTTPS listener. One of `ADMIN`, `AGENT`, `ENGINE`, `CONFIG QUERY`, `SIDEBAND`
-- **use_server_cipher_suite_order** (Boolean) Enable server cipher suite ordering for the HTTPS listener.
+- `key_pair_id` (Number) The ID of the default key pair used by the HTTPS listener.
+- `name` (String) The name of the HTTPS listener. One of `ADMIN`, `AGENT`, `ENGINE`, `CONFIG QUERY`, `SIDEBAND`
+- `use_server_cipher_suite_order` (Boolean) Enable server cipher suite ordering for the HTTPS listener.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

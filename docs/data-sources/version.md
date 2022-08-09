@@ -21,5 +21,5 @@ data "pingaccess_version" "example" {}
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
-- **version** (String) The version of PingAccess.
+- `id` (String) The ID of this resource.
+- `version` (String) The version of PingAccess.

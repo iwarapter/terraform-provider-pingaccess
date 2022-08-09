@@ -76,14 +76,14 @@ resource "tls_self_signed_cert" "example" {
 
 ### Required
 
-- **file_data** (String) The CSR response data.
-- **keypair_id** (String) ID of the Key Pair to update.
+- `file_data` (String) The CSR response data.
+- `keypair_id` (String) ID of the Key Pair to update.
 
 ### Optional
 
-- **chain_certificates** (List of String) A list of base64-encoded certificates to add to the key pair certificate chain.
-- **trusted_certificate_group_id** (Number) The ID of the trusted certificate group associated with the CSR response.
+- `chain_certificates` (List of String) A list of base64-encoded certificates to add to the key pair certificate chain.
+- `trusted_certificate_group_id` (Number) The ID of the trusted certificate group associated with the CSR response.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.

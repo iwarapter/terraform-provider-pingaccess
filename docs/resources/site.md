@@ -24,28 +24,28 @@ resource "pingaccess_site" "example" {
 
 ### Required
 
-- **name** (String) The name of the site.
-- **targets** (Set of String) The {hostname}:{port} pairs for the hosts that make up the site.
+- `name` (String) The name of the site.
+- `targets` (Set of String) The {hostname}:{port} pairs for the hosts that make up the site.
 
 ### Optional
 
-- **availability_profile_id** (Number) The ID of the availability profile associated with the site.
-- **expected_hostname** (String) The name of the host expected in the site's certificate.
-- **keep_alive_timeout** (Number) The time, in milliseconds, that an HTTP persistent connection to the site can be idle before PingAccess closes the connection.
-- **load_balancing_strategy_id** (Number) The ID of the load balancing strategy associated with the site.
-- **max_connections** (Number) The maximum number of HTTP persistent connections you want PingAccess to have open and maintain for the site. -1 indicates unlimited connections.
-- **max_web_socket_connections** (Number) The maximum number of WebSocket connections you want PingAccess to have open and maintain for the site. -1 indicates unlimited connections.
-- **secure** (Boolean) This field is true if the site expects HTTPS connections.
-- **send_pa_cookie** (Boolean) This field is true if the PingAccess Token or OAuth Access Token should be included in the request to the site.
-- **site_authenticator_ids** (Set of Number) The IDs of the site authenticators associated with the site.
-- **skip_hostname_verification** (Boolean) This field is true if the hostname verification of the site's certificate should be skipped.
-- **trusted_certificate_group_id** (Number) The ID of the trusted certificate group associated with the site.
-- **use_proxy** (Boolean) True if a proxy should be used for HTTP or HTTPS requests.
-- **use_target_host_header** (Boolean) Setting this field to true causes PingAccess to adjust the Host header to the site's selected target host rather than the virtual host configured in the application.
+- `availability_profile_id` (Number) The ID of the availability profile associated with the site.
+- `expected_hostname` (String) The name of the host expected in the site's certificate.
+- `keep_alive_timeout` (Number) The time, in milliseconds, that an HTTP persistent connection to the site can be idle before PingAccess closes the connection.
+- `load_balancing_strategy_id` (Number) The ID of the load balancing strategy associated with the site.
+- `max_connections` (Number) The maximum number of HTTP persistent connections you want PingAccess to have open and maintain for the site. -1 indicates unlimited connections.
+- `max_web_socket_connections` (Number) The maximum number of WebSocket connections you want PingAccess to have open and maintain for the site. -1 indicates unlimited connections.
+- `secure` (Boolean) This field is true if the site expects HTTPS connections.
+- `send_pa_cookie` (Boolean) This field is true if the PingAccess Token or OAuth Access Token should be included in the request to the site.
+- `site_authenticator_ids` (Set of Number) The IDs of the site authenticators associated with the site.
+- `skip_hostname_verification` (Boolean) This field is true if the hostname verification of the site's certificate should be skipped.
+- `trusted_certificate_group_id` (Number) The ID of the trusted certificate group associated with the site.
+- `use_proxy` (Boolean) True if a proxy should be used for HTTP or HTTPS requests.
+- `use_target_host_header` (Boolean) Setting this field to true causes PingAccess to adjust the Host header to the site's selected target host rather than the virtual host configured in the application.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

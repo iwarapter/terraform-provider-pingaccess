@@ -43,17 +43,17 @@ resource "pingaccess_rule" "example" {
 
 ### Required
 
-- **class_name** (String) The rule's class name.
-- **configuration** (String) The rule's configuration data.
-- **name** (String) The rule's name.
+- `class_name` (String) The rule's class name.
+- `configuration` (String) The rule's configuration data.
+- `name` (String) The rule's name.
 
 ### Optional
 
-- **supported_destinations** (Set of String, Deprecated) The supported destinations for this rule.
+- `supported_destinations` (Set of String, Deprecated) The supported destinations for this rule.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

@@ -36,44 +36,44 @@ resource "pingaccess_pingfederate_oauth" "demo" {
 
 ### Required
 
-- **subject_attribute_name** (String) The attribute you want to use from the OAuth access token as the subject for auditing purposes.
+- `subject_attribute_name` (String) The attribute you want to use from the OAuth access token as the subject for auditing purposes.
 
 ### Optional
 
-- **access_validator_id** (Number) The Access Validator Id. This field is read-only.
-- **cache_tokens** (Boolean) Enable to retain token details for subsequent requests.
-- **client_credentials** (Block List, Max: 1) Specify the credentials for the OAuth client configured in PingFederate. (see [below for nested schema](#nestedblock--client_credentials))
-- **client_id** (String, Deprecated) The Client ID which PingAccess should use when requesting PingFederate to validate access tokens. The client must have Access Token Validation grant type allowed.
-- **client_secret** (Block List, Max: 1, Deprecated) The Client Secret for the Client ID. (see [below for nested schema](#nestedblock--client_secret))
-- **name** (String) The unique Access Validator name.
-- **send_audience** (Boolean) Enable to send the URI the user requested as the 'aud' OAuth parameter for PingAccess to use to select an Access Token Manager.
-- **token_time_to_live_seconds** (Number) Defines the number of seconds to cache the access token. -1 means no limit. This value should be less than the PingFederate Token Lifetime.
-- **use_token_introspection** (Boolean) Specify if token introspection is enabled.
+- `access_validator_id` (Number) The Access Validator Id. This field is read-only.
+- `cache_tokens` (Boolean) Enable to retain token details for subsequent requests.
+- `client_credentials` (Block List, Max: 1) Specify the credentials for the OAuth client configured in PingFederate. (see [below for nested schema](#nestedblock--client_credentials))
+- `client_id` (String, Deprecated) The Client ID which PingAccess should use when requesting PingFederate to validate access tokens. The client must have Access Token Validation grant type allowed.
+- `client_secret` (Block List, Max: 1, Deprecated) The Client Secret for the Client ID. (see [below for nested schema](#nestedblock--client_secret))
+- `name` (String) The unique Access Validator name.
+- `send_audience` (Boolean) Enable to send the URI the user requested as the 'aud' OAuth parameter for PingAccess to use to select an Access Token Manager.
+- `token_time_to_live_seconds` (Number) Defines the number of seconds to cache the access token. -1 means no limit. This value should be less than the PingFederate Token Lifetime.
+- `use_token_introspection` (Boolean) Specify if token introspection is enabled.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--client_credentials"></a>
 ### Nested Schema for `client_credentials`
 
 Required:
 
-- **client_id** (String) Specify the client ID.
+- `client_id` (String) Specify the client ID.
 
 Optional:
 
-- **client_secret** (Block List, Max: 1) Specify the client secret. (see [below for nested schema](#nestedblock--client_credentials--client_secret))
-- **credentials_type** (String) Specify the credential type.
-- **key_pair_id** (Number) Specify the ID of a key pair to use for mutual TLS.
+- `client_secret` (Block List, Max: 1) Specify the client secret. (see [below for nested schema](#nestedblock--client_credentials--client_secret))
+- `credentials_type` (String) Specify the credential type.
+- `key_pair_id` (Number) Specify the ID of a key pair to use for mutual TLS.
 
 <a id="nestedblock--client_credentials--client_secret"></a>
 ### Nested Schema for `client_credentials.client_secret`
 
 Optional:
 
-- **encrypted_value** (String) encrypted value of the field, as originally returned by the API.
-- **value** (String, Sensitive) The value of the field. This field takes precedence over the encryptedValue field, if both are specified.
+- `encrypted_value` (String) encrypted value of the field, as originally returned by the API.
+- `value` (String, Sensitive) The value of the field. This field takes precedence over the encryptedValue field, if both are specified.
 
 
 
@@ -82,8 +82,8 @@ Optional:
 
 Optional:
 
-- **encrypted_value** (String) encrypted value of the field, as originally returned by the API.
-- **value** (String, Sensitive) The value of the field. This field takes precedence over the encryptedValue field, if both are specified.
+- `encrypted_value` (String) encrypted value of the field, as originally returned by the API.
+- `value` (String, Sensitive) The value of the field. This field takes precedence over the encryptedValue field, if both are specified.
 
 ## Import
 

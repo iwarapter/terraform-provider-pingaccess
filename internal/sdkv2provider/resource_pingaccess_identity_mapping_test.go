@@ -105,10 +105,10 @@ func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
 			"headerNamePrefix": null,`
 	}
 	return fmt.Sprintf(`
-	resource "pingaccess_identity_mapping" "acc_test_idm" {
-		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
-		name = "acctest_%s"
-		configuration = <<EOF
+resource "pingaccess_identity_mapping" "acc_test_idm" {
+  class_name    = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
+  name          = "acctest_%s"
+  configuration = <<EOF
 		{
 			%s
 			"attributeHeaderMappings": [
@@ -121,15 +121,15 @@ func testAccPingAccessIdentityMappingConfig(name, configUpdate string) string {
 			"headerClientCertificateMappings": []
 		}
 		EOF
-	}`, name, block, configUpdate)
+}`, name, block, configUpdate)
 }
 
 func testAccPingAccessIdentityMappingConfigWrongClassName() string {
 	return `
-	resource "pingaccess_identity_mapping" "acc_test_idm" {
-		class_name = "com.pingidentity.pa.identitymappings.foo"
-		name = "wrong_class_name"
-		configuration = <<EOF
+resource "pingaccess_identity_mapping" "acc_test_idm" {
+  class_name    = "com.pingidentity.pa.identitymappings.foo"
+  name          = "wrong_class_name"
+  configuration = <<EOF
 		{
 			"attributeHeaderMappings": [
 				{
@@ -141,16 +141,16 @@ func testAccPingAccessIdentityMappingConfigWrongClassName() string {
 			"headerClientCertificateMappings": []
 		}
 		EOF
-	}`
+}`
 }
 
 func testAccPingAccessIdentityMappingConfigMissingRequired() string {
 	return `
-	resource "pingaccess_identity_mapping" "acc_test_idm" {
-		class_name = "com.pingidentity.pa.identitymappings.JwtIdentityMapping"
-		name = "missing_required"
-		configuration = "{}"
-	}`
+resource "pingaccess_identity_mapping" "acc_test_idm" {
+  class_name    = "com.pingidentity.pa.identitymappings.JwtIdentityMapping"
+  name          = "missing_required"
+  configuration = "{}"
+}`
 }
 
 func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
@@ -162,10 +162,10 @@ func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
 			"headerNamePrefix": null,`
 	}
 	return fmt.Sprintf(`
-	resource "pingaccess_identity_mapping" "acc_test_idm" {
-		class_name = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
-		name = "acctest_interpolated"
-		configuration = <<EOF
+resource "pingaccess_identity_mapping" "acc_test_idm" {
+  class_name    = "com.pingidentity.pa.identitymappings.HeaderIdentityMapping"
+  name          = "acctest_interpolated"
+  configuration = <<EOF
 		{
 			%s
 			"attributeHeaderMappings": [
@@ -178,12 +178,12 @@ func testAccPingAccessIdentityMappingConfigInterpolatedSkipped() string {
 			"headerClientCertificateMappings": []
 		}
 		EOF
-	}
+}
 
-	resource "pingaccess_virtualhost" "interpolate_me" {
-	   host                         = "idmfoo"
-	   port                         = 80
-	}
+resource "pingaccess_virtualhost" "interpolate_me" {
+  host = "idmfoo"
+  port = 80
+}
 `, block)
 }
 

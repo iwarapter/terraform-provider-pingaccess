@@ -25,17 +25,17 @@ resource "pingaccess_engine_listener" "example" {
 
 ### Required
 
-- **name** (String) The name of the engine listener.
-- **port** (Number) The port the engine listener listens on.
+- `name` (String) The name of the engine listener.
+- `port` (Number) The port the engine listener listens on.
 
 ### Optional
 
-- **secure** (Boolean) Indicator if the engine listener should listen to HTTPS connections.
-- **trusted_certificate_group_id** (Number) Trusted Certificate Group assigned to engine listener for client certificate authentication.
+- `secure` (Boolean) Indicator if the engine listener should listen to HTTPS connections.
+- `trusted_certificate_group_id` (Number) Trusted Certificate Group assigned to engine listener for client certificate authentication.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

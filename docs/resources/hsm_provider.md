@@ -34,13 +34,13 @@ resource "pingaccess_hsm_provider" "example" {
 
 ### Required
 
-- **class_name** (String) The HSM provider's class name.
-- **configuration** (String) The HSM provider's configuration data.
-- **name** (String) The HSM provider's name.
+- `class_name` (String) The HSM provider's class name.
+- `configuration` (String) The HSM provider's configuration data.
+- `name` (String) The HSM provider's name.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

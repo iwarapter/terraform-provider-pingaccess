@@ -38,13 +38,13 @@ resource "pingaccess_availability_profile" "example" {
 
 ### Required
 
-- **class_name** (String) The class name of the availability profile.
-- **configuration** (String) The availability profile's configuration data.
-- **name** (String) The name of the availability profile.
+- `class_name` (String) The class name of the availability profile.
+- `configuration` (String) The availability profile's configuration data.
+- `name` (String) The name of the availability profile.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

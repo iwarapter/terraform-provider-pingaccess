@@ -27,12 +27,12 @@ resource "pingaccess_http_config_request_host_source" "example" {
 
 ### Required
 
-- **header_name_list** (List of String) An array of header names used to identify the host source name.
-- **list_value_location** (String) The location in a matching header value list to use as the source.
+- `header_name_list` (List of String) An array of header names used to identify the host source name.
+- `list_value_location` (String) The location in a matching header value list to use as the source.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ## Import
 

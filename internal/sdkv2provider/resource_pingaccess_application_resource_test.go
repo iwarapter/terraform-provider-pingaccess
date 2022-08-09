@@ -79,38 +79,38 @@ func testAccCheckPingAccessApplicationResourceDestroy(s *terraform.State) error 
 
 func testAccPingAccessApplicationResourceConfig(name string, context string, policy string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_site" "app_res_test_site" {
-		name                         = "acc_test_app_res_test_site"
-		targets                      = ["localhost:4321"]
-		max_connections              = -1
-		max_web_socket_connections   = -1
-		availability_profile_id      = 1
-	}
+resource "pingaccess_site" "app_res_test_site" {
+  name                       = "acctest_app_res_test_site"
+  targets                    = ["localhost:4321"]
+  max_connections            = -1
+  max_web_socket_connections = -1
+  availability_profile_id    = 1
+}
 
-	resource "pingaccess_virtualhost" "app_res_test_virtualhost" {
-		host                         = "acc-test-localhost"
-		port                         = 4000
-		agent_resource_cache_ttl     = 900
-		key_pair_id                  = 0
-		trusted_certificate_group_id = 0
- 	}
+resource "pingaccess_virtualhost" "app_res_test_virtualhost" {
+  host                         = "acc-test-localhost"
+  port                         = 4000
+  agent_resource_cache_ttl     = 900
+  key_pair_id                  = 0
+  trusted_certificate_group_id = 0
+}
 
-	resource "pingaccess_application" "app_res_test" {
-		access_validator_id = 0
-		application_type 	= "Web"
-		agent_id			= 0
-		name				= "%s"
-		context_root		= "/bar"
-		default_auth_type	= "Web"
-		destination			= "Site"
-		site_id				= pingaccess_site.app_res_test_site.id
-		virtual_host_ids	= [pingaccess_virtualhost.app_res_test_virtualhost.id]
+resource "pingaccess_application" "app_res_test" {
+  access_validator_id = 0
+  application_type    = "Web"
+  agent_id            = 0
+  name                = "%s"
+  context_root        = "/bar"
+  default_auth_type   = "Web"
+  destination         = "Site"
+  site_id             = pingaccess_site.app_res_test_site.id
+  virtual_host_ids    = [pingaccess_virtualhost.app_res_test_virtualhost.id]
 
-		identity_mapping_ids {
-			web = 0
-			api = 0
-		}
-	}
+  identity_mapping_ids {
+    web = 0
+    api = 0
+  }
+}
 
 resource "pingaccess_application_resource" "app_res_test_resource" {
   name = "acc_test_woot"
@@ -128,10 +128,10 @@ resource "pingaccess_application_resource" "app_res_test_resource" {
     type    = "WILDCARD"
   }
 
-  audit_level = "OFF"
-  anonymous = false
-  enabled = true
-  root_resource = false
+  audit_level    = "OFF"
+  anonymous      = false
+  enabled        = true
+  root_resource  = false
   application_id = pingaccess_application.app_res_test.id
 
   policy {
@@ -153,25 +153,25 @@ resource "pingaccess_application_resource" "app_res_virtual_resource" {
     type    = "WILDCARD"
   }
 
-  audit_level = "OFF"
-  anonymous = false
-  enabled = true
-  root_resource = false
+  audit_level    = "OFF"
+  anonymous      = false
+  enabled        = true
+  root_resource  = false
   application_id = pingaccess_application.app_res_test.id
 
   resource_type = "Virtual"
 
   resource_type_configuration {
-      response_generator {
-          class_name = "com.pingidentity.pa.resources.responsegenerator.TemplateResponseGenerator"
-          configuration = <<EOF
+    response_generator {
+      class_name    = "com.pingidentity.pa.resources.responsegenerator.TemplateResponseGenerator"
+      configuration = <<EOF
           {
               "template": "<h1>Hello from Virtual Resource</h1>",
               "responseCode": 200,
               "mediaType": "text/html;charset=utf-8"
           }
           EOF
-      }
+    }
   }
 
   depends_on = [pingaccess_application_resource.app_res_test_resource]
@@ -181,7 +181,7 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
   name = "Root Resource"
   methods = [
     "*"
-	]
+  ]
 
   path_patterns {
     pattern = "/*"
@@ -190,23 +190,23 @@ resource "pingaccess_application_resource" "app_res_test_root_resource" {
 
   policy {}
 
-  audit_level = "ON"
-  anonymous = false
-  enabled = true
-  root_resource = true
+  audit_level    = "ON"
+  anonymous      = false
+  enabled        = true
+  root_resource  = true
   application_id = pingaccess_application.app_res_test.id
 
   resource_type = "Standard"
 }
 
 resource "pingaccess_rule" "acc_test_resource_rule" {
-	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-	name = "acc_test_resource_rule"
-	supported_destinations = [
-		"Site",
-		"Agent"
-	]
-	configuration = <<EOF
+  class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+  name       = "acc_test_resource_rule"
+  supported_destinations = [
+    "Site",
+    "Agent"
+  ]
+  configuration = <<EOF
 	{
 		"cidrNotation": "127.0.0.1/32",
 		"negate": false,
@@ -225,13 +225,13 @@ resource "pingaccess_rule" "acc_test_resource_rule" {
 }
 
 resource "pingaccess_rule" "acc_test_resource_rule_two" {
-	class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-	name = "acc_test_resource_rule_two"
-	supported_destinations = [
-		"Site",
-		"Agent"
-	]
-	configuration = <<EOF
+  class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+  name       = "acc_test_resource_rule_two"
+  supported_destinations = [
+    "Site",
+    "Agent"
+  ]
+  configuration = <<EOF
 	{
 		"cidrNotation": "127.0.0.1/32",
 		"negate": false,

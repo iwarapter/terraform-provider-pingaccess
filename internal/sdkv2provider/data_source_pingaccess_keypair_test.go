@@ -49,14 +49,14 @@ func testAccCheckPingAccessKeyPairDataSourceDestroy(s *terraform.State) error {
 
 func testAccPingAccessKeyPairDataSourceConfig() string {
 	return `
-	data "pingaccess_keypair" "test" {
-		alias = "Generated: ADMIN"
-	}`
+data "pingaccess_keypair" "test" {
+  alias = "Generated: ADMIN"
+}`
 }
 
 func testAccPingAccessKeyPairDataSourceConfigNonExistent() string {
 	return `
-	data "pingaccess_keypair" "test" {
-		alias = "junk"
-	}`
+data "pingaccess_keypair" "test" {
+  alias = "junk"
+}`
 }

@@ -36,30 +36,30 @@ resource "pingaccess_pingfederate_admin" "example" {
 
 ### Required
 
-- **admin_password** (Block List, Min: 1, Max: 1) The password for the administrator username. (see [below for nested schema](#nestedblock--admin_password))
-- **admin_username** (String) The administrator username.
-- **host** (String) The host name or IP address for PingFederate Administration API.
-- **port** (Number) The port number for PingFederate Administration API.
+- `admin_password` (Block List, Min: 1, Max: 1) The password for the administrator username. (see [below for nested schema](#nestedblock--admin_password))
+- `admin_username` (String) The administrator username.
+- `host` (String) The host name or IP address for PingFederate Administration API.
+- `port` (Number) The port number for PingFederate Administration API.
 
 ### Optional
 
-- **audit_level** (String) Enable to record requests to the PingFederate Administrative API to the audit store.
-- **base_path** (String) The base path, if needed, for Administration API.
-- **secure** (Boolean) Enable if PingFederate is expecting HTTPS connections.
-- **trusted_certificate_group_id** (Number) The group of certificates to use when authenticating to PingFederate Administrative API.
-- **use_proxy** (Boolean) True if a proxy should be used for HTTP or HTTPS requests.
+- `audit_level` (String) Enable to record requests to the PingFederate Administrative API to the audit store.
+- `base_path` (String) The base path, if needed, for Administration API.
+- `secure` (Boolean) Enable if PingFederate is expecting HTTPS connections.
+- `trusted_certificate_group_id` (Number) The group of certificates to use when authenticating to PingFederate Administrative API.
+- `use_proxy` (Boolean) True if a proxy should be used for HTTP or HTTPS requests.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--admin_password"></a>
 ### Nested Schema for `admin_password`
 
 Optional:
 
-- **encrypted_value** (String) encrypted value of the field, as originally returned by the API.
-- **value** (String, Sensitive) The value of the field. This field takes precedence over the encryptedValue field, if both are specified.
+- `encrypted_value` (String) encrypted value of the field, as originally returned by the API.
+- `value` (String, Sensitive) The value of the field. This field takes precedence over the encryptedValue field, if both are specified.
 
 ## Import
 

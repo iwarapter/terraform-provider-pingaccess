@@ -60,7 +60,7 @@ func TestAccPingAccessPingFederateRuntimeMetadataDataSource(t *testing.T) {
 func testAccPingAccessPingFederateRuntimeMetadataConfig() string {
 	return fmt.Sprintf(`data "pingaccess_pingfederate_runtime_metadata" "test" {}
 resource "pingaccess_pingfederate_runtime" "app_demo_pfr" {
-	issuer = "%s"
-	trusted_certificate_group_id = 2
+  issuer                       = "%s"
+  trusted_certificate_group_id = 2
 }`, os.Getenv("PINGFEDERATE_TEST_IP"))
 }

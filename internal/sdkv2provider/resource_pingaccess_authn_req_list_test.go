@@ -74,13 +74,13 @@ func testAccCheckPingAccessAuthnReqListDestroy(s *terraform.State) error {
 
 func testAccPingAccessAuthnReqListConfig(req1, req2 string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_authn_req_list" "acc_test" {
-	   name   = "acctest_foo"
-	   authn_reqs = [
-			 "%s",
-			 "%s",
-		 ]
-	}`, req1, req2)
+resource "pingaccess_authn_req_list" "acc_test" {
+  name = "acctest_foo"
+  authn_reqs = [
+    "%s",
+    "%s",
+  ]
+}`, req1, req2)
 }
 
 func testAccCheckPingAccessAuthnReqListExists(n string) resource.TestCheckFunc {

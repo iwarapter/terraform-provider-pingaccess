@@ -66,32 +66,32 @@ func TestAccPingAccessHsmProvider(t *testing.T) {
 
 func testAccPingAccessHsmProviderConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_hsm_provider" "acc_test_hsm" {
-	  class_name    = "com.pingidentity.pa.hsm.pkcs11.plugin.PKCS11HsmProvider"
-	  name          = "acctest_demo"
-	  configuration = <<EOF
+resource "pingaccess_hsm_provider" "acc_test_hsm" {
+  class_name    = "com.pingidentity.pa.hsm.pkcs11.plugin.PKCS11HsmProvider"
+  name          = "acctest_demo"
+  configuration = <<EOF
 	  {
 		"slotId": "1234",
 		"library": "%s",
 		"password": "top_secret"
 	  }
 	  EOF
-	}`, configUpdate)
+}`, configUpdate)
 }
 
 func testAccPingAccessHsmProviderConfigInvalidClassName() string {
 	return `
-	resource "pingaccess_hsm_provider" "acc_test_hsm" {
-		class_name = "com.pingidentity.pa.hsm.cloudhsm.plugin.foo"
-		name = "test"
-		configuration = <<EOF
+resource "pingaccess_hsm_provider" "acc_test_hsm" {
+  class_name    = "com.pingidentity.pa.hsm.cloudhsm.plugin.foo"
+  name          = "test"
+  configuration = <<EOF
 		{
 			"user": true,
 			"password": "sub",
 			"partition": "test"
 		}
 		EOF
-	}`
+}`
 }
 
 func testAccCheckPingAccessHsmProviderExists(n string) resource.TestCheckFunc {

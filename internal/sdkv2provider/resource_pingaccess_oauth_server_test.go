@@ -80,19 +80,19 @@ func testAccCheckPingAccessOAuthServerDestroy(s *terraform.State) error {
 
 func testAccPingAccessOAuthServerConfig(introspectionURL, clientPassword string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_oauth_server" "demo_pfr" {
-		targets = ["localhost:9031"]
-		subject_attribute_name = "san"
-		trusted_certificate_group_id = 1
-		introspection_endpoint = "%s"
-		client_credentials {
-			client_id = "oauth"
-			client_secret {
-				value = "%s"
-			}
-		}
-		secure = true
-	}`, introspectionURL, clientPassword)
+resource "pingaccess_oauth_server" "demo_pfr" {
+  targets                      = ["localhost:9031"]
+  subject_attribute_name       = "san"
+  trusted_certificate_group_id = 1
+  introspection_endpoint       = "%s"
+  client_credentials {
+    client_id = "oauth"
+    client_secret {
+      value = "%s"
+    }
+  }
+  secure = true
+}`, introspectionURL, clientPassword)
 }
 
 func testAccCheckPingAccessOAuthServerExists(n string) resource.TestCheckFunc {

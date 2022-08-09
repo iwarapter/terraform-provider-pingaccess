@@ -74,14 +74,14 @@ func testAccCheckPingAccessRuleDestroy(s *terraform.State) error {
 
 func testAccPingAccessRuleConfig(configUpdate string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_rule" "acc_test_rule" {
-		class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
-		name = "acctest_test"
-		supported_destinations = [
-			"Site",
-			"Agent"
-		]
-		configuration = <<EOF
+resource "pingaccess_rule" "acc_test_rule" {
+  class_name = "com.pingidentity.pa.policy.CIDRPolicyInterceptor"
+  name       = "acctest_test"
+  supported_destinations = [
+    "Site",
+    "Agent"
+  ]
+  configuration = <<EOF
 		{
 			"cidrNotation": "127.0.0.${pingaccess_virtualhost.unknown_value.id}/32",
 			"negate": false,
@@ -97,15 +97,15 @@ func testAccPingAccessRuleConfig(configUpdate string) string {
 			"rejectionHandlingEnabled": false
 		}
 		EOF
-	}
+}
 
-	resource "pingaccess_virtualhost" "unknown_value" {
-	   host                         = "acctest-rule-config-dynamic-config"
-	   port                         = 1111
-	   agent_resource_cache_ttl     = 900
-	   key_pair_id                  = 0
-	   trusted_certificate_group_id = 0
-	}`, configUpdate)
+resource "pingaccess_virtualhost" "unknown_value" {
+  host                         = "acctest-rule-config-dynamic-config"
+  port                         = 1111
+  agent_resource_cache_ttl     = 900
+  key_pair_id                  = 0
+  trusted_certificate_group_id = 0
+}`, configUpdate)
 }
 
 func testAccCheckPingAccessRuleExists(n string) resource.TestCheckFunc {

@@ -52,19 +52,19 @@ func testAccCheckPingAccessPingFederateAdminDestroy(s *terraform.State) error {
 
 func testAccPingAccessPingFederateAdminConfig(host, port, configChange string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_pingfederate_admin" "demo" {
-		admin_username = "Administrator"
-		admin_password {
-			value = "2FederateM0re"
-		}
-		base_path = "/path"
-		audit_level = "%s"
-		host = "%s"
-		port = %s
-		secure = true
-		trusted_certificate_group_id = 2
-		use_proxy = false
-	}`, configChange, host, port)
+resource "pingaccess_pingfederate_admin" "demo" {
+  admin_username = "Administrator"
+  admin_password {
+    value = "2FederateM0re"
+  }
+  base_path                    = "/path"
+  audit_level                  = "%s"
+  host                         = "%s"
+  port                         = %s
+  secure                       = true
+  trusted_certificate_group_id = 2
+  use_proxy                    = false
+}`, configChange, host, port)
 }
 
 func testAccCheckPingAccessPingFederateAdminExists(n string) resource.TestCheckFunc {

@@ -73,11 +73,11 @@ func testAccCheckPingAccessTrustedCertificateGroupsDestroy(s *terraform.State) e
 
 func testAccPingAccessTrustedCertificateGroupsConfig(name, skipDateCheck string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_trusted_certificate_group" "demo_tcg" {
-		name = "%s"
-		use_java_trust_store = true
-		skip_certificate_date_check = %s
-	}`, name, skipDateCheck)
+resource "pingaccess_trusted_certificate_group" "demo_tcg" {
+  name                        = "%s"
+  use_java_trust_store        = true
+  skip_certificate_date_check = %s
+}`, name, skipDateCheck)
 }
 
 func testAccCheckPingAccessTrustedCertificateGroupsExists(n string) resource.TestCheckFunc {

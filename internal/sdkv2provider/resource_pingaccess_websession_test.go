@@ -135,35 +135,35 @@ func testAccCheckPingAccessWebSessionDestroy(s *terraform.State) error {
 
 func testAccPingAccessWebSessionConfig(audience, password string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_websession" "demo_session" {
-		name = "acctest_demo-session"
-		audience = "%s"
-		client_credentials {
-			client_id = "websession"
-			client_secret {
-				value = "%s"
-			}
-		}
-		scopes = [
-			"profile",
-			"address",
-			"email",
-			"phone"
-		]
-	}`, audience, password)
+resource "pingaccess_websession" "demo_session" {
+  name     = "acctest_demo-session"
+  audience = "%s"
+  client_credentials {
+    client_id = "websession"
+    client_secret {
+      value = "%s"
+    }
+  }
+  scopes = [
+    "profile",
+    "address",
+    "email",
+    "phone"
+  ]
+}`, audience, password)
 }
 
 func testAccPingAccessWebSessionPrivateKeyJwtConfig(audience string) string {
 	return fmt.Sprintf(`
-	resource "pingaccess_websession" "demo_session" {
-		name = "acctest_demo-session-two"
-		audience = "%s"
-		client_credentials {
-			client_id = "websession"
-			credentials_type = "PRIVATE_KEY_JWT"
-		}
-		scopes = ["profile","address","email","phone"]
-	}`, audience)
+resource "pingaccess_websession" "demo_session" {
+  name     = "acctest_demo-session-two"
+  audience = "%s"
+  client_credentials {
+    client_id        = "websession"
+    credentials_type = "PRIVATE_KEY_JWT"
+  }
+  scopes = ["profile", "address", "email", "phone"]
+}`, audience)
 }
 
 func testAccCheckPingAccessWebSessionExists(n string) resource.TestCheckFunc {
