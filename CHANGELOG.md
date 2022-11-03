@@ -1,3 +1,9 @@
+## 0.11.1 (November 3rd, 2022)
+
+BUG FIXES:
+
+* Error: unable to update Application: Manual resource ordering enabled, but no resource ordering provided. (#158)
+
 ## 0.11.0 (August 9th, 2022)
 
 NOTES:
