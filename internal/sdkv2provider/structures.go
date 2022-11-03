@@ -426,8 +426,7 @@ func maskConfigFromConfigurationField(field *models.ConfigurationField, input *s
 	return config
 }
 
-//Checks all the fields in the descriptor to ensure all required fields are set
-//
+// Checks all the fields in the descriptor to ensure all required fields are set
 func descriptorsHasClassName(className string, desc *models.DescriptorsView) error {
 	var classes []string
 	for _, value := range desc.Items {
@@ -439,8 +438,7 @@ func descriptorsHasClassName(className string, desc *models.DescriptorsView) err
 	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
 }
 
-//Checks the class name specified exists in the DescriptorsView
-//
+// Checks the class name specified exists in the DescriptorsView
 func validateConfiguration(className string, d *schema.ResourceDiff, desc *models.DescriptorsView) error {
 	var diags diag.Diagnostics
 	conf := d.Get("configuration").(string)
@@ -471,8 +469,7 @@ func validateConfiguration(className string, d *schema.ResourceDiff, desc *model
 	return nil
 }
 
-//Checks the class name specified exists in the RuleDescriptorsView
-//
+// Checks the class name specified exists in the RuleDescriptorsView
 func ruleDescriptorsHasClassName(className string, desc *models.RuleDescriptorsView) error {
 	var classes []string
 	for _, value := range desc.Items {
@@ -484,8 +481,7 @@ func ruleDescriptorsHasClassName(className string, desc *models.RuleDescriptorsV
 	return fmt.Errorf("unable to find className '%s' available classNames: %s", className, strings.Join(classes, ", "))
 }
 
-//Checks all the fields in the Rule descriptor to ensure all required fields are set
-//
+// Checks all the fields in the Rule descriptor to ensure all required fields are set
 func validateRulesConfiguration(className string, d *schema.ResourceDiff, desc *models.RuleDescriptorsView) error {
 	var diags diag.Diagnostics
 	conf := d.Get("configuration").(string)

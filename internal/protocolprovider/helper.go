@@ -178,7 +178,7 @@ func marshal(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	return nil, tftypes.Value{}, nil
 }
 
-//handles object(map[string]interface where subtypes are different)
+// handles object(map[string]interface where subtypes are different)
 func marshalObject(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	vals := map[string]tftypes.Value{}
 	t := reflect.TypeOf(i)
@@ -203,7 +203,7 @@ func marshalObject(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	}, vals), nil
 }
 
-//handles maps(map[string]string/number/complex type etc where subtypes are consistent)
+// handles maps(map[string]string/number/complex type etc where subtypes are consistent)
 func marshalMap(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	vals := map[string]tftypes.Value{}
 	t := reflect.TypeOf(i)
@@ -229,7 +229,7 @@ func marshalMap(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	}, vals), nil
 }
 
-//handles lists([]string/number/complex type etc)
+// handles lists([]string/number/complex type etc)
 func marshalSlice(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	vals := []tftypes.Value{}
 	t := reflect.TypeOf(i)
@@ -273,8 +273,7 @@ func marshalTuple(i interface{}) (tftypes.Type, tftypes.Value, error) {
 	}, vals), nil
 }
 
-//Checks all the fields in the descriptor to ensure all required fields are set
-//
+// Checks all the fields in the descriptor to ensure all required fields are set
 func descriptorsHasClassName(className string, desc *models.DescriptorsView) *tfprotov5.Diagnostic {
 	var classes []string
 	for _, value := range desc.Items {
@@ -291,8 +290,7 @@ func descriptorsHasClassName(className string, desc *models.DescriptorsView) *tf
 	}
 }
 
-//Checks the class name specified exists in the DescriptorsView
-//
+// Checks the class name specified exists in the DescriptorsView
 func validateConfiguration(className string, configuration asgotypes.GoPrimitive, desc *models.DescriptorsView) []*tfprotov5.Diagnostic {
 	var diags []*tfprotov5.Diagnostic
 	diags = append(diags, validateNoNullConfigurationAttributes(configuration)...)

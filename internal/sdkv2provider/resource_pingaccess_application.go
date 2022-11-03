@@ -130,6 +130,14 @@ func resourcePingAccessApplicationSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "True if the application requires HTTPS connections.",
 		},
+		"resource_order": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "The explicit resource order defined when manual ordering is enabled. Each existing resource ID must be represented.",
+			Elem: &schema.Schema{
+				Type: schema.TypeInt,
+			},
+		},
 		"site_id": {
 			Type:        schema.TypeString,
 			Required:    true,
@@ -225,6 +233,9 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.
 	setResourceDataBoolWithDiagnostic(d, "manual_ordering_enabled", rv.ManualOrderingEnabled, &diags)
 	setResourceDataStringWithDiagnostic(d, "realm", rv.Realm, &diags)
 	setResourceDataBoolWithDiagnostic(d, "require_https", rv.RequireHTTPS, &diags)
+	if err := d.Set("resource_order", rv.ResourceOrder); err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
 	siteID := strconv.Itoa(*rv.SiteId)
 	setResourceDataStringWithDiagnostic(d, "site_id", &siteID, &diags)
 	setResourceDataBoolWithDiagnostic(d, "spa_support_enabled", rv.SpaSupportEnabled, &diags)
@@ -253,11 +264,11 @@ func resourcePingAccessApplicationReadResult(d *schema.ResourceData, rv *models.
 	return diags
 }
 
-//https://github.com/hashicorp/terraform-plugin-sdk/issues/142
-//because we cannot set the default for the policies, there was an original check to not write policy state
-//if the default response was returned from the api (web and api with empty arrays), however this left an edge case
-//where config and state could have rules but a manual removal of all rules would not be saved. This helper method checks
-//to see if the current config/state has values that should be zero'd out.
+// https://github.com/hashicorp/terraform-plugin-sdk/issues/142
+// because we cannot set the default for the policies, there was an original check to not write policy state
+// if the default response was returned from the api (web and api with empty arrays), however this left an edge case
+// where config and state could have rules but a manual removal of all rules would not be saved. This helper method checks
+// to see if the current config/state has values that should be zero'd out.
 func policyStateHasData(d *schema.ResourceData) bool {
 	if v, ok := d.GetOk("policy"); ok {
 		pol := expandPolicy(v.([]interface{}))
@@ -340,6 +351,11 @@ func resourcePingAccessApplicationReadData(d *schema.ResourceData) *models.Appli
 
 	if val, ok := d.GetOk("policy"); ok {
 		application.Policy = expandPolicy(val.([]interface{}))
+	}
+
+	if val, ok := d.GetOk("resource_order"); ok {
+		ids := expandIntList(val.([]interface{}))
+		application.ResourceOrder = &ids
 	}
 
 	return application

@@ -331,6 +331,104 @@ func Test_resourcePingAccessApplicationReadData(t *testing.T) {
 	}
 }
 
+func Test_issue158(t *testing.T) {
+	resourceName := "pingaccess_application.acc_test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProviders,
+		CheckDestroy:             testAccCheckPingAccessApplicationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+resource "pingaccess_application" "acc_test" {
+  name                    = "Test"
+  agent_id                = 0
+  enabled                 = true
+  require_https           = true
+  description             = "Managed with Terraform"
+  application_type        = "Web"
+  destination             = "Site"
+  context_root            = "/test/contextroot"
+  manual_ordering_enabled = true
+  case_sensitive_path     = false
+  site_id                 = pingaccess_site.site_test.id
+  virtual_host_ids        = [pingaccess_virtualhost.vh_test.id]
+  access_validator_id     = 0
+  spa_support_enabled     = true
+}
+
+resource "pingaccess_virtualhost" "vh_test" {
+  host                     = "localhost"
+  port                     = 443
+  agent_resource_cache_ttl = 900
+}
+
+data "pingaccess_trusted_certificate_group" "trust_any" {
+  name = "Trust Any"
+}
+resource "pingaccess_site" "site_test" {
+  name                         = "Site test"
+  secure                       = true
+  skip_hostname_verification   = true
+  targets                      = ["google.com:80"]
+  trusted_certificate_group_id = data.pingaccess_trusted_certificate_group.trust_any.id
+  send_pa_cookie               = false
+}`,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessApplicationExists(resourceName),
+				),
+			},
+			{
+				Config: `
+resource "pingaccess_application" "acc_test" {
+  name                    = "Test2"
+  agent_id                = 0
+  enabled                 = true
+  require_https           = true
+  description             = "Managed with Terraform"
+  application_type        = "Web"
+  destination             = "Site"
+  context_root            = "/test/contextroot"
+  manual_ordering_enabled = true
+  case_sensitive_path     = false
+  site_id                 = pingaccess_site.site_test.id
+  virtual_host_ids        = [pingaccess_virtualhost.vh_test.id]
+  access_validator_id     = 0
+  spa_support_enabled     = true
+}
+
+resource "pingaccess_virtualhost" "vh_test" {
+  host                     = "localhost"
+  port                     = 443
+  agent_resource_cache_ttl = 900
+}
+
+data "pingaccess_trusted_certificate_group" "trust_any" {
+  name = "Trust Any"
+}
+
+resource "pingaccess_site" "site_test" {
+  name                         = "Site test"
+  secure                       = true
+  skip_hostname_verification   = true
+  targets                      = ["google.com:80"]
+  trusted_certificate_group_id = data.pingaccess_trusted_certificate_group.trust_any.id
+  send_pa_cookie               = false
+}`,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPingAccessApplicationExists(resourceName),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func Test_issue48(t *testing.T) {
 	app := &models.ApplicationView{
 		Name:              String("engine1"),
