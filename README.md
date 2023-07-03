@@ -12,6 +12,12 @@ PingAccess Terraform Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
+---
+
+**The PingAccess provider has been archived, and is no longer under active maintainenance. Ping Identity are developing their own https://github.com/pingidentity/terraform-provider-pingaccess**
+
+---
+
 Requirements
 ------------
 
