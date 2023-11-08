@@ -3,7 +3,7 @@ module github.com/iwarapter/terraform-provider-pingaccess
 go 1.18
 
 require (
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
 	github.com/hashicorp/terraform-plugin-go v0.12.0
 	github.com/hashicorp/terraform-plugin-go-contrib v0.0.0-20220614221518-1dc806b413d1
